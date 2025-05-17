@@ -1,0 +1,8 @@
+@import "tailwindcss";
+@theme {
+}
+
+.bg-gold {
+  --tw-bg-opacity: 1;
+  background-color: rgb(18 40 164 / var(--tw-bg-opacity));
+}
