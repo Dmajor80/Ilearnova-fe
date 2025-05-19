@@ -7,6 +7,9 @@ import StudentLogin from "./student/StudentLogin";
 import ParentLogin from "./parent/ParentLogin";
 import AdminLogin from "./admin/AdminLogin";
 import StudentDashboard from "./student/StudentDashboard";
+// import TeacherPortal from "./teacher/teacherPortal/teacherPortal";
+import TeacherDashboard from "./teacher/TeacherDashboard";
+
 
 const App = () => {
   return (
@@ -29,6 +32,8 @@ const App = () => {
         {/* student dashboard */}
         <Route path="/student-dashboard" element={<StudentDashboard />} />
         {/* end of student dashboard */}
+        <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
+
       </Routes>
     </>
   );
