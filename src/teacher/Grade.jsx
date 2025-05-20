@@ -5,98 +5,130 @@ import StudentProfile from "./components/StudentProfile";
 import GradeLegend from "./components/GradeLegend";
 import CoursesComponent from "./components/CourseComponents";
 import TranscriptTable from "./components/TranscriptTable";
+import AssignmentRow from "./components/AssignmentRow";
+import AssignmentTableHeader from "./components/AssignmentTableHeader";
+import AttendanceHeader from "./components/AttendanceHeader";
+import AssignmentHeader from "./components/AssignmentHeader";
 
-const student = {
-  name: "Priscilla Daniel",
-  id: "loremx/STU001",
-  grade: "Grade 8",
-  image: "https://randomuser.me/api/portraits/women/1.jpg"
-};
 
-const subjects = [
+// const student = {
+//   name: "Priscilla Daniel",
+//   id: "loremx/STU001",
+//   grade: "Grade 8",
+//   image: "https://randomuser.me/api/portraits/women/1.jpg"
+// };
+const students = [
   {
-    name: "Mathematics",
-    term1: "85% (A)",
-    term2: "88% (A)",
-    term3: "90% (A)",
-    final: "90% (A)",
-    remark: "Excellent performance"
+    sn: 1,
+    name: "John Doe",
+    status: "Early",
+    comments: "Excellent attendance and participation",
+    score: "23"
   },
   {
-    name: "English Language",
-    term1: "79% (B)",
-    term2: "82% (A)",
-    term3: "80% (B)",
-    final: "80% (B)",
-    remark: "Good effort"
+    sn: 2,
+    name: "Jane Smith",
+    status: "late",
+    comments: "Needs to improve punctuality",
+    score: "75"
   },
   {
-    name: "Physics",
-    term1: "90% (A)",
-    term2: "88% (A)",
-    term3: "85% (A)",
-    final: "88% (A)",
-    remark: "Outstanding"
+    sn: 3,
+    name: "Alice Johnson",
+    status: "late",
+    comments: "Good commitment overall",
+    score: "81"
   },
   {
-    name: "Chemistry",
-    term1: "80% (B)",
-    term2: "83% (A)",
-    term3: "82% (A)",
-    final: "82% (A)",
-    remark: "Consistent"
+    sn: 4,
+    name: "Bob Lee",
+    status: "Early",
+    comments: "Inconsistent in attendance",
+    score: "68"
   },
   {
-    name: "Biology",
-    term1: "75% (B)",
-    term2: "77% (B)",
-    term3: "79% (B)",
-    final: "82% (A)",
-    remark: "Needs improvement"
+    sn: 5,
+    name: "Charlie Kim",
+    status: "late",
+    comments: "Highly disciplined and attentive",
+    score: "88"
   },
   {
-    name: "Civic",
-    term1: "90% (A)",
-    term2: "90% (A)",
-    term3: "92% (A)",
-    final: "90% (A)",
-    remark: "Excellent Performance"
+    sn: 6,
+    name: "Dana White",
+    status: "late",
+    comments: "Must work on time management",
+    score: "59"
   },
   {
-    name: "Geography",
-    term1: "85% (A)",
-    term2: "84% (B)",
-    term3: "83% (A)",
-    final: "84% (A)",
-    remark: "Well-done"
+    sn: 7,
+    name: "Evan Peters",
+    status: "Early",
+    comments: "Shows potential, stay consistent",
+    score: "77"
   },
   {
-    name: "Computer Science",
-    term1: "90% (A)",
-    term2: "91% (A)",
-    term3: "90% (A)",
-    final: "90% (A)",
-    remark: "Outstanding"
+    sn: 8,
+    name: "Fiona Clark",
+    status: "late",
+    comments: "Often arrives late to class",
+    score: "70"
   },
   {
-    name: "Physical Education",
-    term1: "70% (A)",
-    term2: "75% (A)",
-    term3: "76% (A)",
-    final: "74% (B)",
-    remark: "Improving"
+    sn: 9,
+    name: "George Adams",
+    status: "Early",
+    comments: "Model student",
+    score: "90"
+  },
+  {
+    sn: 10,
+    name: "Helen Brooks",
+    status: "late",
+    comments: "Low attendance affecting performance",
+    score: "62"
   }
 ];
 
-const studentsList = ["Priscilla Daniel", "John Doe", "Jane Smith"];
+// const studentsList = ["Priscilla Daniel", "John Doe", "Jane Smith"];
 
 const Grade = () => {
   return (
-    <>
+    <div className="bg-[#F5F8FE]">
       <CoursesComponent page="Grade" />
 
-     
-    </>
+    <AssignmentHeader/>
+
+      <div className="bg-white mt-6">
+           <AssignmentTableHeader/>
+
+      <div className="border border-[#A3AED0] flex flex-col gap-5 rounded-xl p-4 mt-1.5">
+          {
+        students.map((student, index) => (
+          <div>
+            <AssignmentRow
+              key={index}
+              sn={student.sn}
+              name={student.name}
+              status={student.status}
+              comments={student.comments}
+              score={parseInt(student.score)} // Only extracts the number before "%"
+            />
+
+          </div>
+        ))
+      }
+        
+      </div>
+    
+
+
+        
+      </div>
+
+   
+
+    </div>
   );
 };
 

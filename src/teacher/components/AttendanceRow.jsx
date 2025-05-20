@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const getStatusStyle = (status) => {
   switch (status) {
@@ -13,13 +14,13 @@ const getStatusStyle = (status) => {
   }
 };
 
-const AttendanceRow = ({ name, status, date }) => {
+const AttendanceRow = ({id, name, status, date }) => {
   return (
     <div
       className="grid grid-cols-3 items-center px-4 py-3 border-0 rounded-lg"
       style={{ backgroundColor: "#F5F8FE" }}
     >
-      <div>{name}</div>
+      <div><Link to={`/student/${id}`} >{name}</Link></div>
       <div>
         <span
           className={`text-sm px-3 py-1 rounded-full font-medium ${getStatusStyle(

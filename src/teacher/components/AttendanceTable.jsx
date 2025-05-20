@@ -5,14 +5,14 @@ import AttendanceRow from "./AttendanceRow";
 
 const AttendanceTable = () => {
   const attendanceData = [
-    { name: "Priscilla Daniel", status: "Present", date: "19/11/2024" },
-    { name: "Priscilla Daniel", status: "Absent", date: "19/11/2024" },
-    { name: "Priscilla Daniel", status: "Absent", date: "19/11/2024" },
-    { name: "Priscilla Daniel", status: "Absent", date: "19/11/2024" },
-    { name: "Priscilla Daniel", status: "Present", date: "19/11/2024" },
-    { name: "Priscilla Daniel", status: "Present", date: "19/11/2024" },
-    { name: "Priscilla Daniel", status: "Present", date: "19/11/2024" },
-    { name: "Priscilla Daniel", status: "Late", date: "19/11/2024" },
+    {id:1, name: "Priscilla Daniel", status: "Present", date: "19/11/2024" },
+    {id:2, name: "Priscilla Daniel", status: "Absent", date: "19/11/2024" },
+    {id:3, name: "Priscilla Daniel", status: "Absent", date: "19/11/2024" },
+    {id:4, name: "Priscilla Daniel", status: "Absent", date: "19/11/2024" },
+    {id:5, name: "Priscilla Daniel", status: "Present", date: "19/11/2024" },
+    {id:6, name: "Priscilla Daniel", status: "Present", date: "19/11/2024" },
+    {id:7, name: "Priscilla Daniel", status: "Present", date: "19/11/2024" },
+    { id:8, name: "Priscilla Daniel", status: "Late", date: "19/11/2024" },
   ];
 
   return (
