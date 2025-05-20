@@ -7,6 +7,14 @@ import StudentLogin from "./student/StudentLogin";
 import ParentLogin from "./parent/ParentLogin";
 import AdminLogin from "./admin/AdminLogin";
 import StudentDashboard from "./student/StudentDashboard";
+import Overview from "./student/Overview";
+import Messages from "./student/Messages";
+import Attendance from "./student/Attendance";
+import Assignments from "./student/Assignments";
+import Timetable from "./student/Timetable";
+import Grade from "./student/Grade";
+import { CoursePage, CoursesComponent } from "./student/CoursesComponent";
+// import { CoursePage } from "./student/CoursesComponent";
 
 const App = () => {
   return (
@@ -27,8 +35,20 @@ const App = () => {
         <Route path="/Admin-login" element={<AdminLogin />} />
         {/*end of  Admin login */}
         {/* student dashboard */}
-        <Route path="/student-dashboard" element={<StudentDashboard />} />
+        <Route path="/student-dashboard" element={<StudentDashboard />}>
+          <Route path="overview" element={<Overview />} />
+          <Route path="message" element={<Messages />} />
+          <Route path="attendance" element={<Attendance />} />
+          <Route path="assignment" element={<Assignments />} />
+          <Route path="timetable" element={<Timetable />} />
+          <Route path="grade" element={<Grade />} />
+          <Route path="courses" element={<CoursesComponent />} />
+          <Route path="courses/:courseId" element={<CoursePage />} />
+        </Route>
         {/* end of student dashboard */}
+        {/* course page */}
+        {/* <Route path="/course-page" element={<CoursePage />} /> */}
+        {/* end of course page */}
       </Routes>
     </>
   );
