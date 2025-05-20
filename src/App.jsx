@@ -13,6 +13,7 @@ import AdminLogin from "./admin/AdminLogin";
 // Dashboards
 import StudentDashboard from "./student/StudentDashboard";
 import TeacherDashboard from "./teacher/TeacherDashboard";
+import ParentDashboard from "./parent/ParentDashboard";
 
 // Student Dashboard Inner Routes
 import Overview from "./student/Overview";
@@ -34,8 +35,9 @@ const App = () => {
       <Route path="/parent-login" element={<ParentLogin />} />
       <Route path="/admin-login" element={<AdminLogin />} />
 
-      {/* Teacher Dashboard */}
+      {/* Dashboards */}
       <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
+      <Route path="/parent-dashboard" element={<ParentDashboard />} />
 
       {/* Student Dashboard with Nested Routes */}
       <Route path="/student-dashboard" element={<StudentDashboard />}>
