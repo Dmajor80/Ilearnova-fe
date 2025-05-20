@@ -30,7 +30,6 @@ const App = () => {
         {/* student dashboard */}
         <Route path="/student-dashboard" element={<StudentDashboard />} />
         {/* end of student dashboard */}
-
         {/* Parent dashboard */}
         <Route path="/parent-dashboard" element={<ParentDashboard />} />
         {/*end of  Parent dashboard */}

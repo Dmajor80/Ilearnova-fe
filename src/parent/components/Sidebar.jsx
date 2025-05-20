@@ -10,27 +10,10 @@ function Navigation() {
         {/* {['Dashboard', 'Messages', 'Payments', 'Reports', 'Attendance', 'Timetable'].map((item) => (
           <a href="#" key={item} className="hover:text-blue-500">{item}</a>
         ))} */}
-<Link to="/parent-dashboard">
-  Dashboard
-</Link>
-<Link to="/messages">
-  Messages
-</Link>
-<Link to="/payments">
-  Payments
-</Link>
-<Link to="/reports>
-  Reports
-</Link>
-<Link to="/attendace">
-  Attendance
-</Link>
-<Link to="/timetable">
-  Timetable
-</Link>
+        
       </nav>
     </aside>
-  )
+  );
 }
 
 export default Navigation
