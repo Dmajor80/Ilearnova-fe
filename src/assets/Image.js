@@ -1,0 +1,1 @@
+// export {default as mother} from "/"
