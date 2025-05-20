@@ -188,7 +188,7 @@ export function CoursePage() {
                 className="flex items-center text-blue-600 hover:text-blue-800"
               >
                 <ChevronLeft className="h-5 w-5 mr-1" />
-                Back to Courses
+                Back to Course
               </button>
             </div>
           </div>
