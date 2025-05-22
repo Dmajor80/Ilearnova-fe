@@ -10,7 +10,12 @@ function Navigation() {
         {/* {['Dashboard', 'Messages', 'Payments', 'Reports', 'Attendance', 'Timetable'].map((item) => (
           <a href="#" key={item} className="hover:text-blue-500">{item}</a>
         ))} */}
-        
+        <Link to="/parent-dashboard" className="hover:text-blue-500" >Dashboard</Link>
+        <Link to="/message" className="hover:text-blue-500">Messages</Link>
+        <Link to="/payment" className="hover:text-blue-500">Payment</Link>
+        <Link to="/report" className="hover:text-blue-500">Report</Link>
+        <Link to="/attendance" className="hover:text-blue-500">Attendance</Link>
+        <Link to="/timetable" className="hover:text-blue-500">Timetable</Link>
       </nav>
     </aside>
   );
