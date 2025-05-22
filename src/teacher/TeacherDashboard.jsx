@@ -18,7 +18,7 @@ import Timetable from "./Timetable";
 import Resources from "./Resources";
 import CoursesComponent from "./components/CourseComponents";
 import AttendancePage from "./AttendancePage";
-import ClassManagement from "./classManagement";
+import ClassManagement from "./ClassManagement";
 
 
 // Main application component
