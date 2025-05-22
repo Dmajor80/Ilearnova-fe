@@ -8,7 +8,9 @@ import {
   Award,
   ChevronRight,
   LayoutDashboard,
+  IdCard,
 } from "lucide-react";
+
 import Messages from "./Messages";
 import Attendance from "./Attendance";
 import Assignments from "./Assignments";
@@ -35,10 +37,10 @@ export default function StudentDashboard() {
       air: "courses",
     },
     {
-      id: "messages",
-      icon: <MessageCircle size={20} />,
-      label: "Messages",
-      air: "message",
+      id: "id card",
+      icon: <IdCard size={20} />,
+      label: "ID Card",
+      air: "IDcard",
     },
     {
       id: "attendance",
@@ -59,6 +61,18 @@ export default function StudentDashboard() {
       air: "timetable",
     },
     { id: "grade", icon: <Award size={20} />, label: "Grade", air: "grade" },
+    {
+      id: "result",
+      icon: <BookOpen size={20} />,
+      label: "Result",
+      air: "result",
+    },
+    {
+      id: "exam",
+      icon: <BookOpen size={20} />,
+      label: "Exam",
+      air: "exam",
+    },
   ];
 
   // Mock course data
@@ -102,7 +116,6 @@ export default function StudentDashboard() {
         <div className="flex items-center justify-between mb-6 w-[1024px] p-[2rem]">
           <div>
             <p className="text-gray-500 text-xs mt-1">Page/Student Portal</p>
-            <h2 className="font-medium mt-2 text-xl">My Courses</h2>
           </div>
           <div className="flex items-center gap-4">
             <div className="relative w-64">

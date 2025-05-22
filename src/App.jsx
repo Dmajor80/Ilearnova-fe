@@ -14,6 +14,9 @@ import Assignments from "./student/Assignments";
 import Timetable from "./student/Timetable";
 import Grade from "./student/Grade";
 import { CoursePage, CoursesComponent } from "./student/CoursesComponent";
+import Result from "./student/Result";
+import Exam from "./student/Exam";
+import IdCard from "./student/IdCard";
 // import { CoursePage } from "./student/CoursesComponent";
 
 const App = () => {
@@ -37,12 +40,14 @@ const App = () => {
         {/* student dashboard */}
         <Route path="/student-dashboard" element={<StudentDashboard />}>
           <Route path="overview" element={<Overview />} />
-          <Route path="message" element={<Messages />} />
+          <Route path="IDcard" element={<IdCard />} />
           <Route path="attendance" element={<Attendance />} />
           <Route path="assignment" element={<Assignments />} />
           <Route path="timetable" element={<Timetable />} />
           <Route path="grade" element={<Grade />} />
           <Route path="courses" element={<CoursesComponent />} />
+          <Route path="result" element={<Result />} />
+          <Route path="exam" element={<Exam />} />
           <Route path="courses/:courseId" element={<CoursePage />} />
         </Route>
         {/* end of student dashboard */}
