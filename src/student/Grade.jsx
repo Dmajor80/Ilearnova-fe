@@ -106,7 +106,7 @@ export default function Grade() {
     >
       {/* Header */}
       <div className="container mx-auto px-4 mb-[2rem]">
-        <h1 className="text-[25px] text-[blue] font-semibold">Grade</h1>
+        <h1 className="text-[25px] text-[blue] font-semibold">Transcript</h1>
         <p className="text-[14px] text-[black]">
           View your academic performance across terms.
         </p>

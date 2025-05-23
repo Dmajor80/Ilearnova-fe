@@ -60,7 +60,12 @@ export default function StudentDashboard() {
       label: "Timetable",
       air: "timetable",
     },
-    { id: "grade", icon: <Award size={20} />, label: "Grade", air: "grade" },
+    {
+      id: "transcript",
+      icon: <Award size={20} />,
+      label: "Transcript",
+      air: "transcript",
+    },
     {
       id: "result",
       icon: <BookOpen size={20} />,

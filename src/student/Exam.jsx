@@ -6,6 +6,7 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
+  ArrowRight,
 } from "lucide-react";
 
 const Exam = () => {
@@ -225,7 +226,7 @@ const Exam = () => {
   if (currentView === "results") {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-4xl mx-auto">
+        <div className=" mx-auto">
           {/* Header */}
           <div className="flex items-center gap-4 mb-6">
             <button
@@ -464,14 +465,19 @@ const Exam = () => {
   if (currentView === "exam") {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-4xl mx-auto">
+        <div className="w-full">
           {/* Exam Header */}
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h1 className="text-xl font-bold text-gray-800">
+              <h1
+                className="text-[25px] font-semibold text-gray-800"
+                style={{ color: "rgba(18, 40, 164, 1)" }}
+              >
                 Mathematics Final Exams
               </h1>
-              <p className="text-sm text-gray-600">SS3-01</p>
+              <p className="text-sm " style={{ color: "rgba(51, 51, 51, 1)" }}>
+                Section 1
+              </p>
             </div>
             <div className="flex items-center gap-4">
               <div
@@ -492,8 +498,8 @@ const Exam = () => {
 
           {/* Instructions */}
           <div className="bg-white rounded-lg border p-6 mb-6">
-            <h3 className="font-medium text-gray-800 mb-3">Instructions</h3>
-            <ul className="text-sm text-gray-600 space-y-1">
+            <h3 className=" font-medium mb-3 text-[18px]">Instructions</h3>
+            <ul className="text-sm text-gray-500 space-y-1">
               <li>• You have 60 minutes to complete this test</li>
               <li>• Answer all questions</li>
               <li>• Choose the best answer for each question</li>
@@ -543,11 +549,12 @@ const Exam = () => {
             <button
               onClick={goToPreviousQuestion}
               disabled={currentQuestion === 0}
-              className={`flex items-center gap-2 px-4 py-2 rounded font-medium ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-2xl font-medium  ${
                 currentQuestion === 0
                   ? "text-gray-400 cursor-not-allowed"
                   : "text-gray-600 hover:text-gray-800 hover:bg-gray-100"
               }`}
+              style={{ backgroundColor: "rgba(235, 235, 235, 1)" }}
             >
               <ArrowLeft className="w-4 h-4" />
               Previous
@@ -561,9 +568,10 @@ const Exam = () => {
               {currentQuestion < examQuestions.length - 1 ? (
                 <button
                   onClick={goToNextQuestion}
-                  className="text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-4 py-2 rounded font-medium"
+                  className=" flex items-center gap-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-4 py-2 rounded-2xl font-medium"
+                  style={{ backgroundColor: "rgba(235, 235, 235, 1)" }}
                 >
-                  Next
+                  Next <ArrowRight className="w-4 h-4" />
                 </button>
               ) : (
                 <button
@@ -582,7 +590,7 @@ const Exam = () => {
 
   // Dashboard View
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen  bg-gray-50 p-6">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-start mb-8">
