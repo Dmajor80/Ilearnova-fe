@@ -1,8 +1,8 @@
 import { useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import SideBar from "./components/SideBar"
-import { PieGraph, BarGraph } from "./components/Charts"
+import SideBar from "./components/SideBar";
+import { PieGraph,BarGraph } from "./components/Charts"
 
 
 const events = [
@@ -115,7 +115,7 @@ export default function ParentDashboard() {
             <div className="text-xs text-gray-500 mb-2">Score</div>
             {/* Recharts Bar Chart */}
             <div className="flex-1 flex items-end justify-center h-56">
-              <BarGraph />
+             <BarGraph />
             </div>
             {/* Legend */}
             <div className="flex gap-4 justify-center mt-4 text-xs">
