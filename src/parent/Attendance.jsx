@@ -3,7 +3,7 @@ import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 // import FilterListIcon from '@mui/icons-material/FilterList';
 // import DownloadIcon from '@mui/icons-material/Download';
-import SideBar from "./components/Sidebar"
+import SideBar from "./components/SideBar"
 
 
 const scoreData = [

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
+import SideBar from "./components/SideBar"
 import {
   BarChart,
   Bar,
@@ -35,11 +36,11 @@ const events = [
 ];
 
 export default function ParentDashboard() {
-    const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(new Date());
   return (
     <div className="flex min-h-screen bg-[#f5f8fe]">
       {/* Sidebar */}
-   
+      <SideBar />
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col">
@@ -72,7 +73,7 @@ export default function ParentDashboard() {
               </svg>
             </div>
             <img
-            // /api/placeholder/32/32
+              // /api/placeholder/32/32
               src="/profile.png"
               alt="User"
               className="w-8 h-8 rounded-full object-cover"
@@ -118,7 +119,7 @@ export default function ParentDashboard() {
           {/* Profile */}
           <div className="absolute left-1/2 top-full -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
             <img
-            // /api/placeholder/100/100
+              // /api/placeholder/100/100
               src="/profile.png"
               alt="Profile"
               className="w-28 h-28 rounded-full border-4 border-white shadow-lg object-cover"
@@ -186,11 +187,10 @@ export default function ParentDashboard() {
                 return (
                   <div
                     key={day}
-                    className={`py-1 rounded-full cursor-pointer ${
-                      isActive
+                    className={`py-1 rounded-full cursor-pointer ${isActive
                         ? "bg-blue-700 text-white font-bold"
                         : "hover:bg-blue-100"
-                    }`}
+                      }`}
                   >
                     {day}
                   </div>
@@ -268,7 +268,7 @@ export default function ParentDashboard() {
             </div>
           </div>
 
-         {/* Student Attendance Calendar with react-calendar */}
+          {/* Student Attendance Calendar with react-calendar */}
           <div className="bg-white rounded-xl shadow p-6 flex flex-col">
             <div className="font-semibold text-gray-700 mb-2">Student Attendance</div>
             <div className="text-xs text-gray-500 mb-4">
@@ -277,7 +277,7 @@ export default function ParentDashboard() {
             <Calendar
               onChange={setSelectedDate}
               value={selectedDate}
-              calendarType="US"
+              calendarType="hebrew"
               className="border-none w-full [&_.react-calendar__tile--active]:bg-blue-700 [&_.react-calendar__tile--active]:text-white [&_.react-calendar__tile--now]:bg-blue-100"
               tileClassName={({ date, view }) => {
                 // Example: mark 22nd and 23rd as absent
