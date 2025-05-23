@@ -8,10 +8,10 @@ import ParentLogin from "./parent/ParentLogin";
 import AdminLogin from "./admin/AdminLogin";
 import StudentDashboard from "./student/StudentDashboard";
 import ParentDashboard from "./parent/ParentDashboard";
-import Payment from "./parent/Payment";
-import Attendance from "./parent/Attendance";
-import Timetable from "./parent/Timetable";
-import Result from "./parent/Result";
+// import Payment from "./parent/Payment";
+// import Attendance from "./parent/Attendance";
+// import Timetable from "./parent/Timetable";
+// import Result from "./parent/Result";
 
 const App = () => {
   return (
@@ -37,10 +37,10 @@ const App = () => {
         {/* Parent dashboard */}
         <Route path="/parent-dashboard" element={<ParentDashboard />} />
         {/*end of  Parent dashboard */}
-        <Route path="/payments" element={<Payment />} />
-        <Route path="/timetable" element={<Timetable />} />
-        <Route path="/attendance" element={<Attendance/>} />
-        <Route path="/result" element={<Result />} />
+        {/* <Route path="/payments" element={<Payment />} /> */}
+        {/* <Route path="/timetable" element={<Timetable />} /> */}
+        {/* <Route path="/attendance" element={<Attendance/>} /> */}
+        {/* <Route path="/result" element={<Result />} /> */}
         {/* <Route path="/parent-dashboard" element={<ParentDashboard />} /> */}
         
 

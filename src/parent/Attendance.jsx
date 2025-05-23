@@ -6,24 +6,24 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import SideBar from "./components/Sidebar"
 
 
-// const scoreData = [
-//     { subject: 'Math', score: 70 },
-//     { subject: 'English', score: 85 },
-//     { subject: 'Science', score: 60 },
-//     { subject: 'Civic', score: 65 },
-//     { subject: 'Agric', score: 45 },
-//     { subject: 'French', score: 90 },
-//     { subject: 'ICT', score: 80 }
-// ];
+const scoreData = [
+    { subject: 'Math', score: 70 },
+    { subject: 'English', score: 85 },
+    { subject: 'Science', score: 60 },
+    { subject: 'Civic', score: 65 },
+    { subject: 'Agric', score: 45 },
+    { subject: 'French', score: 90 },
+    { subject: 'ICT', score: 80 }
+];
 
-// const percentageData = [
-//     { month: 'Jan', present: 90 },
-//     { month: 'Feb', present: 85 },
-//     { month: 'Mar', present: 80 },
-//     { month: 'Apr', present: 75 },
-//     { month: 'May', present: 70 },
-//     { month: 'Jun', present: 95 }
-// ];
+const percentageData = [
+    { month: 'Jan', present: 90 },
+    { month: 'Feb', present: 85 },
+    { month: 'Mar', present: 80 },
+    { month: 'Apr', present: 75 },
+    { month: 'May', present: 70 },
+    { month: 'Jun', present: 95 }
+];
 
 function Attendance() {
     return (
