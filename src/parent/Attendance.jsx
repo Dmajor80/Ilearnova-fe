@@ -1,109 +1,184 @@
-import React from 'react';
-// import { Button, Card, CardContent, Typography, IconButton } from '@mui/material';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-// import FilterListIcon from '@mui/icons-material/FilterList';
-// import DownloadIcon from '@mui/icons-material/Download';
+import React from "react";
 import SideBar from "./components/SideBar"
-
+import {
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    Tooltip,
+    ResponsiveContainer,
+    Cell,
+    Legend,
+} from "recharts";
 
 const scoreData = [
-    { subject: 'Math', score: 70 },
-    { subject: 'English', score: 85 },
-    { subject: 'Science', score: 60 },
-    { subject: 'Civic', score: 65 },
-    { subject: 'Agric', score: 45 },
-    { subject: 'French', score: 90 },
-    { subject: 'ICT', score: 80 }
+    { subject: "Math", value: 85 },
+    { subject: "English", value: 65 },
+    { subject: "Civic", value: 80 },
+    { subject: "Biology", value: 70 },
+    { subject: "Chemistry", value: 55 },
+    { subject: "Physics", value: 90 },
+    { subject: "Geography", value: 75 },
 ];
 
 const percentageData = [
-    { month: 'Jan', present: 90 },
-    { month: 'Feb', present: 85 },
-    { month: 'Mar', present: 80 },
-    { month: 'Apr', present: 75 },
-    { month: 'May', present: 70 },
-    { month: 'Jun', present: 95 }
+    { month: "Jan", value: 85 },
+    { month: "Feb", value: 80 },
+    { month: "Mar", value: 70 },
+    { month: "Apr", value: 90 },
+    { month: "May", value: 75 },
+    { month: "Jun", value: 80 },
+    { month: "Jul", value: 85 },
 ];
 
-function Attendance() {
+const getBarColor = value =>
+    value >= 80 ? "#4ade80" : value >= 60 ? "#fde047" : "#f87171";
+
+export default function Attendance() {
     return (
-        <div className="flex min-h-screen bg-red-500">
+        <div className="flex min-h-screen gap-2 bg-[#f5f8fe]">
             {/* Sidebar */}
-            {/* <aside className="w-64 bg-white shadow-md hidden md:block">
-                <div className="p-4 text-xl font-bold border-b border-gray-200">ILEARNOVA</div>
-                <nav className="flex flex-col p-4 space-y-2 text-gray-700">
-                    {['Dashboard', 'Messages', 'Payments', 'Reports', 'Attendance', 'Timetable'].map((item) => (
-                        <a href="#" key={item} className="hover:text-blue-500">{item}</a>
-                    ))}
-                </nav>
-            </aside> */}
-            
-<SideBar/>
+            <SideBar />
 
             {/* Main Content */}
-            <main className="flex-1 p-6">
-                <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
-                    {/* <Typography variant="h5" className="font-semibold">Performance Insight</Typography> */}
-                    <div className="flex gap-2 mt-4 md:mt-0">
-                        {/* <Button variant="outlined" startIcon={<FilterListIcon />}>Filter</Button>
-                        <Button variant="contained" startIcon={<DownloadIcon />}>Download</Button> */}
+            <main className="flex-1 flex flex-col">
+                {/* Topbar */}
+                <header className="flex items-center justify-between px-4 md:px-8 py-4 bg-[#f5f8fe]">
+                    <div>
+                        <p className="text-xs text-gray-500">Parent</p>
+                        <h1 className="text-lg font-semibold text-gray-800">Performance Insight</h1>
                     </div>
+                    <div className="flex items-center gap-4">
+                        <div className="relative">
+                            <input
+                                type="text"
+                                placeholder="Priscilla"
+                                className="border border-gray-300 rounded-full py-2 px-4 pl-10 w-36 md:w-56"
+                                aria-label="Search"
+                            />
+                            <svg
+                                className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                />
+                            </svg>
+                        </div>
+                        <img
+                            // /api/placeholder/32/32
+                            src="/profile.png"
+                            alt="User" loading="lazy"
+                            className="w-8 h-8 rounded-full object-cover"
+                        />
+                    </div>
+                </header>
+
+                {/* Filters & Download */}
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 px-2 md:px-8 mt-4">
+                    <div className="flex items-center gap-2">
+                        <span className="font-semibold text-gray-700">Attendance</span>
+                        <button className="border border-gray-300 px-3 py-1 rounded text-xs bg-white">Filter</button>
+                        <button className="border border-gray-300 px-3 py-1 rounded text-xs bg-white">Bar</button>
+                    </div>
+                    <button className="bg-blue-600 text-white cursor-pointer px-4 py-1 rounded text-xs font-semibold">Download</button>
                 </div>
 
-                {/* Score Chart */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* <Card className="lg:col-span-2"> */}
-                        {/* <CardContent> */}
-                            {/* <Typography variant="h6" className="mb-4">Attendance</Typography> */}
-                            <ResponsiveContainer width="100%" height={250}>
-                                <BarChart data={scoreData}>
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="subject" />
-                                    <YAxis />
-                                    <Tooltip />
-                                    <Legend />
-                                    <Bar dataKey="score" fill="#8884d8" />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        {/* </CardContent> */}
-                    {/* </Card>  */}
+                {/* Main Dashboard */}
+                <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 px-2 md:px-8 mt-4">
+                    {/* Left: Charts */}
+                    <div className="lg:col-span-2 flex flex-col gap-6">
+                        {/* Score Bar Chart */}
+                        <div className="bg-white rounded-xl shadow p-6 flex flex-col">
+                            <div className="font-semibold text-gray-700 mb-2">Score</div>
+                            <div className="flex-1 min-h-[220px]">
+                                <ResponsiveContainer width="100%" height={220}>
+                                    <BarChart data={scoreData}>
+                                        <XAxis dataKey="subject" tick={{ fontSize: 12 }} />
+                                        <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} />
+                                        <Tooltip />
+                                        <Bar dataKey="value">
+                                            {scoreData.map((entry, idx) => (
+                                                <Cell key={`cell-${idx}`} fill={getBarColor(entry.value)} />
+                                            ))}
+                                        </Bar>
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
+                            {/* Legend */}
+                            <div className="flex gap-4 justify-center mt-4 text-xs">
+                                <div className="flex items-center gap-1">
+                                    <span className="inline-block w-3 h-3 bg-green-400 rounded"></span> 80-100
+                                </div>
+                                <div className="flex items-center gap-1">
+                                    <span className="inline-block w-3 h-3 bg-yellow-400 rounded"></span> 60-79
+                                </div>
+                                <div className="flex items-center gap-1">
+                                    <span className="inline-block w-3 h-3 bg-red-400 rounded"></span> Below 60
+                                </div>
+                            </div>
+                        </div>
 
-                    {/* Alerts */}
-                    {/* <div className="space-y-4">
-                        <Typography variant="h6">Performance Alert</Typography>
-                        <div className="p-4 bg-red-100 rounded-lg">
-                            <p className="text-sm">John Smith has 6 scores dropped <b>(45%)</b></p>
-                            <Button variant="outlined" fullWidth className="mt-2">Dismiss</Button>
+                        {/* Percentage Bar Chart */}
+                        <div className="bg-white rounded-xl shadow p-6 flex flex-col">
+                            <div className="font-semibold text-gray-700 mb-2">Percentage</div>
+                            <div className="flex-1 min-h-[220px]">
+                                <ResponsiveContainer width="100%" height={220}>
+                                    <BarChart data={percentageData}>
+                                        <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                                        <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} />
+                                        <Tooltip />
+                                        <Bar dataKey="value">
+                                            {percentageData.map((entry, idx) => (
+                                                <Cell key={`cell2-${idx}`} fill={getBarColor(entry.value)} />
+                                            ))}
+                                        </Bar>
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
+                            {/* Legend */}
+                            <div className="flex gap-4 justify-center mt-4 text-xs">
+                                <div className="flex items-center gap-1">
+                                    <span className="inline-block w-3 h-3 bg-green-400 rounded"></span> 80-100
+                                </div>
+                                <div className="flex items-center gap-1">
+                                    <span className="inline-block w-3 h-3 bg-yellow-400 rounded"></span> 60-79
+                                </div>
+                                <div className="flex items-center gap-1">
+                                    <span className="inline-block w-3 h-3 bg-red-400 rounded"></span> Below 60
+                                </div>
+                            </div>
                         </div>
-                        <div className="p-4 bg-yellow-100 rounded-lg">
-                            <p className="text-sm">2 low scores for Civic & Agric</p>
-                            <Button variant="outlined" fullWidth className="mt-2">Dismiss</Button>
-                        </div>
-                        <div className="p-4 bg-blue-100 rounded-lg">
-                            <p className="text-sm">View low attendance performance</p>
-                            <Button variant="contained" fullWidth className="mt-2">View Details</Button>
-                        </div>
-                    </div> */}
-                </div> 
+                    </div>
 
-                {/* Attendance Chart */}
-                {/* <Card className="mt-6"> */}
-                    {/* <CardContent> */}
-                        {/* <Typography variant="h6" className="mb-4">Attendance Percentage</Typography> */}
-                        <ResponsiveContainer width="100%" height={250}>
-                            <BarChart data={percentageData}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="month" />
-                                <YAxis />
-                                <Tooltip />
-                                <Legend />
-                                <Bar dataKey="present" fill="#82ca9d" name="Attendance %" />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    {/* </CardContent> */}
-                {/* </Card> */}
+                    {/* Right: Performance Alert */}
+                    <div className="flex flex-col gap-6">
+                        <div className="bg-white rounded-xl shadow p-6 flex flex-col">
+                            <div className="font-semibold text-gray-700 mb-4">Performance Alert</div>
+                            <button className="bg-blue-700 cursor-pointer text-white font-semibold px-4 py-2 rounded mb-2 text-left">
+                                Attendance Report Alert &rarr;
+                            </button>
+                            <button className="bg-blue-700 text-white font-semibold cursor-pointer px-4 py-2 rounded mb-2 text-left">
+                                Download
+                            </button>
+                            <button className="bg-blue-700 cursor-pointer text-white font-semibold px-4 py-2 rounded mb-2 text-left">
+                                Score Analysis Insight &rarr;
+                            </button>
+                            <button className="bg-blue-700 cursor-pointer text-white font-semibold px-4 py-2 rounded mb-2 text-left">
+                                View Details
+                            </button>
+                            <button className="bg-blue-700 cursor-pointer text-white font-semibold px-4 py-2 rounded text-left">
+                                More Analysis &rarr;
+                            </button>
+                        </div>
+                    </div>
+                </section>
             </main>
         </div>
     );
 }
-export default Attendance

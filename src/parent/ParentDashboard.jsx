@@ -2,32 +2,8 @@ import { useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import SideBar from "./components/SideBar"
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-  PieChart,
-  Pie,
-  Label,
-} from "recharts";
+import { PieGraph, BarGraph } from "./components/Charts"
 
-const barData = [
-  { label: "Math", value: 90 },
-  { label: "Eng", value: 70 },
-  { label: "Bio", value: 90 },
-  { label: "Civic", value: 70 },
-  { label: "Chem", value: 50 },
-  { label: "Phy", value: 95 },
-  { label: "Geo", value: 80 },
-];
-
-const barColors = barData.map((d) =>
-  d.value >= 80 ? "#4ade80" : d.value >= 60 ? "#fde047" : "#f87171"
-);
 
 const events = [
   { date: 22, title: "Parent-Teacher Meeting", color: "bg-yellow-100", icon: "📝" },
@@ -38,12 +14,12 @@ const events = [
 export default function ParentDashboard() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   return (
-    <div className="flex min-h-screen bg-[#f5f8fe]">
+    <div className="flex min-h-screen gap-2 bg-[#f5f8fe]">
       {/* Sidebar */}
       <SideBar />
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col p-2">
         {/* Topbar */}
         <header className="flex items-center justify-between px-4 md:px-8 py-4 bg-[#f5f8fe]">
           <div>
@@ -139,18 +115,7 @@ export default function ParentDashboard() {
             <div className="text-xs text-gray-500 mb-2">Score</div>
             {/* Recharts Bar Chart */}
             <div className="flex-1 flex items-end justify-center h-56">
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={barData}>
-                  <XAxis dataKey="label" tick={{ fontSize: 12 }} />
-                  <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} />
-                  <Tooltip />
-                  <Bar dataKey="value">
-                    {barData.map((entry, idx) => (
-                      <Cell key={`cell-${idx}`} fill={barColors[idx]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              <BarGraph />
             </div>
             {/* Legend */}
             <div className="flex gap-4 justify-center mt-4 text-xs">
@@ -188,8 +153,8 @@ export default function ParentDashboard() {
                   <div
                     key={day}
                     className={`py-1 rounded-full cursor-pointer ${isActive
-                        ? "bg-blue-700 text-white font-bold"
-                        : "hover:bg-blue-100"
+                      ? "bg-blue-700 text-white font-bold"
+                      : "hover:bg-blue-100"
                       }`}
                   >
                     {day}
@@ -216,33 +181,7 @@ export default function ParentDashboard() {
           <div className="bg-white rounded-xl shadow p-6 flex flex-col md:flex-row items-center gap-6">
             <div className="flex flex-col items-center justify-center w-full md:w-1/2">
               {/* Recharts Pie Chart as Circular Progress */}
-              <ResponsiveContainer width={96} height={96}>
-                <PieChart>
-                  <Pie
-                    data={[
-                      { name: "Completed", value: 9 },
-                      { name: "Remaining", value: 2 },
-                    ]}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={32}
-                    outerRadius={48}
-                    startAngle={90}
-                    endAngle={-270}
-                    dataKey="value"
-                  >
-                    <Cell fill="#1e40af" />
-                    <Cell fill="#e5e7eb" />
-                    <Label
-                      value="9/11"
-                      position="center"
-                      fontSize="20"
-                      fill="#1e40af"
-                      fontWeight="bold"
-                    />
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
+              <PieGraph />
               <div className="text-xs text-gray-500 mt-2">Courses</div>
             </div>
             <div className="flex-1 w-full">
