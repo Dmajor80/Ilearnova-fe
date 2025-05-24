@@ -1,3 +1,4 @@
+import DashboardHeader from "./components/DashboardHeader";
 import SideBar from "./components/SideBar"
 
 const timetable = [
@@ -23,40 +24,16 @@ function Timetable() {
 
       {/* Main Content */}
       <main className="flex-1 p-4 md:p-10">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
-          <div>
-            <div className="text-sm text-gray-500">Page/Parent</div>
-            <h2 className="text-2xl font-semibold text-gray-800">Timetable</h2>
-          </div>
-          <div className="flex items-center gap-4 mt-4 md:mt-0">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search"
-                className="pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
-              />
-              {/* <span className="material-icons absolute left-2 top-2 text-gray-400">search</span> */}
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-medium">Priscilla</span>
-              <img
-                src="/profile.png"
-                loading="lazy"
-                alt="Profile"
-                className="w-8 h-8 rounded-full"
-              />
-            </div>
-          </div>
-        </div>
+       {/* Header */}
+      <DashboardHeader text="Timetable" />
 
         {/* Grade Button */}
-        <button className="mb-6 px-6 py-2 rounded-lg border border-gray-300 bg-white font-medium shadow-sm hover:bg-gray-100">
+        <button className="mb-6 px-6 py-2 mt-[80px] rounded-lg border border-gray-300 bg-white font-medium shadow-sm hover:bg-gray-100">
           Grade 2
         </button>
 
         {/* Timetable Grid */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto mt-6">
           <div className="min-w-[700px] grid grid-cols-6 gap-4">
             {/* Time Column */}
             <div className="flex flex-col gap-4">

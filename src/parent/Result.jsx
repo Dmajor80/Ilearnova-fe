@@ -3,6 +3,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine,
 } from "recharts";
 import SideBar from "./components/SideBar";
+import DashboardHeader from "./components/DashboardHeader";
 
 const subjects = [
   "Mathematics", "English", "Biology", "Physics", "Yoruba", "Chemistry", "Further Mathematics", "Animal Husbandry", "Geography"
@@ -119,7 +120,7 @@ export default function ResultDashboard() {
       {/* Main Content */}
       <main className="flex-1 p-4 md:p-10">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+        {/* <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
           <div>
             <div className="text-sm text-gray-500">Exam result</div>
             <h2 className="text-2xl font-semibold text-gray-800">Result</h2>
@@ -136,14 +137,15 @@ export default function ResultDashboard() {
             <div className="flex items-center gap-2">
               <span className="font-medium">Priscilla</span>
               <img
-                src="https://randomuser.me/api/portraits/women/44.jpg"
+                src="/profile.png"
+                loading="lazy"
                 alt="Profile"
                 className="w-8 h-8 rounded-full"
               />
             </div>
           </div>
-        </div>
-
+        </div> */}
+        <DashboardHeader text="Result" />
         {/* Chart and Side Info */}
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Chart Card */}
@@ -270,11 +272,11 @@ export default function ResultDashboard() {
                   <th className="py-2 px-3 text-left">PRACTICAL</th>
                   <th className="py-2 px-3 text-left">ASSIGNMENT</th>
                   <th className="py-2 px-3 text-left">ATTENDANCE</th>
-                  <th className="py-2 px-3 text-left"></th>
+                  <th className="py-2 px-3 text-left">TOTAL</th>
                 </tr>
               </thead>
               <tbody>
-                {subjectMarks.map((s, i) => (
+                {subjectMarks.map((s) => (
                   <tr key={s.subject} className="border-b">
                     <td className="py-2 px-3">{s.subject}</td>
                     <td className="py-2 px-3">{s.theory}</td>
@@ -282,9 +284,10 @@ export default function ResultDashboard() {
                     <td className="py-2 px-3">{s.assignment}</td>
                     <td className="py-2 px-3">{s.attendance}</td>
                     <td className="py-2 px-3">
-                      <span className={`inline-block px-3 py-1 rounded-lg font-semibold text-white ${i === 0 ? "bg-blue-700" : "bg-blue-400"}`}>
+                      <span className={`inline-block px-3 py-1 rounded-sm font-semibold text-white bg-blue-800`}>
                         {s.total}
                       </span>
+                      {/* ${i === 0 ? "bg-blue-700" : "bg-blue-400"} */}
                     </td>
                   </tr>
                 ))}

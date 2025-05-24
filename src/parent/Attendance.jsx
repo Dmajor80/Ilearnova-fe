@@ -1,4 +1,3 @@
-import React from "react";
 import SideBar from "./components/SideBar"
 import {
     BarChart,
@@ -10,6 +9,7 @@ import {
     Cell,
     Legend,
 } from "recharts";
+import DashboardHeader from "./components/DashboardHeader";
 
 const scoreData = [
     { subject: "Math", value: 85 },
@@ -43,7 +43,8 @@ export default function Attendance() {
             {/* Main Content */}
             <main className="flex-1 flex flex-col">
                 {/* Topbar */}
-                <header className="flex items-center justify-between px-4 md:px-8 py-4 bg-[#f5f8fe]">
+                <DashboardHeader/>
+                {/* <header className="flex items-center justify-between px-4 md:px-8 py-4 bg-[#f5f8fe]">
                     <div>
                         <p className="text-xs text-gray-500">Parent</p>
                         <h1 className="text-lg font-semibold text-gray-800">Performance Insight</h1>
@@ -77,7 +78,7 @@ export default function Attendance() {
                             className="w-8 h-8 rounded-full object-cover"
                         />
                     </div>
-                </header>
+                </header> */}
 
                 {/* Filters & Download */}
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 px-2 md:px-8 mt-4">
