@@ -36,7 +36,7 @@ function Timetable() {
                 placeholder="Search"
                 className="pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
               />
-              <span className="material-icons absolute left-2 top-2 text-gray-400">search</span>
+              {/* <span className="material-icons absolute left-2 top-2 text-gray-400">search</span> */}
             </div>
             <div className="flex items-center gap-2">
               <span className="font-medium">Priscilla</span>
@@ -68,7 +68,7 @@ function Timetable() {
               ))}
             </div>
             {/* Days Columns */}
-            {days.map((day, dayIdx) => (
+            {days.map((day) => (
               <div key={day} className="flex flex-col gap-4">
                 <div className="h-12 flex items-center justify-center font-semibold bg-gray-100 rounded">{day}</div>
                 {timetable[0].subjects.map((subject, subIdx) => (
