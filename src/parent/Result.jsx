@@ -258,7 +258,7 @@ export default function ResultDashboard() {
                 Total Subject <span className="bg-gray-200 rounded px-2">{subjectMarks.length}</span>
               </button>
               <button className="flex items-center gap-1 px-3 py-1 bg-blue-700 text-white rounded-lg text-xs font-medium">
-                <span className="material-icons text-base">visibility</span>
+                <span className="material-icons text-base">trending_up</span>
                 View Transcript
               </button>
             </div>

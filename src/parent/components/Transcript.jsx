@@ -35,7 +35,7 @@ export default function Transcript() {
   return (
     <div className="min-h-screen bg-[#f5f8fe] px-2 md:px-0 py-4">
       {/* Header */}
-      <div className="max-w-6xl mx-auto">
+      {/* <div className="max-w-6xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
           <div>
             <p className="text-xs text-gray-500">Page / Parent</p>
@@ -72,13 +72,13 @@ export default function Transcript() {
             />
           </div>
         </div>
-      </div>
+      </div> */}
       <DashboardHeader text="Transcript" />
 
       {/* Banner & Profile */}
-      <div className="max-w-4xl mx-auto mt-4">
+      {/* <div className="max-w-4xl mx-auto mt-4">
         <div className="relative">
-          {/* Banner */}
+          Banner
           <div className="w-full h-32 md:h-36 rounded-lg overflow-hidden bg-[#1736a4] flex items-center justify-center">
             <div className="absolute left-0 top-0 w-32 h-28 bg-[#ffd600] rounded-br-full"></div>
             <div className="absolute left-0 bottom-0 w-20 h-16 bg-[#2ecc71] rounded-tr-full"></div>
@@ -86,7 +86,7 @@ export default function Transcript() {
             <div className="absolute right-0 bottom-0 w-24 h-24 bg-white rounded-tl-full"></div>
             <div className="w-full h-full bg-[#1736a4]"></div>
           </div>
-          {/* Profile */}
+          Profile
           <div className="absolute left-1/2 top-full -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
             <img
               src="/profile.png"
@@ -100,7 +100,7 @@ export default function Transcript() {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Summary */}
       <div className="max-w-4xl mx-auto mt-20 md:mt-16 flex flex-col md:flex-row md:items-center md:justify-between gap-2">

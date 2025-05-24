@@ -12,6 +12,7 @@ import ParentDashboard from "./parent/ParentDashboard";
 import Attendance from "./parent/Attendance";
 import Timetable from "./parent/Timetable";
 import Result from "./parent/Result";
+import Transcript from "./parent/components/Transcript";
 
 const App = () => {
   return (
@@ -41,6 +42,7 @@ const App = () => {
         <Route path="/timetable" element={<Timetable />} />
         <Route path="/attendance" element={<Attendance/>} />
         <Route path="/result" element={<Result />} />
+        <Route path="/transcript" element={<Transcript />} />
         {/* <Route path="/parent-dashboard" element={<ParentDashboard />} /> */}
         
 
