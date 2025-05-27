@@ -110,32 +110,34 @@ const Overview = () => {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen p-6">
+    <div className=" w-[280px]  sm:w-[320px]  md:w-[500px] lg:w-[1200px] bg-gray-50 min-h-screen p-6">
       {/* Header */}
       <div
         className="flex justify-between items-center mb-6"
         style={fadeInUp(0.1)}
       >
         <div className="flex items-center">
-          <h1 className="text-[18px] font-medium text-[rgba(51, 51, 51, 1)]">
+          <h1 className="text-[12px] sm:lg:text-[14px] md:text-[16px] lg:text-[18px] font-medium text-[rgba(51, 51, 51, 1)]">
             Overview
           </h1>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
         <div
           className="bg-white p-4 rounded-xl shadow-sm h-[143px]"
           style={fadeInUp(0.2)}
         >
           <div className="flex justify-between items-center">
-            <h2 className="text-[39px] text-[#3737df] font-normal ">24</h2>
+            <h2 className="text-[20px] sm:text-[22px] md:text-[25px] lg:text-[35px]  text-[#3737df] font-normal ">
+              24
+            </h2>
             <div className="p-2 bg-blue-100 rounded-lg">
               <img src={completed} alt="" />
             </div>
           </div>
-          <p className="text-[14px] font-medium">Courses Completed</p>
+          <p className="lg:text-[14px] font-medium">Courses Completed</p>
         </div>
 
         <div
@@ -143,12 +145,14 @@ const Overview = () => {
           style={fadeInUp(0.2)}
         >
           <div className="flex justify-between items-center">
-            <h2 className="text-[39px] text-[#3737df] font-normal ">24</h2>
+            <h2 className="text-[20px] sm:text-[22px] md:text-[25px] lg:text-[35px] text-[#3737df] font-normal ">
+              24
+            </h2>
             <div className="p-2 bg-blue-100 rounded-lg">
               <img src={pro} alt="" />
             </div>
           </div>
-          <p className="text-[14px] font-medium">Courses Progress</p>
+          <p className="text-[12px]  font-medium">Courses Progress</p>
         </div>
 
         <div
@@ -156,24 +160,28 @@ const Overview = () => {
           style={fadeInUp(0.2)}
         >
           <div className="flex justify-between items-center">
-            <h2 className="text-[39px] text-[#3737df] font-normal ">24</h2>
+            <h2 className="text-[20px] sm:text-[22px] md:text-[25px] lg:text-[35px] text-[#3737df] font-normal ">
+              24
+            </h2>
             <div className="p-2 bg-blue-100 rounded-lg">
               <img src={assignment} alt="" />
             </div>
           </div>
-          <p className="text-[14px] font-medium">Pending Assignment</p>
+          <p className="lg:text-[14px] font-medium">Pending Assignment</p>
         </div>
       </div>
 
       {/* Calendar and Activities */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
         <div className="col-span-2" style={fadeInUp(0.6)}>
           <div className="bg-white p-4 rounded-xl shadow-sm mb-4">
             <div className="flex justify-between items-center mb-4">
-              <h3 className=" text-[18px] font-medium text-[rgba(51, 51, 51, 1)]">
+              <h3 className="  text-[12px] sm:text-[14px]  md:text-[16px] lg:text-[18px] font-medium text-[rgba(51, 51, 51, 1)]">
                 Courses In progress
               </h3>
-              <p className="text-[18px] text-[#484894] font-normal">View All</p>
+              <p className="text-[12px] sm:text-[14px]  md:text-[16px] lg:text-[18px] text-[#484894] font-normal">
+                View All
+              </p>
             </div>
 
             {taskData.map((task, index) => (
@@ -186,7 +194,7 @@ const Overview = () => {
                     <div className="flex justify-between items-center mb-2">
                       <div className="">
                         <h4
-                          className="text-[14px] font-medium"
+                          className="lg:text-[14px] font-medium"
                           style={{ color: "rgba(51, 51, 51, 1)" }}
                         >
                           {task.name}
@@ -224,7 +232,9 @@ const Overview = () => {
           {/* notification */}
           <div className="bg-white p-4 rounded-xl shadow-sm">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-[18px] text-[#333]">Notification</h3>
+              <h3 className="text-[12px] sm:lg:text-[14px] md:text-[16px] lg:text-[18px] text-[#333]">
+                Notification
+              </h3>
               <button className="text-blue-600 text-[16px] font-normal flex items-center">
                 View All
               </button>
@@ -240,7 +250,7 @@ const Overview = () => {
                   <img src={bell} alt="" />
                   <div>
                     <p
-                      className="text-[14px] font-medium"
+                      className="lg:text-[14px] font-medium"
                       style={{ color: "rgba(51, 51, 51, 1)" }}
                     >
                       Assignment Due Soon
@@ -256,7 +266,7 @@ const Overview = () => {
                 </div>
                 {/* notification button */}
                 <button
-                  className="text-[18px] font-medium w-full rounded-[5px] h-[42px] mt-[1rem] "
+                  className="text-[12px] sm:lg:text-[14px] md:text-[16px] lg:text-[18px] font-medium w-full rounded-[5px] h-[25px] lg:h-\[42px\] mt-[1rem] "
                   style={{
                     backgroundColor: "rgba(18, 40, 164, 1)",
                     color: "rgba(255, 255, 255, 1)",
@@ -275,7 +285,7 @@ const Overview = () => {
                   <img src={bell} alt="" />
                   <div>
                     <p
-                      className="text-[14px] font-medium"
+                      className="lg:text-[14px] font-medium"
                       style={{ color: "rgba(51, 51, 51, 1)" }}
                     >
                       Assignment Due Soon
@@ -291,7 +301,7 @@ const Overview = () => {
                 </div>
                 {/* notification button */}
                 <button
-                  className="text-[18px] font-medium w-full rounded-[5px] h-[42px] mt-[1rem] "
+                  className="text-[12px] sm:lg:text-[14px] md:text-[16px] lg:text-[18px] font-medium w-full rounded-[5px] h-[25px] lg:h-\[42px\] mt-[1rem] "
                   style={{
                     backgroundColor: "rgba(18, 40, 164, 1)",
                     color: "rgba(255, 255, 255, 1)",
@@ -310,7 +320,7 @@ const Overview = () => {
                   <img src={bell} alt="" />
                   <div>
                     <p
-                      className="text-[14px] font-medium"
+                      className="lg:text-[14px] font-medium"
                       style={{ color: "rgba(51, 51, 51, 1)" }}
                     >
                       Assignment Due Soon
@@ -326,7 +336,7 @@ const Overview = () => {
                 </div>
                 {/* notification button */}
                 <button
-                  className="text-[18px] font-medium w-full rounded-[5px] h-[42px] mt-[1rem] "
+                  className="text-[12px] sm:lg:text-[14px] md:text-[16px] lg:text-[18px] font-medium w-full rounded-[5px] h-[25px] lg:h-\[42px\] mt-[1rem] "
                   style={{
                     backgroundColor: "rgba(18, 40, 164, 1)",
                     color: "rgba(255, 255, 255, 1)",
@@ -347,18 +357,18 @@ const Overview = () => {
           {/* end of calender */}
 
           {/* class */}
-          <div className="bg-white p-4 rounded-xl shadow-sm mb-[1.5rem]">
+          <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] max-w-[500px] sm:w-[400px] h-[100px]">
             <div className="flex items-center gap-[2rem]">
               <img src={chemistry} alt="" />
               <div>
                 <p
-                  className="text-[18px] font-medium"
+                  className="text-[12px] sm:lg:text-[14px] md:text-[16px] lg:text-[18px] font-medium"
                   style={{ color: "rgba(51, 51, 51, 1)" }}
                 >
                   Chemistry Practical
                 </p>
                 <p
-                  className="text-[14px] font-normal "
+                  className="lg:text-[14px] font-normal "
                   style={{ color: "rgba(105, 105, 105, 1)" }}
                 >
                   October 22nd - 26th .10:00 am
@@ -369,18 +379,18 @@ const Overview = () => {
           {/* end of class */}
 
           {/* class */}
-          <div className="bg-white p-4 rounded-xl shadow-sm mb-[1.5rem]">
+          <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] max-w-[500px] sm:w-[400px] h-[100px]">
             <div className="flex items-center gap-[2rem]">
               <img src={chemistry} alt="" />
               <div>
                 <p
-                  className="text-[18px] font-medium"
+                  className="text-[12px] sm:lg:text-[14px] md:text-[16px] lg:text-[18px] font-medium"
                   style={{ color: "rgba(51, 51, 51, 1)" }}
                 >
                   Chemistry Practical
                 </p>
                 <p
-                  className="text-[14px] font-normal "
+                  className="lg:text-[14px] font-normal "
                   style={{ color: "rgba(105, 105, 105, 1)" }}
                 >
                   October 22nd - 26th .10:00 am
@@ -391,18 +401,18 @@ const Overview = () => {
           {/* end of class */}
 
           {/* class */}
-          <div className="bg-white p-4 rounded-xl shadow-sm mb-[1.5rem]">
+          <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] max-w-[500px] sm:w-[400px] h-[100px]">
             <div className="flex items-center gap-[2rem]">
               <img src={chemistry} alt="" />
               <div>
                 <p
-                  className="text-[18px] font-medium"
+                  className="text-[12px] sm:lg:text-[14px] md:text-[16px] lg:text-[18px] font-medium"
                   style={{ color: "rgba(51, 51, 51, 1)" }}
                 >
                   Chemistry Practical
                 </p>
                 <p
-                  className="text-[14px] font-normal "
+                  className="lg:text-[14px] font-normal "
                   style={{ color: "rgba(105, 105, 105, 1)" }}
                 >
                   October 22nd - 26th .10:00 am
@@ -413,9 +423,11 @@ const Overview = () => {
           {/* end of class */}
 
           {/* certification */}
-          <div className="bg-white w-full p-[2rem]">
+          <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] max-w-[500px] sm:w-[400px] ">
             <div className="flex items-center justify-between">
-              <p className="text-[18px] font-medium">Certification</p>
+              <p className="text-[12px] sm:lg:text-[14px] md:text-[16px] lg:text-[18px] font-medium">
+                Certification
+              </p>
               <p
                 className="text-[12px] font-normal"
                 style={{ color: "rgba(18, 40, 164, 1)" }}
@@ -429,13 +441,13 @@ const Overview = () => {
                 <img src={chemistry} alt="" />
                 <div>
                   <p
-                    className="text-[18px] font-medium"
+                    className="text-[12px] sm:lg:text-[14px] md:text-[16px] lg:text-[18px] font-medium"
                     style={{ color: "rgba(51, 51, 51, 1)" }}
                   >
                     Chemistry Practical
                   </p>
                   <p
-                    className="text-[14px] font-normal "
+                    className="lg:text-[14px] font-normal "
                     style={{ color: "rgba(105, 105, 105, 1)" }}
                   >
                     October 22nd - 26th .10:00 am
@@ -450,13 +462,13 @@ const Overview = () => {
                 <img src={chemistry} alt="" />
                 <div>
                   <p
-                    className="text-[18px] font-medium"
+                    className="text-[12px] sm:lg:text-[14px] md:text-[16px] lg:text-[18px] font-medium"
                     style={{ color: "rgba(51, 51, 51, 1)" }}
                   >
                     Chemistry Practical
                   </p>
                   <p
-                    className="text-[14px] font-normal "
+                    className="lg:text-[14px] font-normal "
                     style={{ color: "rgba(105, 105, 105, 1)" }}
                   >
                     October 22nd - 26th .10:00 am
@@ -471,13 +483,13 @@ const Overview = () => {
                 <img src={chemistry} alt="" />
                 <div>
                   <p
-                    className="text-[18px] font-medium"
+                    className="text-[12px] sm:lg:text-[14px] md:text-[16px] lg:text-[18px] font-medium"
                     style={{ color: "rgba(51, 51, 51, 1)" }}
                   >
                     Chemistry Practical
                   </p>
                   <p
-                    className="text-[14px] font-normal "
+                    className="lg:text-[14px] font-normal "
                     style={{ color: "rgba(105, 105, 105, 1)" }}
                   >
                     October 22nd - 26th .10:00 am
@@ -492,7 +504,7 @@ const Overview = () => {
       </div>
 
       {/* Performance Charts */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
         <div
           className="bg-white p-4 rounded-xl shadow-sm"
           style={fadeInUp(0.7)}

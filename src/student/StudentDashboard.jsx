@@ -8,19 +8,17 @@ import {
   Award,
   ChevronRight,
   LayoutDashboard,
-  IdCard,
+  CreditCard,
+  Menu,
+  X,
 } from "lucide-react";
 
-import Messages from "./Messages";
-import Attendance from "./Attendance";
-import Assignments from "./Assignments";
-import Timetable from "./Timetable";
-import Grade from "./Grade";
-import Overview from "./Overview";
 import { Link, Outlet } from "react-router-dom";
+
 // Main application component
 export default function StudentDashboard() {
   const [activeTab, setActiveTab] = useState("courses");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Navigation links data
   const navLinks = [
@@ -38,7 +36,7 @@ export default function StudentDashboard() {
     },
     {
       id: "id card",
-      icon: <IdCard size={20} />,
+      icon: <CreditCard size={20} />,
       label: "ID Card",
       air: "IDcard",
     },
@@ -85,49 +83,111 @@ export default function StudentDashboard() {
   // side bar
   return (
     <div className="flex min-h-screen bg-gray-50">
+      {/* Mobile overlay */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       <aside>
         {/* Sidebar */}
-        <div className="w-[246px] h-[100%] bg-white border-r  border-gray-200 pt-4">
-          <div className="px-4 pb-6 border-b border-gray-200">
-            <h1 className="font-bold text-[26px] text-blue-900 text-center">
+        <div
+          className={`
+          w-16 md:w-[246px] h-[100%] bg-white border-r border-gray-200 pt-4 
+          fixed md:static inset-y-0 left-0 z-50
+          transition-all duration-300 ease-in-out
+          ${isMobileMenuOpen ? "w-[246px]" : "w-16"}
+        `}
+        >
+          <div className="px-4 pb-6 border-b border-gray-200 relative">
+            <h1
+              className={`
+              font-bold text-[26px] text-blue-900 text-center transition-all duration-300
+              ${isMobileMenuOpen ? "block" : "hidden md:block"}
+            `}
+            >
               ILEARNOVA
             </h1>
+            <div
+              className={`
+              font-bold text-blue-900 text-center transition-all duration-300
+              ${isMobileMenuOpen ? "hidden" : "block md:hidden"}
+            `}
+            >
+              <span className="text-xl text-white">IL</span>
+            </div>
+
+            {/* Mobile menu toggle */}
+            <button
+              className="absolute top-0 right-2 md:hidden p-1 text-blue-900 hover:bg-blue-50 rounded"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
           </div>
 
           <nav className="mt-4">
             {navLinks.map((link) => (
-              <button
-                key={link.id}
-                className={`flex items-center px-4 py-3 w-full text-left ${
-                  activeTab === link.id
-                    ? "text-blue-600 bg-blue-50"
-                    : "text-gray-600"
-                }`}
-                onClick={() => setActiveTab(link.id)}
-              >
-                <span className="mr-3">{link.icon}</span>
-                <Link to={link.air}>
-                  {" "}
-                  <span>{link.label}</span>
-                </Link>
-              </button>
+              <div key={link.id} className="relative group">
+                <button
+                  className={`flex items-center px-4 py-3 w-full text-left transition-all duration-200 ${
+                    activeTab === link.id
+                      ? "text-blue-600 bg-blue-50"
+                      : "text-gray-600 hover:text-blue-600 hover:bg-gray-50"
+                  }`}
+                  onClick={() => {
+                    setActiveTab(link.id);
+                    setIsMobileMenuOpen(false);
+                  }}
+                >
+                  <span className="mr-3 flex-shrink-0">{link.icon}</span>
+                  <Link
+                    to={link.air}
+                    className={`
+                    transition-all duration-300
+                    ${isMobileMenuOpen ? "block" : "hidden md:block"}
+                  `}
+                  >
+                    <span>{link.label}</span>
+                  </Link>
+                </button>
+
+                {/* Tooltip for mobile/collapsed state */}
+                <div
+                  className={`
+                  absolute left-full top-1/2 transform -translate-y-1/2 ml-2
+                  bg-gray-800 text-white text-sm px-2 py-1 rounded whitespace-nowrap
+                  opacity-0 pointer-events-none transition-opacity duration-200
+                  group-hover:opacity-100 z-50
+                  ${isMobileMenuOpen ? "hidden" : "block md:hidden"}
+                `}
+                >
+                  {link.label}
+                  <div
+                    className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 
+                                 border-4 border-transparent border-r-gray-800"
+                  ></div>
+                </div>
+              </div>
             ))}
           </nav>
         </div>
       </aside>
 
-      <div className="">
+      <div className="ml-16 md:ml-0 flex-1">
         {/* adminnav */}
-        <div className="flex items-center justify-between mb-6 w-[1024px] p-[2rem]">
+        <div className="flex items-center justify-between mb-6 w-full max-w-[1024px] p-4 md:p-[2rem]">
           <div>
             <p className="text-gray-500 text-xs mt-1">Page/Student Portal</p>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="relative w-64">
+          <div className="flex items-center gap-2 md:gap-4">
+            <div className="relative w-32 sm:w-48 md:w-64">
               <input
                 type="text"
                 placeholder="Search courses..."
-                className="border border-gray-300 rounded-full w-full py-2 px-4 pl-10"
+                className="border border-gray-300 rounded-full w-full py-2 px-4 pl-10 text-sm"
               />
               <svg
                 className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"
@@ -161,7 +221,3 @@ export default function StudentDashboard() {
   );
   // end of side bar
 }
-
-// Course card component
-
-// Course component

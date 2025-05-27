@@ -199,14 +199,14 @@ const Navbar = () => {
             <div className="flex-1 space-y-1 px-2 py-3">
               <Link
                 className="block rounded-md px-3 py-2 text-base font-medium text-white hover:bg-powderblue hover:text-white"
-                to="/auth/signup"
+                to="/signup"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Signup
               </Link>
               <Link
                 className="block rounded-md px-3 py-2 text-base font-medium text-white hover:bg-powderblue hover:text-white"
-                to="/auth/login"
+                to="/login"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Login

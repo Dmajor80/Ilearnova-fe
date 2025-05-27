@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, X, Edit2, Trash } from "lucide-react";
+import { ChevronDown, X, Edit2, Trash, Plus } from "lucide-react";
 
 export default function Timetable() {
   const [showModal, setShowModal] = useState(false);
@@ -299,243 +299,331 @@ export default function Timetable() {
 
   return (
     <div
-      className=" min-h-screen p-4 "
+      className="min-h-screen p-2 sm:p-4 lg:p-6"
       style={{ backgroundColor: "rgba(245, 248, 254, 1)" }}
     >
-      <p className="text-[25px] font-semibold mb-[3rem]">Timetable</p>
-      {/* Grade Selection */}
-      <div className="mb-6 flex justify-between items-center">
-        <button className="px-4 py-2 border rounded-md bg-white text-[20px] w-[179px] h-[65px]">
-          {selectedGrade}
-        </button>
-        <button
-          className="px-4 py-2 bg-blue-600 text-white rounded-md"
-          onClick={openCreateModal}
-        >
-          Create Timetable
-        </button>
-      </div>
+      <div className="max-w-7xl mx-auto">
+        <p className="text-xl sm:text-2xl lg:text-[25px] font-semibold mb-6 sm:mb-8 lg:mb-12">
+          Timetable
+        </p>
 
-      {/* Timetable Grid */}
-      <div className="overflow-x-auto">
-        <div className="min-w-max">
-          {/* Days header */}
-          <div className="flex mb-2 w-fit">
-            <div className="w-20"></div> {/* Empty cell for time column */}
-            {days.map((day) => (
-              <div
-                key={day}
-                className="w-[148px] h-[42px] p-3  border rounded-md mx-1  text-center text-[14px] ml-[0.9rem]"
-                style={{
-                  border: "1px solid rgba(174, 174, 174, 1)",
-                  backgroundColor: "rgba(255, 255, 255, 1)",
-                  color: "rgba(51, 51, 51, 1)",
-                }}
-              >
-                {day}
-              </div>
-            ))}
-          </div>
+        {/* Grade Selection */}
+        <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+          <button className="px-3 py-2 sm:px-4 sm:py-2 border rounded-md bg-white text-base sm:text-lg lg:text-[20px] w-full sm:w-auto sm:min-w-[179px] h-12 sm:h-16 lg:h-[65px]">
+            {selectedGrade}
+          </button>
+          <button
+            className="px-4 py-2 bg-blue-600 text-white rounded-md flex items-center justify-center gap-2 w-full sm:w-auto"
+            onClick={openCreateModal}
+          >
+            <Plus size={16} className="sm:hidden" />
+            <span className="text-sm sm:text-base">Create Timetable</span>
+          </button>
+        </div>
 
-          {/* Timetable rows */}
+        {/* Mobile View - Card Layout */}
+        <div className="block lg:hidden space-y-4">
           {timetableData.map((row, rowIndex) => (
-            <div key={rowIndex} className="flex mb-2 ">
-              <div
-                className="  w-[104px] p-2 flex items-center justify-center border-1 text-[14px] font-semibold"
-                style={{
-                  border: " 1px solid rgba(174, 174, 174, 1) ",
-                  color: "rgba(51, 51, 51, 1)",
-                }}
+            <div
+              key={rowIndex}
+              className="bg-white rounded-lg p-4 shadow-sm border"
+            >
+              <h3
+                className="font-semibold text-lg mb-4"
+                style={{ color: "rgba(39, 16, 78, 1)" }}
               >
                 {row.time}
-              </div>
-
-              {days.map((day) => (
-                <div style={{ backgroundColor: "rgba(255, 255, 255, 1)" }}>
+              </h3>
+              <div className="space-y-3">
+                {days.map((day) => (
                   <div
                     key={`${rowIndex}-${day}`}
-                    className="w-[147px] h-[87px] p-2   rounded-md mx-1 mb-3  mt-2.5 "
+                    className="p-3 rounded-md"
                     style={{ backgroundColor: "rgba(245, 248, 254, 1)" }}
                   >
-                    <div className="flex justify-between">
-                      <span
-                        className="font-medium text-[14px]"
-                        style={{ color: "rgba(39, 16, 78, 1)" }}
-                      >
-                        {row[day].subject}
-                      </span>
-                      <div className="flex gap-2">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex-1">
+                        <div
+                          className="font-medium text-sm mb-1"
+                          style={{ color: "rgba(39, 16, 78, 1)" }}
+                        >
+                          {day}
+                        </div>
+                        <div
+                          className="font-semibold text-base"
+                          style={{ color: "rgba(39, 16, 78, 1)" }}
+                        >
+                          {row[day].subject}
+                        </div>
+                        <div
+                          className="text-sm font-light"
+                          style={{ color: "rgba(39, 16, 78, 1)" }}
+                        >
+                          {row[day].teacher}
+                        </div>
+                        <div
+                          className="text-xs"
+                          style={{ color: "rgba(0, 0, 0, 0.6)" }}
+                        >
+                          {row[day].duration}
+                        </div>
+                      </div>
+                      <div className="flex gap-2 ml-2">
                         <button
-                          className="text-blue-500"
+                          className="text-blue-500 p-1"
                           onClick={() => handleEdit(rowIndex, day)}
                         >
                           <Edit2 size={16} />
                         </button>
                         <button
-                          className="text-red-500"
+                          className="text-red-500 p-1"
                           onClick={() => handleDelete(rowIndex, day)}
                         >
                           <Trash size={16} />
                         </button>
                       </div>
                     </div>
-                    <div
-                      className="text-[10px] font-light"
-                      style={{ color: "rgba(39, 16, 78, 1)" }}
-                    >
-                      {row[day].teacher}
-                    </div>
-                    <div
-                      className="text-[8px] "
-                      style={{ color: "rgba(0, 0, 0, 0.6)" }}
-                    >
-                      {row[day].duration}
-                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Modal for Create/Edit Timetable */}
-      {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
-          <div className="bg-white rounded-md p-6 w-full max-w-md">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-lg font-bold">
-                {modalMode === "create" ? "Create Timetable" : "Edit Timetable"}
-              </h2>
-              <button onClick={() => setShowModal(false)}>
-                <X size={20} />
-              </button>
-            </div>
-
-            {/* Day Selection */}
-            <div className="mb-4">
-              <label className="block text-sm mb-2">Select Day</label>
-              <div className="flex flex-wrap gap-2">
-                {days.map((day) => (
-                  <label key={day} className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={formData.day === day}
-                      onChange={() => handleInputChange("day", day)}
-                      className="mr-1"
-                      disabled={modalMode === "edit"}
-                    />
-                    <span className="text-sm">{day}</span>
-                  </label>
                 ))}
               </div>
             </div>
+          ))}
+        </div>
 
-            {/* Subject Selection */}
-            <div className="mb-4">
-              <label className="block text-sm mb-2">Select Subject</label>
-              <div className="relative">
-                <select
-                  className="w-full p-2 border rounded-md appearance-none pr-8"
-                  value={formData.subject}
-                  onChange={(e) => handleInputChange("subject", e.target.value)}
+        {/* Desktop View - Table Layout */}
+        <div className="hidden lg:block overflow-x-auto">
+          <div className="min-w-max">
+            {/* Days header */}
+            <div className="flex mb-2 w-fit">
+              <div className="w-20 xl:w-24"></div>{" "}
+              {/* Empty cell for time column */}
+              {days.map((day) => (
+                <div
+                  key={day}
+                  className="w-32 xl:w-[148px] h-10 xl:h-[42px] p-2 xl:p-3 border rounded-md mx-1 text-center text-sm xl:text-[14px] ml-4 xl:ml-[0.9rem]"
+                  style={{
+                    border: "1px solid rgba(174, 174, 174, 1)",
+                    backgroundColor: "rgba(255, 255, 255, 1)",
+                    color: "rgba(51, 51, 51, 1)",
+                  }}
                 >
-                  <option value="">Select a subject</option>
-                  {subjects.map((subject) => (
-                    <option key={subject} value={subject}>
-                      {subject}
-                    </option>
-                  ))}
-                </select>
-                <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                  <ChevronDown size={16} />
+                  {day}
                 </div>
-              </div>
+              ))}
             </div>
 
-            {/* Teacher Selection */}
-            <div className="mb-4">
-              <label className="block text-sm mb-2">Select Teacher</label>
-              <div className="relative">
-                <select
-                  className="w-full p-2 border rounded-md appearance-none pr-8"
-                  value={formData.teacher}
-                  onChange={(e) => handleInputChange("teacher", e.target.value)}
+            {/* Timetable rows */}
+            {timetableData.map((row, rowIndex) => (
+              <div key={rowIndex} className="flex mb-2">
+                <div
+                  className="w-20 xl:w-[104px] p-2 flex items-center justify-center border text-xs xl:text-[14px] font-semibold"
+                  style={{
+                    border: "1px solid rgba(174, 174, 174, 1)",
+                    color: "rgba(51, 51, 51, 1)",
+                  }}
                 >
-                  <option value="">Select a teacher</option>
-                  {teachers.map((teacher) => (
-                    <option key={teacher} value={teacher}>
-                      {teacher}
-                    </option>
-                  ))}
-                </select>
-                <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                  <ChevronDown size={16} />
+                  {row.time}
                 </div>
-              </div>
-            </div>
 
-            {/* Time Selection */}
-            <div className="flex mb-4 gap-4">
-              <div className="flex-1">
-                <label className="block text-sm mb-2">Start Time</label>
-                <div className="relative">
-                  <select
-                    className="w-full p-2 border rounded-md appearance-none pr-8"
-                    value={formData.startTime}
-                    onChange={(e) =>
-                      handleInputChange("startTime", e.target.value)
-                    }
-                    disabled={modalMode === "edit"}
+                {days.map((day) => (
+                  <div
+                    key={`${rowIndex}-${day}`}
+                    style={{ backgroundColor: "rgba(255, 255, 255, 1)" }}
                   >
-                    <option value="">Select time</option>
-                    <option value="08:30">08:30 am</option>
-                    <option value="09:30">09:30 am</option>
-                    <option value="10:30">10:30 am</option>
-                    <option value="11:30">11:30 am</option>
-                    <option value="12:30">12:30 pm</option>
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                    <ChevronDown size={16} />
+                    <div
+                      className="w-32 xl:w-[147px] h-20 xl:h-[87px] p-2 rounded-md mx-1 mb-3 mt-2.5"
+                      style={{ backgroundColor: "rgba(245, 248, 254, 1)" }}
+                    >
+                      <div className="flex justify-between">
+                        <span
+                          className="font-medium text-xs xl:text-[14px] truncate pr-2"
+                          style={{ color: "rgba(39, 16, 78, 1)" }}
+                          title={row[day].subject}
+                        >
+                          {row[day].subject}
+                        </span>
+                        <div className="flex gap-1 xl:gap-2 flex-shrink-0">
+                          <button
+                            className="text-blue-500"
+                            onClick={() => handleEdit(rowIndex, day)}
+                          >
+                            <Edit2 size={12} className="xl:hidden" />
+                            <Edit2 size={16} className="hidden xl:block" />
+                          </button>
+                          <button
+                            className="text-red-500"
+                            onClick={() => handleDelete(rowIndex, day)}
+                          >
+                            <Trash size={12} className="xl:hidden" />
+                            <Trash size={16} className="hidden xl:block" />
+                          </button>
+                        </div>
+                      </div>
+                      <div
+                        className="text-[8px] xl:text-[10px] font-light truncate"
+                        style={{ color: "rgba(39, 16, 78, 1)" }}
+                        title={row[day].teacher}
+                      >
+                        {row[day].teacher}
+                      </div>
+                      <div
+                        className="text-[6px] xl:text-[8px]"
+                        style={{ color: "rgba(0, 0, 0, 0.6)" }}
+                      >
+                        {row[day].duration}
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
-
-              <div className="flex-1">
-                <label className="block text-sm mb-2">End Time</label>
-                <div className="relative">
-                  <select
-                    className="w-full p-2 border rounded-md appearance-none pr-8"
-                    value={formData.endTime}
-                    onChange={(e) =>
-                      handleInputChange("endTime", e.target.value)
-                    }
-                    disabled={modalMode === "edit"}
-                  >
-                    <option value="">Select time</option>
-                    <option value="09:15">09:15 am</option>
-                    <option value="10:15">10:15 am</option>
-                    <option value="11:15">11:15 am</option>
-                    <option value="12:15">12:15 pm</option>
-                    <option value="13:15">01:15 pm</option>
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                    <ChevronDown size={16} />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Save Button */}
-            <button
-              className="w-full py-3 bg-blue-600 text-white rounded-md font-medium mt-4"
-              onClick={handleSave}
-            >
-              {modalMode === "create" ? "Save" : "Update"}
-            </button>
+            ))}
           </div>
         </div>
-      )}
+
+        {/* Modal for Create/Edit Timetable */}
+        {showModal && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50 p-4">
+            <div className="bg-white rounded-md p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-4 sm:mb-6">
+                <h2 className="text-lg font-bold">
+                  {modalMode === "create"
+                    ? "Create Timetable"
+                    : "Edit Timetable"}
+                </h2>
+                <button onClick={() => setShowModal(false)}>
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Day Selection */}
+              <div className="mb-4">
+                <label className="block text-sm mb-2">Select Day</label>
+                <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
+                  {days.map((day) => (
+                    <label key={day} className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={formData.day === day}
+                        onChange={() => handleInputChange("day", day)}
+                        className="mr-2"
+                        disabled={modalMode === "edit"}
+                      />
+                      <span className="text-sm">{day}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Subject Selection */}
+              <div className="mb-4">
+                <label className="block text-sm mb-2">Select Subject</label>
+                <div className="relative">
+                  <select
+                    className="w-full p-2 border rounded-md appearance-none pr-8"
+                    value={formData.subject}
+                    onChange={(e) =>
+                      handleInputChange("subject", e.target.value)
+                    }
+                  >
+                    <option value="">Select a subject</option>
+                    {subjects.map((subject) => (
+                      <option key={subject} value={subject}>
+                        {subject}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                    <ChevronDown size={16} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Teacher Selection */}
+              <div className="mb-4">
+                <label className="block text-sm mb-2">Select Teacher</label>
+                <div className="relative">
+                  <select
+                    className="w-full p-2 border rounded-md appearance-none pr-8"
+                    value={formData.teacher}
+                    onChange={(e) =>
+                      handleInputChange("teacher", e.target.value)
+                    }
+                  >
+                    <option value="">Select a teacher</option>
+                    {teachers.map((teacher) => (
+                      <option key={teacher} value={teacher}>
+                        {teacher}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                    <ChevronDown size={16} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Time Selection */}
+              <div className="flex flex-col sm:flex-row mb-4 gap-4">
+                <div className="flex-1">
+                  <label className="block text-sm mb-2">Start Time</label>
+                  <div className="relative">
+                    <select
+                      className="w-full p-2 border rounded-md appearance-none pr-8"
+                      value={formData.startTime}
+                      onChange={(e) =>
+                        handleInputChange("startTime", e.target.value)
+                      }
+                      disabled={modalMode === "edit"}
+                    >
+                      <option value="">Select time</option>
+                      <option value="08:30">08:30 am</option>
+                      <option value="09:30">09:30 am</option>
+                      <option value="10:30">10:30 am</option>
+                      <option value="11:30">11:30 am</option>
+                      <option value="12:30">12:30 pm</option>
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                      <ChevronDown size={16} />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex-1">
+                  <label className="block text-sm mb-2">End Time</label>
+                  <div className="relative">
+                    <select
+                      className="w-full p-2 border rounded-md appearance-none pr-8"
+                      value={formData.endTime}
+                      onChange={(e) =>
+                        handleInputChange("endTime", e.target.value)
+                      }
+                      disabled={modalMode === "edit"}
+                    >
+                      <option value="">Select time</option>
+                      <option value="09:15">09:15 am</option>
+                      <option value="10:15">10:15 am</option>
+                      <option value="11:15">11:15 am</option>
+                      <option value="12:15">12:15 pm</option>
+                      <option value="13:15">01:15 pm</option>
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                      <ChevronDown size={16} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Save Button */}
+              <button
+                className="w-full py-3 bg-blue-600 text-white rounded-md font-medium mt-4"
+                onClick={handleSave}
+              >
+                {modalMode === "create" ? "Save" : "Update"}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
