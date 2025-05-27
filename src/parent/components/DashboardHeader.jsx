@@ -13,7 +13,7 @@ function DashboardHeader(props) {
                     <div className="relative">
                         <input
                             type="text"
-                            placeholder="Priscilla"
+                            placeholder={props.holder}
                             className="border border-gray-300 rounded-full py-2 px-4 pl-10 w-36 md:w-56"
                             aria-label="Search"
                         />

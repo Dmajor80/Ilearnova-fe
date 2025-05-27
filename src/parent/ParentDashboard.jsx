@@ -48,7 +48,7 @@ export default function ParentDashboard() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col p-2">
         {/* Topbar */}
-        <DashboardHeader />
+        <DashboardHeader holder="Search" text="Dashboard"/>
 
       
 

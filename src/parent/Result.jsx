@@ -92,6 +92,40 @@ const subjectMarks = [
     total: "94/100",
   },
 ];
+const topMarks = [
+  {
+    subject: "Mathematics",
+    theory: "35/40",
+    practical: "38/40",
+    assignment: "7/10",
+    attendance: "80%",
+    total: "94/100",
+  },
+  {
+    subject: "English Language",
+    theory: "30/40",
+    practical: "35/40",
+    assignment: "8/10",
+    attendance: "90%",
+    total: "95/100",
+  },
+  {
+    subject: "Biology",
+    theory: "28/40",
+    practical: "34/40",
+    assignment: "7/10",
+    attendance: "85%",
+    total: "84/100",
+  },
+  {
+    subject: "Physics",
+    theory: "33/40",
+    practical: "38/40",
+    assignment: "8/10",
+    attendance: "82%",
+    total: "94/100",
+  },
+];
 
 export default function ResultDashboard() {
   const [chartData, setChartData] = useState(initialChartData);
@@ -145,7 +179,7 @@ export default function ResultDashboard() {
             </div>
           </div>
         </div> */}
-        <DashboardHeader text="Result" />
+        <DashboardHeader text='Result' holder="Search Results"/>
         {/* Chart and Side Info */}
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Chart Card */}
@@ -209,7 +243,8 @@ export default function ResultDashboard() {
             {/* Top 4 Marks */}
             <div className="bg-white rounded-2xl shadow p-4">
               <div className="font-semibold mb-2 text-gray-700">Top 4 Marks</div>
-              {subjectMarks.map((s, i) => (
+              <hr className="bg-gray-500 mt-2 mb-3 rounded " />
+              {topMarks.map((s, i) => (
                 <div key={s.subject} className="mb-2">
                   <div className="flex justify-between text-sm">
                     <span className={i === 2 ? "font-semibold text-green-700" : ""}>{s.subject}</span>
@@ -227,21 +262,22 @@ export default function ResultDashboard() {
             {/* Position in Session */}
             <div className="bg-white rounded-2xl shadow p-4">
               <div className="font-semibold mb-2 text-gray-700">Position in this session</div>
+              <hr className="bg-gray-500 mt-2 mb-3 rounded " />
               <div className="text-sm mb-2">
                 Merit Position - <span className="font-semibold">1st</span>
               </div>
               <ul className="text-xs text-gray-500 mb-4">
                 <li>
-                  <span className="material-icons text-base align-middle text-blue-500">check_circle</span>
+                  <span className="material-icons text-base align-middle text-gray-500">check</span>
                   &nbsp;Theory - 450/500
                 </li>
                 <li>
-                  <span className="material-icons text-base align-middle text-blue-500">check_circle</span>
+                  <span className="material-icons text-base align-middle text-gray-500">check</span>
                   &nbsp;Practical - 380/500
                 </li>
               </ul>
-              <button className="w-full bg-blue-700 text-white rounded-lg py-2 font-semibold flex items-center justify-center gap-2">
-                <span className="material-icons text-white">star</span>
+              <button className="w-full bg-blue-700 text-white rounded-sm py-2 font-semibold flex items-center justify-center gap-2">
+                <span className="material-icons text-white">trending_up</span>
                 Total Mark - 830/1000
               </button>
             </div>
@@ -253,12 +289,12 @@ export default function ResultDashboard() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-2">
             <div className="font-semibold text-gray-700">All Subject Marks</div>
             <div className="flex gap-2">
-              <button className="flex items-center gap-1 px-3 py-1 border border-gray-300 rounded-lg text-xs font-medium">
-                <span className="material-icons text-base">list</span>
+              <button className="flex items-center gap-1 px-3 py-1 border border-gray-300 rounded-sm text-xs font-medium">
+                <span className="material-icons text-base">import_contacts</span>
                 Total Subject <span className="bg-gray-200 rounded px-2">{subjectMarks.length}</span>
               </button>
-              <button className="flex items-center gap-1 px-3 py-1 bg-blue-700 text-white rounded-lg text-xs font-medium">
-                <span className="material-icons text-base">trending_up</span>
+              <button className="flex items-center gap-1 px-3 py-1 bg-blue-700 text-white rounded-sm text-xs font-medium">
+                <span className="material-icons text-base">download</span>
                 View Transcript
               </button>
             </div>
@@ -277,7 +313,7 @@ export default function ResultDashboard() {
               </thead>
               <tbody>
                 {subjectMarks.map((s) => (
-                  <tr key={s.subject} className="border-b">
+                  <tr key={s.subject} className="border-b border-gray-300 border-lg">
                     <td className="py-2 px-3">{s.subject}</td>
                     <td className="py-2 px-3">{s.theory}</td>
                     <td className="py-2 px-3">{s.practical}</td>

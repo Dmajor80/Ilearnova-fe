@@ -43,7 +43,7 @@ export default function Attendance() {
             {/* Main Content */}
             <main className="flex-1 flex flex-col">
                 {/* Topbar */}
-                <DashboardHeader/>
+                <DashboardHeader holder="Search" text="Attendance" />
                 {/* <header className="flex items-center justify-between px-4 md:px-8 py-4 bg-[#f5f8fe]">
                     <div>
                         <p className="text-xs text-gray-500">Parent</p>

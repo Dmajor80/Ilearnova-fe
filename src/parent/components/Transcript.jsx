@@ -1,5 +1,8 @@
 import React from "react";
 import DashboardHeader from "./DashboardHeader";
+import SideBar from "./components/Sidebar"
+
+
 
 const transcriptData = [
   {
@@ -33,6 +36,8 @@ const transcriptData = [
 
 export default function Transcript() {
   return (
+       <div className="flex min-h-screen gap-2 bg-[#f5f8fe]">
+       <SideBar/>
     <div className="min-h-screen bg-[#f5f8fe] px-2 md:px-0 py-4">
       {/* Header */}
       {/* <div className="max-w-6xl mx-auto">
@@ -73,7 +78,7 @@ export default function Transcript() {
           </div>
         </div>
       </div> */}
-      <DashboardHeader text="Transcript" />
+      <DashboardHeader holder="Transcripts" text="Transcript" />
 
       {/* Banner & Profile */}
       {/* <div className="max-w-4xl mx-auto mt-4">
@@ -120,19 +125,19 @@ export default function Transcript() {
         </div>
         {/* Buttons */}
         <div className="flex gap-2 mt-4 md:mt-0">
-          <button className="flex items-center gap-1 px-3 py-1 border border-gray-300 rounded-lg text-xs font-medium">
+          <button className="flex items-center gap-1 px-3 py-1 border border-gray-300 rounded-sm text-xs font-medium">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v16a1 1 0 01-1 1H4a1 1 0 01-1-1V4z" />
             </svg>
             Filter
           </button>
-          <button className="flex items-center gap-1 px-3 py-1 bg-blue-700 text-white rounded-lg text-xs font-medium">
+          <button className="flex items-center gap-1 px-3 py-1 bg-blue-700 text-white rounded-sm text-xs font-medium">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
             </svg>
             Contact Teacher
           </button>
-          <button className="flex items-center gap-1 px-3 py-1 bg-blue-700 text-white rounded-lg text-xs font-medium">
+          <button className="flex items-center gap-1 px-3 py-1 bg-blue-700 text-white rounded-sm text-xs font-medium">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
             </svg>
@@ -170,6 +175,7 @@ export default function Transcript() {
           </tbody>
         </table>
       </div>
+    </div>
     </div>
   );
 }
