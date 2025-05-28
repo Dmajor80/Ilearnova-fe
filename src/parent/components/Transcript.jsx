@@ -1,6 +1,6 @@
 import React from "react";
 import DashboardHeader from "./DashboardHeader";
-import SideBar from "./components/Sidebar"
+import SideBar from "./Sidebar"
 
 
 
