@@ -1,19 +1,43 @@
-import React from 'react'
-import {Link} from 'react-router-dom'
+// import {Link} from 'react-router-dom'
+import {
+  BookOpen,
+  MessageCircle,
+  Calendar,
+  FileText,
+  Clock,
+  Award,
+  ChevronRight,
+  LayoutDashboard,
+  IdCard,
+} from "lucide-react";
+import { Link, Outlet } from "react-router-dom";
+// import { useState } from 'react';
 
-function Navigation() {
+
+
+function SideBar() {
+  // const [activeTab, setActiveTab] = useState("Dashboard");
   return (
 
-    <aside className="w-64 bg-white shadow-md hidden md:block">
-      <div className="p-4 text-xl font-bold border-b border-gray-200">ILEARNOVA</div>
-      <nav className="flex flex-col p-4 space-y-2 text-gray-700">
-        {/* {['Dashboard', 'Messages', 'Payments', 'Reports', 'Attendance', 'Timetable'].map((item) => (
-          <a href="#" key={item} className="hover:text-blue-500">{item}</a>
-        ))} */}
-        
-      </nav>
-    </aside>
+    <div className="sticky hidden md:block top-0 flex flex-col h-screen bg-gray-50">
+      {/* Sidebar */}
+      <aside className="hidden md:flex flex-col w-56 bg-white border-r border-gray-200 py-6 px-4">
+        <div className="mb-8">
+          <span className="font-bold text-lg text-[#1a237e]">ILEARNOVA</span>
+        </div>
+        <nav className="flex flex-col gap-2 text-gray-700">
+          <Link to="/parent-dashboard" className="font-semibold text-[#1a237e] bg-blue-50 rounded px-3 py-2">Dashboard</Link>
+          <Link to="#" className="hover:bg-blue-50 rounded px-3 py-2">Messages</Link>
+          <Link to="#" className="hover:bg-blue-50 rounded px-3 py-2">Payments</Link>
+          <Link to="/result" className="hover:bg-blue-50 rounded px-3 py-2">Results</Link>
+          <Link to="/attendance" className="hover:bg-blue-50 rounded px-3 py-2">Attendance</Link>
+          <Link to="/timetable" className="hover:bg-blue-50 rounded px-3 py-2">Timetable</Link>
+          {/* <Link to="#" className="hover:bg-blue-50 rounded px-3 py-2">Resources</Link> */}
+          {/* <Link to="#" className="hover:bg-blue-50 rounded px-3 py-2">Performance</Link> */}
+        </nav>
+      </aside>
+    </div>
   );
 }
 
-export default Navigation
+export default SideBar
