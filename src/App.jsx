@@ -23,34 +23,51 @@ import Assignments from "./student/Assignments";
 import Timetable from "./student/Timetable";
 import Grade from "./student/Grade";
 import { CoursePage, CoursesComponent } from "./student/CoursesComponent";
+import Result from "./student/Result";
+import Exam from "./student/Exam";
+import IdCard from "./student/IdCard";
+// import { CoursePage } from "./student/CoursesComponent";
 
 const App = () => {
   return (
-    <Routes>
-      {/* Public Routes */}
-      <Route path="/" element={<HomePage />} />
-      <Route path="/signup" element={<SignupForm />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/student-login" element={<StudentLogin />} />
-      <Route path="/parent-login" element={<ParentLogin />} />
-      <Route path="/admin-login" element={<AdminLogin />} />
+    <>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/signup" element={<SignupForm />} />
+        {/* teacher login */}
+        <Route path="/login" element={<LoginPage />} />
+        {/* end of teacher login */}
+        {/* student login */}
+        <Route path="/student-login" element={<StudentLogin />} />
+        {/*end of  student login */}
+        {/* Parent login */}
+        <Route path="/parent-login" element={<ParentLogin />} />
+        {/*end of  Parent login */}
+        {/* Admin login */}
+        <Route path="/Admin-login" element={<AdminLogin />} />
+        {/*end of  Admin login */}
 
-      {/* Dashboards */}
       <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
       <Route path="/parent-dashboard" element={<ParentDashboard />} />
-
-      {/* Student Dashboard with Nested Routes */}
-      <Route path="/student-dashboard" element={<StudentDashboard />}>
-        <Route path="overview" element={<Overview />} />
-        <Route path="message" element={<Messages />} />
-        <Route path="attendance" element={<Attendance />} />
-        <Route path="assignment" element={<Assignments />} />
-        <Route path="timetable" element={<Timetable />} />
-        <Route path="grade" element={<Grade />} />
-        <Route path="courses" element={<CoursesComponent />} />
-        <Route path="courses/:courseId" element={<CoursePage />} />
-      </Route>
-    </Routes>
+        {/* student dashboard */}
+        <Route path="/student-dashboard" element={<StudentDashboard />}>
+          <Route path="overview" element={<Overview />} />
+          <Route path="IDcard" element={<IdCard />} />
+          <Route path="attendance" element={<Attendance />} />
+          <Route path="assignment" element={<Assignments />} />
+          <Route path="timetable" element={<Timetable />} />
+          <Route path="transcript" element={<Grade />} />
+          <Route path="courses" element={<CoursesComponent />} />
+          <Route path="result" element={<Result />} />
+          <Route path="exam" element={<Exam />} />
+          <Route path="courses/:courseId" element={<CoursePage />} />
+        </Route>
+        {/* end of student dashboard */}
+        {/* course page */}
+        {/* <Route path="/course-page" element={<CoursePage />} /> */}
+        {/* end of course page */}
+      </Routes>
+    </>
   );
 };
 
