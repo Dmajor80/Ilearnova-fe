@@ -1,12 +1,21 @@
 import React from "react";
-import HomePage from "./homepage/HomePage";
 import { Route, Routes } from "react-router-dom";
+
+import HomePage from "./homepage/HomePage";
 import SignupForm from "./signup/SignupForm";
+
+// Login Pages
 import LoginPage from "./teacher/LoginPage";
 import StudentLogin from "./student/StudentLogin";
 import ParentLogin from "./parent/ParentLogin";
 import AdminLogin from "./admin/AdminLogin";
+
+// Dashboards
 import StudentDashboard from "./student/StudentDashboard";
+import TeacherDashboard from "./teacher/TeacherDashboard";
+import ParentDashboard from "./parent/ParentDashboard";
+
+// Student Dashboard Inner Routes
 import Overview from "./student/Overview";
 import Messages from "./student/Messages";
 import Attendance from "./student/Attendance";
@@ -37,6 +46,9 @@ const App = () => {
         {/* Admin login */}
         <Route path="/Admin-login" element={<AdminLogin />} />
         {/*end of  Admin login */}
+
+      <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
+      <Route path="/parent-dashboard" element={<ParentDashboard />} />
         {/* student dashboard */}
         <Route path="/student-dashboard" element={<StudentDashboard />}>
           <Route path="overview" element={<Overview />} />
