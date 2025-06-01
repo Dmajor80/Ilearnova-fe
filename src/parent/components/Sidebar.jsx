@@ -19,7 +19,7 @@ function SideBar() {
   // const [activeTab, setActiveTab] = useState("Dashboard");
   return (
 
-    <div className="sticky hidden md:block top-0 flex flex-col h-screen bg-gray-50">
+    <div className="sticky md:block top-0 flex flex-col h-screen bg-gray-50">
       {/* Sidebar */}
       <aside className="hidden md:flex flex-col w-56 bg-white border-r border-gray-200 py-6 px-4">
         <div className="mb-8">
