@@ -14,6 +14,7 @@ import {
   Sparkles,
 } from "lucide-react";
 
+
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
