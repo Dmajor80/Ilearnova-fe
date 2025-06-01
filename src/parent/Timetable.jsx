@@ -1,5 +1,5 @@
 import DashboardHeader from "./components/DashboardHeader";
-import SideBar from "./components/SideBar"
+import SideBar from "./components/Sidebar"
 
 const timetable = [
   {

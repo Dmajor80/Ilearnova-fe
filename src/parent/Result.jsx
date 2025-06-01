@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine,
 } from "recharts";
-import SideBar from "./components/SideBar";
+import SideBar from "./components/Sidebar";
 import DashboardHeader from "./components/DashboardHeader";
 
 const subjects = [

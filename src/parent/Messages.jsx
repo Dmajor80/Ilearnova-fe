@@ -1,6 +1,6 @@
 import "@splidejs/react-splide/css";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
-import SideBar from "./components/SideBar";
+import SideBar from "./components/Sidebar";
 
 // Dummy data for announcements
 const announcements = [
