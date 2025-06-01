@@ -1,6 +1,6 @@
 import React from "react";
 import DashboardHeader from "./DashboardHeader";
-import SideBar from "./Sidebar"
+// import Side
 
 
 
@@ -37,7 +37,7 @@ const transcriptData = [
 export default function Transcript() {
   return (
        <div className="flex min-h-screen gap-2 bg-[#f5f8fe]">
-       <SideBar/>
+       {/* <SideBar/> */}
     <div className="min-h-screen bg-[#f5f8fe] px-2 md:px-0 py-4">
       {/* Header */}
       {/* <div className="max-w-6xl mx-auto">

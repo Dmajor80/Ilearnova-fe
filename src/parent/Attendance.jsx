@@ -1,4 +1,4 @@
-import SideBar from "./components/Sidebar"
+import SideBar from "./components/SideBar"
 import {
     BarChart,
     Bar,

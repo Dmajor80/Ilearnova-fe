@@ -27,6 +27,13 @@ import Result from "./student/Result";
 import Exam from "./student/Exam";
 import IdCard from "./student/IdCard";
 // import { CoursePage } from "./student/CoursesComponent";
+import ParentDashboard from "./parent/ParentDashboard";
+// import Payment from "./parent/Payment";
+import Attendance from "./parent/Attendance";
+import Timetable from "./parent/Timetable";
+import Result from "./parent/Result";
+import Transcript from "./parent/components/Transcript";
+import Messages from "./parent/Messages";
 
 const App = () => {
   return (
@@ -61,6 +68,16 @@ const App = () => {
           <Route path="result" element={<Result />} />
           <Route path="exam" element={<Exam />} />
           <Route path="courses/:courseId" element={<CoursePage />} />
+          {/* Parent dashboard */}
+        <Route path="/parent-dashboard" element={<ParentDashboard />} />
+        {/*end of  Parent dashboard */}
+        {/* <Route path="/payments" element={<Payment />} /> */}
+        <Route path="/timetable" element={<Timetable />} />
+        <Route path="/attendance" element={<Attendance/>} />
+        <Route path="/result" element={<Result />} />
+        <Route path="/transcript" element={<Transcript />} />
+        <Route path="/messages" element={<Messages />} />
+        {/* <Route path="/parent-dashboard" element={<ParentDashboard />} /> */}
         </Route>
         {/* end of student dashboard */}
         {/* course page */}

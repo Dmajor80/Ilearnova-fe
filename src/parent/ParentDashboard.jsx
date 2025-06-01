@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import SideBar from "./components/Sidebar";
+import SideBar from "./components/SideBar";
 import { PieGraph, BarGraph } from "./components/Charts"
 import DashboardHeader from "./components/DashboardHeader";
 import {
