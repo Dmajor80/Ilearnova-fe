@@ -27,7 +27,6 @@ import Result from "./student/Result";
 import Exam from "./student/Exam";
 import IdCard from "./student/IdCard";
 // import { CoursePage } from "./student/CoursesComponent";
-import ParentDashboard from "./parent/ParentDashboard";
 // import Payment from "./parent/Payment";
 import Attendance from "./parent/Attendance";
 import Timetable from "./parent/Timetable";
