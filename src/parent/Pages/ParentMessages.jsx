@@ -1,6 +1,6 @@
 import "@splidejs/react-splide/css";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
-import SideBar from "./components/SideBar";
+import SideBar from "../components/SideBar";
 
 // Dummy data for announcements
 const announcements = [
@@ -48,35 +48,12 @@ const upcomingClasses = [
 ];
 
 
-function Messages() {
+function ParentMessages() {
   return (
-       <div className="min-h-screen bg-[#f5f8fe] flex flex-col md:flex-row">
+       <div className="flex min-h-screen gap-2 bg-[#f5f8fe]">
       {/* Sidebar */}
       <SideBar/>
-      {/* <aside className="bg-white w-full md:w-1/5 p-6 border-r">
-        <h1 className="font-bold text-xl mb-8 text-blue-900">ILEARNOVA</h1>
-        <nav className="space-y-4 text-gray-700">
-          <a href="#" className="flex items-center gap-2 text-blue-700 font-semibold">
-            <span className="material-icons">dashboard</span> Dashboard
-          </a>
-          <a href="#" className="flex items-center gap-2 hover:text-blue-700">
-            <span className="material-icons">message</span> Messages
-          </a>
-          <a href="#" className="flex items-center gap-2 hover:text-blue-700">
-            <span className="material-icons">payment</span> Payments
-          </a>
-          <a href="#" className="flex items-center gap-2 hover:text-blue-700">
-            <span className="material-icons">assessment</span> Reports
-          </a>
-          <a href="#" className="flex items-center gap-2 hover:text-blue-700">
-            <span className="material-icons">check_circle</span> Attendance
-          </a>
-          <a href="#" className="flex items-center gap-2 hover:text-blue-700">
-            <span className="material-icons">calendar_today</span> Timetable
-          </a>
-        </nav>
-      </aside> */}
-
+     
       {/* Main Content */}
       <main className="flex-1 p-4 md:p-8">
         {/* Header */}
@@ -218,4 +195,4 @@ function Messages() {
   )
 }
 
-export default Messages;
+export default ParentMessages;

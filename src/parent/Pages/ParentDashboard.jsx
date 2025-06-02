@@ -1,9 +1,9 @@
 import { useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import SideBar from "./components/SideBar";
-import { PieGraph, BarGraph } from "./components/Charts"
-import DashboardHeader from "./components/DashboardHeader";
+import SideBar from "../components/SideBar";
+import { PieGraph, BarGraph } from "../components/Charts"
+import DashboardHeader from "../components/DashboardHeader";
 import {
   BarChart,
   Bar,
@@ -16,6 +16,8 @@ import {
   Pie,
   Label,
 } from "recharts";
+
+
 
 const barData = [
   { label: "Math", value: 90 },

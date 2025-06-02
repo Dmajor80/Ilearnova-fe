@@ -1,4 +1,4 @@
-import SideBar from "./components/SideBar"
+import SideBar from "../components/SideBar"
 import {
     BarChart,
     Bar,
@@ -9,7 +9,7 @@ import {
     Cell,
     Legend,
 } from "recharts";
-import DashboardHeader from "./components/DashboardHeader";
+import DashboardHeader from "../components/DashboardHeader";
 
 const scoreData = [
     { subject: "Math", value: 85 },
@@ -44,50 +44,20 @@ export default function Attendance() {
             <main className="flex-1 flex flex-col">
                 {/* Topbar */}
                 <DashboardHeader holder="Search" text="Attendance" />
-                {/* <header className="flex items-center justify-between px-4 md:px-8 py-4 bg-[#f5f8fe]">
-                    <div>
-                        <p className="text-xs text-gray-500">Parent</p>
-                        <h1 className="text-lg font-semibold text-gray-800">Performance Insight</h1>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <div className="relative">
-                            <input
-                                type="text"
-                                placeholder="Priscilla"
-                                className="border border-gray-300 rounded-full py-2 px-4 pl-10 w-36 md:w-56"
-                                aria-label="Search"
-                            />
-                            <svg
-                                className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                                />
-                            </svg>
-                        </div>
-                        <img
-                            // /api/placeholder/32/32
-                            src="/profile.png"
-                            alt="User" loading="lazy"
-                            className="w-8 h-8 rounded-full object-cover"
-                        />
-                    </div>
-                </header> */}
 
                 {/* Filters & Download */}
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 px-2 md:px-8 mt-4">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 px-2 md:px-8 mt-10">
+                    <span className="font-semibold text-gray-700">Attendance</span>
                     <div className="flex items-center gap-2">
-                        <span className="font-semibold text-gray-700">Attendance</span>
-                        <button className="border border-gray-300 px-3 py-1 rounded text-xs bg-white">Filter</button>
-                        <button className="border border-gray-300 px-3 py-1 rounded text-xs bg-white">Bar</button>
+                        <button className="border border-gray-300 flex items-center gap-2 px-3 py-1 rounded text-xs bg-white"><span class="material-icons">
+                            filter_alt
+                        </span>Filter</button>
+                        <button className="border border-gray-300 px-3 py-1 flex items-center gap-2 rounded text-xs bg-white"><span class="material-icons">
+                            calendar_month
+                        </span>Date</button>
+                        <button className="bg-blue-600 text-white flex items-center gap-2 cursor-pointer px-4 py-1 rounded text-xs font-semibold">Download</button>
                     </div>
-                    <button className="bg-blue-600 text-white cursor-pointer px-4 py-1 rounded text-xs font-semibold">Download</button>
+
                 </div>
 
                 {/* Main Dashboard */}
@@ -110,17 +80,19 @@ export default function Attendance() {
                                         </Bar>
                                     </BarChart>
                                 </ResponsiveContainer>
+                                <h3 className="text-center font-medium">Subject</h3>
                             </div>
                             {/* Legend */}
                             <div className="flex gap-4 justify-center mt-4 text-xs">
+
                                 <div className="flex items-center gap-1">
-                                    <span className="inline-block w-3 h-3 bg-green-400 rounded"></span> 80-100
+                                    <span className="inline-block w-3 h-3 bg-yellow-400 rounded-full"></span> Between 50%-80%
                                 </div>
                                 <div className="flex items-center gap-1">
-                                    <span className="inline-block w-3 h-3 bg-yellow-400 rounded"></span> 60-79
+                                    <span className="inline-block w-3 h-3 bg-green-400 rounded-full"></span>Above 80%
                                 </div>
                                 <div className="flex items-center gap-1">
-                                    <span className="inline-block w-3 h-3 bg-red-400 rounded"></span> Below 60
+                                    <span className="inline-block w-3 h-3 bg-red-400 rounded-full"></span> Below 50%
                                 </div>
                             </div>
                         </div>
@@ -141,17 +113,22 @@ export default function Attendance() {
                                         </Bar>
                                     </BarChart>
                                 </ResponsiveContainer>
+                                <h3 className="text-center font-medium">Months</h3>
                             </div>
                             {/* Legend */}
                             <div className="flex gap-4 justify-center mt-4 text-xs">
+
                                 <div className="flex items-center gap-1">
-                                    <span className="inline-block w-3 h-3 bg-green-400 rounded"></span> 80-100
+                                    <span className="inline-block w-3 h-3 bg-yellow-400 rounded-full"></span> Between 50%-80%
                                 </div>
                                 <div className="flex items-center gap-1">
-                                    <span className="inline-block w-3 h-3 bg-yellow-400 rounded"></span> 60-79
+                                    <span className="inline-block w-3 h-3 bg-green-400 rounded-full"></span>Above 80%
                                 </div>
                                 <div className="flex items-center gap-1">
-                                    <span className="inline-block w-3 h-3 bg-red-400 rounded"></span> Below 60
+                                    <span className="inline-block w-3 h-3 bg-red-400 rounded-full"></span> Below 50%
+                                </div>
+                                <div className="flex items-center gap-1">
+                                    Attendance
                                 </div>
                             </div>
                         </div>
@@ -161,20 +138,26 @@ export default function Attendance() {
                     <div className="flex flex-col gap-6">
                         <div className="bg-white rounded-xl shadow p-6 flex flex-col">
                             <div className="font-semibold text-gray-700 mb-4">Performance Alert</div>
-                            <button className="bg-blue-700 cursor-pointer text-white font-semibold px-4 py-2 rounded mb-2 text-left">
-                                Attendance Report Alert &rarr;
+
+                            <span>john</span>
+                            <button className="bg-blue-700 text-center cursor-pointer text-white font-semibold px-4 py-2 rounded mb-2">
+                                Dismiss
                             </button>
-                            <button className="bg-blue-700 text-white font-semibold cursor-pointer px-4 py-2 rounded mb-2 text-left">
-                                Download
+                            <span>john</span>
+                            <button className="bg-blue-700 text-center text-white font-semibold cursor-pointer px-4 py-2 rounded mb-2">
+                                Dismiss
                             </button>
-                            <button className="bg-blue-700 cursor-pointer text-white font-semibold px-4 py-2 rounded mb-2 text-left">
-                                Score Analysis Insight &rarr;
+                            <span>john</span>
+                            <button className="bg-blue-700 text-center cursor-pointer text-white font-semibold px-4 py-2 rounded mb-2">
+                                Dismiss
                             </button>
-                            <button className="bg-blue-700 cursor-pointer text-white font-semibold px-4 py-2 rounded mb-2 text-left">
-                                View Details
+                            <span>john</span>
+                            <button className="bg-blue-700 text-center cursor-pointer text-white font-semibold px-4 py-2 rounded mb-2">
+                                Dismiss
                             </button>
-                            <button className="bg-blue-700 cursor-pointer text-white font-semibold px-4 py-2 rounded text-left">
-                                More Analysis &rarr;
+                            <span>john</span>
+                            <button className="bg-blue-700 text-center cursor-pointer text-white font-semibold px-4 py-2 rounded">
+                                Dismiss
                             </button>
                         </div>
                     </div>
