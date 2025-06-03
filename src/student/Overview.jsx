@@ -126,7 +126,7 @@ const Overview = () => {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
         <div
-          className="bg-white p-4 rounded-xl shadow-sm h-[143px]"
+          className="bg-white p-4 rounded-xl shadow-sm h-[143px] max-w-[340px]"
           style={fadeInUp(0.2)}
         >
           <div className="flex justify-between items-center">
