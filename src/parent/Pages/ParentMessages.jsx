@@ -50,10 +50,10 @@ const upcomingClasses = [
 
 function ParentMessages() {
   return (
-       <div className="flex min-h-screen gap-2 bg-[#f5f8fe]">
+    <div className="flex min-h-screen gap-2 bg-[#f5f8fe]">
       {/* Sidebar */}
-      <SideBar/>
-     
+      <SideBar />
+
       {/* Main Content */}
       <main className="flex-1 p-4 md:p-8">
         {/* Header */}
