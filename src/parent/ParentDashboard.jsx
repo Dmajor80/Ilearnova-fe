@@ -2,7 +2,7 @@ import { useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import SideBar from "./components/Sidebar";
-import { PieGraph, BarGraph } from "./components/Charts"
+import { PieGraph, BarGraph } from "./components/Charts";
 import DashboardHeader from "./components/DashboardHeader";
 import {
   BarChart,
@@ -31,11 +31,25 @@ const barColors = barData.map((d) =>
   d.value >= 80 ? "#4ade80" : d.value >= 60 ? "#fde047" : "#f87171"
 );
 
-
 const events = [
-  { date: 22, title: "Parent-Teacher Meeting", color: "bg-yellow-100", icon: "📝" },
-  { date: 26, title: "Parent-Teacher Meeting", color: "bg-yellow-100", icon: "📝" },
-  { date: 28, title: "Parent-Teacher Meeting", color: "bg-yellow-100", icon: "📝" },
+  {
+    date: 22,
+    title: "Parent-Teacher Meeting",
+    color: "bg-yellow-100",
+    icon: "📝",
+  },
+  {
+    date: 26,
+    title: "Parent-Teacher Meeting",
+    color: "bg-yellow-100",
+    icon: "📝",
+  },
+  {
+    date: 28,
+    title: "Parent-Teacher Meeting",
+    color: "bg-yellow-100",
+    icon: "📝",
+  },
 ];
 
 export default function ParentDashboard() {
@@ -48,9 +62,7 @@ export default function ParentDashboard() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col p-2">
         {/* Topbar */}
-        <DashboardHeader holder="Search" text="Dashboard"/>
-
-      
+        <DashboardHeader holder="Search" text="Dashboard" />
 
         {/* Main Dashboard Widgets */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-20 px-2 md:px-0">
@@ -76,20 +88,25 @@ export default function ParentDashboard() {
             {/* Legend */}
             <div className="flex gap-4 justify-center mt-4 text-xs">
               <div className="flex items-center gap-1">
-                <span className="inline-block w-3 h-3 bg-green-400 rounded"></span> 80-100
+                <span className="inline-block w-3 h-3 bg-green-400 rounded"></span>{" "}
+                80-100
               </div>
               <div className="flex items-center gap-1">
-                <span className="inline-block w-3 h-3 bg-yellow-400 rounded"></span> 60-79
+                <span className="inline-block w-3 h-3 bg-yellow-400 rounded"></span>{" "}
+                60-79
               </div>
               <div className="flex items-center gap-1">
-                <span className="inline-block w-3 h-3 bg-red-400 rounded"></span> Below 60
+                <span className="inline-block w-3 h-3 bg-red-400 rounded"></span>{" "}
+                Below 60
               </div>
             </div>
           </div>
 
           {/* Upcoming Classes */}
           <div className="bg-white rounded-xl shadow p-6 min-h-[320px] flex flex-col">
-            <div className="font-semibold text-gray-700 mb-2">Upcoming Classes</div>
+            <div className="font-semibold text-gray-700 mb-2">
+              Upcoming Classes
+            </div>
             <div className="text-xs text-gray-500 mb-2">October 2024</div>
             {/* Calendar */}
             <div className="grid grid-cols-7 gap-1 text-center text-xs text-gray-500 mb-2">
@@ -108,10 +125,11 @@ export default function ParentDashboard() {
                 return (
                   <div
                     key={day}
-                    className={`py-1 rounded-full cursor-pointer ${isActive
-                      ? "bg-blue-700 text-white font-bold"
-                      : "hover:bg-blue-100"
-                      }`}
+                    className={`py-1 rounded-full cursor-pointer ${
+                      isActive
+                        ? "bg-blue-700 text-white font-bold"
+                        : "hover:bg-blue-100"
+                    }`}
                   >
                     {day}
                   </div>
@@ -121,7 +139,10 @@ export default function ParentDashboard() {
             {/* Events */}
             <div className="flex flex-col gap-2">
               {events.map((event, idx) => (
-                <div key={idx} className={`flex items-center gap-2 p-2 rounded ${event.color}`}>
+                <div
+                  key={idx}
+                  className={`flex items-center gap-2 p-2 rounded ${event.color}`}
+                >
                   <span className="text-lg">{event.icon}</span>
                   <span className="text-xs text-gray-700">{event.title}</span>
                   <span className="ml-auto text-xs text-gray-500">{`Oct ${event.date}`}</span>
@@ -141,7 +162,9 @@ export default function ParentDashboard() {
               <div className="text-xs text-gray-500 mt-2">Courses</div>
             </div>
             <div className="flex-1 w-full">
-              <div className="font-semibold text-gray-700 mb-2">Your weekly learning goal</div>
+              <div className="font-semibold text-gray-700 mb-2">
+                Your weekly learning goal
+              </div>
               <div className="flex items-end gap-4 h-24">
                 {[100, 90, 80, 70, 60].map((val, idx) => (
                   <div key={idx} className="flex flex-col items-center">
@@ -158,16 +181,23 @@ export default function ParentDashboard() {
               <div className="flex items-center gap-2 mt-2">
                 <span className="text-2xl font-bold text-[#1a237e]">100</span>
                 <span className="text-xs text-gray-500">/ Score</span>
-                <span className="ml-auto text-xs text-red-500">-25% from previous week</span>
+                <span className="ml-auto text-xs text-red-500">
+                  -25% from previous week
+                </span>
               </div>
             </div>
           </div>
 
           {/* Student Attendance Calendar with react-calendar */}
           <div className="bg-white rounded-xl shadow p-6 flex flex-col">
-            <div className="font-semibold text-gray-700 mb-2">Student Attendance</div>
+            <div className="font-semibold text-gray-700 mb-2">
+              Student Attendance
+            </div>
             <div className="text-xs text-gray-500 mb-4">
-              {selectedDate.toLocaleString("default", { month: "long", year: "numeric" })}
+              {selectedDate.toLocaleString("default", {
+                month: "long",
+                year: "numeric",
+              })}
             </div>
             <Calendar
               onChange={setSelectedDate}
