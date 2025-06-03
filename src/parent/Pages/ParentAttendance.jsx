@@ -51,13 +51,13 @@ export default function Attendance() {
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 px-2 md:px-8 mt-10">
                     <span className="font-semibold text-gray-700">Attendance</span>
                     <div className="flex items-center gap-2">
-                        <button className="border border-gray-300 flex items-center gap-2 px-3 py-1 rounded text-xs bg-white"><span class="material-icons">
+                        <button className="border-3 border-gray-300 flex items-center gap-2 px-4 py-2 rounded text-xs bg-white"><span class="material-icons bg-none text-gray-700">
                             filter_alt
                         </span>Filter</button>
-                        <button className="border border-gray-300 px-3 py-1 flex items-center gap-2 rounded text-xs bg-white"><span class="material-icons">
+                        <button className="border-3 border-gray-300 px-4 py-2 flex items-center gap-2 rounded text-xs bg-white"><span class="material-icons bg-none text-gray-700">
                             calendar_month
                         </span>Date</button>
-                        <button className="bg-blue-600 text-white flex items-center gap-2 cursor-pointer px-4 py-1 rounded text-xs font-semibold">Download</button>
+                        <button className="bg-blue-900 text-white flex items-center gap-2 cursor-pointer px-4 py-2 rounded text-xs font-semibold">Download</button>
                     </div>
 
                 </div>
@@ -141,23 +141,23 @@ export default function Attendance() {
                         <div className="bg-white rounded-xl shadow p-6 flex flex-col">
                             <div className="font-semibold text-gray-700 mb-4">Performance Alert</div>
 
-                            <span className='capitalize text-md my-4'>john doe's math score dropped to 45%</span>
+                            <span className='capitalize text-md my-4 flex gap-2 justify-contents-between items-center'> <div className="rounded-full bg-red-500 h-3 w-3"></div> john doe's math score dropped to 45%</span>
                             <button className="bg-blue-700 text-center cursor-pointer text-white font-semibold px-4 py-2 rounded mb-2">
                                 Dismiss
                             </button>
-                            <span className='capitalize text-md my-4'>john doe's math score dropped to 45%</span>
+                            <span className='capitalize text-md my-4 flex gap-2 justify-contents-between items-center'> <div className="rounded-full bg-red-500 h-3 w-3"></div> john doe's math score dropped to 45%</span>
                             <button className="bg-blue-700 text-center text-white font-semibold cursor-pointer px-4 py-2 rounded mb-2">
                                 Dismiss
                             </button>
-                            <span className='capitalize text-md my-4'>john doe's math score dropped to 45%</span>
+                            <span className='capitalize text-md my-4 flex gap-2 justify-contents-between items-center'> <div className="rounded-full bg-red-500 h-3 w-3"></div> john doe's math score dropped to 45%</span>
                             <button className="bg-blue-700 text-center cursor-pointer text-white font-semibold px-4 py-2 rounded mb-2">
                                 Dismiss
                             </button>
-                            <span className='capitalize text-md my-4'>john doe's math score dropped to 45%</span>
+                            <span className='capitalize text-md my-4 flex gap-2 justify-contents-between items-center'> <div className="rounded-full bg-red-500 h-3 w-3"></div> john doe's math score dropped to 45%</span>
                             <button className="bg-blue-700 text-center cursor-pointer text-white font-semibold px-4 py-2 rounded mb-2">
                                 Dismiss
                             </button>
-                            <span className='capitalize text-md my-4'>john doe's math score dropped to 45%</span>
+                            <span className='capitalize text-md my-4 flex gap-2 justify-contents-between items-center'> <div className="rounded-full bg-red-500 h-3 w-3"></div> john doe's math score dropped to 45%</span>
                             <button className="bg-blue-700 text-center cursor-pointer text-white font-semibold px-4 py-2 rounded">
                                 Dismiss
                             </button>
