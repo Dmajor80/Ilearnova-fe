@@ -17,15 +17,20 @@ import ParentDashboard from "./parent/ParentDashboard";
 
 // Student Dashboard Inner Routes
 import Overview from "./student/Overview";
-import Messages from "./student/Messages";
+// import Messages from "./student/Messages";
 import Attendance from "./student/Attendance";
-import Assignments from "./student/Assignments";
+// import Assignments from "./student/Assignments";
 import Timetable from "./student/Timetable";
 import Grade from "./student/Grade";
 import { CoursePage, CoursesComponent } from "./student/CoursesComponent";
 import Result from "./student/Result";
 import Exam from "./student/Exam";
 import IdCard from "./student/IdCard";
+import AdminDashboard from "./admin/AdminDashboard";
+import Dashboard from "./admin/Dashboard";
+import Users from "./admin/Users";
+import NewUser from "./admin/NewUser";
+import Report from "./admin/Report";
 // import { CoursePage } from "./student/CoursesComponent";
 // import Payment from "./parent/Payment";
 import Transcript from "./parent/components/Transcript";
@@ -47,13 +52,12 @@ const App = () => {
 
         <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
         <Route path="/parent-dashboard" element={<ParentDashboard />} />
-        
         {/* student dashboard */}
         <Route path="/student-dashboard" element={<StudentDashboard />}>
           <Route path="overview" element={<Overview />} />
           <Route path="IDcard" element={<IdCard />} />
           <Route path="attendance" element={<Attendance />} />
-          <Route path="assignment" element={<Assignments />} />
+          {/* <Route path="assignment" element={<Assignments />} /> */}
           <Route path="timetable" element={<Timetable />} />
           <Route path="transcript" element={<Grade />} />
           <Route path="courses" element={<CoursesComponent />} />
@@ -62,13 +66,15 @@ const App = () => {
           <Route path="courses/:courseId" element={<CoursePage />} />
           <Route path="messages" element={<Messages />} />
         </Route>
-        
-        {/* Routes that should be outside the student dashboard */}
-        <Route path="/timetable" element={<Timetable />} />
-        <Route path="/attendance" element={<Attendance/>} />
-        <Route path="/result" element={<Result />} />
-        <Route path="/transcript" element={<Transcript />} />
-        <Route path="/messages" element={<Messages />} />
+        {/* end of student dashboard */}
+        {/* admin section */}
+        <Route path="/admin-dashboard" element={<AdminDashboard />}>
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="users" element={<Users />} />
+          <Route path="users/new-user" element={<NewUser />} />
+          <Route path="reports" element={<Report />} />
+        </Route>
+        {/*end of  admin section */}
       </Routes>
     </>
   );

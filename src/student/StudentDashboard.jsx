@@ -46,12 +46,13 @@ export default function StudentDashboard() {
       label: "Attendance",
       air: "attendance",
     },
-    {
-      id: "assignments",
-      icon: <FileText size={20} />,
-      label: "Assignments",
-      air: "assignment",
-    },
+    // {
+    //   id: "assignments",
+    //   icon: <FileText size={20} />,
+    //   label: "Assignments",
+    //   air: "assignment",
+    // },
+
     {
       id: "timetable",
       icon: <Clock size={20} />,

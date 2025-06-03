@@ -108,7 +108,7 @@ export default function IdCard() {
       <p className="text-[25px] p-[2rem] font-semibold">ID Card Preview</p>
 
       <div className="flex justify-center">
-        <div className="bg-white rounded-lg shadow-lg p-0 w-[400px] overflow-hidden">
+        <div className="bg-white rounded-lg shadow-lg p-0 max-w-[400px] overflow-hidden">
           {/* Header with colorful design */}
           <div className="relative">
             <div className="h-32 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 relative overflow-hidden">
@@ -497,7 +497,7 @@ export default function IdCard() {
         <button
           type="button"
           onClick={() => console.log("Form data:", formData)}
-          className="px-8 py-3 bg-gray-400 lg:text-[20px] rounded-md hover:bg-gray-500 transition-colors duration-200 font-medium text-white cursor-pointer"
+          className="px-8 py-3 bg-gray-400 text-[20px] rounded-md hover:bg-gray-500 transition-colors duration-200 font-medium text-white cursor-pointer"
         >
           Save
         </button>
