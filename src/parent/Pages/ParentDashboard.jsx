@@ -21,12 +21,15 @@ import {
 
 const barData = [
   { label: "Math", value: 90 },
-  { label: "Eng", value: 70 },
+  { label: "Eng", value: 85 },
   { label: "Bio", value: 90 },
   { label: "Civic", value: 70 },
   { label: "Chem", value: 50 },
   { label: "Phy", value: 95 },
   { label: "Geo", value: 80 },
+  { label: "Yoruba", value: 45 },
+  { label: "Furth-Math", value: 50 },
+  { label: "Ani-Hus", value: 90 },
 ];
 
 const barColors = barData.map((d) =>

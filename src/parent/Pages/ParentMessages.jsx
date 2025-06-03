@@ -85,10 +85,10 @@ function ParentMessages() {
           <Splide
             options={{
               type: "loop",
-              perPage: 2,
+              perPage: 1,
               gap: "1rem",
               breakpoints: {
-                1024: { perPage: 2 },
+                1024: { perPage: 4 },
                 768: { perPage: 1 },
               },
               arrows: true,

@@ -12,12 +12,15 @@ import {
 import DashboardHeader from "../components/DashboardHeader";
 
 const scoreData = [
-    { subject: "Math", value: 85 },
-    { subject: "English", value: 65 },
-    { subject: "Civic", value: 80 },
-    { subject: "Biology", value: 70 },
-    { subject: "Chemistry", value: 55 },
-    { subject: "Physics", value: 90 },
+    { subject: "Math", value: 90 },
+    { subject: "English", value: 85 },
+    { subject: "Biology", value: 90 },
+    { subject: "Physics", value: 95 },
+    { subject: "Chemistry", value: 50 },
+    { subject: "Civic", value: 70 },
+    { subject: "Yoruba", value: 45 },
+    { subject: "Further Mathematics", value: 50 },
+    { subject: "Animal Husbandry", value: 90 },
     { subject: "Geography", value: 75 },
 ];
 
@@ -39,7 +42,6 @@ export default function Attendance() {
         <div className="flex min-h-screen gap-2 bg-[#f5f8fe]">
             {/* Sidebar */}
             <SideBar />
-
             {/* Main Content */}
             <main className="flex-1 flex flex-col">
                 {/* Topbar */}
@@ -68,7 +70,7 @@ export default function Attendance() {
                         <div className="bg-white rounded-xl shadow p-6 flex flex-col">
                             <div className="font-semibold text-gray-700 mb-2">Score</div>
                             <div className="flex-1 min-h-[220px]">
-                                <ResponsiveContainer width="100%" height={220}>
+                                <ResponsiveContainer width="100%" height={250}>
                                     <BarChart data={scoreData}>
                                         <XAxis dataKey="subject" tick={{ fontSize: 12 }} />
                                         <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} />
@@ -139,23 +141,23 @@ export default function Attendance() {
                         <div className="bg-white rounded-xl shadow p-6 flex flex-col">
                             <div className="font-semibold text-gray-700 mb-4">Performance Alert</div>
 
-                            <span>john</span>
+                            <span className='capitalize text-md my-4'>john doe's math score dropped to 45%</span>
                             <button className="bg-blue-700 text-center cursor-pointer text-white font-semibold px-4 py-2 rounded mb-2">
                                 Dismiss
                             </button>
-                            <span>john</span>
+                            <span className='capitalize text-md my-4'>john doe's math score dropped to 45%</span>
                             <button className="bg-blue-700 text-center text-white font-semibold cursor-pointer px-4 py-2 rounded mb-2">
                                 Dismiss
                             </button>
-                            <span>john</span>
+                            <span className='capitalize text-md my-4'>john doe's math score dropped to 45%</span>
                             <button className="bg-blue-700 text-center cursor-pointer text-white font-semibold px-4 py-2 rounded mb-2">
                                 Dismiss
                             </button>
-                            <span>john</span>
+                            <span className='capitalize text-md my-4'>john doe's math score dropped to 45%</span>
                             <button className="bg-blue-700 text-center cursor-pointer text-white font-semibold px-4 py-2 rounded mb-2">
                                 Dismiss
                             </button>
-                            <span>john</span>
+                            <span className='capitalize text-md my-4'>john doe's math score dropped to 45%</span>
                             <button className="bg-blue-700 text-center cursor-pointer text-white font-semibold px-4 py-2 rounded">
                                 Dismiss
                             </button>
