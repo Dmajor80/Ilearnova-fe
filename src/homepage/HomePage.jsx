@@ -101,7 +101,7 @@ const HomePage = () => {
           pointerEvents: "none",
         }}
       ></div>
-      <div className="flex flex-col items-center bg-[#B2EBF2]">
+      <div className="flex flex-col items-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         <Navbar />
 
         {/* Hero Section with Parallax */}
@@ -116,7 +116,7 @@ const HomePage = () => {
           </FadeInUp>
 
           <FadeInUp delay={0.2}>
-            <div className="mt-4 justify-center px-4 text-justify text-gray-500 text-opacity-80 lg:px-96 lg:text-center lg:text-lg lg:leading-7">
+            <div className="mt-4 justify-center px-4 text-justify text-[white] text-opacity-80 lg:px-96 lg:text-center lg:text-lg lg:leading-7">
               Through innovative teaching methodologies and a dedicated faculty,
               we've consistently achieved remarkable results. Our students have
               not only excelled academically but have also emerged as confident,
@@ -136,13 +136,17 @@ const HomePage = () => {
             <CounterAnimation
               end={10000}
               title="Students"
-              textColor="text-blue"
+              textColor="text-white"
             />
-            <CounterAnimation end={75} title="Total success" />
+            <CounterAnimation
+              end={75}
+              title="Total success"
+              textColor="text-white"
+            />
             <CounterAnimation
               end={100}
               title="Main questions"
-              textColor="text-blue"
+              textColor="text-white"
             />
             <CounterAnimation
               end={26}
@@ -163,13 +167,13 @@ const HomePage = () => {
         <div className="container mx-auto px-4 py-12">
           <FadeInUp>
             <div className="mt-8 text-3xl font-semibold sm:text-5xl text-center">
-              <span className="font-bold text-blue">All-In-One </span>
-              <span className="font-bold text-gold">Cloud Software.</span>
+              <span className="font-bold text-white">All-In-One </span>
+              <span className="font-bold text-white">Cloud Software.</span>
             </div>
           </FadeInUp>
 
           <FadeInUp delay={0.2}>
-            <div className="text-xl max-md:max-w-full mt-4 text-center leading-10 text-gray-500 px-4">
+            <div className="text-xl max-md:max-w-full mt-4 text-center leading-10 text-[white] px-4">
               Ilearnova is one powerful online software suite that combines all
               the tools needed to run a successful school or office.
             </div>
@@ -189,11 +193,11 @@ const HomePage = () => {
                   alt=""
                   src="https://dimatech-lsm-frontend.vercel.app/group-80.svg"
                 />
-                <div className="max-md:mt-10 max-md:max-w-full flex h-full w-full grow flex-col rounded-3xl bg-white px-2 py-12 text-center shadow-2xl lg:px-14">
-                  <div className="mt-5 font-medium text-indigo-900 lg:text-3xl">
+                <div className="max-md:mt-10 max-md:max-w-full flex h-full w-full grow flex-col rounded-3xl bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 px-2 py-12 text-center shadow-2xl lg:px-14">
+                  <div className="mt-5 font-medium text-[white] lg:text-3xl">
                     Online Billing, Invoicing, & Contracts
                   </div>
-                  <div className="mt-5 text-gray-500 lg:text-xl lg:leading-9">
+                  <div className="mt-5 text-[white] lg:text-xl lg:leading-9">
                     Simple and secure control of your organization's financial
                     and legal transactions. Send customized invoices and
                     contracts
@@ -212,11 +216,11 @@ const HomePage = () => {
                   alt=""
                   src="https://dimatech-lsm-frontend.vercel.app/group-81.svg"
                 />
-                <div className="max-md:mt-10 max-md:max-w-full flex h-full w-full grow flex-col rounded-3xl bg-white px-2 py-12 text-center shadow-2xl lg:px-14">
-                  <div className="mt-5 self-center font-medium text-indigo-900 lg:text-3xl">
+                <div className="max-md:mt-10 max-md:max-w-full flex h-full w-full grow flex-col rounded-3xl bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 px-2 py-12 text-center shadow-2xl lg:px-14">
+                  <div className="mt-5 self-center font-medium text-[white] lg:text-3xl">
                     Easy Scheduling & Attendance Tracking
                   </div>
-                  <div className="mt-5 text-gray-500 lg:text-xl lg:leading-9">
+                  <div className="mt-5 text-[white] lg:text-xl lg:leading-9">
                     Schedule and reserve classrooms at one campus or multiple
                     campuses. Keep detailed records of student attendance
                   </div>
@@ -234,11 +238,11 @@ const HomePage = () => {
                   alt=""
                   src="https://dimatech-lsm-frontend.vercel.app/group-79.svg"
                 />
-                <div className="max-md:mt-10 max-md:max-w-full flex h-full w-full grow flex-col rounded-3xl bg-white px-2 py-12 text-center shadow-2xl lg:px-14">
-                  <div className="mt-5 whitespace-nowrap font-medium text-indigo-900 lg:text-3xl">
+                <div className="max-md:mt-10 max-md:max-w-full flex h-full w-full grow flex-col rounded-3xl bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 px-2 py-12 text-center shadow-2xl lg:px-14">
+                  <div className="mt-5 whitespace-nowrap font-medium text-white lg:text-3xl">
                     Customer Tracking
                   </div>
-                  <div className="mt-5 text-gray-500 lg:text-xl lg:leading-9">
+                  <div className="mt-5 text-white lg:text-xl lg:leading-9">
                     Automate and track emails to individuals or groups.
                     Skillline's built-in system helps organize your organization
                   </div>
@@ -249,15 +253,15 @@ const HomePage = () => {
         </div>
 
         {/* What is Ilearnova Section */}
-        <div className="container mx-auto px-4 py-12 bg-gray-50 rounded-3xl my-12">
+        <div className="container mx-auto px-4 py-12 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 rounded-3xl my-12">
           <FadeInUp>
             <div className="mt-10 whitespace-nowrap text-center text-4xl sm:text-5xl font-semibold text-teal-500">
-              What is <span className="text-teal-500">Ilearnova?</span>
+              What is <span className="text-white">Ilearnova?</span>
             </div>
           </FadeInUp>
 
           <FadeInUp delay={0.2}>
-            <div className="text-xl mt-10 text-center leading-8 sm:leading-10 tracking-wide text-gray-500 sm:px-32">
+            <div className="text-xl mt-10 text-center leading-8 sm:leading-10 tracking-wide text-white sm:px-32">
               Ilearnova is a platform that allows educators to create online
               classes whereby they can store the course materials online; manage
               assignments, quizzes and exams; monitor due dates; grade results
@@ -353,7 +357,7 @@ const HomePage = () => {
         <div className="container mx-auto w-full px-4 sm:px-20 py-16">
           <div className="max-md:gap-0 flex flex-col gap-5 md:flex-row">
             <FadeInUp className="max-md:w-full flex flex-col sm:w-1/2">
-              <div className="my-auto flex flex-col px-5 text-gray-500">
+              <div className="my-auto flex flex-col px-5 text-white">
                 <span className="mt-10 text-center text-3xl sm:text-5xl font-semibold text-gold">
                   Everything you can do in a physical classroom, you can do with
                   Ilearnova
@@ -363,7 +367,7 @@ const HomePage = () => {
                   online schools manage scheduling, attendance, payments and
                   virtual classrooms all in one secure cloud-based system.
                 </div>
-                <div className="text-xl mt-6 underline text-teal-500 cursor-pointer hover:text-teal-600 transition-colors">
+                <div className="text-xl mt-6 underline text-teal-500 cursor-pointer hover:text-teal-600 transition-colors text-center">
                   Ilearnova
                 </div>
               </div>
@@ -394,7 +398,7 @@ const HomePage = () => {
           </FadeInUp>
 
           <FadeInUp delay={0.2}>
-            <div className="text-xl text-center leading-10 text-gray-500 mt-4">
+            <div className="text-xl text-center leading-10 text-white mt-4">
               This very extraordinary feature, can make learning activities more
               efficient
             </div>
@@ -464,7 +468,7 @@ const HomePage = () => {
                     src="https://dimatech-lsm-frontend.vercel.app/group-86@2x.png"
                     className="bg-zinc-50 aspect-square h-[50px] w-[60px] self-start rounded-full object-cover shadow-md"
                   />
-                  <div className="self-center text-lg">
+                  <div className="self-center text-lg text-white">
                     Teachers don't get lost in the grid view and have a
                     dedicated Podium space.
                   </div>
@@ -481,7 +485,7 @@ const HomePage = () => {
                     src="https://dimatech-lsm-frontend.vercel.app/group-88@2x.png"
                     className="bg-zinc-50 aspect-square h-[50px] w-[60px] self-start rounded-full object-cover shadow-md"
                   />
-                  <div className="self-center text-lg">
+                  <div className="self-center text-lg text-white">
                     TA's and presenters can be moved to the front of the class.
                   </div>
                 </motion.div>
@@ -497,7 +501,7 @@ const HomePage = () => {
                     src="https://dimatech-lsm-frontend.vercel.app/group-86@2x.png"
                     className="bg-zinc-50 aspect-square h-[50px] w-[60px] rounded-full object-cover shadow-md"
                   />
-                  <div className="self-center text-lg">
+                  <div className="self-center text-lg text-white">
                     Teachers can easily see all students and class data at one
                     time.
                   </div>
@@ -551,13 +555,13 @@ const HomePage = () => {
                 </span>{" "}
                 <span className="font-semibold">Tools for Educators</span>
               </div>
-              <div className="text-lg tracking-wide text-gray-500 mt-6">
+              <div className="text-lg tracking-wide text-white mt-6">
                 Class provides tools to help run and manage the class such as
                 Class Roster, <br className="hidden md:block" />
                 Attendance, and more. With the Gradebook, teachers can review
                 and grade tests and <br className="hidden md:block" /> quizzes
                 in real-time.
-                <div className="text-xl mt-6 underline text-teal-500 cursor-pointer hover:text-teal-600 transition-colors">
+                <div className="text-xl mt-6 underline text-teal-500  text-center cursor-pointer hover:text-teal-600 transition-colors">
                   Ilearnova
                 </div>
               </div>
@@ -602,7 +606,7 @@ const HomePage = () => {
             <div className="text-3xl font-bold text-teal-500">
               <span className="font-semibold">One-on-One Discussions</span>
             </div>
-            <div className="text-2xl tracking-wide text-gray-500">
+            <div className="text-2xl tracking-wide text-white">
               Teachers and teacher assistants can talk with students privately
               without leaving the <br /> Zoom environment. without leaving the
               Zoom environment.without leaving <br /> the Zoom environment.
