@@ -3,6 +3,10 @@ import Navbar from "../navbar/Nabar";
 import { motion, useAnimation, useScroll, useTransform } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 
+import Footer from "../homepage/Footer";
+import SchoolComponents from "../homepage/SchoolComponents";
+import IlearnovaHero from "./IlearnovaHero";
+
 // Animated component for fade-in-up effect
 const FadeInUp = ({ children, delay = 0, className = "", ...props }) => {
   const controls = useAnimation();
@@ -101,53 +105,7 @@ const HomePage = () => {
         <Navbar />
 
         {/* Hero Section with Parallax */}
-        <motion.div
-          className="relative flex w-full flex-col items-center bg-gold lg:rounded-b-[20.5rem]"
-          style={{ y: heroY }}
-        >
-          <div className="z-10 flex flex-col sm:flex-row sm:gap-16 px-4 py-12 container mx-auto">
-            <motion.div
-              className="my-auto p-5 sm:ms-8 text-center sm:p-0 sm:w-1/2"
-              initial={{ opacity: 0, x: -100 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-            >
-              <p className="sm:text-[45px] text-[20px] font-black text-white">
-                WELCOME BACK TO SCHOOL 🎒📚
-              </p>
-              <p className="text-justify text-white mt-6 sm:mt-12 text-sm sm:text-base md:block">
-                Summer's adventures are a memory, and it's time to dive back
-                into a world of learning and excitement. At Ilearnova, we're
-                thrilled to welcome you to a brand-new academic year filled with
-                fresh opportunities, new friends, and boundless possibilities.
-                As you step into the classroom, remember that each day is a
-                chance to grow, discover, and achieve. Our dedicated teachers
-                and staff are here to support you every step of the way. Get
-                ready to explore new subjects, engage in creative projects, and
-                make lasting memories. Let's make this school year the best one
-                yet! Embrace the challenges, celebrate the victories, and most
-                importantly, enjoy the journey. Welcome back – let's make this
-                year unforgettable! 🌟
-              </p>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{
-                duration: 0.8,
-                ease: "easeOut",
-                delay: 0.3,
-              }}
-              className="mt-8 sm:mt-0"
-            >
-              <img
-                alt="Students"
-                src="https://dimatech-lsm-frontend.vercel.app/group1.png"
-                className="max-h-[90vh] w-full object-contain"
-              />
-            </motion.div>
-          </div>
-        </motion.div>
+        <IlearnovaHero />
 
         {/* Our Success Section */}
         <div className="container mx-auto px-4 py-16">
@@ -651,67 +609,8 @@ const HomePage = () => {
             </div>
           </div>
         </div>
-
-        <div className="max-md:px-5 max-md:mt-10 max-md:max-w-full mt-10 flex w-full items-center justify-center bg-gold">
-          <div className="mt-4 flex max-w-full flex-col items-center">
-            <div className="text-2xl flex max-w-full justify-between gap-5 font-semibold tracking-wider text-white">
-              <img
-                loading="lazy"
-                src="https://dimatech-lsm-frontend.vercel.app/static/media/auth.639d277feb2fe0057614.png"
-                className="aspect-[1.37] w-[114px] max-w-full"
-              />
-              <div className="h-[83px] bg-gray-500"></div>
-              <div className="my-auto">Support for Offline Class</div>
-            </div>
-            <div className="text-2xl text-slate-400 max-md:mt-10 max-md:max-w-full mt-2 text-center font-medium tracking-wider"></div>
-            <div className="mt-6 flex items-center gap-2">
-              <div className="border-white text-white rounded-[80px] border border-solid px-4 py-2">
-                Want to get in touch??
-              </div>
-              <a
-                target="_blank"
-                rel="noopener noreferrer"
-                href="https://wa.me/+2347065689414"
-                className="text-2xl flex items-center justify-center gap-2 rounded-[60px] bg-powderblue px-4 py-2 font-medium"
-              >
-                <svg
-                  stroke="currentColor"
-                  fill="currentColor"
-                  strokeWidth="0"
-                  viewBox="0 0 16 16"
-                  color="green"
-                  height="1em"
-                  width="1em"
-                  xmlns="http://www.w3.org/2000/svg"
-                  style={{ color: "green" }}
-                >
-                  <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"></path>
-                </svg>
-                Contact Us
-              </a>
-            </div>
-            <div className="text-2xl text-white max-md:flex-wrap max-md:mt-10 max-md:mr-2.5 max-md:max-w-full mx-5 mt-5 flex justify-between gap-2 self-stretch text-center tracking-wider">
-              <div>Careers</div>
-              <div className="h-[23px] w-px bg-gray-500"></div>
-              <div className="flex-auto">Privacy Policy</div>
-              <div className="h-[23px] w-px bg-gray-500"></div>
-              <div className="grow whitespace-nowrap text-white">
-                Terms & Conditions
-              </div>
-            </div>
-            <div className="text-2xl text-white mt-8 text-center tracking-wider">
-              ©{" "}
-              {new Date().toLocaleDateString("en-US", {
-                weekday: "short",
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-                timeZone: "Africa/Lagos",
-              })}{" "}
-              Ilearnova
-            </div>
-          </div>
-        </div>
+        <SchoolComponents />
+        <Footer />
       </div>
     </div>
   );

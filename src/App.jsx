@@ -64,7 +64,7 @@ const App = () => {
           <Route path="result" element={<Result />} />
           <Route path="exam" element={<Exam />} />
           <Route path="courses/:courseId" element={<CoursePage />} />
-          <Route path="messages" element={<Messages />} />
+          {/* <Route path="messages" element={<Messages />} /> */}
         </Route>
         {/* end of student dashboard */}
         {/* admin section */}

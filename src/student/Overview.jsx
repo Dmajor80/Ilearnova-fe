@@ -357,7 +357,7 @@ const Overview = () => {
           {/* end of calender */}
 
           {/* class */}
-          <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] max-w-[500px] sm:w-[400px] h-[100px]">
+          <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] max-w-[500px] sm:w-[350px] h-[100px]">
             <div className="flex items-center gap-[2rem]">
               <img src={chemistry} alt="" />
               <div>
@@ -379,7 +379,7 @@ const Overview = () => {
           {/* end of class */}
 
           {/* class */}
-          <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] max-w-[500px] sm:w-[400px] h-[100px]">
+          <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] max-w-[500px] sm:w-[350px] h-[100px]">
             <div className="flex items-center gap-[2rem]">
               <img src={chemistry} alt="" />
               <div>
@@ -401,7 +401,7 @@ const Overview = () => {
           {/* end of class */}
 
           {/* class */}
-          <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] max-w-[500px] sm:w-[400px] h-[100px]">
+          <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] max-w-[500px] sm:w-[350px] h-[100px]">
             <div className="flex items-center gap-[2rem]">
               <img src={chemistry} alt="" />
               <div>
@@ -423,7 +423,7 @@ const Overview = () => {
           {/* end of class */}
 
           {/* certification */}
-          <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] max-w-[500px] sm:w-[400px] ">
+          <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] max-w-[500px] sm:w-[350px] ">
             <div className="flex items-center justify-between">
               <p className="text-[12px] sm:lg:text-[14px] md:text-[16px] lg:text-[18px] font-medium">
                 Certification

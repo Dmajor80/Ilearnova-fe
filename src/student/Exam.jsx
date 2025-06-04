@@ -595,7 +595,7 @@ const Exam = () => {
         {/* Header */}
         <div className="flex justify-between items-start mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800 mb-1">
+            <h1 className="lg:text-[24px] font-bold text-gray-800 mb-1">
               Welcome Priscilla,
             </h1>
             <p className="text-gray-600 text-sm">
@@ -618,7 +618,7 @@ const Exam = () => {
             {completedTasks.map((task, index) => (
               <div
                 key={index}
-                className="flex justify-between items-start py-3 border-b border-gray-100 last:border-b-0"
+                className="flex flex-col md:flex-row lg:flex-row justify-between items-start py-3 border-b border-gray-100 last:border-b-0 "
               >
                 <div className="flex-1">
                   <h3 className="font-medium text-gray-800 mb-1">
@@ -629,11 +629,11 @@ const Exam = () => {
                   </p>
                   <p className="text-sm text-gray-500">{task.date}</p>
                 </div>
-                <div className="flex gap-2 ml-4">
+                <div className="flex gap-2 ml-4 mt-3.5">
                   {task.actions.map((action, actionIndex) => (
                     <button
                       key={actionIndex}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-[8px] lg:text-[14px] font-medium"
                     >
                       {action}
                     </button>
@@ -654,7 +654,7 @@ const Exam = () => {
             {activeTasks.map((task, index) => (
               <div
                 key={index}
-                className="flex justify-between items-start py-3 border-b border-gray-100 last:border-b-0"
+                className="flex flex-col md:flex-row  lg:flex-row justify-between items-start py-3 border-b border-gray-100 last:border-b-0"
               >
                 <div className="flex-1">
                   <h3 className="font-medium text-gray-800 mb-1">
@@ -669,7 +669,7 @@ const Exam = () => {
                 <div className="ml-4">
                   <button
                     onClick={() => handleButtonClick(task)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium mt-[1rem]"
                   >
                     {task.action}
                   </button>
