@@ -31,9 +31,9 @@ import Dashboard from "./admin/Dashboard";
 import Users from "./admin/Users";
 import NewUser from "./admin/NewUser";
 import Report from "./admin/Report";
+import Transcript from "./parent/components/Transcript";
 // import { CoursePage } from "./student/CoursesComponent";
 // import Payment from "./parent/Payment";
-import Transcript from "./parent/components/Transcript";
 
 const App = () => {
   return (
@@ -64,7 +64,7 @@ const App = () => {
           <Route path="result" element={<Result />} />
           <Route path="exam" element={<Exam />} />
           <Route path="courses/:courseId" element={<CoursePage />} />
-          <Route path="messages" element={<Messages />} />
+          {/* <Route path="messages" element={<Messages />} /> */}
         </Route>
         {/* end of student dashboard */}
         {/* admin section */}
