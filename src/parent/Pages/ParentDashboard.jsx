@@ -1,7 +1,6 @@
 import { useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import SideBar from "../components/SideBar";
 import { PieGraph, BarGraph } from "../components/Charts"
 import DashboardHeader from "../components/DashboardHeader";
 import {
@@ -16,6 +15,7 @@ import {
   Pie,
   Label,
 } from "recharts";
+import SideMenu from "../components/SideMenu";
 
 
 
@@ -36,19 +36,18 @@ const barColors = barData.map((d) =>
   d.value >= 80 ? "#4ade80" : d.value >= 60 ? "#fde047" : "#f87171"
 );
 
-
 const events = [
   { date: 22, title: "Parent-Teacher Meeting", color: "bg-yellow-100", time: "10:00 am" },
   { date: 22, title: "Parent-Teacher Meeting", color: "bg-yellow-100", time: "10:00 am" },
   { date: 26, title: "Parent-Teacher Meeting", color: "bg-yellow-100", time: "10:00 am" },
 ];
 
-export default function ParentDashboard() {
+function ParentDashboard() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   return (
     <div className="flex min-h-screen gap-2 bg-[#f5f8fe]">
       {/* Sidebar */}
-      <SideBar />
+      <SideMenu />
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col p-2">
@@ -86,17 +85,28 @@ export default function ParentDashboard() {
                   <span className="inline-block w-3 h-3 bg-yellow-400 rounded-full"></span> Between 50%-80%
                 </div>
                 <span className="inline-block w-3 h-3 bg-green-400 rounded-full"></span> Above 80%
+
+                <span className="inline-block w-3 h-3 bg-green-400 rounded"></span>{" "}
+                80-100
               </div>
 
               <div className="flex items-center gap-1">
                 <span className="inline-block w-3 h-3 bg-red-400 rounded-full"></span> Below 50%
+                <span className="inline-block w-3 h-3 bg-yellow-400 rounded"></span>{" "}
+                60-79
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="inline-block w-3 h-3 bg-red-400 rounded"></span>{" "}
+                Below 60
               </div>
             </div>
           </div>
 
           {/* Upcoming Classes */}
           <div className="bg-white rounded-xl shadow p-6 min-h-[320px] flex flex-col">
-            <div className="font-semibold text-gray-700 mb-2">Upcoming Classes</div>
+            <div className="font-semibold text-gray-700 mb-2">
+              Upcoming Classes
+            </div>
             <div className="text-xs text-gray-500 mb-2">October 2024</div>
             {/* Calendar */}
             <div className="grid grid-cols-7 gap-1 text-center text-xs text-gray-500 mb-2">
@@ -129,10 +139,7 @@ export default function ParentDashboard() {
             <div className="flex flex-col gap-2">
               {events.map((event, idx) => (
                 <div key={idx} className={`flex items-center gap-3 p-3`}>
-
                   <img src="/icon.png" className='h-10 w-10' alt="icons" />
-
-
                   <div className='flex-row text-left'>
                     <span className="text-md md:text-lg text-blue-700">{event.title}</span>
                     <div className="flex items-center mt-2 ">
@@ -140,9 +147,17 @@ export default function ParentDashboard() {
                       <li className="ml-auto text-xs text-gray-500">{event.time}</li>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                  <div
+                    key={idx}
+                    className={`flex items-center gap-2 p-2 rounded ${event.color}`}
+                  >
+                    <span className="text-lg">{event.icon}</span>
+                    <span className="text-xs text-gray-700">{event.title}</span>
+                    <span className="ml-auto text-xs text-gray-500">{`Oct ${event.date}`}</span>
+                  </div>
+                   </div>
+              ))}           
+          </div>
           </div>
         </section>
 
@@ -156,7 +171,9 @@ export default function ParentDashboard() {
               <div className="text-xs text-gray-500 mt-2">Courses</div>
             </div>
             <div className="flex-1 w-full">
-              <div className="font-semibold text-gray-700 mb-2">Your weekly learning goal</div>
+              <div className="font-semibold text-gray-700 mb-2">
+                Your weekly learning goal
+              </div>
               <div className="flex items-end gap-4 h-24">
                 {[100, 90, 80, 70, 60].map((val, idx) => (
                   <div key={idx} className="flex flex-col items-center">
@@ -171,40 +188,58 @@ export default function ParentDashboard() {
                 ))}
               </div>
               <div className="flex items-center gap-2 mt-2">
+
                 <div className='flex-1'>
                   <span className="text-2xl font-bold text-[#1a237e]">100</span><span className="text-xs text-gray-500">/ 300 mins</span>
                 </div>
                 <span className="ml-auto text-xs text-red-500">-40% from previous week</span>
+                <span className="text-2xl font-bold text-[#1a237e]">100</span>
+                <span className="text-xs text-gray-500">/ Score</span>
+                <span className="ml-auto text-xs text-red-500">
+                  -25% from previous week
+                </span>
               </div>
             </div>
           </div>
 
           {/* Student Attendance Calendar with react-calendar */}
+
           <div className="bg-white rounded-xl border-none shadow p-6 flex flex-col">
             <div className="font-semibold text-gray-700 mb-2">Student Attendance</div>
-            <div className="text-xs text-gray-500 mb-4">
-              {selectedDate.toLocaleString("default", { month: "long", year: "numeric" })}
+            <div className="bg-white rounded-xl shadow p-6 flex flex-col">
+              <div className="font-semibold text-gray-700 mb-2">
+                Student Attendance
+              </div>
+              <div className="text-xs text-gray-500 mb-4">
+                {selectedDate.toLocaleString("default", {
+                  month: "long",
+                  year: "numeric",
+                })}
+              </div>
+              <Calendar
+                onChange={setSelectedDate}
+                value={selectedDate}
+                calendarType="hebrew"
+                className="border-none w-full [&_.react-calendar__tile--active]:bg-blue-700 [&_.react-calendar__tile--active]:text-white [&_.react-calendar__tile--now]:bg-blue-100"
+                tileClassName={({ date, view }) => {
+                  // Example: mark 22nd and 23rd as absent
+                  if (
+                    view === "month" &&
+                    [22, 23].includes(date.getDate()) &&
+                    date.getMonth() === selectedDate.getMonth()
+                  ) {
+                    return "bg-red-500 text-white font-bold rounded-full";
+                  }
+                  return "rounded-full";
+                }}
+              />
             </div>
-            <Calendar
-              onChange={setSelectedDate}
-              value={selectedDate}
-              calendarType="hebrew"
-              className="border-none w-full [&_.react-calendar__tile--active]:bg-blue-700 [&_.react-calendar__tile--active]:text-white [&_.react-calendar__tile--now]:bg-blue-100"
-              tileClassName={({ date, view }) => {
-                // Example: mark 22nd and 23rd as absent
-                if (
-                  view === "month" &&
-                  [22, 23].includes(date.getDate()) &&
-                  date.getMonth() === selectedDate.getMonth()
-                ) {
-                  return "bg-red-500 text-white font-bold rounded-full";
-                }
-                return "rounded-full";
-              }}
-            />
           </div>
         </section>
       </main>
     </div>
   );
 }
+
+
+export default ParentDashboard;

@@ -1,4 +1,4 @@
-import SideBar from "../components/SideBar"
+import SideMenu from "../components/SideMenu"
 import {
     BarChart,
     Bar,
@@ -37,16 +37,15 @@ const percentageData = [
 const getBarColor = value =>
     value >= 80 ? "#4ade80" : value >= 60 ? "#fde047" : "#f87171";
 
-export default function Attendance() {
+function Attendance() {
     return (
         <div className="flex min-h-screen gap-2 bg-[#f5f8fe]">
             {/* Sidebar */}
-            <SideBar />
+            <SideMenu />
             {/* Main Content */}
             <main className="flex-1 flex flex-col">
                 {/* Topbar */}
                 <DashboardHeader holder="Search" text="Attendance" />
-
                 {/* Filters & Download */}
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 px-2 md:px-8 mt-10">
                     <span className="font-semibold text-gray-700">Attendance</span>
@@ -168,3 +167,5 @@ export default function Attendance() {
         </div>
     );
 }
+
+export default Attendance;

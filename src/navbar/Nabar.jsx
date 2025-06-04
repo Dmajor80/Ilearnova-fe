@@ -63,7 +63,7 @@ const Navbar = () => {
 
   return (
     <nav
-      className={`sticky top-0 z-50 w-full bg-gold ${
+      className={`sticky top-0 z-50 w-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 ${
         scrolled ? "shadow-xl" : ""
       } transition-shadow duration-300`}
     >
@@ -177,7 +177,7 @@ const Navbar = () => {
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-40 transform overflow-hidden bg-black bg-opacity-50 transition-opacity">
           <div
-            className="mobile-menu-container fixed inset-y-0 left-0 flex w-64 transform flex-col bg-gold shadow-xl transition-transform"
+            className="mobile-menu-container fixed inset-y-0 left-0 flex w-64 transform flex-col bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 shadow-xl transition-transform"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex h-16 items-center justify-between px-4">

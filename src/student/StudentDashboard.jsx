@@ -46,12 +46,13 @@ export default function StudentDashboard() {
       label: "Attendance",
       air: "attendance",
     },
-    {
-      id: "assignments",
-      icon: <FileText size={20} />,
-      label: "Assignments",
-      air: "assignment",
-    },
+    // {
+    //   id: "assignments",
+    //   icon: <FileText size={20} />,
+    //   label: "Assignments",
+    //   air: "assignment",
+    // },
+
     {
       id: "timetable",
       icon: <Clock size={20} />,
@@ -104,7 +105,7 @@ export default function StudentDashboard() {
           <div className="px-4 pb-6 border-b border-gray-200 relative">
             <h1
               className={`
-              font-bold text-[26px] text-blue-900 text-center transition-all duration-300
+              font-bold text-[26px] text-blue-900 text-center ml-[-1rem] transition-all duration-300
               ${isMobileMenuOpen ? "block" : "hidden md:block"}
             `}
             >
@@ -121,10 +122,10 @@ export default function StudentDashboard() {
 
             {/* Mobile menu toggle */}
             <button
-              className="absolute top-0 right-2 md:hidden p-1 text-blue-900 hover:bg-blue-50 rounded"
+              className="absolute top-0 right-4 md:hidden p-1 text-blue-900 hover:bg-blue-50 rounded"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
-              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+              {isMobileMenuOpen ? <X size={30} /> : <Menu size={20} />}
             </button>
           </div>
 
@@ -180,7 +181,7 @@ export default function StudentDashboard() {
         {/* adminnav */}
         <div className="flex items-center justify-between mb-6 w-full max-w-[1024px] p-4 md:p-[2rem]">
           <div>
-            <p className="text-gray-500 text-xs mt-1">Page/Student Portal</p>
+            <p className="text-gray-500 text-[8px] mt-1">Page/Student Portal</p>
           </div>
           <div className="flex items-center gap-2 md:gap-4">
             <div className="relative w-32 sm:w-48 md:w-64">

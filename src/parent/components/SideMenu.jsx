@@ -14,7 +14,7 @@ import {
 
 
 
-function SideBar() {
+function SideMenu() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeItem, setActiveItem] = useState('Dashboard');
 
@@ -121,4 +121,4 @@ function SideBar() {
   );
 }
 
-export default SideBar
+export default SideMenu

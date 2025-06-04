@@ -3,8 +3,8 @@ import React, { useEffect, useState } from "react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine,
 } from "recharts";
-import SideBar from "../components/SideBar";
 import DashboardHeader from "../components/DashboardHeader";
+import SideMenu from "../components/SideMenu";
 
 const subjects = [
   "Mathematics", "English", "Biology", "Physics", "Yoruba", "Chemistry", "Further Mathematics", "Animal Husbandry", "Geography"
@@ -127,7 +127,7 @@ const topMarks = [
   },
 ];
 
-export default function ParentResult() {
+ function ParentResult() {
   const [chartData, setChartData] = useState(initialChartData);
 
   // Simulate real-time chart updates
@@ -149,7 +149,7 @@ export default function ParentResult() {
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
       {/* Sidebar */}
 
-      <SideBar />
+      <SideMenu />
 
       {/* Main Content */}
       <main className="flex-1 p-4 md:p-10">
@@ -311,3 +311,5 @@ export default function ParentResult() {
     </div>
   );
 }
+
+export default ParentResult;
