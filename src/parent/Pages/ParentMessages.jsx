@@ -1,6 +1,7 @@
 import "@splidejs/react-splide/css";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import SideMenu from "../components/SideMenu";
+import DashboardHeader from "../components/DashboardHeader";
 
 
 // Dummy data for announcements
@@ -58,7 +59,8 @@ function ParentMessages() {
       {/* Main Content */}
       <main className="flex-1 p-4 md:p-8">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+        <DashboardHeader text="PTA Hub" holder='search announcement' />
+        {/* <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
           <div>
             <p className="text-xs text-gray-500">Page / Parent</p>
             <h2 className="text-2xl font-semibold text-gray-800">PTA Hub</h2>
@@ -79,27 +81,31 @@ function ParentMessages() {
               className="w-8 h-8 rounded-full object-cover"
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Announcement Cards Slider */}
-        <div className="mb-6">
+        <div className="mb-6 w-full">
           <Splide
             options={{
               type: "loop",
-              perPage: 1,
+              perPage: 4,
               gap: "1rem",
+              // autoplay: true,
+              // interval: 2000,
+              pagination: false,
+              focus: "center",
+              width: "auto",
+              lazyLoading: "sequential",
               breakpoints: {
                 1024: { perPage: 4 },
-                768: { perPage: 1 },
+                640: { perPage: 1 },
               },
-              arrows: true,
-              pagination: false,
             }}
             aria-label="School Announcements"
           >
             {announcements.map((a, idx) => (
               <SplideSlide key={idx}>
-                <div className="bg-white rounded-lg shadow p-4 min-w-[260px] flex flex-col h-full">
+                <div className="bg-white rounded-lg shadow p-4 w-[260px] flex flex-col h-full">
                   <div className="text-xs text-gray-500 mb-1">{a.date}</div>
                   <div className="font-semibold text-blue-900 mb-1">{a.title}</div>
                   <div className="text-sm text-gray-600 flex-1">{a.desc}</div>
@@ -115,7 +121,7 @@ function ParentMessages() {
         {/* Main Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Chat Section */}
-          <div className="lg:col-span-2 bg-white rounded-lg shadow p-4 flex flex-col h-[420px]">
+          <div className="lg:col-span-2 bg-red-500 w-auto rounded-lg shadow p-4 flex flex-col h-[420px]">
             <div className="flex items-center justify-between border-b pb-2 mb-2">
               <div>
                 <div className="font-semibold text-blue-900">Teacher XYZ</div>

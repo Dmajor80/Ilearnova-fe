@@ -72,10 +72,7 @@ const App = () => {
         {/* course page */}
         {/* <Route path="/course-page" element={<CoursePage />} /> */}
         {/* end of course page */}
-
-
-        <Route path="/parent-dashboard" element={<ParentDashboard />} />
-        {/* student dashboard */}
+           {/* student dashboard */}
         <Route path="/student-dashboard" element={<StudentDashboard />}>
           <Route path="overview" element={<Overview />} />
           <Route path="IDcard" element={<IdCard />} />
