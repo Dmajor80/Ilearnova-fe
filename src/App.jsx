@@ -19,7 +19,7 @@ import TeacherDashboard from "./teacher/TeacherDashboard";
 import Overview from "./student/Overview";
 // import Messages from "./student/Messages";
 import Attendance from "./student/Attendance";
-// import Assignments from "./student/Assignments";
+import Assignments from "./student/Assignments";
 import Timetable from "./student/Timetable";
 import Grade from "./student/Grade";
 import { CoursePage, CoursesComponent } from "./student/CoursesComponent";
