@@ -65,7 +65,7 @@ export default function AdminDashboard() {
     },
   ];
 
-  // Mock course data
+  // Mock course data.
 
   // side bar
   return (
