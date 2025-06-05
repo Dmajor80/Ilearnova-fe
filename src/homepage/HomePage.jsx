@@ -6,6 +6,7 @@ import { useInView } from "react-intersection-observer";
 import Footer from "../homepage/Footer";
 import SchoolComponents from "../homepage/SchoolComponents";
 import IlearnovaHero from "./IlearnovaHero";
+import SchoolHeroSection from "./SchoolHeroSection";
 
 // Animated component for fade-in-up effect
 const FadeInUp = ({ children, delay = 0, className = "", ...props }) => {
@@ -110,13 +111,13 @@ const HomePage = () => {
         {/* Our Success Section */}
         <div className="container mx-auto px-4 py-16">
           <FadeInUp>
-            <div className="text-slate-950 max-md:mt-10 max-md:text-4xl mt-8 text-center text-5xl font-bold lg:leading-[62.4px]">
+            <div className="text-[white] text-[46px] sm:text-[40px] max-md:mt-10 md:text-4xl lg:text-[50px] mt-8 text-center  font-bold lg:leading-[62.4px]">
               Our Success
             </div>
           </FadeInUp>
 
           <FadeInUp delay={0.2}>
-            <div className="mt-4 justify-center px-4 text-justify text-[white] text-opacity-80 lg:px-96 lg:text-center lg:text-lg lg:leading-7">
+            <div className="text-[18px] sm:text-[20px] lg:text-[24px] mt-4 text-center leading-6 sm:leading-10 tracking-wide text-white sm:px-32">
               Through innovative teaching methodologies and a dedicated faculty,
               we've consistently achieved remarkable results. Our students have
               not only excelled academically but have also emerged as confident,
@@ -126,7 +127,7 @@ const HomePage = () => {
           </FadeInUp>
 
           {/* Stats counter */}
-          <motion.div
+          {/* <motion.div
             className="mt-16 flex w-full flex-wrap justify-center gap-8 whitespace-nowrap px-5 sm:gap-16"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -137,6 +138,7 @@ const HomePage = () => {
               end={10000}
               title="Students"
               textColor="text-white"
+              style={{ color: "white" }}
             />
             <CounterAnimation
               end={75}
@@ -160,20 +162,20 @@ const HomePage = () => {
               textColor="bg-gradient-to-r from-blue-600 to-teal-400 bg-clip-text text-transparent"
               className="hidden sm:flex"
             />
-          </motion.div>
+          </motion.div> */}
         </div>
 
         {/* All-In-One Cloud Software Section */}
         <div className="container mx-auto px-4 py-12">
           <FadeInUp>
-            <div className="mt-8 text-3xl font-semibold sm:text-5xl text-center">
+            <div className="mt-8 text-[24px] font-bold sm:text-[26px] lg:text-[40px] text-center">
               <span className="font-bold text-white">All-In-One </span>
               <span className="font-bold text-white">Cloud Software.</span>
             </div>
           </FadeInUp>
 
           <FadeInUp delay={0.2}>
-            <div className="text-xl max-md:max-w-full mt-4 text-center leading-10 text-[white] px-4">
+            <div className="text-xl max-md:max-w-full mt-4 text-center leading-7 text-[white] px-4">
               Ilearnova is one powerful online software suite that combines all
               the tools needed to run a successful school or office.
             </div>
@@ -194,7 +196,7 @@ const HomePage = () => {
                   src="https://dimatech-lsm-frontend.vercel.app/group-80.svg"
                 />
                 <div className="max-md:mt-10 max-md:max-w-full flex h-full w-full grow flex-col rounded-3xl bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 px-2 py-12 text-center shadow-2xl lg:px-14">
-                  <div className="mt-5 font-medium text-[white] lg:text-3xl">
+                  <div className="mt-5 font-medium text-[white] text-[20px] lg:text-[26px]">
                     Online Billing, Invoicing, & Contracts
                   </div>
                   <div className="mt-5 text-[white] lg:text-xl lg:leading-9">
@@ -217,7 +219,7 @@ const HomePage = () => {
                   src="https://dimatech-lsm-frontend.vercel.app/group-81.svg"
                 />
                 <div className="max-md:mt-10 max-md:max-w-full flex h-full w-full grow flex-col rounded-3xl bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 px-2 py-12 text-center shadow-2xl lg:px-14">
-                  <div className="mt-5 self-center font-medium text-[white] lg:text-3xl">
+                  <div className="mt-5 font-medium text-[white] text-[20px] lg:text-[26px]">
                     Easy Scheduling & Attendance Tracking
                   </div>
                   <div className="mt-5 text-[white] lg:text-xl lg:leading-9">
@@ -239,7 +241,7 @@ const HomePage = () => {
                   src="https://dimatech-lsm-frontend.vercel.app/group-79.svg"
                 />
                 <div className="max-md:mt-10 max-md:max-w-full flex h-full w-full grow flex-col rounded-3xl bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 px-2 py-12 text-center shadow-2xl lg:px-14">
-                  <div className="mt-5 whitespace-nowrap font-medium text-white lg:text-3xl">
+                  <div className="mt-5 font-medium text-[white] text-[20px] lg:text-[26px]">
                     Customer Tracking
                   </div>
                   <div className="mt-5 text-white lg:text-xl lg:leading-9">
@@ -255,13 +257,14 @@ const HomePage = () => {
         {/* What is Ilearnova Section */}
         <div className="container mx-auto px-4 py-12 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 rounded-3xl my-12">
           <FadeInUp>
-            <div className="mt-10 whitespace-nowrap text-center text-4xl sm:text-5xl font-semibold text-teal-500">
+            x
+            <div className="mt-10 whitespace-nowrap text-center text-[30px] sm:text-[34px] lg:text-[40px] font-bold text-teal-500">
               What is <span className="text-white">Ilearnova?</span>
             </div>
           </FadeInUp>
 
           <FadeInUp delay={0.2}>
-            <div className="text-xl mt-10 text-center leading-8 sm:leading-10 tracking-wide text-white sm:px-32">
+            <div className="text-[18px] sm:text-[20px] lg:text-[24px] mt-4 text-center leading-6 sm:leading-10 tracking-wide text-white sm:px-32">
               Ilearnova is a platform that allows educators to create online
               classes whereby they can store the course materials online; manage
               assignments, quizzes and exams; monitor due dates; grade results
@@ -271,104 +274,21 @@ const HomePage = () => {
         </div>
 
         {/* Teachers & Learners Section */}
-        <div className="container mx-auto px-4 my-4 w-full sm:px-5">
-          <div className="flex w-full flex-col gap-5 sm:flex-row">
-            {/* Teachers Card */}
-            <motion.div
-              className="relative w-full flex-col sm:w-1/2 overflow-hidden rounded-3xl"
-              whileHover={{ scale: 1.03 }}
-              transition={{ type: "spring", stiffness: 400, damping: 10 }}
-            >
-              <div className="w-full flex-col items-center justify-center px-4 text-center text-white sm:py-12 sm:px-16">
-                <div className="relative h-72 sm:h-96 w-full">
-                  <img
-                    src="https://dimatech-lsm-frontend.vercel.app/rectangle-21@2x.png"
-                    alt="Teachers"
-                    className="w-full rounded-3xl h-72 sm:h-96 object-cover"
-                  />
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-40 rounded-3xl">
-                    <motion.div
-                      className="text-3xl font-semibold"
-                      initial={{ y: 20, opacity: 0 }}
-                      whileInView={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 0.2 }}
-                      viewport={{ once: true }}
-                    >
-                      Teachers
-                    </motion.div>
-                    <motion.div
-                      className="text-xl sm:text-2xl mt-8 justify-center rounded-full border border-solid border-white px-6 py-4 sm:px-10 sm:py-7 font-medium cursor-pointer hover:bg-white hover:text-teal-500 transition-all"
-                      initial={{ y: 20, opacity: 0 }}
-                      whileInView={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 0.4 }}
-                      viewport={{ once: true }}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      Start a class today
-                    </motion.div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Learners Card */}
-            <motion.div
-              className="relative w-full flex-col sm:w-1/2 overflow-hidden rounded-3xl mt-5 sm:mt-0"
-              whileHover={{ scale: 1.03 }}
-              transition={{ type: "spring", stiffness: 400, damping: 10 }}
-            >
-              <div className="flex flex-col items-center justify-center px-4 text-center text-white sm:py-12 sm:px-16">
-                <div className="relative h-72 sm:h-96 w-full">
-                  <img
-                    src="/api/placeholder/800/600"
-                    alt="Learners"
-                    className="w-full rounded-3xl h-72 sm:h-96 object-cover"
-                  />
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-40 rounded-3xl">
-                    <motion.div
-                      className="text-3xl font-semibold"
-                      initial={{ y: 20, opacity: 0 }}
-                      whileInView={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 0.2 }}
-                      viewport={{ once: true }}
-                    >
-                      Learners
-                    </motion.div>
-                    <motion.div
-                      className="text-xl sm:text-2xl mt-8 justify-center rounded-full bg-cyan-400 bg-opacity-90 px-6 py-4 sm:px-11 sm:py-8 font-medium cursor-pointer transition-all"
-                      initial={{ y: 20, opacity: 0 }}
-                      whileInView={{ y: 0, opacity: 1 }}
-                      transition={{ delay: 0.4 }}
-                      viewport={{ once: true }}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      Download app
-                    </motion.div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </div>
+        <SchoolHeroSection />
 
         {/* Everything You Can Do Section */}
         <div className="container mx-auto w-full px-4 sm:px-20 py-16">
           <div className="max-md:gap-0 flex flex-col gap-5 md:flex-row">
             <FadeInUp className="max-md:w-full flex flex-col sm:w-1/2">
               <div className="my-auto flex flex-col px-5 text-white">
-                <span className="mt-10 text-center text-3xl sm:text-5xl font-semibold text-gold">
+                <span className="mt-10 text-center text-[25px] font-bold ">
                   Everything you can do in a physical classroom, you can do with
                   Ilearnova
                 </span>
-                <div className="text-xl max-md:max-w-full leading-8 sm:leading-10 tracking-wide mt-6">
+                <div className="text-[18px] sm:text-[20px] lg:text-[24px] mt-4 text-center leading-6 sm:leading-10 tracking-wide text-white sm:px-32">
                   Ilearnova's school management software helps traditional and
                   online schools manage scheduling, attendance, payments and
                   virtual classrooms all in one secure cloud-based system.
-                </div>
-                <div className="text-xl mt-6 underline text-teal-500 cursor-pointer hover:text-teal-600 transition-colors text-center">
-                  Ilearnova
                 </div>
               </div>
             </FadeInUp>
@@ -549,21 +469,18 @@ const HomePage = () => {
         <div className="container mx-auto px-4 py-16">
           <div className="left-0 flex flex-col px-5 md:flex-row gap-8">
             <FadeInUp className="mt-5 flex flex-col px-2 sm:my-auto sm:pl-5 sm:w-1/2">
-              <div className="text-3xl font-bold text-teal-500">
-                <span className="font-semibold text-teal-500">
+              <div className="text-3xl text-center font-bold text-teal-500">
+                <span className="  font-semibold text-teal-500">
                   Class Management
                 </span>{" "}
                 <span className="font-semibold">Tools for Educators</span>
               </div>
-              <div className="text-lg tracking-wide text-white mt-6">
+              <div className="text-[18px] sm:text-[20px] lg:text-[24px] mt-5 text-center leading-6 sm:leading-10 tracking-wide text-white sm:px-32">
                 Class provides tools to help run and manage the class such as
                 Class Roster, <br className="hidden md:block" />
                 Attendance, and more. With the Gradebook, teachers can review
                 and grade tests and <br className="hidden md:block" /> quizzes
                 in real-time.
-                <div className="text-xl mt-6 underline text-teal-500  text-center cursor-pointer hover:text-teal-600 transition-colors">
-                  Ilearnova
-                </div>
               </div>
             </FadeInUp>
 
@@ -592,8 +509,8 @@ const HomePage = () => {
             </FadeInUp>
           </div>
         </div>
-
-        <div className="left-0 mt-20 flex flex-col px-5 md:flex-row">
+        {/* one on one discussion */}
+        <div className="left-0 mt-20 flex flex-col px-5 md:flex-row mb-[4rem]">
           <div className="flex flex-col sm:flex-row">
             <div className="ml-28 h-[23px] w-[23px] rounded-full bg-orange-500"></div>
             <img
@@ -603,13 +520,13 @@ const HomePage = () => {
             />
           </div>
           <div className="mt-5 flex flex-col px-2 sm:my-auto sm:pl-5">
-            <div className="text-3xl font-bold text-teal-500">
+            <div className="text-[30px] text-center font-bold text-teal-500">
               <span className="font-semibold">One-on-One Discussions</span>
             </div>
-            <div className="text-2xl tracking-wide text-white">
+            <div className="text-[18px] sm:text-[20px] lg:text-[24px] mt-4 text-center leading-6 sm:leading-10 tracking-wide text-white sm:px-32">
               Teachers and teacher assistants can talk with students privately
-              without leaving the <br /> Zoom environment. without leaving the
-              Zoom environment.without leaving <br /> the Zoom environment.
+              without leaving the Zoom environment. without leaving the Zoom
+              environment.without leaving the Zoom environment.
             </div>
           </div>
         </div>

@@ -10,7 +10,7 @@ import {
   Award,
   TrendingUp,
 } from "lucide-react";
-
+import { Link } from "react-router-dom";
 const IlearnovaHero = () => {
   const [scrollY, setScrollY] = useState(0);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -27,6 +27,7 @@ const IlearnovaHero = () => {
       icon: <GraduationCap className="w-6 h-6 sm:w-8 sm:h-8" />,
       color: "from-purple-500 via-purple-600 to-blue-600",
       bgColor: "bg-gradient-to-br from-purple-500/20 to-blue-500/20",
+      goto: "/login",
     },
     {
       title: "EMPOWER YOUR TEACHING",
@@ -36,6 +37,7 @@ const IlearnovaHero = () => {
       icon: <BookOpen className="w-6 h-6 sm:w-8 sm:h-8" />,
       color: "from-emerald-500 via-green-600 to-teal-600",
       bgColor: "bg-gradient-to-br from-emerald-500/20 to-teal-500/20",
+      goto: "/teacher-login",
     },
     {
       title: "TRACK THEIR PROGRESS",
@@ -45,6 +47,7 @@ const IlearnovaHero = () => {
       icon: <Users className="w-6 h-6 sm:w-8 sm:h-8" />,
       color: "from-orange-500 via-red-500 to-pink-600",
       bgColor: "bg-gradient-to-br from-orange-500/20 to-pink-500/20",
+      goto: "/parent-login",
     },
   ];
 
@@ -230,7 +233,7 @@ const IlearnovaHero = () => {
 
                 <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-white leading-tight">
                   {slides[currentSlide].title}
-                  <span className="ml-2 sm:ml-3 text-xl sm:text-2xl">🎒📚</span>
+                  {/* <span className="ml-2 sm:ml-3 text-xl sm:text-2xl">🎒📚</span> */}
                 </h2>
 
                 <p className="text-gray-200 text-base sm:text-lg leading-relaxed max-w-2xl mx-auto lg:mx-0">
@@ -247,13 +250,14 @@ const IlearnovaHero = () => {
                 }`}
                 style={{ transitionDelay: "0.4s" }}
               >
-                <button className="group bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold shadow-2xl hover:shadow-yellow-500/50 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1">
-                  <span className="flex items-center justify-center space-x-2">
-                    <span>Get Started</span>
-                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
-                  </span>
-                </button>
-
+                <Link to={slides[currentSlide].goto}>
+                  <button className="group bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold shadow-2xl hover:shadow-yellow-500/50 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1">
+                    <div className="flex items-center justify-center space-x-2">
+                      <span>Get Started</span>
+                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </button>
+                </Link>
                 <button className="group bg-white/10 backdrop-blur-sm text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold border border-white/20 hover:bg-white/20 hover:border-white/40 transition-all duration-300 transform hover:scale-105">
                   <span className="flex items-center justify-center space-x-2">
                     <Play className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" />
