@@ -31,9 +31,9 @@ import Dashboard from "./admin/Dashboard";
 import Users from "./admin/Users";
 import NewUser from "./admin/NewUser";
 import Report from "./admin/Report";
+import Transcript from "./parent/components/Transcript";
 // import { CoursePage } from "./student/CoursesComponent";
 // import Payment from "./parent/Payment";
-import Transcript from "./parent/components/Transcript";
 
 const App = () => {
   return (
