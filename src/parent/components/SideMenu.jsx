@@ -96,16 +96,10 @@ function SideMenu() {
                     }
                   `}
                   onClick={() => {
-                    // e.preventDefault();
                     setActiveItem(item.label);
-
-                    // Close sidebar on mobile when item is clicked
                     if (window.innerWidth < 1024) {
                       setIsSidebarOpen(false);
                     }
-
-                    // For demo: show which page would be navigated to
-                    console.log(`Navigating to: ${item.href}`);
                   }}
                 >
                   <Icon size={20} />

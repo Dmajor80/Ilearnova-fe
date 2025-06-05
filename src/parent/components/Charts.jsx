@@ -1,29 +1,36 @@
 import {
-  // BarChart,
-  // Bar,
-  // XAxis,
-  // YAxis,
-  // Tooltip,
-  ResponsiveContainer,
-  Cell,
-  PieChart,
-  Pie,
-  Label,
+  BarChart,
+   Bar,
+   XAxis,
+   YAxis,
+   Tooltip,
+   ResponsiveContainer,
+   Cell,
+   PieChart,
+   Pie,
+   Label,
+   CartesianGrid,
+   Legend
 } from "recharts";
 
-// const barData = [
-//   { label: "Math", value: 90 },
-//   { label: "Eng", value: 70 },
-//   { label: "Bio", value: 90 },
-//   { label: "Civic", value: 70 },
-//   { label: "Chem", value: 50 },
-//   { label: "Phy", value: 95 },
-//   { label: "Geo", value: 80 },
-// ];
+const data = [
+  { subject: 'Maths', score: 85 },
+  { subject: 'Eng', score: 90 },
+  { subject: 'Bio', score: 65 },
+  { subject: 'Phy', score: 70 },
+  { subject: 'Chem', score: 88 },
+  { subject: 'Civic', score: 68 },
+  { subject: 'Yor', score: 45 },
+  { subject: 'Agric', score: 48 },
+  { subject: 'Art', score: 95 },
+  { subject: 'Geo', score: 78 },
+];
 
-// const barColors = barData.map((d) =>
-//   d.value >= 80 ? "#4ade80" : d.value >= 60 ? "#fde047" : "#f87171"
-// );
+const getBarColor = (score) => {
+  if (score < 50) return '#ef4444';
+  if (score < 80) return '#facc15';
+  return '#22c55e';
+};
 
 export const PieGraph = () => {
   return (
@@ -62,19 +69,37 @@ export const PieGraph = () => {
 
 export const BarGraph = () => {
   return (
-    <div>
-      {/* <ResponsiveContainer width="100%" height={200}>
-        <BarChart data={barData}>
-          <XAxis dataKey="label" tick={{ fontSize: 12 }} />
-          <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} />
-          <Tooltip />
-          <Bar dataKey="value">
-            {barData.map((entry, idx) => (
-              <Cell key={`cell-${idx}`} fill={barColors[idx]} />
-            ))}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer> */}
-    </div>
+    <>
+      <div className="w-full h-[400px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="subject" tick={{ fontSize: 12 }} />
+              <YAxis domain={[0, 100]} />
+              <Tooltip formatter={(value) => `${value} / 100`} />
+              <Bar dataKey="score" radius={[4, 4, 0, 0]} barSize={40}>
+                {data.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={getBarColor(entry.score)} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+<h4 className="text-center capitalize font-medium">subject</h4>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-sm">
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 bg-[#facc15] rounded-full"></span>
+            <span>Between 60% - 80%</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 bg-[#22c55e] rounded-full"></span>
+            <span>Above 80%</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 bg-[#ef4444] rounded-full"></span>
+            <span>Below 50%</span>
+          </div>
+        </div>
+    </>
   )
 }

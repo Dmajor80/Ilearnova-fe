@@ -14,33 +14,76 @@ import {
   PieChart,
   Pie,
   Label,
+  CartesianGrid,
+  Legend
 } from "recharts";
+// import {
+//   BarChart,
+//   Bar,
+//   XAxis,
+//   YAxis,
+//   Tooltip,
+//   ResponsiveContainer,
+//   CartesianGrid,
+//   Legend,
+// } from 'recharts';
 import SideMenu from "../components/SideMenu";
 
-
-
-const barData = [
-  { label: "Math", value: 90 },
-  { label: "Eng", value: 85 },
-  { label: "Bio", value: 90 },
-  { label: "Civic", value: 70 },
-  { label: "Chem", value: 50 },
-  { label: "Phy", value: 95 },
-  { label: "Geo", value: 80 },
-  { label: "Yoruba", value: 45 },
-  { label: "Furth-Math", value: 50 },
-  { label: "Ani-Hus", value: 90 },
+const data = [
+  { day: 'Mon', minutes: 50 },
+  { day: 'Tue', minutes: 60 },
+  { day: 'Wed', minutes: 40 },
+  { day: 'Thur', minutes: 50 },
+  { day: 'Frid', minutes: 60 },
+  { day: 'Sat', minutes: 40 },
 ];
 
-const barColors = barData.map((d) =>
-  d.value >= 80 ? "#4ade80" : d.value >= 60 ? "#fde047" : "#f87171"
-);
+// const barData = [
+//   { label: "Math", value: 90 },
+//   { label: "Eng", value: 85 },
+//   { label: "Bio", value: 90 },
+//   { label: "Civic", value: 70 },
+//   { label: "Chem", value: 50 },
+//   { label: "Phy", value: 95 },
+//   { label: "Geo", value: 80 },
+//   { label: "Yoruba", value: 45 },
+//   { label: "Furth-Math", value: 50 },
+//   { label: "Ani-Hus", value: 90 },
+// ];
 
+// const barData = [
+//   { subject: 'Maths', score: 85 },
+//   { subject: 'Eng', score: 90 },
+//   { subject: 'Bio', score: 65 },
+//   { subject: 'Phy', score: 70 },
+//   { subject: 'Chem', score: 88 },
+//   { subject: 'Civic', score: 68 },
+//   { subject: 'Yor', score: 45 },
+//   { subject: 'Agric', score: 48 },
+//   { subject: 'Art', score: 95 },
+//   { subject: 'Geo', score: 78 },
+// ];
+
+// const barColors = barData.map((d) =>
+//   d.value >= 80 ? "#4ade80" : d.value >= 60 ? "#fde047" : "#f87171"
+// );
+
+
+// const getBarColor = (score) => {
+//   if (score < 50) return '#ef4444'; // red
+//   if (score < 80) return '#facc15'; // yellow
+//   return '#22c55e'; // green
+// };
 const events = [
   { date: 22, title: "Parent-Teacher Meeting", color: "bg-yellow-100", time: "10:00 am" },
   { date: 22, title: "Parent-Teacher Meeting", color: "bg-yellow-100", time: "10:00 am" },
   { date: 26, title: "Parent-Teacher Meeting", color: "bg-yellow-100", time: "10:00 am" },
 ];
+
+// const Calendar = () => {
+  const days = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+  const dates = Array.from({ length: 31 }, (_, i) => i + 1);
+  const eventDates = [22, 25, 26];
 
 function ParentDashboard() {
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -57,84 +100,61 @@ function ParentDashboard() {
         {/* Main Dashboard Widgets */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-20 px-2 md:px-0">
           {/* Score Chart */}
-          <div className="bg-white rounded-xl shadow p-6 min-h-[320px] flex flex-col">
-            <div className="text-xs text-gray-500 mb-2">Score</div>
-            {/* Recharts Bar Chart */}
-            <div className="flex-1 flex items-end justify-center h-56">
-              {/* <BarGraph /> */}
-              <ResponsiveContainer width="100%" height={250}>
+          <div className="w-full max-w-5xl mx-auto p-4 md:p-6 lg:p-8 bg-white rounded-lg shadow-md">
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">Scores</h2>
+<BarGraph/>
+            {/* <div className="w-full h-[400px]">
+              <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={barData}>
-                  <XAxis dataKey="label" tick={{ fontSize: 12 }} />
-                  <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} />
-                  <Tooltip />
-                  <Bar dataKey="value">
-                    {barData.map((entry, idx) => (
-                      <Cell key={`cell-${idx}`} fill={barColors[idx]} />
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="subject" tick={{ fontSize: 12 }} />
+                  <YAxis domain={[0, 100]} />
+                  <Tooltip formatter={(value) => `${value} / 100`} />
+                  <Bar dataKey="score" radius={[4, 4, 0, 0]} barSize={40}>
+                    {data.map((entry, index) => (
+                      <cell key={`cell-${index}`} fill={getBarColor(entry.score)} />
                     ))}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
-
             </div>
-            <h3 className="font-medium text-center text-md">Subject</h3>
-            {/* Legend */}
-            <div className="flex gap-4 justify-center mt-4 text-xs">
 
-              <div className="flex items-center gap-1">
-                <div className="flex items-center gap-1">
-                  <span className="inline-block w-3 h-3 bg-yellow-400 rounded-full"></span> Between 50%-80%
-                </div>
-                <span className="inline-block w-3 h-3 bg-green-400 rounded-full"></span> Above 80%
-
-                <span className="inline-block w-3 h-3 bg-green-400 rounded"></span>{" "}
-                80-100
+            <div className="mt-6 flex flex-wrap gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 bg-[#facc15] rounded-full"></span>
+                <span>Between 60% - 80%</span>
               </div>
-
-              <div className="flex items-center gap-1">
-                <span className="inline-block w-3 h-3 bg-red-400 rounded-full"></span> Below 50%
-                <span className="inline-block w-3 h-3 bg-yellow-400 rounded"></span>{" "}
-                60-79
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 bg-[#22c55e] rounded-full"></span>
+                <span>Above 80%</span>
               </div>
-              <div className="flex items-center gap-1">
-                <span className="inline-block w-3 h-3 bg-red-400 rounded"></span>{" "}
-                Below 60
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 bg-[#ef4444] rounded-full"></span>
+                <span>Below 50%</span>
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Upcoming Classes */}
           <div className="bg-white rounded-xl shadow p-6 min-h-[320px] flex flex-col">
-            <div className="font-semibold text-gray-700 mb-2">
-              Upcoming Classes
-            </div>
-            <div className="text-xs text-gray-500 mb-2">October 2024</div>
-            {/* Calendar */}
-            <div className="grid grid-cols-7 gap-1 text-center text-xs text-gray-500 mb-2">
-              <div>Mo</div>
-              <div>Tu</div>
-              <div>We</div>
-              <div>Th</div>
-              <div>Fr</div>
-              <div>Sa</div>
-              <div>Su</div>
-            </div>
-            <div className="grid grid-cols-7 gap-1 text-center text-sm mb-4">
-              {Array.from({ length: 31 }, (_, i) => {
-                const day = i + 1;
-                const isActive = [22, 26, 28].includes(day);
-                return (
-                  <div
-                    key={day}
-                    className={`py-1 rounded-full cursor-pointer ${isActive
-                      ? "bg-blue-700 text-white font-bold"
-                      : "hover:bg-blue-100"
-                      }`}
-                  >
-                    {day}
-                  </div>
-                );
-              })}
-            </div>
+          <h3 className="text-lg font-semibold mb-2">Upcoming Classes</h3>
+      <div className="text-sm text-gray-600 mb-2">October 2024</div>
+      <div className="grid grid-cols-7 gap-2 text-center text-sm">
+        {days.map((day) => (
+          <div key={day} className="font-medium text-gray-500">{day}</div>
+        ))}
+        {Array.from({ length: 1 }, (_, i) => <div key={`spacer-${i}`} />)}
+        {dates.map((date) => (
+          <div
+            key={date}
+            className={`p-1 rounded-full ${
+              eventDates.includes(date) ? 'bg-blue-600 text-white font-bold' : 'text-gray-800'
+            }`}
+          >
+            {date}
+          </div>
+        ))}
+      </div>
             {/* Events */}
             <div className="flex flex-col gap-2">
               {events.map((event, idx) => (
@@ -147,17 +167,10 @@ function ParentDashboard() {
                       <li className="ml-auto text-xs text-gray-500">{event.time}</li>
                     </div>
                   </div>
-                  <div
-                    key={idx}
-                    className={`flex items-center gap-2 p-2 rounded ${event.color}`}
-                  >
-                    <span className="text-lg">{event.icon}</span>
-                    <span className="text-xs text-gray-700">{event.title}</span>
-                    <span className="ml-auto text-xs text-gray-500">{`Oct ${event.date}`}</span>
-                  </div>
-                   </div>
-              ))}           
-          </div>
+
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -170,34 +183,24 @@ function ParentDashboard() {
               <PieGraph />
               <div className="text-xs text-gray-500 mt-2">Courses</div>
             </div>
-            <div className="flex-1 w-full">
-              <div className="font-semibold text-gray-700 mb-2">
-                Your weekly learning goal
-              </div>
-              <div className="flex items-end gap-4 h-24">
-                {[100, 90, 80, 70, 60].map((val, idx) => (
-                  <div key={idx} className="flex flex-col items-center">
-                    <div
-                      className="bg-green-400 w-6 rounded-t-md"
-                      style={{ height: `${val / 2}%` }}
-                    ></div>
-                    <span className="text-xs mt-1 text-gray-500">
-                      {["Mon", "Tue", "Wed", "Thu", "Fri"][idx]}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <div className="flex items-center gap-2 mt-2">
+            <div className="w-full max-w-2xl mx-auto p-4 md:p-6 lg:p-8 bg-white rounded-lg shadow-md">
+              <h2 className="text-xl font-semibold mb-2 text-gray-800">Your weekly learning goal</h2>
 
-                <div className='flex-1'>
-                  <span className="text-2xl font-bold text-[#1a237e]">100</span><span className="text-xs text-gray-500">/ 300 mins</span>
-                </div>
-                <span className="ml-auto text-xs text-red-500">-40% from previous week</span>
-                <span className="text-2xl font-bold text-[#1a237e]">100</span>
-                <span className="text-xs text-gray-500">/ Score</span>
-                <span className="ml-auto text-xs text-red-500">
-                  -25% from previous week
-                </span>
+              <div className="w-full h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={data}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="day" tick={{ fontSize: 12 }} />
+                    <YAxis hide domain={[0, 70]} />
+                    <Tooltip formatter={(value) => `${value} mins`} />
+                    <Bar dataKey="minutes" fill="#4ade80" radius={[6, 6, 0, 0]} barSize={32} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="mt-4 flex justify-between items-center text-sm">
+                <span className="text-black font-medium text-lg">100/<span className="text-gray-500">300mins</span></span>
+                <span className="text-red-600 font-medium">-40% from previous week</span>
               </div>
             </div>
           </div>
@@ -205,7 +208,6 @@ function ParentDashboard() {
           {/* Student Attendance Calendar with react-calendar */}
 
           <div className="bg-white rounded-xl border-none shadow p-6 flex flex-col">
-            <div className="font-semibold text-gray-700 mb-2">Student Attendance</div>
             <div className="bg-white rounded-xl shadow p-6 flex flex-col">
               <div className="font-semibold text-gray-700 mb-2">
                 Student Attendance
