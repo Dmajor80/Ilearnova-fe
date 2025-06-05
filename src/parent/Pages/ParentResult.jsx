@@ -1,15 +1,15 @@
+/* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from "react";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine,
 } from "recharts";
-import SideBar from "./components/Sidebar";
-import DashboardHeader from "./components/DashboardHeader";
+import DashboardHeader from "../components/DashboardHeader";
+import SideMenu from "../components/SideMenu";
 
 const subjects = [
   "Mathematics", "English", "Biology", "Physics", "Yoruba", "Chemistry", "Further Mathematics", "Animal Husbandry", "Geography"
 ];
 
-// eslint-disable-next-line no-unused-vars
 const initialChartData = subjects.map((subject, i) => ({
   name: subject,
   first: 80 + Math.round(Math.random() * 15),
@@ -127,7 +127,7 @@ const topMarks = [
   },
 ];
 
-export default function ResultDashboard() {
+ function ParentResult() {
   const [chartData, setChartData] = useState(initialChartData);
 
   // Simulate real-time chart updates
@@ -149,37 +149,13 @@ export default function ResultDashboard() {
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
       {/* Sidebar */}
 
-      <SideBar />
+      <SideMenu />
 
       {/* Main Content */}
       <main className="flex-1 p-4 md:p-10">
         {/* Header */}
-        {/* <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
-          <div>
-            <div className="text-sm text-gray-500">Exam result</div>
-            <h2 className="text-2xl font-semibold text-gray-800">Result</h2>
-          </div>
-          <div className="flex items-center gap-4 mt-4 md:mt-0">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search"
-                className="pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200"
-              />
-              <span className="material-icons absolute left-2 top-2 text-gray-400">search</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-medium">Priscilla</span>
-              <img
-                src="/profile.png"
-                loading="lazy"
-                alt="Profile"
-                className="w-8 h-8 rounded-full"
-              />
-            </div>
-          </div>
-        </div> */}
-        <DashboardHeader text='Result' holder="Search Results"/>
+
+        <DashboardHeader text='Performance Insight' holder="Search Results" />
         {/* Chart and Side Info */}
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Chart Card */}
@@ -335,3 +311,5 @@ export default function ResultDashboard() {
     </div>
   );
 }
+
+export default ParentResult;

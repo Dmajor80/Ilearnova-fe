@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import logo from "../assets/image 1.png";
-import teacherIllustration from "../assets/mother-son-spending-time-together 1.png";
+import logo from "/logo.png";
+import teacherIllustration from "/mother.png";
 import { Link } from "react-router-dom";
 
 const ParentLogin = () => {

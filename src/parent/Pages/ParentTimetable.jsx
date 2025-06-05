@@ -1,5 +1,5 @@
-import DashboardHeader from "./components/DashboardHeader";
-import SideBar from "./components/Sidebar"
+import DashboardHeader from "../components/DashboardHeader";
+import SideMenu from "../components/SideMenu";
 
 const timetable = [
   {
@@ -20,7 +20,7 @@ function Timetable() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
       {/* Sidebar */}
-      <SideBar />
+      <SideMenu />
 
       {/* Main Content */}
       <main className="flex-1 p-4 md:p-10">
