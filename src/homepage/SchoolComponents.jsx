@@ -109,6 +109,32 @@ const ProgramsSection = () => {
 
   const programs = [
     {
+      title: "Elementary Program",
+      age: "Ages 5-10",
+      description:
+        "Building strong foundations in literacy, numeracy, and social skills through play-based learning.",
+      features: [
+        "Interactive Learning",
+        "Creative Arts",
+        "Physical Education",
+        "Character Development",
+      ],
+      color: "from-green-400 to-blue-500",
+    },
+    {
+      title: "Middle School",
+      age: "Ages 11-14",
+      description:
+        "Developing critical thinking and independence through comprehensive academic programs.",
+      features: [
+        "STEM Focus",
+        "Language Arts",
+        "Social Studies",
+        "Leadership Training",
+      ],
+      color: "from-purple-400 to-pink-500",
+    },
+    {
       title: "High School",
       age: "Ages 15-18",
       description:
@@ -297,6 +323,134 @@ const StatsSection = () => {
 };
 
 // Events Component
+// const EventsSection = () => {
+//   const [currentEvent, setCurrentEvent] = useState(0);
+
+
+//   const events = [
+//     {
+//       title: "Science Fair 2024",
+//       date: "March 15, 2024",
+//       time: "9:00 AM - 3:00 PM",
+//       location: "Main Auditorium",
+//       description:
+//         "Students showcase innovative science projects and experiments.",
+//       category: "Academic",
+//     },
+//     {
+//       title: "Spring Sports Day",
+//       date: "April 20, 2024",
+//       time: "8:00 AM - 5:00 PM",
+//       location: "Sports Complex",
+//       description:
+//         "Annual athletics competition featuring various sports activities.",
+//       category: "Sports",
+//     },
+//     {
+//       title: "Arts & Culture Festival",
+//       date: "May 10, 2024",
+//       time: "6:00 PM - 9:00 PM",
+//       location: "Cultural Center",
+//       description:
+//         "Celebration of student creativity through music, dance, and visual arts.",
+//       category: "Cultural",
+//     },
+//   ];
+
+//   return (
+//     <section className="py-20 bg-gray-50">
+//       <div className="container mx-auto px-4">
+//         <div className="text-center mb-16">
+//           <h2 className="text-4xl font-bold text-gray-800 mb-4">
+//             Upcoming Events
+//           </h2>
+//           <p className="text-gray-600 max-w-2xl mx-auto">
+//             Join us for exciting events that bring our school community together
+//           </p>
+//         </div>
+
+//         <div className="max-w-4xl mx-auto">
+//           <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
+//             <div className="grid lg:grid-cols-3">
+//               <div className="lg:col-span-1 bg-gradient-to-br from-blue-500 to-purple-600 p-8">
+//                 <div className="space-y-4">
+//                   {events.map((event, index) => (
+//                     <button
+//                       key={index}
+//                       onClick={() => setCurrentEvent(index)}
+//                       className={`w-full text-left p-4 rounded-xl transition-all duration-300 ${
+//                         currentEvent === index
+//                           ? "bg-white text-gray-800 shadow-lg transform scale-105"
+//                           : "text-white hover:bg-white hover:bg-opacity-20"
+//                       }`}
+//                     >
+//                       <div className="font-semibold text-sm mb-1">
+//                         {event.category}
+//                       </div>
+//                       <div className="font-bold">{event.title}</div>
+//                       <div className="text-sm opacity-75">{event.date}</div>
+//                     </button>
+//                   ))}
+//                 </div>
+//               </div>
+
+//               <div className="lg:col-span-2 p-8">
+//                 <div className="space-y-6">
+//                   <div>
+//                     <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+//                       {events[currentEvent].category}
+//                     </span>
+//                     <h3 className="text-3xl font-bold text-gray-800 mt-4 mb-4">
+//                       {events[currentEvent].title}
+//                     </h3>
+//                     <p className="text-gray-600 text-lg leading-relaxed">
+//                       {events[currentEvent].description}
+//                     </p>
+//                   </div>
+
+//                   <div className="grid md:grid-cols-3 gap-4">
+//                     <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-xl">
+//                       <Calendar className="w-5 h-5 text-blue-500" />
+//                       <div>
+//                         <div className="text-sm text-gray-500">Date</div>
+//                         <div className="font-semibold text-gray-800">
+//                           {events[currentEvent].date}
+//                         </div>
+//                       </div>
+//                     </div>
+//                     <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-xl">
+//                       <Clock className="w-5 h-5 text-blue-500" />
+//                       <div>
+//                         <div className="text-sm text-gray-500">Time</div>
+//                         <div className="font-semibold text-gray-800">
+//                           {events[currentEvent].time}
+//                         </div>
+//                       </div>
+//                     </div>
+//                     <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-xl">
+//                       <MapPin className="w-5 h-5 text-blue-500" />
+//                       <div>
+//                         <div className="text-sm text-gray-500">Location</div>
+//                         <div className="font-semibold text-gray-800">
+//                           {events[currentEvent].location}
+//                         </div>
+//                       </div>
+//                     </div>
+//                   </div>
+
+//                   <button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center space-x-2">
+//                     <span>Register Now</span>
+//                     <ChevronRight className="w-4 h-4" />
+//                   </button>
+//                 </div>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+//     </section>
+//   );
+// };
 
 // Testimonials Component
 const TestimonialsSection = () => {
