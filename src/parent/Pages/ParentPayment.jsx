@@ -1,7 +1,10 @@
+import SideMenu from "../components/SideMenu"
+
 function Payment() {
     return (
         <>
-            <SideBar /></>
+            <SideMenu />
+            </>
     )
 }
 
