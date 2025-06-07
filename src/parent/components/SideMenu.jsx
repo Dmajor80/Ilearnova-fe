@@ -22,12 +22,12 @@ function SideMenu() {
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   const menuItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', to: '/parent-dashboard' },
-    { icon: MessageSquare, label: 'Messages', to: '/parent-messages' },
-    { icon: CreditCard, label: 'Payments', to: '/parent-payments' },
-    { icon: FileText, label: 'Result', to: '/parent-results' },
-    { icon: Calendar, label: 'Attendance', to: '/parent-attendance' },
-    { icon: Clock, label: 'Timetable', to: '/parent-timetable' },
+    { icon: LayoutDashboard, label: 'Dashboard', href: '/parent-dashboard' },
+    { icon: MessageSquare, label: 'Messages', href: '/parent-messages' },
+    { icon: CreditCard, label: 'Payments', href: '/parent-payments' },
+    { icon: FileText, label: 'Result', href: '/parent-results' },
+    { icon: Calendar, label: 'Attendance', href: '/parent-attendance' },
+    { icon: Clock, label: 'Timetable', href: '/parent-timetable' },
   ];
   return (
     <div className="relative">
@@ -68,9 +68,9 @@ function SideMenu() {
               const Icon = item.icon;
               const isActive = activeItem === item.label;
               return (
-                <Link
+                <a
                   key={index}
-                  to={item.to}
+                  href={item.href}
                   className={`
                     flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200
                     ${isActive
@@ -87,7 +87,7 @@ function SideMenu() {
                 >
                   <Icon size={20} />
                   <span className="font-medium">{item.label}</span>
-                </Link>
+                </a>
               );
             })}
           </nav>
