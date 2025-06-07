@@ -12,13 +12,9 @@ import {
 import { Link } from "react-router-dom";
 
 
-
-
 function SideMenu() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeItem, setActiveItem] = useState('');
-
-
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   const menuItems = [
