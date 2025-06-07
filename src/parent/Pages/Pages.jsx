@@ -5,6 +5,7 @@ import ParentResult from "./ParentResult";
 import Transcript from "../components/Transcript";
 import ParentMessages from "./ParentMessages";
 import ParentDashboard from "./ParentDashboard";
+import PaymentProcess from "./PaymentProcess";
 import { Route, Routes } from "react-router-dom";
 
 function Pages() {
@@ -17,6 +18,7 @@ function Pages() {
       <Route path="/parent-results" element={<ParentResult />} />
       <Route path="/transcript" element={<Transcript />} />
       <Route path="/parent-messages" element={<ParentMessages />} />
+      <Route path="/payment-process" element={<PaymentProcess />} />
     </Routes>
   );
 }

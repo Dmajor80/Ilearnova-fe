@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom"; // Add this import
 import SideMenu from "../components/SideMenu";
 import DashboardHeader from "../components/DashboardHeader";
+
 
 const feeTypes = [
     {
@@ -88,13 +90,21 @@ const dummyPayments = [
 
 function ParentPayment() {
 
-    const [selectedTerm, setSelectedTerm] = useState("Term 1");
+ const [selectedTerm, setSelectedTerm] = useState("Term 1");
     const [selectedStatus, setSelectedStatus] = useState("All");
-    const filteredPayments = dummyPayments.filter(
+    const navigate = useNavigate(); // Add this line
+     const filteredPayments = dummyPayments.filter(
         (p) =>
             (selectedTerm === "All" || p.term === selectedTerm) &&
             (selectedStatus === "All" || p.status === selectedStatus)
     );
+
+       // Handler for Pay Now button
+    const handlePayNow = (fee) => {
+        // Navigate to payment-process and pass fee info via state
+        navigate("/payment-process", { state: { fee } });
+    };
+
 
     return (
         <div className="min-h-screen bg-[#f5f8fe] flex flex-col md:flex-row">
@@ -108,13 +118,16 @@ function ParentPayment() {
                 <DashboardHeader text="Parent Payment" holder="Search by Transaction ID" />
 
                 {/* Fee Cards */}
-                <div className="mt-30 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                  <div className="mt-30 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
                     {feeTypes.map((fee) => (
                         <div key={fee.title} className="bg-white rounded-xl shadow p-6 flex flex-col justify-between">
                             <div>
                                 <div className="flex items-center justify-between mb-2">
                                     <div className="font-bold text-lg text-black">{fee.title}</div>
-                                    <button className="bg-[#1736a4] md:cursor-pointer text-white px-4 py-1 rounded-md text-sm font-normal hover:bg-blue-900 transition">
+                                    <button
+                                        className="bg-[#1736a4] md:cursor-pointer text-white px-4 py-1 rounded-md text-sm font-normal hover:bg-blue-900 transition"
+                                        onClick={() => handlePayNow(fee)}
+                                    >
                                         Pay Now
                                     </button>
                                 </div>
