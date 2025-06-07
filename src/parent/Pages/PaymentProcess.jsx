@@ -16,6 +16,7 @@ const steps = [
   "Select Fee & Student",
   "Payment Details",
   "Review",
+  "Double Review",
   "Complete",
 ];
 
@@ -52,7 +53,42 @@ export default function PaymentProcess() {
   const [paymentPattern, setPaymentPattern] = useState("");
   const [selectedMethod, setSelectedMethod] = useState("");
   const [saveMethod, setSaveMethod] = useState(false);
+  const [cardNumber, setCardNumber] = useState("");
+  const [expiry, setExpiry] = useState("");
+  const [cvv, setCvv] = useState("");
+  const [cardName, setCardName] = useState("");
+  const [reviewAgreed, setReviewAgreed] = useState("");
 
+  // Format card number as "1234 5678 9012 3456"
+  const handleCardNumberChange = (e) => {
+    let value = e.target.value.replace(/\D/g, "");
+    value = value.substring(0, 16);
+    value = value.replace(/(.{4})/g, "$1 ").trim();
+    setCardNumber(value);
+  };
+
+  // Format expiry as "MM / YY"
+  const handleExpiryChange = (e) => {
+    let value = e.target.value.replace(/\D/g, "");
+    if (value.length > 4) value = value.substring(0, 4);
+    if (value.length > 2) value = value.replace(/^(\d{2})(\d{1,2})/, "$1 / $2");
+    setExpiry(value);
+  };
+
+  // Format CVV as "123" or "1234" with space after 2 or 3 digits
+  const handleCvvChange = (e) => {
+    let value = e.target.value.replace(/\D/g, "");
+    value = value.substring(0, 4);
+    if (value.length > 2) value = value.replace(/^(\d{3})(\d{1})/, "$1 $2");
+    setCvv(value);
+  };
+
+  // Validation for card form
+  const isCardFormValid =
+    cardName.trim().length > 0 &&
+    cardNumber.replace(/\s/g, "").length === 16 &&
+    /^\d{2} \/ \d{2}$/.test(expiry) &&
+    cvv.replace(/\s/g, "").length >= 3;
 
   const handleProceed = () => {
     if (currentStep < steps.length - 1) setCurrentStep(currentStep + 1);
@@ -214,8 +250,8 @@ export default function PaymentProcess() {
                     </div>
                     <span
                       className={`w-5 h-5 border-2 rounded-full flex items-center justify-center ${selectedMethod === method.value
-                          ? "border-[#1736a4] bg-[#1736a4]"
-                          : "border-gray-300 bg-white"
+                        ? "border-[#1736a4] bg-[#1736a4]"
+                        : "border-gray-300 bg-white"
                         }`}
                     >
                       {selectedMethod === method.value && (
@@ -254,130 +290,213 @@ export default function PaymentProcess() {
         )}
 
         {/* Step 3: Review */}
-      {currentStep === 2 && (
-  <div className="flex flex-col lg:flex-row gap-8 items-center justify-center min-h-[400px]">
-    {/* Payment Details Form */}
-    <div className="w-full max-w-md">
-      <div className="text-xl font-semibold mb-2 text-center lg:text-left">
-        Step 3: Payment Details Entry
-      </div>
-      <div className="text-sm text-gray-500 mb-4 text-center lg:text-left">
-        Securely Enter Your Payment Details Below to Complete Your Transaction
-      </div>
-      <form className="bg-white rounded-xl shadow p-6 mb-6 flex flex-col gap-4">
-        <div>
-          <label className="block text-xs text-gray-500 mb-1">Name on Card</label>
-          <input
-            type="text"
-            className="w-full border border-gray-300 rounded px-3 py-2"
-            placeholder="Priscilla Daniel"
-            defaultValue={selectedStudent}
-          />
-        </div>
-        <div>
-          <label className="block text-xs text-gray-500 mb-1">Card Number</label>
-          <input
-            type="text"
-            className="w-full border border-gray-300 rounded px-3 py-2"
-            placeholder="5679 73784 03721 2232"
-            maxLength={19}
-            inputMode="numeric"
-          />
-        </div>
-        <div className="flex gap-2">
-          <div className="flex-1">
-            <label className="block text-xs text-gray-500 mb-1">Expiration Date</label>
-            <input
-              type="text"
-              className="w-full border border-gray-300 rounded px-3 py-2"
-              placeholder="MM/YY"
-              maxLength={7}
-            />
-          </div>
-          <div className="flex-1">
-            <label className="block text-xs text-gray-500 mb-1">CVV</label>
-            <input
-              type="password"
-              className="w-full border border-gray-300 rounded px-3 py-2"
-              placeholder="CVV"
-              maxLength={4}
-              inputMode="numeric"
-            />
-          </div>
-        </div>
-        <div className="flex items-center justify-between mt-2">
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={saveMethod}
-              onChange={e => setSaveMethod(e.target.checked)}
-              className="form-checkbox rounded border-gray-300"
-            />
-            <span className="text-xs text-gray-600">Save payment method</span>
-          </label>
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              checked
-              readOnly
-              className="form-radio rounded border-gray-300"
-            />
-            <span className="text-xs text-gray-600">Add New Card</span>
-          </label>
-        </div>
-      </form>
-      {/* Payment Summary */}
-      <div className="bg-white rounded-xl shadow p-4 mb-4">
-        <div className="flex justify-between text-sm mb-2">
-          <span>Subtotal</span>
-          <span>${fee ? fee.price : "100.00"}</span>
-        </div>
-        <div className="flex justify-between text-sm mb-2">
-          <span>Discount/ Scholarship</span>
-          <span>$0.00</span>
-        </div>
-        <div className="flex justify-between text-sm mb-2">
-          <span>Service Charge</span>
-          <span>$0.00</span>
-        </div>
-        <div className="flex justify-between text-base font-semibold mt-2">
-          <span className="text-[#1736a4]">Total Amount Due</span>
-          <span className="text-[#1736a4]">${fee ? fee.price : "100.00"}</span>
-        </div>
-      </div>
-      <div className="flex gap-4 items-center justify-between">
+        {currentStep === 2 && (
+          <div className="flex flex-col lg:flex-row gap-8 items-center justify-center min-h-[400px]">
+            {/* Payment Details Form */}
+            <div className="w-full max-w-md">
+              <div className="text-xl font-semibold mb-2 text-center lg:text-left">
+                Step 3: Payment Details Entry
+              </div>
+              <div className="text-sm text-gray-500 mb-4 text-center lg:text-left">
+                Securely Enter Your Payment Details Below to Complete Your Transaction
+              </div>
+              <form className="bg-white rounded-xl shadow p-6 mb-6 flex flex-col gap-4">
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Name on Card</label>
+                  <input
+                    type="text"
+                    className="w-full border focus:outline-none border-gray-300 rounded px-3 py-2"
+                    placeholder="Priscilla Daniel"
+                    // defaultValue={selectedStudent}
+                    value={cardName}
+                    onChange={e => setCardName(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Card Number</label>
+                  <input
+                    className="w-full border focus:outline-none border-gray-300 rounded px-3 py-2"
+                    placeholder="5679 7378 4037 2122"
+                    maxLength={19}
+                    inputMode="numeric"
+                    value={cardNumber}
+                    onChange={handleCardNumberChange}
+                    autoComplete="cc-number"
+                    required
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <label className="block text-xs text-gray-500 mb-1">Expiration Date</label>
+                    <input
+                      type="text"
 
-        <button
-        className="w-full bg-[#1736a4] text-white py-3 rounded-lg font-semibold hover:bg-blue-900 transition"
-        onClick={handleReturn}
-        type="button"
-      >
-        Previous
-      </button>
-        <button
-        className="w-full bg-[#1736a4] text-white py-3 rounded-lg font-semibold hover:bg-blue-900 transition"
-        onClick={handleProceed}
-        type="button"
-      >
-        Review Payment
-      </button>
-      </div>
-      
-    </div>
-    {/* Card Illustration */}
-    <div className="w-full max-w-md flex justify-center">
-      <img
-        src="/bankcard.png"
-        alt="Cards Illustration"
-        loading="lazy"
-        className="rounded-2xl w-full max-w-xs"
-      />
-    </div>
-  </div>
-)}
+                      className="w-full border focus:outline-none border-gray-300 rounded px-3 py-2"
+                      placeholder="MM / YY"
+                      maxLength={7}
+                      inputMode="numeric"
+                      value={expiry}
+                      onChange={handleExpiryChange}
+                      autoComplete="cc-exp"
+                      required
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-xs text-gray-500 mb-1">CVV</label>
+                    <input
+                      type="password"
+                      className="w-full border focus:outline-none border-gray-300 rounded px-3 py-2"
+                      placeholder="CVV"
+                      maxLength={5}
+                      inputMode="numeric"
+                      value={cvv}
+                      onChange={handleCvvChange}
+                      autoComplete="cc-csc"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center justify-between mt-2">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={saveMethod}
+                      onChange={e => setSaveMethod(e.target.checked)}
+                      className="form-checkbox rounded border-gray-300"
+                    />
+                    <span className="text-xs text-gray-600">Save payment method</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      checked
+                      readOnly
+                      className="form-radio rounded border-gray-300"
+                    />
+                    <span className="text-xs text-gray-600">Add New Card</span>
+                  </label>
+                </div>
+              </form>
+              {/* Payment Summary */}
+              <div className="bg-white rounded-xl shadow p-4 mb-4">
+                <div className="flex justify-between text-sm mb-2">
+                  <span>Subtotal</span>
+                  <span>${fee ? fee.price : "100.00"}</span>
+                </div>
+                <div className="flex justify-between text-sm mb-2">
+                  <span>Discount/ Scholarship</span>
+                  <span>$0.00</span>
+                </div>
+                <div className="flex justify-between text-sm mb-2">
+                  <span>Service Charge</span>
+                  <span>$0.00</span>
+                </div>
+                <div className="flex justify-between text-base font-semibold mt-2">
+                  <span className="text-[#1736a4]">Total Amount Due</span>
+                  <span className="text-[#1736a4]">${fee ? fee.price : "100.00"}</span>
+                </div>
+              </div>
+              <div className="flex gap-4 items-center justify-between">
+                <button
+                  className="w-full bg-[#1736a4] text-white py-3 rounded-lg font-semibold hover:bg-blue-900 transition"
+                  onClick={handleReturn}
+                  type="button"
+                >
+                  Previous
+                </button>
+                <button
+                  className={`w-full bg-[#1736a4] text-white py-3 rounded-lg font-semibold hover:bg-blue-900 transition ${!isCardFormValid ? "opacity-50 cursor-not-allowed" : ""}`}
+                  onClick={handleProceed}
+                  type="button"
+                  disabled={!isCardFormValid}
+                >
+                  Review Payment
+                </button>
+              </div>
 
-        {/* Step 4: Complete */}
+            </div>
+            {/* Card Illustration */}
+            <div className="w-full max-w-md flex justify-center">
+              <img
+                src="/bankcard.png"
+                alt="Cards Illustration"
+                loading="lazy"
+                className="rounded-2xl w-full max-w-xs"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Step 4: Double Check Information */}
         {currentStep === 3 && (
+          <div className="flex flex-col lg:flex-row gap-8 items-center justify-center min-h-[400px]">
+            {/* Review Payment Details */}
+            <div className="w-full max-w-md">
+              <div className="text-xl font-semibold mb-2 text-center lg:text-left">
+                Step 4: Review Payment Details
+              </div>
+              <div className="text-sm text-gray-500 mb-4 text-center lg:text-left">
+                Double-check your payment details before confirming to ensure a smooth transaction.
+              </div>
+              <div className="bg-white rounded-xl shadow p-4 mb-4">
+                <div className="flex justify-between text-sm mb-2">
+                  <span>Fee</span>
+                  <span className="font-semibold">{fee ? fee.title : "Tuition Fee"}</span>
+                </div>
+                <div className="flex justify-between text-sm mb-2">
+                  <span>Selected Payment Method</span>
+                  <span className="capitalize font-semibold">{selectedMethod || "Card"}</span>
+                </div>
+                <div className="flex justify-between text-sm mb-2">
+                  <span>Additional Charges</span>
+                  <span>$0.00</span>
+                </div>
+              </div>
+              <label className="flex items-center gap-2 mb-4">
+                <input
+                  type="checkbox"
+                  checked={!!reviewAgreed}
+                  onChange={e => setReviewAgreed(e.target.checked)}
+                  className="form-checkbox rounded border-gray-300"
+                />
+                <span className="text-xs text-gray-600">
+                  I agree to the terms and conditions, including any applicable service fees, and authorize the payment as outlined above.
+                </span>
+              </label>
+
+              <div className="flex gap-4 items-center justify-between">
+                <button
+                  className="w-full bg-[#1736a4] text-white py-3 rounded-lg font-semibold hover:bg-blue-900 transition"
+                  onClick={handleReturn}
+                  type="button"
+                >
+                  Previous
+                </button>
+                <button
+                  className="w-full bg-[#1736a4] text-white py-3 rounded-lg font-semibold hover:bg-blue-900 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={handleProceed}
+                  type="button"
+                  disabled={!reviewAgreed}
+                >
+                  Confirm & Pay
+                </button>
+              </div>
+
+            </div>
+            {/* Card Illustration */}
+            <div className="w-full max-w-md flex justify-center">
+              <img
+                src="/bankcard.png"
+                alt="Cards Illustration"
+                loading="lazy"
+                className="rounded-2xl w-full max-w-xs"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Step 5: Complete */}
+        {currentStep === 4 && (
           <div className="flex flex-col items-center justify-center min-h-[300px]">
             <div className="text-2xl font-bold text-green-600 mb-4">Payment Complete!</div>
             <div className="text-gray-600 mb-4">Thank you for your payment.</div>
