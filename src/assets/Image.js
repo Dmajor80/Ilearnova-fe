@@ -1,1 +1,1 @@
-// export {default as mother} from "/"
+export {default as payIcon } from "/payicon.png"

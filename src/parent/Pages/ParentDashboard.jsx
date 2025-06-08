@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { PieGraph, BarGraph } from "../components/Charts"
@@ -17,16 +17,6 @@ import {
   CartesianGrid,
   Legend
 } from "recharts";
-// import {
-//   BarChart,
-//   Bar,
-//   XAxis,
-//   YAxis,
-//   Tooltip,
-//   ResponsiveContainer,
-//   CartesianGrid,
-//   Legend,
-// } from 'recharts';
 import SideMenu from "../components/SideMenu";
 
 const data = [
@@ -38,55 +28,63 @@ const data = [
   { day: 'Sat', minutes: 40 },
 ];
 
-// const barData = [
-//   { label: "Math", value: 90 },
-//   { label: "Eng", value: 85 },
-//   { label: "Bio", value: 90 },
-//   { label: "Civic", value: 70 },
-//   { label: "Chem", value: 50 },
-//   { label: "Phy", value: 95 },
-//   { label: "Geo", value: 80 },
-//   { label: "Yoruba", value: 45 },
-//   { label: "Furth-Math", value: 50 },
-//   { label: "Ani-Hus", value: 90 },
-// ];
+const demoNotifications = [
+  "Holiday: Christmas Day is on December 25th!",
+  "Reminder: Parent-Teacher Meeting on December 22nd at 10:00 am.",
+  "Holiday: New Year's Day is on January 1st!",
+  "School resumes January 8th. Prepare your materials!",
+];
 
-// const barData = [
-//   { subject: 'Maths', score: 85 },
-//   { subject: 'Eng', score: 90 },
-//   { subject: 'Bio', score: 65 },
-//   { subject: 'Phy', score: 70 },
-//   { subject: 'Chem', score: 88 },
-//   { subject: 'Civic', score: 68 },
-//   { subject: 'Yor', score: 45 },
-//   { subject: 'Agric', score: 48 },
-//   { subject: 'Art', score: 95 },
-//   { subject: 'Geo', score: 78 },
-// ];
-
-// const barColors = barData.map((d) =>
-//   d.value >= 80 ? "#4ade80" : d.value >= 60 ? "#fde047" : "#f87171"
-// );
-
-
-// const getBarColor = (score) => {
-//   if (score < 50) return '#ef4444'; // red
-//   if (score < 80) return '#facc15'; // yellow
-//   return '#22c55e'; // green
-// };
 const events = [
   { date: 22, title: "Parent-Teacher Meeting", color: "bg-yellow-100", time: "10:00 am" },
   { date: 22, title: "Parent-Teacher Meeting", color: "bg-yellow-100", time: "10:00 am" },
   { date: 26, title: "Parent-Teacher Meeting", color: "bg-yellow-100", time: "10:00 am" },
 ];
 
-// const Calendar = () => {
-  const days = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
-  const dates = Array.from({ length: 31 }, (_, i) => i + 1);
-  const eventDates = [22, 25, 26];
+const holidays = [
+  { date: new Date(2024, 11, 25), name: "Christmas Day" }, // December is month 11 (0-indexed)
+  { date: new Date(2024, 0, 1), name: "New Year's Day" },
+  // Add more holidays as needed
+];
+
+function isSameDay(date1, date2) {
+  return (
+    date1.getDate() === date2.getDate() &&
+    date1.getMonth() === date2.getMonth() &&
+    date1.getFullYear() === date2.getFullYear()
+  );
+}
+
+const days = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+const dates = Array.from({ length: 31 }, (_, i) => i + 1);
+const eventDates = [22, 25, 26];
 
 function ParentDashboard() {
   const [selectedDate, setSelectedDate] = useState(new Date());
+
+  const [notification, setNotification] = useState("");
+
+   // Demo: Show a new notification every 30 seconds
+  useEffect(() => {
+    let idx = 0;
+    setNotification(demoNotifications[idx]);
+    const interval = setInterval(() => {
+      idx = (idx + 1) % demoNotifications.length;
+      setNotification(demoNotifications[idx]);
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const holiday = holidays.find(h =>
+      isSameDay(h.date, selectedDate)
+    );
+    if (holiday) {
+      setNotification(`Holiday: ${holiday.name}`);
+    } else {
+      setNotification("");
+    }
+  }, [selectedDate]);
   return (
     <div className="flex min-h-screen gap-2 bg-[#f5f8fe]">
       {/* Sidebar */}
@@ -95,14 +93,19 @@ function ParentDashboard() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col p-2">
         {/* Topbar */}
-        <DashboardHeader holder="Search" text="Dashboard" />
+        <DashboardHeader holder="Search" text="Dashboard" notification={notification} />
 
+        {notification && (
+          <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 rounded">
+            {notification}
+          </div>
+        )}
         {/* Main Dashboard Widgets */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-20 px-2 md:px-0">
           {/* Score Chart */}
           <div className="w-full max-w-5xl mx-auto p-4 md:p-6 lg:p-8 bg-white rounded-lg shadow-md">
             <h2 className="text-xl font-semibold mb-4 text-gray-800">Scores</h2>
-<BarGraph/>
+            <BarGraph />
             {/* <div className="w-full h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={barData}>
@@ -137,24 +140,23 @@ function ParentDashboard() {
 
           {/* Upcoming Classes */}
           <div className="bg-white rounded-xl shadow p-6 min-h-[320px] flex flex-col">
-          <h3 className="text-lg font-semibold mb-2">Upcoming Classes</h3>
-      <div className="text-sm text-gray-600 mb-2">October 2024</div>
-      <div className="grid grid-cols-7 gap-2 text-center text-sm">
-        {days.map((day) => (
-          <div key={day} className="font-medium text-gray-500">{day}</div>
-        ))}
-        {Array.from({ length: 1 }, (_, i) => <div key={`spacer-${i}`} />)}
-        {dates.map((date) => (
-          <div
-            key={date}
-            className={`p-1 rounded-full ${
-              eventDates.includes(date) ? 'bg-blue-600 text-white font-bold' : 'text-gray-800'
-            }`}
-          >
-            {date}
-          </div>
-        ))}
-      </div>
+            <h3 className="text-lg font-semibold mb-2">Upcoming Classes</h3>
+            <div className="text-sm text-gray-600 mb-2">October 2024</div>
+            <div className="grid grid-cols-7 gap-2 text-center text-sm">
+              {days.map((day) => (
+                <div key={day} className="font-medium text-gray-500">{day}</div>
+              ))}
+              {Array.from({ length: 1 }, (_, i) => <div key={`spacer-${i}`} />)}
+              {dates.map((date) => (
+                <div
+                  key={date}
+                  className={`p-1 rounded-full ${eventDates.includes(date) ? 'bg-blue-600 text-white font-bold' : 'text-gray-800'
+                    }`}
+                >
+                  {date}
+                </div>
+              ))}
+            </div>
             {/* Events */}
             <div className="flex flex-col gap-2">
               {events.map((event, idx) => (
