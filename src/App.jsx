@@ -31,6 +31,7 @@ import Users from "./admin/Users";
 import NewUser from "./admin/NewUser";
 import Report from "./admin/Report";
 import Transcript from "./parent/components/Transcript";
+import Error from "./Error";
 // import { CoursePage } from "./student/CoursesComponent";
 
 
@@ -92,6 +93,7 @@ const App = () => {
           <Route path="users" element={<Users />} />
           <Route path="users/new-user" element={<NewUser />} />
           <Route path="reports" element={<Report />} />
+          <Route path="*" element={<Error />} />
         </Route>
         {/*end of  admin section */}
       </Routes>
