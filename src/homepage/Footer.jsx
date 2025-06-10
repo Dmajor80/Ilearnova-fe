@@ -48,8 +48,8 @@ export default function Footer() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br  flex flex-col justify-end w-full">
-      <footer className="relative bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 text-white overflow-hidden">
+    <div className="min-h-screen   flex flex-col justify-end w-full ">
+      <footer className="relative  text-white overflow-hidden">
         {/* Animated background elements */}
         <div className="absolute inset-0">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 animate-pulse"></div>

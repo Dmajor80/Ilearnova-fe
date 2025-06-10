@@ -117,7 +117,7 @@ const Overview = () => {
         style={fadeInUp(0.1)}
       >
         <div className="flex items-center">
-          <h1 className="text-[12px] sm:lg:text-[14px] md:text-[16px] lg:text-[18px] font-medium text-[rgba(51, 51, 51, 1)]">
+          <h1 className="text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px] font-medium text-[rgba(51, 51, 51, 1)]">
             Overview
           </h1>
         </div>
@@ -357,12 +357,12 @@ const Overview = () => {
           {/* end of calender */}
 
           {/* class */}
-          <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] max-w-[500px] sm:w-[350px] h-[100px]">
-            <div className="flex items-center gap-[2rem]">
+          <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] max-w-[500px] sm:w-[350px] max-h-[400px] h-[200px] lg:h-[100px]">
+            <div className="flex flex-col lg:flex-row items-center gap-[2rem] w-fit">
               <img src={chemistry} alt="" />
               <div>
                 <p
-                  className="text-[12px] sm:lg:text-[14px] md:text-[16px] lg:text-[18px] font-medium"
+                  className="text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px] font-medium "
                   style={{ color: "rgba(51, 51, 51, 1)" }}
                 >
                   Chemistry Practical
@@ -379,12 +379,12 @@ const Overview = () => {
           {/* end of class */}
 
           {/* class */}
-          <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] max-w-[500px] sm:w-[350px] h-[100px]">
-            <div className="flex items-center gap-[2rem]">
+          <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] max-w-[500px] sm:w-[350px] max-h-[400px] h-[200px] lg:h-[100px]">
+            <div className="flex flex-col lg:flex-row items-center gap-[2rem] w-fit">
               <img src={chemistry} alt="" />
               <div>
                 <p
-                  className="text-[12px] sm:lg:text-[14px] md:text-[16px] lg:text-[18px] font-medium"
+                  className="text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px] font-medium "
                   style={{ color: "rgba(51, 51, 51, 1)" }}
                 >
                   Chemistry Practical
@@ -401,12 +401,12 @@ const Overview = () => {
           {/* end of class */}
 
           {/* class */}
-          <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] max-w-[500px] sm:w-[350px] h-[100px]">
-            <div className="flex items-center gap-[2rem]">
+          <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] max-w-[500px] sm:w-[350px] max-h-[400px] h-[200px] lg:h-[100px]">
+            <div className="flex flex-col lg:flex-row items-center gap-[2rem] w-fit">
               <img src={chemistry} alt="" />
               <div>
                 <p
-                  className="text-[12px] sm:lg:text-[14px] md:text-[16px] lg:text-[18px] font-medium"
+                  className="text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px] font-medium "
                   style={{ color: "rgba(51, 51, 51, 1)" }}
                 >
                   Chemistry Practical
@@ -436,12 +436,12 @@ const Overview = () => {
               </p>
             </div>
             {/* class */}
-            <div className="bg-white p-4 rounded-xl shadow-sm mb-[1.5rem]">
-              <div className="flex items-center gap-[2rem]">
+            <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] max-w-[500px] sm:w-[300px] max-h-[400px] h-[200px] lg:h-[100px]">
+              <div className="flex flex-col lg:flex-row items-center gap-[2rem] w-fit">
                 <img src={chemistry} alt="" />
                 <div>
                   <p
-                    className="text-[12px] sm:lg:text-[14px] md:text-[16px] lg:text-[18px] font-medium"
+                    className="text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px] font-medium "
                     style={{ color: "rgba(51, 51, 51, 1)" }}
                   >
                     Chemistry Practical
@@ -457,12 +457,12 @@ const Overview = () => {
             </div>
             {/* end of class */}
             {/* class */}
-            <div className="bg-white p-4 rounded-xl shadow-sm mb-[1.5rem]">
-              <div className="flex items-center gap-[2rem]">
+            <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] max-w-[500px] sm:w-[300px] max-h-[400px] h-[200px] lg:h-[100px]">
+              <div className="flex flex-col lg:flex-row items-center gap-[2rem] w-fit">
                 <img src={chemistry} alt="" />
                 <div>
                   <p
-                    className="text-[12px] sm:lg:text-[14px] md:text-[16px] lg:text-[18px] font-medium"
+                    className="text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px] font-medium "
                     style={{ color: "rgba(51, 51, 51, 1)" }}
                   >
                     Chemistry Practical
@@ -478,12 +478,12 @@ const Overview = () => {
             </div>
             {/* end of class */}
             {/* class */}
-            <div className="bg-white p-4 rounded-xl shadow-sm mb-[1.5rem]">
-              <div className="flex items-center gap-[2rem]">
+            <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] max-w-[500px] sm:w-[300px] max-h-[400px] h-[200px] lg:h-[100px]">
+              <div className="flex flex-col lg:flex-row items-center gap-[2rem] w-fit">
                 <img src={chemistry} alt="" />
                 <div>
                   <p
-                    className="text-[12px] sm:lg:text-[14px] md:text-[16px] lg:text-[18px] font-medium"
+                    className="text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px] font-medium "
                     style={{ color: "rgba(51, 51, 51, 1)" }}
                   >
                     Chemistry Practical
@@ -510,8 +510,10 @@ const Overview = () => {
           style={fadeInUp(0.7)}
         >
           <div className="flex justify-between items-center mb-4">
-            <h3 className="font-semibold text-gray-800">Performance</h3>
-            <button className="text-sm text-gray-500 flex items-center">
+            <h3 className=" text-[12px] lg:text-[16px] font-semibold text-gray-800">
+              Performance
+            </h3>
+            <button className=" text-[12px] lg:text-[16px] text-gray-500 flex items-center">
               This Week <ChevronDown size={14} />
             </button>
           </div>
@@ -543,8 +545,10 @@ const Overview = () => {
           style={fadeInUp(0.8)}
         >
           <div className="flex justify-between items-center mb-4">
-            <h3 className="font-semibold text-gray-800">Weekly Progress</h3>
-            <button className="text-sm text-gray-500 flex items-center">
+            <h3 className=" text-[12px] lg:text-[16px] font-semibold text-gray-800">
+              Weekly Progress
+            </h3>
+            <button className="text-[12px] lg:text-[16px] text-gray-500 flex items-center">
               Last 7 Days <ChevronDown size={14} />
             </button>
           </div>

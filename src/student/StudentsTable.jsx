@@ -114,8 +114,10 @@ const StudentsTable = () => {
   return (
     <div className="bg-white rounded-xl shadow-sm p-4" style={fadeInUp(0.9)}>
       <div className="flex justify-between items-center mb-4">
-        <h3 className="font-semibold text-gray-800">Students Ranking</h3>
-        <button className="text-blue-600 text-sm flex items-center">
+        <h3 className=" text-[12px] lg:text-[16px] font-semibold text-gray-800">
+          Students Ranking
+        </h3>
+        <button className="text-blue-600 text-[12px] lg:text-[16px] flex items-center">
           See All Students <ChevronRight size={16} />
         </button>
       </div>

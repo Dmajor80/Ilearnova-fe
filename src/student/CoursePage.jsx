@@ -22,7 +22,7 @@ export default function CoursePage() {
       thumbnail: "/api/placeholder/300/200",
     },
     {
-      id: 2,
+      // id: 2,
       title: "Definition of Physics",
       duration: "5:30",
       thumbnail: "/api/placeholder/300/200",
@@ -129,16 +129,16 @@ export default function CoursePage() {
               </div>
 
               {/* Lesson Info */}
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex   items-center justify-between mb-6">
                 <div>
-                  <p className="text-sm text-gray-500 mb-1">
+                  <p className="text-[8px] lg:text-[14px] text-gray-500 mb-1">
                     Lesson {currentLesson}
                   </p>
-                  <h2 className="text-2xl font-bold text-gray-900">
+                  <h2 className="text-[10px] sm:text-[12px] lg:text-[24px] font-bold text-gray-900">
                     {currentLessonData?.title}
                   </h2>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex  items-center space-x-2">
                   <button
                     onClick={handlePrevious}
                     disabled={currentLesson === 1}

@@ -14,7 +14,6 @@ import {
   Sparkles,
 } from "lucide-react";
 
-
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
@@ -175,7 +174,7 @@ const LoginPage = () => {
                 Or login as:
               </p>
               <div className="flex items-center gap-2 sm:gap-3 justify-center flex-wrap">
-                <Link to="/teacher-login">
+                <Link to="/login">
                   <button className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-xs text-white hover:from-orange-600 hover:to-red-600 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg ring-2 ring-orange-300">
                     Teacher
                   </button>

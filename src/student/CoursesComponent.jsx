@@ -234,20 +234,20 @@ export function CoursePage() {
             </div>
 
             {/* Lesson Info */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6">
               <div>
                 <p className="text-sm text-gray-500 mb-1">
                   Lesson {currentLesson}
                 </p>
-                <h2 className="text-2xl font-bold text-gray-900">
+                <h2 className="text-[12px] sm:text-[14px] md:text-[18px] lg:text-[24px] font-bold text-gray-900">
                   {currentLessonData?.title}
                 </h2>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 mt-3.5 lg:mt-0">
                 <button
                   onClick={handlePrevious}
                   disabled={currentLesson === 1}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 transition-colors"
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300 transition-colors "
                 >
                   Previous
                 </button>
@@ -264,13 +264,13 @@ export function CoursePage() {
             {/* Navigation Tabs */}
             <div className="border-b border-gray-200 mb-6">
               <nav className="flex space-x-8">
-                <button className="border-b-2 border-blue-600 py-2 px-1 text-sm font-medium text-blue-600">
+                <button className="border-b-2 border-blue-600 py-2 px-1 text-[8px] sm:text-[10px] md:text-[11px] lg:text-[12pxs] font-medium text-blue-600">
                   Teacher's Note
                 </button>
-                <button className="py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700">
+                <button className="py-2 px-1 text-[8px] sm:text-[10px] md:text-[11px] lg:text-[12pxs] font-medium text-gray-500 hover:text-gray-700">
                   Exercises
                 </button>
-                <button className="py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700">
+                <button className="py-2 px-1 text-[8px] sm:text-[10px] md:text-[11px] lg:text-[12pxs] font-medium text-gray-500 hover:text-gray-700">
                   Video Transcript
                 </button>
               </nav>
