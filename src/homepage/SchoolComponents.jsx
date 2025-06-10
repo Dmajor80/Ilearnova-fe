@@ -329,6 +329,7 @@ const StatsSection = () => {
 // const EventsSection = () => {
 //   const [currentEvent, setCurrentEvent] = useState(0);
 
+
 //   const events = [
 //     {
 //       title: "Science Fair 2024",
