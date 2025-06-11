@@ -22,22 +22,12 @@ const paymentMethods = [
   {
     value: "card",
     label: "Credit Card/Debit Card",
-    icon: "/mastercard.png", // Replace with your icon path
+    icon: "/mastercard.png",
   },
   {
     value: "bank",
     label: "Bank Transfer",
     icon: "/Yandex.png",
-  },
-  {
-    value: "paypal",
-    label: "Paypal",
-    icon: "/paypal.png",
-  },
-  {
-    value: "stripe",
-    label: "Stripe",
-    icon: "/stripe.png",
   },
 ];
 const bankAccounts = [
@@ -75,7 +65,7 @@ export default function PaymentProcess() {
   const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
   const [cardName, setCardName] = useState("");
-  const [reviewAgreed, setReviewAgreed] = useState("");
+  // const [reviewAgreed, setReviewAgreed] = useState("");
 
   // Format card number as "1234 5678 9012 3456"
   const handleCardNumberChange = (e) => {
@@ -102,11 +92,11 @@ export default function PaymentProcess() {
   };
 
   // Validation for card form
-  const isCardFormValid =
-    cardName.trim().length > 0 &&
-    cardNumber.replace(/\s/g, "").length === 16 &&
-    /^\d{2} \/ \d{2}$/.test(expiry) &&
-    cvv.replace(/\s/g, "").length >= 3;
+  // const isCardFormValid =
+  //   cardName.trim().length > 0 &&
+  //   cardNumber.replace(/\s/g, "").length === 16 &&
+  //   /^\d{2} \/ \d{2}$/.test(expiry) &&
+  //   cvv.replace(/\s/g, "").length >= 3;
 
   const handleProceed = () => {
     if (currentStep < steps.length - 1) setCurrentStep(currentStep + 1);
@@ -166,14 +156,14 @@ export default function PaymentProcess() {
               <React.Fragment key={step}>
                 <div className="flex flex-col items-center">
                   <div
-                    className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
+                    className={`w-3 h-3 rounded-full flex items-center justify-center text-xs font-bold
                       ${idx <= currentStep ? "bg-[#1736a4] text-white" : "bg-gray-200 text-gray-400"}
                     `}
                   >
-                    {idx + 1}
+                    {/* {idx + 1} */}
                   </div>
                   <span className={`mt-2 text-xs font-semibold ${idx === currentStep ? "text-[#1736a4]" : "text-gray-400"}`}>
-                    {step}
+                    {/* {step} */}
                   </span>
                 </div>
                 {idx < steps.length - 1 && (
@@ -307,7 +297,6 @@ export default function PaymentProcess() {
           </div>
         )}
 
-  {/* Step 3: Payment Details Entry or Bank/PayPal/Stripe UI */}
         {currentStep === 2 && (
           <>
             {/* Bank Transfer UI */}
@@ -344,32 +333,13 @@ export default function PaymentProcess() {
                 </div>
                 <button
                   className="w-full bg-[#1736a4] text-white py-3 rounded-lg font-semibold hover:bg-blue-900 transition mt-4"
-                  onClick={handleReturn}
+                  onClick={() => setCurrentStep(4)}
                   type="button"
                 >
-                  Go Back
-                </button>
-              </div>
-            )}
-
-            {/* PayPal UI */}
-            {selectedMethod === "paypal" && (
-              <div className="w-full max-w-md mx-auto bg-white rounded-xl shadow p-8 flex flex-col items-center gap-6">
-                <img src="/paypal.png" alt="PayPal" className="w-24 mb-2" />
-                <div className="text-lg font-semibold text-center mb-2">Pay with PayPal</div>
-                <div className="text-gray-600 text-center mb-4">
-                  You will be redirected to PayPal to complete your payment securely.
-                </div>
-                <button
-                  className="w-full bg-yellow-400 text-black py-3 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-yellow-500 transition"
-                  onClick={() => alert("Redirect to PayPal (integration needed)")}
-                  type="button"
-                >
-                  <img src="/paypal.png" alt="PayPal" className="w-6" />
-                  Pay with PayPal
+                  I've Sent the Money
                 </button>
                 <button
-                  className="w-full bg-[#1736a4] text-white py-3 rounded-lg font-semibold hover:bg-blue-900 transition"
+                  className="w-full bg-gray-200 text-[#1736a4] py-3 rounded-lg font-semibold hover:bg-gray-300 transition mt-2"
                   onClick={handleReturn}
                   type="button"
                 >
@@ -378,59 +348,8 @@ export default function PaymentProcess() {
               </div>
             )}
 
-            {/* Stripe UI */}
-            {selectedMethod === "stripe" && (
-              <div className="w-full max-w-md mx-auto bg-white rounded-xl shadow p-8 flex flex-col items-center gap-6">
-                <img src="/stripe.png" alt="Stripe" className="w-24 mb-2" />
-                <div className="text-lg font-semibold text-center mb-2">Pay with Stripe</div>
-                <div className="text-gray-600 text-center mb-4">
-                  Enter your card details below to pay securely with Stripe.
-                </div>
-                {/* Stripe Card Form (mockup, replace with real Stripe Elements for production) */}
-                <form className="w-full flex flex-col gap-4">
-                  <input
-                    type="text"
-                    className="w-full border border-gray-300 rounded px-3 py-2"
-                    placeholder="Card Number"
-                    disabled
-                    value="•••• •••• •••• ••••"
-                  />
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      className="w-full border border-gray-300 rounded px-3 py-2"
-                      placeholder="MM / YY"
-                      disabled
-                      value="MM / YY"
-                    />
-                    <input
-                      type="text"
-                      className="w-full border border-gray-300 rounded px-3 py-2"
-                      placeholder="CVC"
-                      disabled
-                      value="CVC"
-                    />
-                  </div>
-                  <button
-                    className="w-full bg-[#635bff] text-white py-3 rounded-lg font-bold hover:bg-[#5046e5] transition"
-                    onClick={e => { e.preventDefault(); alert("Stripe payment (integration needed)"); }}
-                    type="submit"
-                  >
-                    Pay with Stripe
-                  </button>
-                </form>
-                <button
-                  className="w-full bg-[#1736a4] text-white py-3 rounded-lg font-semibold hover:bg-blue-900 transition"
-                  onClick={handleReturn}
-                  type="button"
-                >
-                  Previous
-                </button>
-              </div>
-            )}
-
-            {/* Card UI (default) */}
-            {(selectedMethod === "card" || !["bank", "paypal", "stripe"].includes(selectedMethod)) && (
+            {/* Card UI */}
+            {selectedMethod === "card" && (
               <div className="flex flex-col lg:flex-row gap-8 items-center justify-center min-h-[400px]">
                 {/* Payment Details Form */}
                 <div className="w-full max-w-md">
@@ -438,9 +357,40 @@ export default function PaymentProcess() {
                     Step 3: Payment Details Entry
                   </div>
                   <div className="text-sm text-gray-500 mb-4 text-center lg:text-left">
-                    Securely Enter Your Payment Details Below to Complete Your Transaction
+                    Use the dummy card below to test payment.<br />
+                    <span className="font-semibold">Card Number:</span> 4242 4242 4242 4242<br />
+                    <span className="font-semibold">Expiry:</span> 12 / 34<br />
+                    <span className="font-semibold">CVV:</span> 123
                   </div>
-                  <form className="bg-white rounded-xl shadow p-6 mb-6 flex flex-col gap-4">
+                  <form
+                    className="bg-white rounded-xl shadow p-6 mb-6 flex flex-col gap-4"
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      // Card validation (keep as in your code)
+                      if (
+                        cardName.trim().length > 0 &&
+                        cardNumber.replace(/\s/g, "").length === 16 &&
+                        /^\d{2} \/ \d{2}$/.test(expiry) &&
+                        cvv.replace(/\s/g, "").length >= 3
+                      ) {
+                        // Dummy validation for the default card
+                        if (
+                          cardNumber.replace(/\s/g, "") === "4242424242424242" &&
+                          expiry === "12 / 34" &&
+                          cvv.replace(/\s/g, "") === "123"
+                        ) {
+                          // Simulate sending email (replace with real API/email logic)
+                          await new Promise((res) => setTimeout(res, 1000));
+                          alert("Payment successful! A receipt has been sent to your email.");
+                          setCurrentStep(4);
+                        } else {
+                          alert("Invalid card details. Use the dummy card provided above.");
+                        }
+                      } else {
+                        alert("Please fill all card details correctly and agree to the consent.");
+                      }
+                    }}
+                  >
                     <div>
                       <label className="block text-xs text-gray-500 mb-1">Name on Card</label>
                       <input
@@ -449,13 +399,14 @@ export default function PaymentProcess() {
                         placeholder="Priscilla Daniel"
                         value={cardName}
                         onChange={e => setCardName(e.target.value)}
+                        required
                       />
                     </div>
                     <div>
                       <label className="block text-xs text-gray-500 mb-1">Card Number</label>
                       <input
                         className="w-full border focus:outline-none border-gray-300 rounded px-3 py-2"
-                        placeholder="5679 7378 4037 2122"
+                        placeholder="4242 4242 4242 4242"
                         maxLength={19}
                         inputMode="numeric"
                         value={cardNumber}
@@ -470,7 +421,7 @@ export default function PaymentProcess() {
                         <input
                           type="text"
                           className="w-full border focus:outline-none border-gray-300 rounded px-3 py-2"
-                          placeholder="MM / YY"
+                          placeholder="12 / 34"
                           maxLength={7}
                           inputMode="numeric"
                           value={expiry}
@@ -484,7 +435,7 @@ export default function PaymentProcess() {
                         <input
                           type="password"
                           className="w-full border focus:outline-none border-gray-300 rounded px-3 py-2"
-                          placeholder="CVV"
+                          placeholder="123"
                           maxLength={5}
                           inputMode="numeric"
                           value={cvv}
@@ -514,43 +465,41 @@ export default function PaymentProcess() {
                         <span className="text-xs text-gray-600">Add New Card</span>
                       </label>
                     </div>
+                    {/* Payment Summary */}
+                    <div className="bg-white rounded-xl shadow p-4 mb-4">
+                      <div className="flex justify-between text-sm mb-2">
+                        <span>Subtotal</span>
+                        <span>${fee ? fee.price : "100.00"}</span>
+                      </div>
+                      <div className="flex justify-between text-sm mb-2">
+                        <span>Discount/ Scholarship</span>
+                        <span>$0.00</span>
+                      </div>
+                      <div className="flex justify-between text-sm mb-2">
+                        <span>Service Charge</span>
+                        <span>$0.00</span>
+                      </div>
+                      <div className="flex justify-between text-base font-semibold mt-2">
+                        <span className="text-[#1736a4]">Total Amount Due</span>
+                        <span className="text-[#1736a4]">${fee ? fee.price : "100.00"}</span>
+                      </div>
+                    </div>
+                    <div className="flex gap-4 items-center justify-between">
+                      <button
+                        className="w-full bg-[#1736a4] text-white py-3 rounded-lg font-semibold hover:bg-blue-900 transition"
+                        onClick={handleReturn}
+                        type="button"
+                      >
+                        Previous
+                      </button>
+                      <button
+                        className={`w-full bg-[#1736a4] text-white py-3 rounded-lg font-semibold hover:bg-blue-900 transition`}
+                        type="submit"
+                      >
+                        Pay Now
+                      </button>
+                    </div>
                   </form>
-                  {/* Payment Summary */}
-                  <div className="bg-white rounded-xl shadow p-4 mb-4">
-                    <div className="flex justify-between text-sm mb-2">
-                      <span>Subtotal</span>
-                      <span>${fee ? fee.price : "100.00"}</span>
-                    </div>
-                    <div className="flex justify-between text-sm mb-2">
-                      <span>Discount/ Scholarship</span>
-                      <span>$0.00</span>
-                    </div>
-                    <div className="flex justify-between text-sm mb-2">
-                      <span>Service Charge</span>
-                      <span>$0.00</span>
-                    </div>
-                    <div className="flex justify-between text-base font-semibold mt-2">
-                      <span className="text-[#1736a4]">Total Amount Due</span>
-                      <span className="text-[#1736a4]">${fee ? fee.price : "100.00"}</span>
-                    </div>
-                  </div>
-                  <div className="flex gap-4 items-center justify-between">
-                    <button
-                      className="w-full bg-[#1736a4] text-white py-3 rounded-lg font-semibold hover:bg-blue-900 transition"
-                      onClick={handleReturn}
-                      type="button"
-                    >
-                      Previous
-                    </button>
-                    <button
-                      className={`w-full bg-[#1736a4] text-white py-3 rounded-lg font-semibold hover:bg-blue-900 transition ${!isCardFormValid ? "opacity-50 cursor-not-allowed" : ""}`}
-                      onClick={handleProceed}
-                      type="button"
-                      disabled={!isCardFormValid}
-                    >
-                      Review Payment
-                    </button>
-                  </div>
                 </div>
                 {/* Card Illustration */}
                 <div className="w-full hidden lg:block max-w-md justify-center">
@@ -565,81 +514,14 @@ export default function PaymentProcess() {
             )}
           </>
         )}
-        {/* Step 4: Double Check Information */}
-        {currentStep === 3 && (
-          <div className="flex flex-col lg:flex-row gap-8 items-center justify-center min-h-[400px]">
-            {/* Review Payment Details */}
-            <div className="w-full max-w-md">
-              <div className="text-xl font-semibold mb-2 text-center lg:text-left">
-                Step 4: Review Payment Details
-              </div>
-              <div className="text-sm text-gray-500 mb-4 text-center lg:text-left">
-                Double-check your payment details before confirming to ensure a smooth transaction.
-              </div>
-              <div className="bg-white rounded-xl shadow p-4 mb-4">
-                <div className="flex justify-between text-sm mb-2">
-                  <span>Fee</span>
-                  <span className="font-semibold">{fee ? fee.title : "Tuition Fee"}</span>
-                </div>
-                <div className="flex justify-between text-sm mb-2">
-                  <span>Selected Payment Method</span>
-                  <span className="capitalize font-semibold">{selectedMethod || "Card"}</span>
-                </div>
-                <div className="flex justify-between text-sm mb-2">
-                  <span>Additional Charges</span>
-                  <span>$0.00</span>
-                </div>
-              </div>
-              <label className="flex items-center gap-2 mb-4">
-                <input
-                  type="checkbox"
-                  checked={!!reviewAgreed}
-                  onChange={e => setReviewAgreed(e.target.checked)}
-                  className="form-checkbox rounded border-gray-300"
-                />
-                <span className="text-xs text-gray-600">
-                  I agree to the terms and conditions, including any applicable service fees, and authorize the payment as outlined above.
-                </span>
-              </label>
-
-              <div className="flex gap-4 items-center justify-between">
-                <button
-                  className="w-full bg-[#1736a4] text-white py-3 rounded-lg font-semibold hover:bg-blue-900 transition"
-                  onClick={handleReturn}
-                  type="button"
-                >
-                  Previous
-                </button>
-                <button
-                  className="w-full bg-[#1736a4] text-white py-3 rounded-lg font-semibold hover:bg-blue-900 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                  onClick={handleProceed}
-                  type="button"
-                  disabled={!reviewAgreed}
-                >
-                  Confirm & Pay
-                </button>
-              </div>
-
-            </div>
-            {/* Card Illustration */}
-            <div className="w-full hidden lg:block max-w-md justify-center">
-              <img
-                src="/bankcard.png"
-                alt="Cards Illustration"
-                loading="lazy"
-                className="rounded-2xl w-full max-w-xs"
-              />
-            </div>
-          </div>
-        )}
 
         {/* Step 5: Complete */}
-      {currentStep === 4 && (
-  <div className="flex flex-col items-center justify-center min-h-[300px]">
-    <div className="text-xl font-semibold mb-6 text-center">
-      Step 5: Confirmation
-    </div>
-     <div className="w-full hidden lg:block max-w-md justify-center">
+        {currentStep === 4 && (
+          <div className="flex flex-col items-center justify-center min-h-[300px]">
+            <div className="text-xl font-semibold mb-6 text-center">
+              Step 5: Confirmation
+            </div>
+            <div className="">
               <img
                 src="/success.png"
                 alt="Cards Illustration"
@@ -647,23 +529,21 @@ export default function PaymentProcess() {
                 className="w-full max-w-xs"
               />
             </div>
-    <div className="flex flex-col items-center mb-6">
-     
-           
-      <div className="text-2xl font-bold text-green-600 mb-2">Payment Successful</div>
-      <div className="text-gray-600 text-center">
-        Your payment was successful! Thank you. A receipt has been sent to your email.
-      </div>
-    </div>
-    <button
-      className="w-full max-w-md bg-[#1736a4] cursor-pointer text-white py-3 rounded-lg font-semibold hover:bg-blue-900 transition"
-      onClick={() => window.location.href = "/parent-payment"}
-      type="button"
-    >
-      Return to Dashboard
-    </button>
-  </div>
-)}
+            <div className="flex flex-col items-center mb-6">
+              <div className="text-2xl font-bold text-green-600 mb-2">Payment Successful</div>
+              <div className="text-gray-600 text-center">
+                Your payment was successful! Thank you. A receipt has been sent to your email.
+              </div>
+            </div>
+            <button
+              className="w-full max-w-md bg-[#1736a4] cursor-pointer text-white py-3 rounded-lg font-semibold hover:bg-blue-900 transition"
+              onClick={() => window.location.href = "/parent-payment"}
+              type="button"
+            >
+              Return to Dashboard
+            </button>
+          </div>
+        )}
       </main>
     </div>
   );
