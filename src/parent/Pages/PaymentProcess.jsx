@@ -537,7 +537,7 @@ export default function PaymentProcess() {
             </div>
             <button
               className="w-full max-w-md bg-[#1736a4] cursor-pointer text-white py-3 rounded-lg font-semibold hover:bg-blue-900 transition"
-              onClick={() => window.location.href = "/parent-payment"}
+              onClick={() => window.location.href = "/parent-payments"}
               type="button"
             >
               Return to Dashboard

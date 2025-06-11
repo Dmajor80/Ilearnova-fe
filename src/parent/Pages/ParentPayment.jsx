@@ -192,7 +192,7 @@ function ParentPayment() {
                                 </tr>
                             )}
                             {filteredPayments.map((row, idx) => (
-                                <tr key={idx} className="border-t">
+                                <tr key={idx} className="border-red-400">
                                     <td className="py-3 px-4">{row.date}</td>
                                     <td className="py-3 px-4">{row.id}</td>
                                     <td className="py-3 px-4">{row.description}</td>
