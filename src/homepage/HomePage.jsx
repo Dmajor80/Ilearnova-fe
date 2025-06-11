@@ -5,6 +5,7 @@ import { useInView } from "react-intersection-observer";
 
 import Footer from "../homepage/Footer";
 import SchoolComponents from "../homepage/SchoolComponents";
+import EducationLanding from "../homepage/EducationLanding";
 import IlearnovaHero from "./IlearnovaHero";
 import SchoolHeroSection from "./SchoolHeroSection";
 
@@ -272,7 +273,7 @@ const HomePage = () => {
             </div>
           </FadeInUp>
         </div>
-
+        <EducationLanding />
         {/* Teachers & Learners Section */}
         <SchoolHeroSection />
 

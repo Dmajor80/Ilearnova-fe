@@ -27,7 +27,7 @@ const IlearnovaHero = () => {
       icon: <GraduationCap className="w-6 h-6 sm:w-8 sm:h-8" />,
       color: "from-purple-500 via-purple-600 to-blue-600",
       bgColor: "bg-gradient-to-br from-purple-500/20 to-blue-500/20",
-      goto: "/login",
+      goto: "/student-login",
     },
     {
       title: "EMPOWER YOUR TEACHING",
@@ -37,7 +37,7 @@ const IlearnovaHero = () => {
       icon: <BookOpen className="w-6 h-6 sm:w-8 sm:h-8" />,
       color: "from-emerald-500 via-green-600 to-teal-600",
       bgColor: "bg-gradient-to-br from-emerald-500/20 to-teal-500/20",
-      goto: "/teacher-login",
+      goto: "/login",
     },
     {
       title: "TRACK THEIR PROGRESS",

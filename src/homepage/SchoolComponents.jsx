@@ -11,7 +11,8 @@ import {
   Play,
   Pause,
 } from "lucide-react";
-
+import { Link } from "react-router-dom";
+import EducationLanding from "./EducationLanding";
 // Features Section Component
 const FeaturesSection = () => {
   const [visibleCards, setVisibleCards] = useState(new Set());
@@ -193,9 +194,11 @@ const ProgramsSection = () => {
                   </p>
                 </div>
                 <div className="mt-4 md:mt-0">
-                  <span className="bg-white bg-opacity-20 px-4 py-2 rounded-full text-sm font-medium">
-                    Featured Program
-                  </span>
+                  <Link to="/student-login">
+                    <span className="bg-white bg-opacity-20 px-4 py-2 rounded-full text-sm font-medium text-[black]">
+                      Get Started
+                    </span>
+                  </Link>
                 </div>
               </div>
             </div>

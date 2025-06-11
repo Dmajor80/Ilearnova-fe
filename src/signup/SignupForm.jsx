@@ -4,13 +4,13 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export default function SignupForm() {
   const [formData, setFormData] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     username: "",
     email: "",
     code: "",
     password: "",
     passwordConfirm: "",
-    role: "student", // Default role
   });
 
   const [darkMode, setDarkMode] = useState(false);
@@ -166,32 +166,64 @@ export default function SignupForm() {
                           animate="animate"
                           exit="exit"
                         >
-                          <motion.div variants={itemVariants} className="mb-3">
-                            <label
-                              htmlFor="name"
-                              className={`ml-1.5 text-sm font-medium ${
-                                darkMode ? "text-white" : "text-navy-700"
-                              }`}
+                          <div className="flex flex-col lg:flex-row gap-4">
+                            <motion.div
+                              variants={itemVariants}
+                              className="mb-3"
                             >
-                              School name*
-                            </label>
-                            <motion.input
-                              whileFocus={{ scale: 1.01 }}
-                              type="text"
-                              id="name"
-                              required
-                              placeholder="Ilearnova schools"
-                              name="name"
-                              value={formData.name}
-                              onChange={handleChange}
-                              className={`mt-2 flex h-12 w-full items-center justify-center rounded-xl border p-3 text-sm outline-none ${
-                                darkMode
-                                  ? "bg-navy-800 border-gray-600 text-white"
-                                  : "bg-white border-gray-200 text-navy-700 border-[#d0d0d0]"
-                              } focus:border-[#6a53ff] transition-all duration-200`}
-                            />
-                          </motion.div>
-
+                              <label
+                                htmlFor="username"
+                                className={`ml-1.5 text-sm font-medium ${
+                                  darkMode ? "text-white" : "text-navy-700"
+                                }`}
+                              >
+                                First Name*
+                              </label>
+                              <motion.input
+                                whileFocus={{ scale: 1.01 }}
+                                type="text"
+                                id="firstName"
+                                required
+                                placeholder="Ayodele"
+                                name="firstName"
+                                value={formData.firstName}
+                                onChange={handleChange}
+                                className={`mt-2 flex h-12 w-full items-center justify-center rounded-xl border p-3 text-sm outline-none ${
+                                  darkMode
+                                    ? "bg-navy-800 border-gray-600 text-white"
+                                    : "bg-white  text-navy-700 border-[#d0d0d0]"
+                                } focus:border-[#6a53ff] transition-all duration-200`}
+                              />
+                            </motion.div>
+                            <motion.div
+                              variants={itemVariants}
+                              className="mb-3"
+                            >
+                              <label
+                                htmlFor="username"
+                                className={`ml-1.5 text-sm font-medium ${
+                                  darkMode ? "text-white" : "text-navy-700"
+                                }`}
+                              >
+                                Last Name*
+                              </label>
+                              <motion.input
+                                whileFocus={{ scale: 1.01 }}
+                                type="text"
+                                id="lastName"
+                                required
+                                placeholder="Kayode"
+                                name="lastName"
+                                value={formData.lastName}
+                                onChange={handleChange}
+                                className={`mt-2 flex h-12 w-full items-center justify-center rounded-xl border p-3 text-sm outline-none ${
+                                  darkMode
+                                    ? "bg-navy-800 border-gray-600 text-white"
+                                    : "bg-white border-gray-200 text-navy-700 border-[#d0d0d0]"
+                                } focus:border-[#6a53ff] transition-all duration-200`}
+                              />
+                            </motion.div>
+                          </div>
                           <motion.div variants={itemVariants} className="mb-3">
                             <label
                               htmlFor="username"
@@ -243,34 +275,6 @@ export default function SignupForm() {
                               } focus:border-[#6a53ff] transition-all duration-200`}
                             />
                           </motion.div>
-
-                          <motion.div variants={itemVariants} className="mb-3">
-                            <label
-                              htmlFor="role"
-                              className={`ml-1.5 text-sm font-medium ${
-                                darkMode ? "text-white" : "text-navy-700"
-                              }`}
-                            >
-                              Select Role*
-                            </label>
-                            <motion.select
-                              whileFocus={{ scale: 1.01 }}
-                              id="role"
-                              required
-                              name="role"
-                              value={formData.role}
-                              onChange={handleChange}
-                              className={`mt-2 flex h-12 w-full items-center justify-center rounded-xl border p-3 text-sm outline-none ${
-                                darkMode
-                                  ? "bg-navy-800 border-gray-600 text-white"
-                                  : "bg-white border-gray-200 text-navy-700 border-[#d0d0d0]"
-                              } focus:border-[#6a53ff] transition-all duration-200`}
-                            >
-                              <option value="student">Student</option>
-                              <option value="parent">Parent</option>
-                              <option value="teacher">Teacher</option>
-                            </motion.select>
-                          </motion.div>
                         </motion.div>
                       )}
 
@@ -282,7 +286,7 @@ export default function SignupForm() {
                           animate="animate"
                           exit="exit"
                         >
-                          <motion.div variants={itemVariants} className="mb-3">
+                          {/* <motion.div variants={itemVariants} className="mb-3">
                             <label
                               htmlFor="code"
                               className={`ml-1.5 text-sm font-medium ${
@@ -306,7 +310,7 @@ export default function SignupForm() {
                                   : "bg-white border-gray-200 text-navy-700 border-[#d0d0d0]"
                               } focus:border-[#6a53ff] transition-all duration-200`}
                             />
-                          </motion.div>
+                          </motion.div> */}
 
                           <motion.div variants={itemVariants} className="mb-3">
                             <label
@@ -355,7 +359,7 @@ export default function SignupForm() {
                               className={`mt-2 flex h-12 w-full items-center justify-center rounded-xl border p-3 text-sm outline-none ${
                                 darkMode
                                   ? "bg-navy-800 border-gray-600 text-white"
-                                  : "bg-white border-gray-200 text-navy-700 border-[#d0d0d0]"
+                                  : "bg-white  text-navy-700 border-[#d0d0d0]"
                               } focus:border-[#6a53ff] transition-all duration-200`}
                             />
                           </motion.div>

@@ -1,640 +1,422 @@
 import React, { useState } from "react";
-import { Calendar, Upload, X, Check, ArrowLeft } from "lucide-react";
-
-export default function IdCard() {
+import { Check, Upload, Edit, ChevronDown } from "lucide-react";
+import check from "../student/checkout.png";
+const IdCard = () => {
+  const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    dateOfBirth: "",
-    bio: "",
-    Sex: "",
-    Academic: "",
-    Session: "",
-    IssueDate: "",
-    ExpiryDate: "",
-    IdNumber: "",
-    Grade: "",
+    firstName: "Priscilla",
+    lastName: "Daniel",
+    dateOfBirth: "2000/04/27",
+    sex: "Female",
+    guardianDetails: "Mr & Mrs Priscilla Daniel",
+    academicHistory: "",
+    admissionLevel: "Primary",
+    documents: {
+      reportCard: false,
+      recommendationLetter: false,
+    },
   });
 
-  const [showModal, setShowModal] = useState(false);
-  const [uploadStep, setUploadStep] = useState("select");
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [showPreview, setShowPreview] = useState(false);
-  const [profileImageUrl, setProfileImageUrl] = useState(null);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
+  const updateFormData = (field, value) => {
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [field]: value,
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Form submitted:", formData);
+  const nextStep = () => {
+    if (currentStep < 3) setCurrentStep(currentStep + 1);
   };
 
-  const handleAddPicture = () => {
-    setShowModal(true);
-    setUploadStep("select");
-    setUploadProgress(0);
+  const prevStep = () => {
+    if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
-  const handleFileSelect = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setSelectedImage(file);
-      // Create a URL for the selected image
-      const imageUrl = URL.createObjectURL(file);
-      setProfileImageUrl(imageUrl);
-      simulateUpload();
-    }
-  };
+  const StepIndicator = () => (
+    <div className="flex items-center justify-center mb-8">
+      <div className="flex items-center space-x-4">
+        {[1, 2, 3].map((step) => (
+          <React.Fragment key={step}>
+            <div
+              className={`w-3 h-3 rounded-full ${
+                step <= currentStep ? "bg-blue-600" : "bg-gray-300"
+              }`}
+            />
+            {step < 3 && (
+              <div
+                className={`w-24 h-0.5 ${
+                  step < currentStep ? "bg-blue-600" : "bg-gray-300"
+                }`}
+              />
+            )}
+          </React.Fragment>
+        ))}
+      </div>
+    </div>
+  );
 
-  const simulateUpload = () => {
-    setUploadStep("uploading");
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += 10;
-      setUploadProgress(progress);
-      if (progress >= 100) {
-        clearInterval(interval);
-        setTimeout(() => {
-          setUploadStep("success");
-        }, 500);
-      }
-    }, 200);
-  };
+  const Step1PersonalInfo = () => (
+    <div className="  w-full">
+      {/* Header with decorative elements */}
+      <div className="relative bg-gradient-to-r from-blue-600 to-blue-700 rounded-t-lg p-8 mb-8">
+        <div className="absolute top-4 left-4 w-8 h-8 bg-green-400 rounded-full"></div>
+        <div className="absolute top-2 right-8 w-6 h-6 bg-yellow-400 rounded-full"></div>
+        <div className="absolute bottom-4 right-4 w-12 h-12 bg-gray-200 rounded-full"></div>
 
-  const closeModal = () => {
-    setShowModal(false);
-    setUploadStep("select");
-    setUploadProgress(0);
-    setSelectedImage(null);
-  };
-
-  const handleContinue = () => {
-    closeModal();
-  };
-
-  const handlePreviewId = () => {
-    setShowPreview(true);
-  };
-
-  const handleBackToForm = () => {
-    setShowPreview(false);
-  };
-
-  const downloadIdCard = () => {
-    // In a real implementation, this would generate and download a PDF or image
-    alert("ID Card download functionality would be implemented here");
-  };
-
-  // ID Card Preview Component
-  const IdCardPreview = () => (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="flex items-center mb-6">
-        <button
-          onClick={handleBackToForm}
-          className="flex items-center text-blue-600 hover:text-blue-800 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5 mr-2" />
-          Back to Form
-        </button>
+        <div className="text-center">
+          <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="text-2xl font-bold text-gray-800">+</div>
+          </div>
+          <h2 className="text-white font-semibold">
+            Step 1: Personal Information
+          </h2>
+        </div>
       </div>
 
-      <p className="text-[25px] p-[2rem] font-semibold">ID Card Preview</p>
+      <div className="space-y-6 px-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              First name*
+            </label>
+            <input
+              type="text"
+              value={formData.firstName}
+              onChange={(e) => updateFormData("firstName", e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Priscilla"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Last name*
+            </label>
+            <input
+              type="text"
+              value={formData.lastName}
+              onChange={(e) => updateFormData("lastName", e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Daniel"
+            />
+          </div>
+        </div>
 
-      <div className="flex justify-center">
-        <div className="bg-white rounded-lg shadow-lg p-0 max-w-[400px] overflow-hidden">
-          {/* Header with colorful design */}
-          <div className="relative">
-            <div className="h-32 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 relative overflow-hidden">
-              {/* Decorative elements */}
-              <div className="absolute -top-4 -left-4 w-16 h-16 bg-yellow-400 rounded-full opacity-80"></div>
-              <div className="absolute top-0 right-0 w-12 h-12 bg-green-400 rounded-full opacity-60"></div>
-              <div className="absolute -bottom-2 -right-2 w-20 h-20 bg-gray-200 rounded-full opacity-40"></div>
-              <div className="absolute bottom-0 left-4 w-8 h-8 bg-orange-400 rounded-full opacity-70"></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Date of Birth*
+            </label>
+            <input
+              type="text"
+              value={formData.dateOfBirth}
+              onChange={(e) => updateFormData("dateOfBirth", e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="2000/04/27"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Sex*
+            </label>
+            <input
+              type="text"
+              value={formData.sex}
+              onChange={(e) => updateFormData("sex", e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Female"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Guardian Details*
+            </label>
+            <input
+              type="text"
+              value={formData.guardianDetails}
+              onChange={(e) =>
+                updateFormData("guardianDetails", e.target.value)
+              }
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Mr & Mrs Priscilla Daniel"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Admission Level*
+            </label>
+            <div className="relative">
+              <select
+                value={formData.admissionLevel}
+                onChange={(e) =>
+                  updateFormData("admissionLevel", e.target.value)
+                }
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+              >
+                <option>Primary</option>
+                <option>Secondary</option>
+                <option>Tertiary</option>
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             </div>
+          </div>
+        </div>
 
-            {/* Profile Image */}
-            <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2">
-              <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center border-4 border-white shadow-lg overflow-hidden">
-                {profileImageUrl ? (
-                  <img
-                    src={profileImageUrl}
-                    alt="Profile"
-                    className="w-full h-full object-cover rounded-full"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gray-200 rounded-full flex items-center justify-center">
-                    <span className="text-gray-400 text-xs">No Photo</span>
-                  </div>
-                )}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Academic History*
+              <span className="text-xs text-gray-500 block">
+                Any previous school or background
+              </span>
+            </label>
+            <textarea
+              value={formData.academicHistory}
+              onChange={(e) =>
+                updateFormData("academicHistory", e.target.value)
+              }
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              rows="3"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Upload Document*
+            </label>
+            <div className="w-full px-4 py-12 border-2 border-dashed border-gray-300 rounded-lg text-center">
+              <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+              <p className="text-gray-500 text-sm">Upload documents</p>
+            </div>
+          </div>
+        </div>
+
+        <button
+          onClick={nextStep}
+          className="w-full bg-gray-400 hover:bg-gray-500 text-white font-semibold py-4 px-6 rounded-lg transition duration-200"
+        >
+          Proceed to Payment
+        </button>
+      </div>
+    </div>
+  );
+
+  const Step2Payment = () => (
+    <div className="w-full mx-auto">
+      <h2 className="text-xl font-semibold text-center mb-8">
+        Step 2: Make Payment
+      </h2>
+      <div className="flex items-center gap-[2rem] flex-col lg:flex-row">
+        <div>
+          {/* instruction */}
+          <div className="bg-white rounded-lg p-6 mb-6 max-w-[488px] h-[236px]">
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-2">Tuition Fee</h3>
+              <div className="text-3xl font-bold text-blue-600 mb-2">
+                $100
+                <span className="text-sm font-normal text-gray-500">
+                  /session
+                </span>
               </div>
+              <p className="text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px] text-[#333333]">
+                Empower your child’s learning journey for just $300 per session
+                – quality education, personalized attention, and a brighter
+                future.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={nextStep}
+            className="w-full bg-[#0D1D75] hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 mb-6"
+          >
+            Proceed to payment
+          </button>
+        </div>
+        {/* end of intruction */}
+        {/* Payment illustration */}
+
+        {/* <div className="bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg p-8 text-center">
+        <div className="relative">
+          <div className="w-32 h-20 bg-gray-800 rounded-lg mx-auto mb-4 relative">
+            <div className="absolute top-2 left-2 w-8 h-6 bg-gray-200 rounded"></div>
+            <div className="absolute bottom-2 right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+              <Check className="w-4 h-4 text-white" />
             </div>
           </div>
 
-          {/* Content */}
-          <div className="pt-16 pb-6 px-6">
-            {/* Logo */}
-            <div className="text-center mb-4">
-              <div className="flex items-center justify-center mb-2">
-                <div className="w-8 h-6 bg-gradient-to-r from-red-500 to-blue-500 rounded mr-2"></div>
-                <span className="font-bold text-lg">Ilearnova</span>
-              </div>
-            </div>
+          <div className="absolute top-0 left-4 w-6 h-6 bg-orange-400 rounded-full opacity-80"></div>
+          <div className="absolute top-8 right-8 w-4 h-4 bg-yellow-400 rounded-full opacity-60"></div>
+          <div className="absolute bottom-4 left-8 w-8 h-8 bg-red-400 rounded-full opacity-70"></div>
+          <div className="absolute bottom-0 right-4 w-6 h-6 bg-purple-400 rounded-full opacity-80"></div>
+        </div>     
+     </div> */}
 
-            {/* Student Name */}
-            <div className="text-center mb-6">
-              <h2 className="text-xl font-bold text-gray-800">
-                {formData.firstName} {formData.lastName}
-              </h2>
-              <p className="text-sm text-gray-600">{formData.IdNumber}</p>
-            </div>
-
-            {/* Details Grid */}
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span className="font-medium text-gray-700">Sex</span>
-                <span className="text-gray-600">
-                  {formData.Sex || "Not specified"}
-                </span>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="font-medium text-gray-700">
-                  Academic Year Session
-                </span>
-                <span className="text-gray-600">
-                  {formData.Academic || "Not specified"}
-                </span>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="font-medium text-gray-700">Grade</span>
-                <span className="text-gray-600">
-                  {formData.Grade || "Not specified"}
-                </span>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="font-medium text-gray-700">
-                  Academic Session
-                </span>
-                <span className="text-gray-600">
-                  {formData.Session || "Not specified"}
-                </span>
-              </div>
-            </div>
-
-            {/* Authorization Footer */}
-            <div className="mt-8 pt-4 border-t border-gray-200">
-              <div className="bg-blue-600 text-white p-3 rounded text-center">
-                <p className="text-xs font-medium mb-1">
-                  Authorized for use by 'Ilearnova' students/staff only
-                </p>
-                <p className="text-xs opacity-90">
-                  This card must not be transferred or surrendered to any school
-                  for book Unauthorized use strictly prohibited.
-                </p>
-              </div>
-
-              <div className="mt-3 text-center">
-                <button
-                  onClick={downloadIdCard}
-                  className="bg-blue-600 text-white px-6 py-2 rounded text-sm hover:bg-blue-700 transition-colors"
-                >
-                  Download ID Card
-                </button>
-              </div>
-            </div>
-          </div>
+        <div>
+          <img src={check} alt="" />
         </div>
       </div>
     </div>
   );
 
-  // Show preview if requested
-  if (showPreview) {
-    return <IdCardPreview />;
-  }
+  const Step3Review = () => (
+    <div className="max-w-4xl mx-auto">
+      <h2 className="text-xl font-semibold text-center mb-8">
+        Step 3: Application Review & Submit
+      </h2>
 
-  return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <p className="text-[25px] p-[2rem] font-semibold">E-Identity Card</p>
-      <div className="">
-        {/* Header with colorful design */}
-        <div className="relative mb-8">
-          <div className="rounded-t-lg flex items-center justify-center relative overflow-hidden">
-            <div className="h-[189px] w-full bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 relative overflow-hidden rounded-lg">
-              {/* Decorative elements */}
-              <div className="absolute -top-4 -left-4 w-20 h-20 bg-yellow-400 rounded-full opacity-80"></div>
-              <div className="absolute top-4 right-8 w-16 h-16 bg-green-400 rounded-full opacity-60"></div>
-              <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-gray-200 rounded-full opacity-40"></div>
-              <div className="absolute bottom-4 left-8 w-12 h-12 bg-orange-400 rounded-full opacity-70"></div>
-            </div>
-            <div
-              className="absolute mt-[5rem] bg-white w-[200px] h-[200px] rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors border-4 border-white shadow-lg overflow-hidden"
-              onClick={handleAddPicture}
-            >
-              {profileImageUrl ? (
-                <img
-                  src={profileImageUrl}
-                  alt="Profile"
-                  className="w-full h-full object-cover rounded-full"
-                />
-              ) : (
-                <span className="text-[54px] font-light text-gray-600">+</span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Form */}
-        <div className="bg-white rounded-lg shadow-sm p-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* First Name */}
-            <div>
-              <label
-                className="block lg:text-\[18px\] font-medium mb-2"
-                style={{ color: "rgba(51, 51, 51, 1)" }}
-              >
-                First name
-              </label>
-              <input
-                type="text"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleInputChange}
-                className="w-full lg:text-\[20px\] lg:h-\[64px\] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
-                style={{
-                  color: "rgba(174, 174, 174, 1)",
-                  border: " 1px solid rgba(174, 174, 174, 1)",
-                }}
-                placeholder="First name"
-              />
-            </div>
-
-            {/* Last Name */}
-            <div>
-              <label
-                className="block lg:text-\[18px\] font-medium mb-2"
-                style={{ color: "rgba(51, 51, 51, 1)" }}
-              >
-                Last name
-              </label>
-              <input
-                type="text"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleInputChange}
-                className="w-full lg:text-\[20px\] lg:h-\[64px\] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
-                style={{
-                  color: "rgba(174, 174, 174, 1)",
-                  border: " 1px solid rgba(174, 174, 174, 1)",
-                }}
-                placeholder="Last name"
-              />
-            </div>
-
-            {/* Date of Birth */}
-            <div>
-              <label
-                className="block lg:text-\[18px\] font-medium mb-2"
-                style={{ color: "rgba(51, 51, 51, 1)" }}
-              >
-                Date of birth
-              </label>
-              <div className="relative">
-                <input
-                  type="date"
-                  name="dateOfBirth"
-                  value={formData.dateOfBirth}
-                  onChange={handleInputChange}
-                  className="w-full lg:text-\[20px\] lg:h-\[64px\] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
-                  style={{
-                    color: "rgba(174, 174, 174, 1)",
-                    border: " 1px solid rgba(174, 174, 174, 1)",
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Sex */}
-            <div>
-              <label
-                className="block lg:text-\[18px\] font-medium mb-2"
-                style={{ color: "rgba(51, 51, 51, 1)" }}
-              >
-                Sex
-              </label>
-              <input
-                type="text"
-                name="Sex"
-                value={formData.Sex}
-                onChange={handleInputChange}
-                className="w-full lg:text-\[20px\] lg:h-\[64px\] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
-                style={{
-                  color: "rgba(174, 174, 174, 1)",
-                  border: " 1px solid rgba(174, 174, 174, 1)",
-                }}
-                placeholder="Female"
-              />
-            </div>
-
-            {/* Academic Year Session */}
-            <div>
-              <label
-                className="block lg:text-\[18px\] font-medium mb-2"
-                style={{ color: "rgba(51, 51, 51, 1)" }}
-              >
-                Academic Year Session
-              </label>
-              <input
-                type="text"
-                name="Academic"
-                value={formData.Academic}
-                onChange={handleInputChange}
-                className="w-full lg:text-\[20px\] lg:h-\[64px\] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
-                style={{
-                  color: "rgba(174, 174, 174, 1)",
-                  border: " 1px solid rgba(174, 174, 174, 1)",
-                }}
-                placeholder="2024/2025"
-              />
-            </div>
-
-            {/* Session */}
-            <div>
-              <label
-                className="block lg:text-\[18px\] font-medium mb-2"
-                style={{ color: "rgba(51, 51, 51, 1)" }}
-              >
-                Academic Session
-              </label>
-              <input
-                type="text"
-                name="Session"
-                value={formData.Session}
-                onChange={handleInputChange}
-                className="w-full lg:text-\[20px\] lg:h-\[64px\] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
-                style={{
-                  color: "rgba(174, 174, 174, 1)",
-                  border: " 1px solid rgba(174, 174, 174, 1)",
-                }}
-                placeholder="1st Session"
-              />
-            </div>
-
-            {/* Issue date */}
-            <div>
-              <label
-                className="block lg:text-\[18px\] font-medium mb-2"
-                style={{ color: "rgba(51, 51, 51, 1)" }}
-              >
-                Issue date
-              </label>
-              <div className="relative">
-                <input
-                  type="date"
-                  name="IssueDate"
-                  value={formData.IssueDate}
-                  onChange={handleInputChange}
-                  className="w-full lg:text-\[20px\] lg:h-\[64px\] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
-                  style={{
-                    color: "rgba(174, 174, 174, 1)",
-                    border: " 1px solid rgba(174, 174, 174, 1)",
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Expiry Date */}
-            <div>
-              <label
-                className="block lg:text-\[18px\] font-medium mb-2"
-                style={{ color: "rgba(51, 51, 51, 1)" }}
-              >
-                Expiry date
-              </label>
-              <div className="relative">
-                <input
-                  type="date"
-                  name="ExpiryDate"
-                  value={formData.ExpiryDate}
-                  onChange={handleInputChange}
-                  className="w-full lg:text-\[20px\] lg:h-\[64px\] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
-                  style={{
-                    color: "rgba(174, 174, 174, 1)",
-                    border: " 1px solid rgba(174, 174, 174, 1)",
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* ID Number */}
-            <div>
-              <label
-                className="block lg:text-\[18px\] font-medium mb-2"
-                style={{ color: "rgba(51, 51, 51, 1)" }}
-              >
-                ID number
-              </label>
-              <input
-                type="text"
-                name="IdNumber"
-                value={formData.IdNumber}
-                onChange={handleInputChange}
-                className="w-full lg:text-\[20px\] lg:h-\[64px\] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
-                style={{
-                  color: "rgba(174, 174, 174, 1)",
-                  border: " 1px solid rgba(174, 174, 174, 1)",
-                }}
-                placeholder="Ilearnova/Stu/001"
-              />
-            </div>
-
-            {/* Grade */}
-            <div>
-              <label
-                className="block lg:text-\[18px\] font-medium mb-2"
-                style={{ color: "rgba(51, 51, 51, 1)" }}
-              >
-                Grade
-              </label>
-              <input
-                type="text"
-                name="Grade"
-                value={formData.Grade}
-                onChange={handleInputChange}
-                className="w-full lg:text-\[20px\] lg:h-\[64px\] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
-                style={{
-                  color: "rgba(174, 174, 174, 1)",
-                  border: " 1px solid rgba(174, 174, 174, 1)",
-                }}
-                placeholder="Grade 3"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-3.5 mt-7">
-        <button
-          type="button"
-          onClick={handlePreviewId}
-          className="px-8 py-3 rounded-md lg:text-[20px] transition-colors duration-200 font-medium cursor-pointer"
-          style={{
-            color: "rgba(18, 40, 164, 1)",
-            border: "1px solid rgba(18, 40, 164, 1)",
-          }}
-        >
-          Preview ID
-        </button>
-        <button
-          type="button"
-          onClick={() => console.log("Form data:", formData)}
-          className="px-8 py-3 bg-gray-400 text-[20px] rounded-md hover:bg-gray-500 transition-colors duration-200 font-medium text-white cursor-pointer"
-        >
-          Save
-        </button>
-      </div>
-
-      {/* Upload Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-96 max-w-md mx-4">
-            {/* Modal Header */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-8">
+          {/* Personal Information */}
+          <div>
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-white bg-blue-600 px-4 py-2 rounded -mx-6 -mt-6 mb-4">
-                Upload Picture
-              </h3>
+              <h3 className="text-lg font-semibold">Personal Information</h3>
               <button
-                onClick={closeModal}
-                className="text-gray-500 hover:text-gray-700 absolute top-4 right-4 bg-white rounded-full p-1"
+                onClick={() => setCurrentStep(1)}
+                className="text-blue-600 hover:text-blue-700 text-sm flex items-center gap-1"
               >
-                <X className="w-5 h-5" />
+                <Edit className="w-4 h-4" />
+                Edit
               </button>
             </div>
-
-            {/* Upload Step */}
-            {uploadStep === "select" && (
-              <>
-                <div className="text-sm text-gray-600 mb-4">
-                  <p>Please upload your picture like following guidelines:</p>
-                  <ul className="list-disc ml-5 mt-2 space-y-1">
-                    <li>Clear face without sunglasses</li>
-                    <li>Face lighting and background</li>
-                    <li>File size below 5 MB</li>
-                    <li>JPG, PNG, or PDF acceptable</li>
-                  </ul>
-                </div>
-
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-4">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Upload className="w-8 h-8 text-gray-400" />
-                  </div>
-                  <p className="text-gray-500 text-sm mb-4">
-                    Drag Picture or Browse
-                  </p>
-                  <input
-                    type="file"
-                    accept="image/*,.pdf"
-                    onChange={handleFileSelect}
-                    className="hidden"
-                    id="file-upload"
-                  />
-                  <label
-                    htmlFor="file-upload"
-                    className="bg-blue-600 text-white px-6 py-2 rounded cursor-pointer hover:bg-blue-700 transition-colors"
-                  >
-                    Browse
-                  </label>
-                </div>
-
-                <div className="flex space-x-3">
-                  <button
-                    onClick={closeModal}
-                    className="flex-1 bg-gray-400 text-white py-2 px-4 rounded hover:bg-gray-500 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    disabled
-                    className="flex-1 bg-gray-300 text-gray-500 py-2 px-4 rounded cursor-not-allowed"
-                  >
-                    Next
-                  </button>
-                </div>
-              </>
-            )}
-
-            {/* Uploading Step */}
-            {uploadStep === "uploading" && (
-              <>
-                <div className="text-center mb-6">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Upload className="w-8 h-8 text-gray-400" />
-                  </div>
-                  <p className="text-gray-600 text-sm mb-4">
-                    Uploading in progress... {uploadProgress}%
+            <div className="space-y-2 text-sm">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-gray-600">Full name:</span>
+                  <p className="font-medium">
+                    {formData.firstName} {formData.lastName}
                   </p>
                 </div>
-
-                <div className="mb-6">
-                  <div className="bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${uploadProgress}%` }}
-                    ></div>
-                  </div>
+                <div>
+                  <span className="text-gray-600">Date of birth:</span>
+                  <p className="font-medium">12 December, 2024</p>
                 </div>
+              </div>
+              <div>
+                <span className="text-gray-600">Guardian Details:</span>
+                <p className="font-medium">Mr Daniel</p>
+                <p className="text-gray-500">+234 - 7056 7842</p>
+              </div>
+            </div>
+          </div>
 
-                <div className="flex space-x-3">
-                  <button
-                    onClick={closeModal}
-                    className="flex-1 bg-gray-400 text-white py-2 px-4 rounded hover:bg-gray-500 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    disabled
-                    className="flex-1 bg-gray-300 text-gray-500 py-2 px-4 rounded cursor-not-allowed"
-                  >
-                    Next
-                  </button>
-                </div>
-              </>
-            )}
+          {/* Academic History */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Academic History</h3>
+            <div className="space-y-2 text-sm">
+              <div>
+                <span className="text-gray-600">School Name:</span>
+                <p className="font-medium">St Michael International School</p>
+              </div>
+              <div>
+                <span className="text-gray-600">Grade:</span>
+                <p className="font-medium">Grade 6</p>
+              </div>
+            </div>
+          </div>
 
-            {/* Success Step */}
-            {uploadStep === "success" && (
-              <>
-                <div className="text-center mb-6">
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Check className="w-8 h-8 text-green-600" />
-                  </div>
-                  <p className="text-gray-800 font-medium">
-                    Image successfully uploaded
-                  </p>
+          {/* Upload Documents */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Upload Documents</h3>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">📄</span>
                 </div>
+                <span className="text-sm">Report Card</span>
+                <div className="ml-auto">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">📋</span>
+                </div>
+                <span className="text-sm">Recommendation Letter</span>
+                <div className="ml-auto">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                </div>
+              </div>
+            </div>
+            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <span className="text-green-700 text-sm font-medium">
+                Status: Uploaded
+              </span>
+            </div>
+          </div>
 
-                <div className="flex justify-center">
-                  <button
-                    onClick={handleContinue}
-                    className="bg-blue-600 text-white py-2 px-8 rounded hover:bg-blue-700 transition-colors"
-                  >
-                    Continue
-                  </button>
-                </div>
-              </>
-            )}
+          {/* Payment Details */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Payment Details</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Amount Paid:</span>
+                <span className="font-medium">$100.00</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Transaction ID:</span>
+                <span className="font-medium">RN104504072</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Payment Date:</span>
+                <span className="font-medium">3 December, 2024</span>
+              </div>
+            </div>
           </div>
         </div>
-      )}
+
+        {/* Profile Image Section */}
+        <div className="lg:col-span-1">
+          <div className="border rounded-lg p-4">
+            <img
+              src="/api/placeholder/300/300"
+              alt="Student Profile"
+              className="w-full h-64 object-cover rounded-lg mb-4"
+            />
+            <div className="space-y-3 text-sm">
+              <div className="flex items-start gap-2">
+                <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
+                <p className="text-gray-700">
+                  I confirm that the above information is accurate to the best
+                  of my knowledge.
+                </p>
+              </div>
+              <div className="flex items-start gap-2">
+                <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
+                <p className="text-gray-700">
+                  I acknowledge receiving academic & financial information.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-8 flex gap-4">
+        <button
+          onClick={prevStep}
+          className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-lg transition duration-200"
+        >
+          Back to Edit
+        </button>
+        <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
+          Submit Application
+        </button>
+      </div>
     </div>
   );
-}
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-8 ">
+      <div className="container mx-auto px-4 ">
+        <StepIndicator />
+
+        {currentStep === 1 && <Step1PersonalInfo />}
+        {currentStep === 2 && <Step2Payment />}
+        {currentStep === 3 && <Step3Review />}
+      </div>
+    </div>
+  );
+};
+
+export default IdCard;
