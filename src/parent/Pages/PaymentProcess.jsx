@@ -532,7 +532,7 @@ export default function PaymentProcess() {
             <div className="flex flex-col items-center mb-6">
               <div className="text-2xl font-bold text-green-600 mb-2">Payment Successful</div>
               <div className="text-gray-600 text-center">
-                Your payment was successful! Thank you. A receipt has been sent to your email.
+                Your payment was successful! Thank you. Send a screenshot of the payment reciept to <a href="tel:+2349050119078" className='text-blue-500 font-bold underline-none'>+2349050119078</a>.
               </div>
             </div>
             <button
