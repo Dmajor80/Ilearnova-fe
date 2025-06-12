@@ -1,5 +1,13 @@
 import { useState } from 'react'
 
+// const demoNotifications = [
+//   "Holiday: Christmas Day is on December 25th!",
+//   "Reminder: Parent-Teacher Meeting on December 22nd at 10:00 am.",
+//   "Holiday: New Year's Day is on January 1st!",
+//   "School resumes January 8th. Prepare your materials!",
+// ];
+
+
 function DashboardHeader(props) {
   const [showNotif, setShowNotif] = useState(false);
   return (
@@ -111,9 +119,7 @@ function DashboardHeader(props) {
           </div>
         </div>
       </section>
-      <div className='flex flex-col md:flex-row md:items-center md:justify-between mb-8'>
-
-      </div>
+   
     </>
   )
 }

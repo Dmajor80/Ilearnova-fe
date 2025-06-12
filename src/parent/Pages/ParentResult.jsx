@@ -271,7 +271,7 @@ const topMarks = [
               </button>
               <button className="flex items-center gap-1 px-3 py-1 bg-blue-700 text-white rounded-sm text-xs font-medium">
                 <span className="material-icons text-base">download</span>
-                View Transcript
+                <a href="/parent-transcript">View Transcript</a>
               </button>
             </div>
           </div>

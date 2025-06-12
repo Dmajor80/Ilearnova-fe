@@ -2,7 +2,7 @@ import Payment from "./ParentPayment";
 import Attendance from "./ParentAttendance";
 import Timetable from "./ParentTimetable";
 import ParentResult from "./ParentResult";
-import Transcript from "../components/Transcript";
+import Transcript from "./ParentTranscript";
 import ParentMessages from "./ParentMessages";
 import ParentDashboard from "./ParentDashboard";
 import PaymentProcess from "./PaymentProcess";
@@ -16,7 +16,7 @@ function Pages() {
       <Route path="/parent-timetable" element={<Timetable />} />
       <Route path="/parent-attendance" element={<Attendance />} />
       <Route path="/parent-results" element={<ParentResult />} />
-      <Route path="/transcript" element={<Transcript />} />
+      <Route path="/parent-transcript" element={<Transcript />} />
       <Route path="/parent-messages" element={<ParentMessages />} />
       <Route path="/payment-process" element={<PaymentProcess />} />
     </Routes>

@@ -30,7 +30,6 @@ import Dashboard from "./admin/Dashboard";
 import Users from "./admin/Users";
 import NewUser from "./admin/NewUser";
 import Report from "./admin/Report";
-import Transcript from "./parent/components/Transcript";
 import Error from "./Error";
 // import { CoursePage } from "./student/CoursesComponent";
 
