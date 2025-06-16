@@ -36,8 +36,8 @@ function SideMenu() {
       </button>
 
       {/* Mobile Backdrop */}
-       {isSidebarOpen && (
-        <div 
+      {isSidebarOpen && (
+        <div
           className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
           onClick={toggleSidebar}
         />
@@ -51,8 +51,8 @@ function SideMenu() {
         <div className="p-6">
           {/* Header */}
           <div className="mb-8">
-          
-            <h1 className="text-2xl font-bold text-gray-800 mb-4">
+
+            <h1 className="text-2xl font-bold text-center text-gray-800 mb-4">
               ILEARNOVA
             </h1>
             <hr className="border-blue-900" />

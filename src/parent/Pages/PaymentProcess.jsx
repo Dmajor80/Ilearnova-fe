@@ -253,7 +253,7 @@ export default function PaymentProcess() {
                     type="button"
                   >
                     <div className="flex items-center gap-3">
-                      <img src={method.icon} alt={method.label} className="w-7 h-7 object-contain" />
+                      <img src={method.icon} alt={method.label} loading='lazy' className="w-7 h-7 object-contain" />
                       <span className="font-medium text-gray-700">{method.label}</span>
                     </div>
                     <span
@@ -309,7 +309,7 @@ export default function PaymentProcess() {
                   {bankAccounts.map((acc) => (
                     <div key={acc.account} className="flex items-center justify-between bg-blue-50 rounded-lg px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <img src={acc.logo} alt={acc.bank} className="w-10 h-10 object-contain" />
+                        <img src={acc.logo} loading='lazy' alt={acc.bank} className="w-10 h-10 object-contain" />
                         <div>
                           <div className="font-semibold text-[#1736a4] text-base">
                             <span className="text-[#1736a4] hover:underline cursor-pointer">{acc.account}</span> {acc.bank}
@@ -532,12 +532,12 @@ export default function PaymentProcess() {
             <div className="flex flex-col items-center mb-6">
               <div className="text-2xl font-bold text-green-600 mb-2">Payment Successful</div>
               <div className="text-gray-600 text-center">
-                Your payment was successful! Thank you. A receipt has been sent to your email.
+                Your payment was successful! Thank you. Send a screenshot of the payment reciept to <a href="tel:+2349050119078" className='text-blue-500 font-bold underline-none'>+2349050119078</a>.
               </div>
             </div>
             <button
               className="w-full max-w-md bg-[#1736a4] cursor-pointer text-white py-3 rounded-lg font-semibold hover:bg-blue-900 transition"
-              onClick={() => window.location.href = "/parent-payment"}
+              onClick={() => window.location.href = "/parent-payments"}
               type="button"
             >
               Return to Dashboard

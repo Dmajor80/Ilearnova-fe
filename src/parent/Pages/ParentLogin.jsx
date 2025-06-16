@@ -36,7 +36,7 @@ function ParentLogin() {
   return (
     <div className="flex min-h-screen">
       <div className="w-full md:w-1/2 flex flex-col justify-center items-center bg-white px-8 py-12">
-        <img src="/logo.png" alt="Ilearnova Logo" className="mb-6 w-32" />
+        <img src="/logo.png" alt="Ilearnova Logo" loading='lazy' className="mb-6 w-32" />
         <h2 className="text-2xl font-semibold mb-1">Login to <span className="text-blue-700">Parent Portal</span></h2>
         <p className="mb-6 text-gray-500">Enter account details</p>
         <form className="w-full max-w-sm" onSubmit={handleSubmit}>
@@ -150,6 +150,7 @@ function ParentLogin() {
         <img
           src={teacherIllustration}
           alt="Parent and child"
+          loading="lazy"
           className="object-cover w-full h-full"
         />
       </div>

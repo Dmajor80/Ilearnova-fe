@@ -1,7 +1,48 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+
+
+// Demo notifications
+const demoNotifications = [
+  "Holiday: Christmas Day is on December 25th!",
+  "Reminder: Parent-Teacher Meeting on December 22nd at 10:00 am.",
+  "Holiday: New Year's Day is on January 1st!",
+  "School resumes January 8th. Prepare your materials!",
+  "Note: Mid-term break starts February 15th.",
+];
+
+
 
 function DashboardHeader(props) {
   const [showNotif, setShowNotif] = useState(false);
+  const [notification, setNotification] = useState("");
+  const [notifIndex, setNotifIndex] = useState(0);
+  const [hasUnread, setHasUnread] = useState(false);
+
+// Show a new notification every 20 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNotification(demoNotifications[notifIndex]);
+      setNotifIndex((prev) => (prev + 1) % demoNotifications.length);
+      setShowNotif(false); // Hide popup until user clicks
+      setHasUnread(true);  // Show red dot
+    }, 20000);
+
+    // Show the first notification immediately on mount
+    setTimeout(() => {
+      setNotification(demoNotifications[0]);
+      setShowNotif(false);
+      setHasUnread(true);
+    }, 0);
+
+    return () => clearInterval(interval);
+  }, [notifIndex]);
+
+  // Show all notifications when icon is clicked, clear red dot
+  const handleNotifClick = () => {
+    setShowNotif(!showNotif);
+    setHasUnread(false);
+    setNotification(demoNotifications.join('\n'));
+  };
   return (
     <>
 
@@ -35,6 +76,7 @@ function DashboardHeader(props) {
           <img
             // /api/placeholder/32/32
             src="/profile.png"
+            loading='lazy'
             alt="User"
             className="w-8 h-8 rounded-full object-cover"
           />
@@ -52,8 +94,8 @@ function DashboardHeader(props) {
             <span className="text-xs text-gray-500">Notification</span>
             <span className="relative">
               <button
-                onClick={() => setShowNotif(!showNotif)}
-                className="focus:outline-none"
+                onClick={handleNotifClick}
+                className="focus:outline-none lg:cursor-pointer"
                 aria-label="Show notifications"
               >
                 <svg
@@ -69,17 +111,17 @@ function DashboardHeader(props) {
                     d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
                   />
                 </svg>
-                {props.notification && (
+                {hasUnread && (
                   <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
                 )}
               </button>
               {/* Notification Dropdown */}
-              {showNotif && props.notification && (
-                <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded shadow-lg z-10 p-4 text-sm text-gray-700">
-                  <div>{props.notification}</div>
+              {showNotif && (
+                <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded shadow-lg z-10 p-4 text-sm text-gray-700 whitespace-pre-line">
+                  {notification}
                 </div>
               )}
-              {showNotif && !props.notification && (
+              {showNotif && !notification && (
                 <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded shadow-lg z-10 p-4 text-sm text-gray-400">
                   No new notifications
                 </div>
@@ -89,7 +131,7 @@ function DashboardHeader(props) {
         </div>
         {/* Banner */}
         <div className="relative w-full rounded-lg overflow-hidden h-28 md:h-32 flex items-center justify-center bg-[#1736a4]">
-        
+
           <div className="absolute left-0 top-0 w-32 h-28 bg-[#ffd600] rounded-br-full"></div>
           <div className="absolute left-0 bottom-0 w-20 h-16 bg-[#2ecc71] rounded-tr-full"></div>
           <div className="absolute right-0 top-0 w-24 h-24 bg-[#ffd600] rounded-bl-full"></div>
@@ -101,6 +143,7 @@ function DashboardHeader(props) {
           <img
             // /api/placeholder/100/100
             src="/profile.png"
+            loading='lazy'
             alt="Profile"
             className="w-28 h-28 rounded-full border-4 border-white shadow-lg object-cover"
           />
@@ -111,9 +154,7 @@ function DashboardHeader(props) {
           </div>
         </div>
       </section>
-      <div className='flex flex-col md:flex-row md:items-center md:justify-between mb-8'>
 
-      </div>
     </>
   )
 }

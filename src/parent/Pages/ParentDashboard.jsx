@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { PieGraph, BarGraph } from "../components/Charts"
@@ -28,32 +28,25 @@ const data = [
   { day: 'Sat', minutes: 40 },
 ];
 
-const demoNotifications = [
-  "Holiday: Christmas Day is on December 25th!",
-  "Reminder: Parent-Teacher Meeting on December 22nd at 10:00 am.",
-  "Holiday: New Year's Day is on January 1st!",
-  "School resumes January 8th. Prepare your materials!",
-];
-
 const events = [
   { date: 22, title: "Parent-Teacher Meeting", color: "bg-yellow-100", time: "10:00 am" },
   { date: 22, title: "Parent-Teacher Meeting", color: "bg-yellow-100", time: "10:00 am" },
   { date: 26, title: "Parent-Teacher Meeting", color: "bg-yellow-100", time: "10:00 am" },
 ];
 
-const holidays = [
-  { date: new Date(2024, 11, 25), name: "Christmas Day" }, // December is month 11 (0-indexed)
-  { date: new Date(2024, 0, 1), name: "New Year's Day" },
-  // Add more holidays as needed
-];
+// const holidays = [
+//   { date: new Date(2024, 11, 25), name: "Christmas Day" }, // December is month 11 (0-indexed)
+//   { date: new Date(2024, 0, 1), name: "New Year's Day" },
+//   // Add more holidays as needed
+// ];
 
-function isSameDay(date1, date2) {
-  return (
-    date1.getDate() === date2.getDate() &&
-    date1.getMonth() === date2.getMonth() &&
-    date1.getFullYear() === date2.getFullYear()
-  );
-}
+// function isSameDay(date1, date2) {
+//   return (
+//     date1.getDate() === date2.getDate() &&
+//     date1.getMonth() === date2.getMonth() &&
+//     date1.getFullYear() === date2.getFullYear()
+//   );
+// }
 
 const days = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 const dates = Array.from({ length: 31 }, (_, i) => i + 1);
@@ -62,29 +55,18 @@ const eventDates = [22, 25, 26];
 function ParentDashboard() {
   const [selectedDate, setSelectedDate] = useState(new Date());
 
-  const [notification, setNotification] = useState("");
+  // const [notification, setNotification] = useState("");
 
-   // Demo: Show a new notification every 30 seconds
-  useEffect(() => {
-    let idx = 0;
-    setNotification(demoNotifications[idx]);
-    const interval = setInterval(() => {
-      idx = (idx + 1) % demoNotifications.length;
-      setNotification(demoNotifications[idx]);
-    }, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    const holiday = holidays.find(h =>
-      isSameDay(h.date, selectedDate)
-    );
-    if (holiday) {
-      setNotification(`Holiday: ${holiday.name}`);
-    } else {
-      setNotification("");
-    }
-  }, [selectedDate]);
+  // useEffect(() => {
+  //   const holiday = holidays.find(h =>
+  //     isSameDay(h.date, selectedDate)
+  //   );
+  //   if (holiday) {
+  //     setNotification(`Holiday: ${holiday.name}`);
+  //   } else {
+  //     setNotification("");
+  //   }
+  // }, [selectedDate]);
   return (
     <div className="flex min-h-screen gap-2 bg-[#f5f8fe]">
       {/* Sidebar */}
@@ -93,13 +75,13 @@ function ParentDashboard() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col p-2">
         {/* Topbar */}
-        <DashboardHeader holder="Search" text="Dashboard" notification={notification} />
-
+        <DashboardHeader holder="Search" text="Dashboard" />
+{/* 
         {notification && (
           <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 rounded">
             {notification}
           </div>
-        )}
+        )} */}
         {/* Main Dashboard Widgets */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-20 px-2 md:px-0">
           {/* Score Chart */}
@@ -161,7 +143,7 @@ function ParentDashboard() {
             <div className="flex flex-col gap-2">
               {events.map((event, idx) => (
                 <div key={idx} className={`flex items-center gap-3 p-3`}>
-                  <img src="/icon.png" className='h-10 w-10' alt="icons" />
+                  <img src="/icon.png" className='h-10 w-10' loading='lazy' alt="icons" />
                   <div className='flex-row text-left'>
                     <span className="text-md md:text-lg text-blue-700">{event.title}</span>
                     <div className="flex items-center mt-2 ">
