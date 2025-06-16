@@ -377,7 +377,7 @@ const ParentMessages = () => {
               <div className="flex flex-col gap-2">
                 {events.map((event, idx) => (
                   <div key={idx} className={`flex items-center gap-3 p-3`}>
-                    <img src="/icon.png" className='h-10 w-10' alt="icons" />
+                    <img src="/icon.png" className='h-10 w-10' loading='lazy' alt="icons" />
                     <div className='flex-row text-left'>
                       <span className="text-md md:text-lg text-blue-700">{event.title}</span>
                       <div className="flex items-center mt-2 ">

@@ -239,7 +239,7 @@ export default function ParentTranscript() {
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Select Grade</label>
               <select
-                className="border border-gray-300 rounded px-2 py-1"
+                className="border cursor-pointer focus:outline-none border-gray-300 rounded px-2 py-1"
                 value={selectedGrade}
                 onChange={e => setSelectedGrade(e.target.value)}
               >
@@ -251,7 +251,7 @@ export default function ParentTranscript() {
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Select Term</label>
               <select
-                className="border border-gray-300 rounded px-2 py-1"
+                className="border  cursor-pointer focus:outline-none border-gray-300 rounded px-2 py-1"
                 value={selectedTerm}
                 onChange={e => setSelectedTerm(e.target.value)}
               >
@@ -264,7 +264,7 @@ export default function ParentTranscript() {
           {/* Buttons */}
           <div className="flex gap-2 mt-4 md:mt-0">
             <button
-              className="flex items-center gap-1 px-4 py-3 focus:outline-none border border-gray-300 rounded-sm text-xs font-medium"
+              className="flex  cursor-pointer focus:outline-none items-center gap-1 px-4 py-3 border border-gray-300 rounded-sm text-xs font-medium"
               onClick={handleFilter}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -272,14 +272,14 @@ export default function ParentTranscript() {
               </svg>
               Filter
             </button>
-            <button className="flex items-center focus:outline-none gap-1 px-4 py-3 bg-blue-700 text-white rounded-sm text-xs font-medium">
+            <button className="flex cursor-pointer items-center focus:outline-none gap-1 px-4 py-3 bg-blue-700 text-white rounded-sm text-xs font-medium">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
               </svg>
               Contact Teacher
             </button>
             <button
-              className="flex items-center focus:outline-none gap-1 px-4 py-3 bg-blue-700 text-white rounded-sm text-xs font-medium"
+              className="flex cursor-pointer items-center focus:outline-none gap-1 px-4 py-3 bg-blue-700 text-white rounded-sm text-xs font-medium"
               onClick={handleDownload}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
