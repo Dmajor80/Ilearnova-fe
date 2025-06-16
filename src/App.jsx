@@ -33,7 +33,6 @@ import Report from "./admin/Report";
 import Error from "./Error";
 // import { CoursePage } from "./student/CoursesComponent";
 
-
 const App = () => {
   return (
     <>
