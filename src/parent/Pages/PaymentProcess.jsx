@@ -1,7 +1,7 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom"; // <-- Add this import
 import SideMenu from "../components/SideMenu";
-const [copied, setCopied] = useState(false);
+
 
 
 const students = [
@@ -20,12 +20,7 @@ const steps = [
   "Complete",
 ];
 
-React.useEffect(() => {
-  if (copied) {
-    const timer = setTimeout(() => setCopied(false), 1500);
-    return () => clearTimeout(timer);
-  }
-}, [copied]);
+
 
 const paymentMethods = [
   {
@@ -65,7 +60,7 @@ const bankAccounts = [
 export default function PaymentProcess() {
   const location = useLocation(); // <-- Add this line
   const fee = location.state?.fee; // <-- Get the fee object from navigation state
-
+  const [copied, setCopied] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedStudent, setSelectedStudent] = useState("");
   const [paymentPattern, setPaymentPattern] = useState("");
@@ -75,7 +70,13 @@ export default function PaymentProcess() {
   const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
   const [cardName, setCardName] = useState("");
-  // const [reviewAgreed, setReviewAgreed] = useState("");
+
+  useEffect(() => {
+    if (copied) {
+      const timer = setTimeout(() => setCopied(false), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [copied]);
 
   // Format card number as "1234 5678 9012 3456"
   const handleCardNumberChange = (e) => {
@@ -100,13 +101,6 @@ export default function PaymentProcess() {
     if (value.length > 2) value = value.replace(/^(\d{3})(\d{1})/, "$1 $2");
     setCvv(value);
   };
-
-  // Validation for card form
-  // const isCardFormValid =
-  //   cardName.trim().length > 0 &&
-  //   cardNumber.replace(/\s/g, "").length === 16 &&
-  //   /^\d{2} \/ \d{2}$/.test(expiry) &&
-  //   cvv.replace(/\s/g, "").length >= 3;
 
   const handleProceed = () => {
     if (currentStep < steps.length - 1) setCurrentStep(currentStep + 1);
