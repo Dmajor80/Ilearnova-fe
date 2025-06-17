@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { useLocation } from "react-router-dom"; // <-- Add this import
 import SideMenu from "../components/SideMenu";
+const [copied, setCopied] = useState(false);
+
 
 const students = [
   { id: 1, name: "Priscilla Daniel" },
@@ -18,6 +20,13 @@ const steps = [
   "Complete",
 ];
 
+React.useEffect(() => {
+  if (copied) {
+    const timer = setTimeout(() => setCopied(false), 1500);
+    return () => clearTimeout(timer);
+  }
+}, [copied]);
+
 const paymentMethods = [
   {
     value: "card",
@@ -30,6 +39,7 @@ const paymentMethods = [
     icon: "/Yandex.png",
   },
 ];
+
 const bankAccounts = [
   {
     bank: "UBA",
@@ -302,6 +312,12 @@ export default function PaymentProcess() {
             {/* Bank Transfer UI */}
             {selectedMethod === "bank" && (
               <div className="w-full max-w-2xl mx-auto bg-white rounded-xl shadow p-6 flex flex-col gap-6 items-center">
+                {/* Show alert when copied */}
+                {copied && (
+                  <div className="mb-2 px-4 py-2 bg-green-100 text-green-700 rounded transition">
+                    Account number copied!
+                  </div>
+                )}
                 <div className="text-center text-sm text-gray-700 mb-2">
                   Kindly pay into any bank of your choice via bank transfer
                 </div>
@@ -318,8 +334,11 @@ export default function PaymentProcess() {
                         </div>
                       </div>
                       <button
-                        className="flex items-center gap-1 text-[#1736a4] text-sm font-medium hover:underline"
-                        onClick={() => navigator.clipboard.writeText(acc.account)}
+                        className="flex items-center gap-1 text-[#1736a4] text-sm font-medium lg:cursor-pointer"
+                        onClick={() => {
+                          navigator.clipboard.writeText(acc.account);
+                          setCopied(true);
+                        }}
                         type="button"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
