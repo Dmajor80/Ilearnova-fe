@@ -51,10 +51,11 @@ function SideMenu() {
         <div className="p-6">
           {/* Header */}
           <div className="mb-8">
-
-            <h1 className="text-2xl font-bold text-center text-gray-800 mb-4">
-              ILEARNOVA
-            </h1>
+            <a href='/'>
+              <h1 className="text-2xl font-bold text-center text-gray-800 mb-4">
+                ILEARNOVA
+              </h1>
+            </a>
             <hr className="border-blue-900" />
           </div>
 
