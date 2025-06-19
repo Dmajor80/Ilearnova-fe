@@ -15,6 +15,7 @@ function Pages() {
       <Route path="/parent-payments" element={<Payment />} />
       <Route path="/parent-timetable" element={<Timetable />} />
       <Route path="/parent-attendance" element={<Attendance />} />
+      <Route path="/parent-attendance/:id" element={<Attendance />} />
       <Route path="/parent-results" element={<ParentResult />} />
       <Route path="/parent-transcript" element={<Transcript />} />
       <Route path="/parent-messages" element={<ParentMessages />} />
