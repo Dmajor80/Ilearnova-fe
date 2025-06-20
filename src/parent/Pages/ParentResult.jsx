@@ -6,6 +6,7 @@ import {
 import DashboardHeader from "../components/DashboardHeader";
 import SideMenu from "../components/SideMenu";
 
+
 const subjects = [
   "Mathematics", "English", "Biology", "Physics", "Yoruba", "Chemistry", "Further Mathematics", "Animal Husbandry", "Geography"
 ];
@@ -17,118 +18,137 @@ const initialChartData = subjects.map((subject, i) => ({
   third: 80 + Math.round(Math.random() * 15),
 }));
 
-const subjectMarks = [
+// Children data (from dashboard)
+const children = [
   {
-    subject: "Mathematics",
-    theory: "35/40",
-    practical: "38/40",
-    assignment: "7/10",
-    attendance: "80%",
-    total: "94/100",
+    id: 1,
+    name: "Priscilla Daniel",
+    age: 10,
+    classLevel: "Primary 5",
+    institution: "Primary",
+    school: "Sunshine Primary School"
   },
   {
-    subject: "English Language",
-    theory: "30/40",
-    practical: "35/40",
-    assignment: "8/10",
-    attendance: "90%",
-    total: "95/100",
+    id: 2,
+    name: "John Doe",
+    age: 15,
+    classLevel: "SS2",
+    institution: "Secondary",
+    school: "Bright Future Secondary School"
   },
   {
-    subject: "Biology",
-    theory: "28/40",
-    practical: "34/40",
-    assignment: "7/10",
-    attendance: "85%",
-    total: "84/100",
+    id: 3,
+    name: "Mary Johnson",
+    age: 19,
+    classLevel: "ND2",
+    institution: "Polytechnic",
+    school: "Federal Polytechnic, Lagos"
   },
   {
-    subject: "Physics",
-    theory: "33/40",
-    practical: "38/40",
-    assignment: "8/10",
-    attendance: "82%",
-    total: "94/100",
-  },
-  {
-    subject: "Yoruba",
-    theory: "33/40",
-    practical: "38/40",
-    assignment: "8/10",
-    attendance: "82%",
-    total: "94/100",
-  },
-  {
-    subject: "Chemistry",
-    theory: "33/40",
-    practical: "38/40",
-    assignment: "8/10",
-    attendance: "82%",
-    total: "94/100",
-  },
-  {
-    subject: "Further Mathematics",
-    theory: "33/40",
-    practical: "38/40",
-    assignment: "8/10",
-    attendance: "82%",
-    total: "94/100",
-
-  },
-  {
-    subject: "Animal Husbandry",
-    theory: "33/40",
-    practical: "38/40",
-    assignment: "8/10",
-    attendance: "82%",
-    total: "94/100",
-  },
-  {
-    subject: "Geography",
-    theory: "33/40",
-    practical: "38/40",
-    assignment: "8/10",
-    attendance: "82%",
-    total: "94/100",
-  },
-];
-const topMarks = [
-  {
-    subject: "Mathematics",
-    theory: "35/40",
-    practical: "38/40",
-    assignment: "7/10",
-    attendance: "80%",
-    total: "94/100",
-  },
-  {
-    subject: "English Language",
-    theory: "30/40",
-    practical: "35/40",
-    assignment: "8/10",
-    attendance: "90%",
-    total: "95/100",
-  },
-  {
-    subject: "Biology",
-    theory: "28/40",
-    practical: "34/40",
-    assignment: "7/10",
-    attendance: "85%",
-    total: "84/100",
-  },
-  {
-    subject: "Physics",
-    theory: "33/40",
-    practical: "38/40",
-    assignment: "8/10",
-    attendance: "82%",
-    total: "94/100",
-  },
+    id: 4,
+    name: "Samuel Lee",
+    age: 22,
+    classLevel: "300 Level",
+    institution: "University",
+    school: "University of Ibadan"
+  }
 ];
 
- function ParentResult() {
+// Dummy results for each child and term
+const childrenResults = {
+  1: {
+    "First Term": [
+      { subject: "Mathematics", theory: "35/40", practical: "38/40", assignment: "7/10", attendance: "80%", total: "94/100" },
+      { subject: "English", theory: "30/40", practical: "35/40", assignment: "8/10", attendance: "90%", total: "95/100" },
+      { subject: "Science", theory: "28/40", practical: "34/40", assignment: "7/10", attendance: "85%", total: "84/100" },
+    ],
+    "Second Term": [
+      { subject: "Mathematics", theory: "36/40", practical: "39/40", assignment: "8/10", attendance: "85%", total: "96/100" },
+      { subject: "English", theory: "32/40", practical: "36/40", assignment: "9/10", attendance: "92%", total: "97/100" },
+      { subject: "Science", theory: "29/40", practical: "35/40", assignment: "8/10", attendance: "88%", total: "87/100" },
+    ],
+    "Third Term": [
+      { subject: "Mathematics", theory: "34/40", practical: "37/40", assignment: "7/10", attendance: "82%", total: "91/100" },
+      { subject: "English", theory: "31/40", practical: "34/40", assignment: "8/10", attendance: "89%", total: "93/100" },
+      { subject: "Science", theory: "27/40", practical: "33/40", assignment: "7/10", attendance: "84%", total: "80/100" },
+    ]
+  },
+  2: {
+    "First Term": [
+      { subject: "Mathematics", theory: "20/40", practical: "25/40", assignment: "5/10", attendance: "70%", total: "60/100" },
+      { subject: "English", theory: "25/40", practical: "28/40", assignment: "6/10", attendance: "75%", total: "70/100" },
+      { subject: "Biology", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+    ],
+    "Second Term": [
+      { subject: "Mathematics", theory: "22/40", practical: "27/40", assignment: "6/10", attendance: "73%", total: "65/100" },
+      { subject: "English", theory: "27/40", practical: "30/40", assignment: "7/10", attendance: "78%", total: "75/100" },
+      { subject: "Biology", theory: "24/40", practical: "29/40", assignment: "6/10", attendance: "74%", total: "70/100" },
+    ],
+    "Third Term": [
+      { subject: "Mathematics", theory: "23/40", practical: "28/40", assignment: "6/10", attendance: "74%", total: "67/100" },
+      { subject: "English", theory: "28/40", practical: "31/40", assignment: "7/10", attendance: "79%", total: "76/100" },
+      { subject: "Biology", theory: "25/40", practical: "30/40", assignment: "6/10", attendance: "75%", total: "71/100" },
+    ]
+  },
+  3: {
+    "First Term": [
+      { subject: "ND1", theory: "30/40", practical: "32/40", assignment: "7/10", attendance: "80%", total: "80/100" },
+      { subject: "ND2", theory: "32/40", practical: "34/40", assignment: "8/10", attendance: "85%", total: "85/100" },
+    ],
+    "Second Term": [
+      { subject: "ND1", theory: "31/40", practical: "33/40", assignment: "8/10", attendance: "82%", total: "82/100" },
+      { subject: "ND2", theory: "33/40", practical: "35/40", assignment: "9/10", attendance: "87%", total: "87/100" },
+    ],
+    "Third Term": [
+      { subject: "ND1", theory: "32/40", practical: "34/40", assignment: "8/10", attendance: "83%", total: "84/100" },
+      { subject: "ND2", theory: "34/40", practical: "36/40", assignment: "9/10", attendance: "88%", total: "89/100" },
+    ]
+  },
+  4: {
+    "First Term": [
+      { subject: "300 Level", theory: "35/40", practical: "36/40", assignment: "8/10", attendance: "85%", total: "87/100" },
+      { subject: "200 Level", theory: "36/40", practical: "37/40", assignment: "9/10", attendance: "88%", total: "90/100" },
+    ],
+    "Second Term": [
+      { subject: "300 Level", theory: "36/40", practical: "37/40", assignment: "9/10", attendance: "87%", total: "89/100" },
+      { subject: "200 Level", theory: "37/40", practical: "38/40", assignment: "10/10", attendance: "90%", total: "92/100" },
+    ],
+    "Third Term": [
+      { subject: "300 Level", theory: "37/40", practical: "38/40", assignment: "10/10", attendance: "89%", total: "91/100" },
+      { subject: "200 Level", theory: "38/40", practical: "39/40", assignment: "10/10", attendance: "91%", total: "93/100" },
+    ]
+  }
+};
+
+function downloadCSV(data, childName, term) {
+  const header = Object.keys(data[0]).join(",");
+  const rows = data.map(row => Object.values(row).join(","));
+  const csvContent = [header, ...rows].join("\n");
+  const blob = new Blob([csvContent], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${childName.replace(/\s/g, "_")}_${term.replace(/\s/g, "_")}_result.csv`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// Helper to get top 4 marks for side info
+function getTopMarks(subjectMarks) {
+  return [...subjectMarks]
+    .sort((a, b) => parseInt(b.total) - parseInt(a.total))
+    .slice(0, 4);
+}
+
+function ParentResult() {
+  const [selectedChildId, setSelectedChildId] = useState(children[0].id);
+  const [selectedTerm, setSelectedTerm] = useState("First Term");
+  const child = children.find(c => c.id === selectedChildId);
+  const terms = Object.keys(childrenResults[selectedChildId]);
+  const subjectMarks = childrenResults[selectedChildId][selectedTerm];
   const [chartData, setChartData] = useState(initialChartData);
+  const topMarks = getTopMarks(subjectMarks);
 
   // Simulate real-time chart updates
   useEffect(() => {
@@ -156,6 +176,42 @@ const topMarks = [
         {/* Header */}
 
         <DashboardHeader text='Performance Insight' holder="Search Results" />
+        {/* Child and Term Selectors */}
+        <div className="flex flex-wrap gap-4 mb-6">
+          <div>
+            <label className="block text-xs font-semibold mb-1">Select Child:</label>
+            <select
+              className="border rounded px-3 py-2 text-sm"
+              value={selectedChildId}
+              onChange={e => {
+                setSelectedChildId(Number(e.target.value));
+                setSelectedTerm("First Term");
+              }}
+            >
+              {children.map(child => (
+                <option key={child.id} value={child.id}>{child.name} ({child.classLevel})</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold mb-1">Select Term:</label>
+            <select
+              className="border rounded px-3 py-2 text-sm"
+              value={selectedTerm}
+              onChange={e => setSelectedTerm(e.target.value)}
+            >
+              {terms.map(term => (
+                <option key={term} value={term}>{term}</option>
+              ))}
+            </select>
+          </div>
+          <button
+            className="bg-blue-700 text-white rounded px-4 py-2 text-sm font-semibold mt-6"
+            onClick={() => downloadCSV(subjectMarks, child.name, selectedTerm)}
+          >
+            Download Result (CSV)
+          </button>
+        </div>
         {/* Chart and Side Info */}
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Chart Card */}
@@ -299,7 +355,6 @@ const topMarks = [
                       <span className={`inline-block px-3 py-1 rounded-sm font-semibold text-white bg-blue-800`}>
                         {s.total}
                       </span>
-                      {/* ${i === 0 ? "bg-blue-700" : "bg-blue-400"} */}
                     </td>
                   </tr>
                 ))}
