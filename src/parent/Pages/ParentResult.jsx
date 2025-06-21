@@ -6,6 +6,7 @@ import {
 import DashboardHeader from "../components/DashboardHeader";
 import SideMenu from "../components/SideMenu";
 
+
 const subjects = [
   "Mathematics", "English", "Biology", "Physics", "Yoruba", "Chemistry", "Further Mathematics", "Animal Husbandry", "Geography"
 ];
