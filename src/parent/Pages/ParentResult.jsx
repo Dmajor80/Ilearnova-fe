@@ -6,7 +6,6 @@ import {
 import DashboardHeader from "../components/DashboardHeader";
 import SideMenu from "../components/SideMenu";
 
-
 const subjects = [
   "Mathematics", "English", "Biology", "Physics", "Yoruba", "Chemistry", "Further Mathematics", "Animal Husbandry", "Geography"
 ];
@@ -60,17 +59,35 @@ const childrenResults = {
     "First Term": [
       { subject: "Mathematics", theory: "35/40", practical: "38/40", assignment: "7/10", attendance: "80%", total: "94/100" },
       { subject: "English", theory: "30/40", practical: "35/40", assignment: "8/10", attendance: "90%", total: "95/100" },
-      { subject: "Science", theory: "28/40", practical: "34/40", assignment: "7/10", attendance: "85%", total: "84/100" },
+      { subject: "Basic Science", theory: "28/40", practical: "34/40", assignment: "7/10", attendance: "85%", total: "84/100" },
+      { subject: "Basic Technology", theory: "28/40", practical: "34/40", assignment: "7/10", attendance: "85%", total: "84/100" },
+      { subject: "Yoruba", theory: "28/40", practical: "34/40", assignment: "7/10", attendance: "85%", total: "84/100" },
+      { subject: "Home Economics", theory: "28/40", practical: "34/40", assignment: "7/10", attendance: "85%", total: "84/100" },
+      { subject: "Social Studies", theory: "28/40", practical: "34/40", assignment: "7/10", attendance: "85%", total: "84/100" },
+      { subject: "Physical & Health Education", theory: "28/40", practical: "34/40", assignment: "7/10", attendance: "85%", total: "84/100" },
+      { subject: "Christian Religous Studies", theory: "28/40", practical: "34/40", assignment: "7/10", attendance: "85%", total: "84/100" },
     ],
     "Second Term": [
-      { subject: "Mathematics", theory: "36/40", practical: "39/40", assignment: "8/10", attendance: "85%", total: "96/100" },
-      { subject: "English", theory: "32/40", practical: "36/40", assignment: "9/10", attendance: "92%", total: "97/100" },
-      { subject: "Science", theory: "29/40", practical: "35/40", assignment: "8/10", attendance: "88%", total: "87/100" },
+      { subject: "Mathematics", theory: "30/40", practical: "35/40", assignment: "8/10", attendance: "90%", total: "95/100" },
+      { subject: "English", theory: "30/40", practical: "35/40", assignment: "8/10", attendance: "90%", total: "95/100" },
+      { subject: "Christian Religous Studies", theory: "30/40", practical: "35/40", assignment: "8/10", attendance: "90%", total: "95/100" },
+      { subject: "Home Economics", theory: "30/40", practical: "35/40", assignment: "8/10", attendance: "90%", total: "95/100" },
+      { subject: "Physical & Health Education", theory: "30/40", practical: "35/40", assignment: "8/10", attendance: "90%", total: "95/100" },
+      { subject: "Yoruba", theory: "30/40", practical: "35/40", assignment: "8/10", attendance: "90%", total: "95/100" },
+      { subject: "Social Studies", theory: "30/40", practical: "35/40", assignment: "8/10", attendance: "90%", total: "95/100" },
+      { subject: "Basic Technology", theory: "30/40", practical: "35/40", assignment: "8/10", attendance: "90%", total: "95/100" },
+      { subject: "Basic Science", theory: "30/40", practical: "35/40", assignment: "8/10", attendance: "90%", total: "95/100" },
     ],
     "Third Term": [
-      { subject: "Mathematics", theory: "34/40", practical: "37/40", assignment: "7/10", attendance: "82%", total: "91/100" },
-      { subject: "English", theory: "31/40", practical: "34/40", assignment: "8/10", attendance: "89%", total: "93/100" },
-      { subject: "Science", theory: "27/40", practical: "33/40", assignment: "7/10", attendance: "84%", total: "80/100" },
+      { subject: "Mathematics", theory: "30/40", practical: "35/40", assignment: "8/10", attendance: "90%", total: "95/100" },
+      { subject: "English", theory: "30/40", practical: "35/40", assignment: "8/10", attendance: "90%", total: "95/100" },
+      { subject: "Christian Religous Studies", theory: "30/40", practical: "35/40", assignment: "8/10", attendance: "90%", total: "95/100" },
+      { subject: "Home Economics", theory: "30/40", practical: "35/40", assignment: "8/10", attendance: "90%", total: "95/100" },
+      { subject: "Physical & Health Education", theory: "30/40", practical: "35/40", assignment: "8/10", attendance: "90%", total: "95/100" },
+      { subject: "Yoruba", theory: "30/40", practical: "35/40", assignment: "8/10", attendance: "90%", total: "95/100" },
+      { subject: "Social Studies", theory: "30/40", practical: "35/40", assignment: "8/10", attendance: "90%", total: "95/100" },
+      { subject: "Basic Technology", theory: "30/40", practical: "35/40", assignment: "8/10", attendance: "90%", total: "95/100" },
+      { subject: "Basic Science", theory: "30/40", practical: "35/40", assignment: "8/10", attendance: "90%", total: "95/100" },
     ]
   },
   2: {
@@ -78,30 +95,75 @@ const childrenResults = {
       { subject: "Mathematics", theory: "20/40", practical: "25/40", assignment: "5/10", attendance: "70%", total: "60/100" },
       { subject: "English", theory: "25/40", practical: "28/40", assignment: "6/10", attendance: "75%", total: "70/100" },
       { subject: "Biology", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+      { subject: "Physics", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+      { subject: "Yoruba", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+
+      { subject: "Chemistry", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+      { subject: "Further Mathematics", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+      { subject: "Animal Husbandry", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+      { subject: "Geography", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
     ],
     "Second Term": [
-      { subject: "Mathematics", theory: "22/40", practical: "27/40", assignment: "6/10", attendance: "73%", total: "65/100" },
-      { subject: "English", theory: "27/40", practical: "30/40", assignment: "7/10", attendance: "78%", total: "75/100" },
-      { subject: "Biology", theory: "24/40", practical: "29/40", assignment: "6/10", attendance: "74%", total: "70/100" },
+      { subject: "Mathematics", theory: "20/40", practical: "25/40", assignment: "5/10", attendance: "70%", total: "60/100" },
+      { subject: "English", theory: "25/40", practical: "28/40", assignment: "6/10", attendance: "75%", total: "70/100" },
+      { subject: "Biology", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+      { subject: "Physics", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+      { subject: "Yoruba", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+
+      { subject: "Chemistry", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+      { subject: "Further Mathematics", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+      { subject: "Animal Husbandry", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+      { subject: "Geography", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
     ],
     "Third Term": [
-      { subject: "Mathematics", theory: "23/40", practical: "28/40", assignment: "6/10", attendance: "74%", total: "67/100" },
-      { subject: "English", theory: "28/40", practical: "31/40", assignment: "7/10", attendance: "79%", total: "76/100" },
-      { subject: "Biology", theory: "25/40", practical: "30/40", assignment: "6/10", attendance: "75%", total: "71/100" },
+      { subject: "Mathematics", theory: "20/40", practical: "25/40", assignment: "5/10", attendance: "70%", total: "60/100" },
+      { subject: "English", theory: "25/40", practical: "28/40", assignment: "6/10", attendance: "75%", total: "70/100" },
+      { subject: "Biology", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+      { subject: "Physics", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+      { subject: "Yoruba", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+
+      { subject: "Chemistry", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+      { subject: "Further Mathematics", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+      { subject: "Animal Husbandry", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+      { subject: "Geography", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
     ]
   },
   3: {
     "First Term": [
-      { subject: "ND1", theory: "30/40", practical: "32/40", assignment: "7/10", attendance: "80%", total: "80/100" },
-      { subject: "ND2", theory: "32/40", practical: "34/40", assignment: "8/10", attendance: "85%", total: "85/100" },
+      { subject: "Mathematics", theory: "20/40", practical: "25/40", assignment: "5/10", attendance: "70%", total: "60/100" },
+      { subject: "English", theory: "25/40", practical: "28/40", assignment: "6/10", attendance: "75%", total: "70/100" },
+      { subject: "Medical Imaging Technology", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+      { subject: "Electronics", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+      { subject: "GNS 200", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+
+      { subject: "Entrepreneurship", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+      { subject: "Real Analysis", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+      { subject: "Electron Engineering", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+      { subject: "Food Safety", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
     ],
     "Second Term": [
-      { subject: "ND1", theory: "31/40", practical: "33/40", assignment: "8/10", attendance: "82%", total: "82/100" },
-      { subject: "ND2", theory: "33/40", practical: "35/40", assignment: "9/10", attendance: "87%", total: "87/100" },
+     { subject: "Mathematics", theory: "20/40", practical: "25/40", assignment: "5/10", attendance: "70%", total: "60/100" },
+      { subject: "English", theory: "25/40", practical: "28/40", assignment: "6/10", attendance: "75%", total: "70/100" },
+      { subject: "Medical Imaging Technology", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+      { subject: "Electronics", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+      { subject: "GNS 200", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+
+      { subject: "Entrepreneurship", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+      { subject: "Real Analysis", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+      { subject: "Electron Engineering", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+      { subject: "Food Safety", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
     ],
     "Third Term": [
-      { subject: "ND1", theory: "32/40", practical: "34/40", assignment: "8/10", attendance: "83%", total: "84/100" },
-      { subject: "ND2", theory: "34/40", practical: "36/40", assignment: "9/10", attendance: "88%", total: "89/100" },
+     { subject: "Mathematics", theory: "20/40", practical: "25/40", assignment: "5/10", attendance: "70%", total: "60/100" },
+      { subject: "English", theory: "25/40", practical: "28/40", assignment: "6/10", attendance: "75%", total: "70/100" },
+      { subject: "Medical Imaging Technology", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+      { subject: "Electronics", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+      { subject: "GNS 200", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+
+      { subject: "Entrepreneurship", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+      { subject: "Real Analysis", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+      { subject: "Electron Engineering", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
+      { subject: "Food Safety", theory: "22/40", practical: "27/40", assignment: "5/10", attendance: "72%", total: "65/100" },
     ]
   },
   4: {
@@ -177,7 +239,7 @@ function ParentResult() {
 
         <DashboardHeader text='Performance Insight' holder="Search Results" />
         {/* Child and Term Selectors */}
-        <div className="flex flex-wrap gap-4 mb-6">
+        <div className="flex flex-wrap gap-4 mb-6 mt-25">
           <div>
             <label className="block text-xs font-semibold mb-1">Select Child:</label>
             <select
@@ -291,7 +353,7 @@ function ParentResult() {
                 </div>
               ))}
             </div>
-            {/* Position in Session */}
+            {/* in Session */}
             <div className="bg-white rounded-2xl shadow p-4">
               <div className="font-semibold mb-2 text-gray-700">Position in this session</div>
               <hr className="bg-gray-500 mt-2 mb-3 rounded " />
