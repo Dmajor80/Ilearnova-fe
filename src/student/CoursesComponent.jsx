@@ -16,6 +16,7 @@ import {
   MessageCircle,
 } from "lucide-react";
 
+
 // Simple arrow icon component
 function ArrowIcon() {
   return (
