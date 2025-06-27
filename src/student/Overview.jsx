@@ -110,7 +110,7 @@ const Overview = () => {
   };
 
   return (
-    <div className=" w-[280px]  sm:w-[320px]  md:w-[500px] lg:w-[1200px] bg-gray-50 min-h-screen p-6">
+    <div className=" w-[270px]  sm:w-[300px]  md:w-[500px] lg:w-[1200px] bg-gray-50 min-h-screen p-6">
       {/* Header */}
       <div
         className="flex justify-between items-center mb-6"
@@ -126,7 +126,7 @@ const Overview = () => {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
         <div
-          className="bg-white p-4 rounded-xl shadow-sm h-[143px] max-w-[340px]"
+          className="bg-white p-4 rounded-xl shadow-sm h-[143px] "
           style={fadeInUp(0.2)}
         >
           <div className="flex justify-between items-center">

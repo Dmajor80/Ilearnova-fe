@@ -32,6 +32,7 @@ import Users from "./admin/Users";
 import NewUser from "./admin/NewUser";
 import Report from "./admin/Report";
 import Transcript from "./parent/components/Transcript";
+import SchoolAdmin from "./School-Admin/SchoolAdmin";
 // import { CoursePage } from "./student/CoursesComponent";
 // import Payment from "./parent/Payment";
 
@@ -54,6 +55,7 @@ const App = () => {
         <Route path="/parent-dashboard" element={<ParentDashboard />} />
         {/* student dashboard */}
         <Route path="/student-dashboard" element={<StudentDashboard />}>
+          <Route path="/student-dashboard" element={<Overview />} />
           <Route path="overview" element={<Overview />} />
           <Route path="IDcard" element={<IdCard />} />
           <Route path="attendance" element={<Attendance />} />
@@ -75,6 +77,7 @@ const App = () => {
           <Route path="reports" element={<Report />} />
         </Route>
         {/*end of  admin section */}
+        <Route path="/dashboard" element={<SchoolAdmin />} />
       </Routes>
     </>
   );
