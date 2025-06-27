@@ -170,11 +170,11 @@ export default function Footer() {
                   <MapPin className="h-5 w-5 text-purple-400 mt-0.5 group-hover:scale-110 transition-transform duration-300" />
                   <div>
                     <p className="text-sm text-gray-300 leading-relaxed">
-                      123 Education Street
+                      162,
                       <br />
-                      Learning City, LC 12345
+                      AGBODU QUARTERS,
                       <br />
-                      United States
+                      ITELE IJEBU
                     </p>
                   </div>
                 </div>
@@ -182,14 +182,16 @@ export default function Footer() {
                 <div className="flex items-center space-x-3 group cursor-pointer">
                   <Phone className="h-5 w-5 text-pink-400 group-hover:scale-110 transition-transform duration-300" />
                   <span className="text-sm text-gray-300 group-hover:text-white transition-colors duration-300">
-                    +1 (555) 123-4567
+                    +2349050119078,
+                    <br />
+                    +2347061500944
                   </span>
                 </div>
 
                 <div className="flex items-center space-x-3 group cursor-pointer">
                   <Mail className="h-5 w-5 text-indigo-400 group-hover:scale-110 transition-transform duration-300" />
                   <span className="text-sm text-gray-300 group-hover:text-white transition-colors duration-300">
-                    info@excellenceacademy.edu
+                    dimatechitconsultancy@gmail.com
                   </span>
                 </div>
               </div>

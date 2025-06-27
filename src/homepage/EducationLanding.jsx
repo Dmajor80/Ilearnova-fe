@@ -37,7 +37,7 @@ const EducationLanding = () => {
 
       {/* Cards Section */}
       <div className="container mx-auto px-8 pb-16">
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-4 gap-8  mx-auto">
           {/* Primary Card */}
           <div
             className={`bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-500 hover:scale-105 hover:-translate-y-2 transform ${
@@ -99,6 +99,32 @@ const EducationLanding = () => {
             <div className="p-6">
               <h3 className="text-2xl font-bold text-gray-800 mb-4 group-hover:text-rose-600 transition-colors duration-300">
                 Senior Secondary
+              </h3>
+              <p className="text-gray-600 leading-relaxed">
+                Master difficult concepts with simplified lessons covering
+                Mathematics, English, Sciences, Arts & Commercials.
+              </p>
+            </div>
+          </div>
+          {/* tertiary Card */}
+          <div
+            className={`bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-500 hover:scale-105 hover:-translate-y-2 transform ${
+              isVisible
+                ? "translate-y-0 opacity-100"
+                : "translate-y-20 opacity-0"
+            }`}
+            style={{ transitionDelay: "1000ms" }}
+          >
+            <div className="h-64 ">
+              <img
+                src="https://plus.unsplash.com/premium_photo-1661375359328-bc2a7948a7fd?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTN8fHRlcnRpYXJ5JTIwZWR1Y2F0aW9ufGVufDB8fDB8fHww"
+                alt=""
+                className="w-full"
+              />
+            </div>
+            <div className="p-6">
+              <h3 className="text-2xl font-bold text-gray-800 mb-4 group-hover:text-rose-600 transition-colors duration-300">
+                Tertiary Education
               </h3>
               <p className="text-gray-600 leading-relaxed">
                 Master difficult concepts with simplified lessons covering

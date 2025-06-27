@@ -31,7 +31,7 @@ import Dashboard from "./admin/Dashboard";
 import Users from "./admin/Users";
 import NewUser from "./admin/NewUser";
 import Report from "./admin/Report";
-import Transcript from "./parent/components/Transcript";
+// import Transcript from "./parent/components/Transcript";
 import SchoolAdmin from "./School-Admin/SchoolAdmin";
 // import { CoursePage } from "./student/CoursesComponent";
 // import Payment from "./parent/Payment";
