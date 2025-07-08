@@ -145,7 +145,7 @@ const AdminLogin = () => {
             </div>
 
             {/* Enhanced Login button */}
-            <Link to="/admin-dashboard">
+            <Link to="/dashboard">
               <button
                 type="submit"
                 className="w-full h-12 sm:h-14 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold text-sm sm:text-base shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-blue-200"

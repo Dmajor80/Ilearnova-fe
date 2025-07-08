@@ -179,14 +179,14 @@ export default function StudentDashboard() {
 
       <div className="ml-16 md:ml-0 flex-1">
         {/* adminnav */}
-        <div className="flex items-center justify-between mb-6 w-full max-w-[1024px] p-4 md:p-[2rem]">
+        <div className="flex items-center justify-between mb-6  lg:w-full   p-4 md:p-[2rem]">
           <div>
             <p className="text-gray-500 text-[9px] sm:text-[10px] md:text-[12px] lg:text-[14px]  mt-1">
               Page/Student Portal
             </p>
           </div>
           <div className="flex items-center gap-2 md:gap-4">
-            <div className="relative w-32 sm:w-48 md:w-64">
+            {/* <div className="relative w-32 sm:w-48 md:w-64">
               <input
                 type="text"
                 placeholder="Search courses..."
@@ -205,7 +205,7 @@ export default function StudentDashboard() {
                   d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                 />
               </svg>
-            </div>
+            </div> */}
             <img
               src="/api/placeholder/32/32"
               alt="User"
