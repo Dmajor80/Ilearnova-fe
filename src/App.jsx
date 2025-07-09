@@ -1,8 +1,9 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
-import Pages from "./parent/Pages/Pages"
+import Pages from "./parent/Pages/Pages";
 import HomePage from "./homepage/HomePage";
 import SignupForm from "./signup/SignupForm";
+
 
 // Login Pages
 import LoginPage from "./teacher/LoginPage";
@@ -30,8 +31,9 @@ import Dashboard from "./admin/Dashboard";
 import Users from "./admin/Users";
 import NewUser from "./admin/NewUser";
 import Report from "./admin/Report";
+
+import SchoolAdmin from "./School-Admin/SchoolAdmin";
 import Error from "./Error";
-// import { CoursePage } from "./student/CoursesComponent";
 
 const App = () => {
   return (
@@ -69,8 +71,9 @@ const App = () => {
         {/* course page */}
         {/* <Route path="/course-page" element={<CoursePage />} /> */}
         {/* end of course page */}
-           {/* student dashboard */}
+        {/* student dashboard */}
         <Route path="/student-dashboard" element={<StudentDashboard />}>
+          <Route path="/student-dashboard" element={<Overview />} />
           <Route path="overview" element={<Overview />} />
           <Route path="IDcard" element={<IdCard />} />
           <Route path="attendance" element={<Attendance />} />
@@ -93,6 +96,7 @@ const App = () => {
           <Route path="*" element={<Error />} />
         </Route>
         {/*end of  admin section */}
+        <Route path="/dashboard" element={<SchoolAdmin />} />
       </Routes>
       <Pages />
     </>

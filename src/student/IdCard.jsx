@@ -1,16 +1,56 @@
 import React, { useState } from "react";
-import { Check, Upload, Edit, ChevronDown } from "lucide-react";
-import check from "../student/checkout.png";
+import {
+  Check,
+  Upload,
+  Edit,
+  ChevronDown,
+  User,
+  Calendar,
+  FileText,
+  CreditCard,
+  CheckCircle,
+  ArrowRight,
+  ArrowLeft,
+} from "lucide-react";
+
+// Mock framer-motion functionality with CSS transitions
+const motion = {
+  div: ({
+    children,
+    className,
+    initial,
+    animate,
+    transition,
+    whileHover,
+    ...props
+  }) => (
+    <div
+      className={`${className} transition-all duration-500 ease-in-out`}
+      {...props}
+    >
+      {children}
+    </div>
+  ),
+  button: ({ children, className, whileHover, whileTap, ...props }) => (
+    <button
+      className={`${className} transition-all duration-200 hover:scale-105 active:scale-95`}
+      {...props}
+    >
+      {children}
+    </button>
+  ),
+};
+
 const IdCard = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
-    firstName: "Priscilla",
-    lastName: "Daniel",
-    dateOfBirth: "2000/04/27",
-    sex: "Female",
-    guardianDetails: "Mr & Mrs Priscilla Daniel",
+    firstName: "",
+    lastName: "",
+    dateOfBirth: "",
+    sex: "",
+    guardianDetails: "",
     academicHistory: "",
-    admissionLevel: "Primary",
+    admissionLevel: "",
     documents: {
       reportCard: false,
       recommendationLetter: false,
@@ -32,382 +72,597 @@ const IdCard = () => {
     if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
+  const steps = [
+    { number: 1, title: "Personal Info", icon: User },
+    { number: 2, title: "Payment", icon: CreditCard },
+    { number: 3, title: "Review", icon: CheckCircle },
+  ];
+
   const StepIndicator = () => (
-    <div className="flex items-center justify-center mb-8">
-      <div className="flex items-center space-x-4">
-        {[1, 2, 3].map((step) => (
-          <React.Fragment key={step}>
-            <div
-              className={`w-3 h-3 rounded-full ${
-                step <= currentStep ? "bg-blue-600" : "bg-gray-300"
-              }`}
-            />
-            {step < 3 && (
-              <div
-                className={`w-24 h-0.5 ${
-                  step < currentStep ? "bg-blue-600" : "bg-gray-300"
-                }`}
-              />
-            )}
-          </React.Fragment>
-        ))}
+    <motion.div className="flex items-center justify-center mb-12 w-[200px] mx-auto sm:w-[330px] md:w-[500px] ">
+      <div className="flex items-center space-x-8">
+        {steps.map((step, index) => {
+          const Icon = step.icon;
+          const isActive = step.number <= currentStep;
+          const isCurrent = step.number === currentStep;
+
+          return (
+            <React.Fragment key={step.number}>
+              <motion.div
+                className="flex flex-col items-center group"
+                whileHover={{ scale: 1.05 }}
+              >
+                <div
+                  className={`w-8 h-8  lg:w-16 lg:h-16rounded-full flex items-center justify-center mb-3 transition-all duration-300 ${
+                    isActive
+                      ? isCurrent
+                        ? "bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg"
+                        : "bg-green-500 shadow-md"
+                      : "bg-gray-200"
+                  }`}
+                >
+                  <Icon
+                    className={`w-7 h-7 ${
+                      isActive ? "text-white" : "text-gray-400"
+                    }`}
+                  />
+                </div>
+                <span
+                  className={`text-sm font-medium transition-colors ${
+                    isActive ? "text-blue-600" : "text-gray-400"
+                  }`}
+                >
+                  {step.title}
+                </span>
+              </motion.div>
+              {index < steps.length - 1 && (
+                <div
+                  className={`w-20 h-1 rounded-full transition-all duration-500 ${
+                    step.number < currentStep
+                      ? "bg-gradient-to-r from-blue-500 to-green-500"
+                      : "bg-gray-200"
+                  }`}
+                />
+              )}
+            </React.Fragment>
+          );
+        })}
       </div>
-    </div>
+    </motion.div>
   );
 
   const Step1PersonalInfo = () => (
-    <div className="  w-full">
-      {/* Header with decorative elements */}
-      <div className="relative bg-gradient-to-r from-blue-600 to-blue-700 rounded-t-lg p-8 mb-8">
-        <div className="absolute top-4 left-4 w-8 h-8 bg-green-400 rounded-full"></div>
-        <div className="absolute top-2 right-8 w-6 h-6 bg-yellow-400 rounded-full"></div>
-        <div className="absolute bottom-4 right-4 w-12 h-12 bg-gray-200 rounded-full"></div>
+    <motion.div
+      className=" w-[350px] sm:w-[400px] md:w-[500px] lg:w-full mx-auto"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+    >
+      {/* Professional Header */}
+      <motion.div
+        className="relative bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 rounded-2xl p-8 mb-8 overflow-hidden"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.8 }}
+      >
+        {/* Decorative Elements */}
+        <div className="absolute top-0 left-0 w-40 h-40 bg-white/5 rounded-full -translate-x-20 -translate-y-20"></div>
+        <div className="absolute bottom-0 right-0 w-32 h-32 bg-white/5 rounded-full translate-x-16 translate-y-16"></div>
+        <div className="absolute top-8 right-8 w-20 h-20 bg-gradient-to-br from-yellow-400/20 to-orange-500/20 rounded-full"></div>
 
-        <div className="text-center">
-          <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4">
-            <div className="text-2xl font-bold text-gray-800">+</div>
-          </div>
-          <h2 className="text-white font-semibold">
-            Step 1: Personal Information
+        <div className="relative text-center">
+          <motion.div
+            className="w-20 h-20 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-6 border border-white/20"
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            transition={{ duration: 0.3 }}
+          >
+            <User className="w-10 h-10 text-white" />
+          </motion.div>
+          <h2 className="text-3xl font-bold text-white mb-2">
+            Personal Information
           </h2>
+          <p className="text-blue-100 text-lg">
+            Let's start with your basic details
+          </p>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="space-y-6 px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              First name*
-            </label>
-            <input
-              type="text"
-              value={formData.firstName}
-              onChange={(e) => updateFormData("firstName", e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Priscilla"
-            />
+      {/* Form Content */}
+      <motion.div
+        className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+      >
+        <div className="space-y-8">
+          {/* Name Fields */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <motion.div whileHover={{ scale: 1.02 }}>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                First Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.firstName}
+                onChange={(e) => updateFormData("firstName", e.target.value)}
+                className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 bg-gray-50 focus:bg-white"
+                placeholder="Enter your first name"
+              />
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.02 }}>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                Last Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.lastName}
+                onChange={(e) => updateFormData("lastName", e.target.value)}
+                className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 bg-gray-50 focus:bg-white"
+                placeholder="Enter your last name"
+              />
+            </motion.div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Last name*
-            </label>
-            <input
-              type="text"
-              value={formData.lastName}
-              onChange={(e) => updateFormData("lastName", e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Daniel"
-            />
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Date of Birth*
-            </label>
-            <input
-              type="text"
-              value={formData.dateOfBirth}
-              onChange={(e) => updateFormData("dateOfBirth", e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="2000/04/27"
-            />
+          {/* Date and Sex Fields */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <motion.div whileHover={{ scale: 1.02 }}>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                Date of Birth <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                value={formData.dateOfBirth}
+                onChange={(e) => updateFormData("dateOfBirth", e.target.value)}
+                className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 bg-gray-50 focus:bg-white"
+              />
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.02 }}>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                Gender <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <select
+                  value={formData.sex}
+                  onChange={(e) => updateFormData("sex", e.target.value)}
+                  className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 bg-gray-50 focus:bg-white appearance-none"
+                >
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+                <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              </div>
+            </motion.div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Sex*
-            </label>
-            <input
-              type="text"
-              value={formData.sex}
-              onChange={(e) => updateFormData("sex", e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Female"
-            />
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Guardian Details*
-            </label>
-            <input
-              type="text"
-              value={formData.guardianDetails}
-              onChange={(e) =>
-                updateFormData("guardianDetails", e.target.value)
-              }
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Mr & Mrs Priscilla Daniel"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Admission Level*
-            </label>
-            <div className="relative">
-              <select
-                value={formData.admissionLevel}
+          {/* Guardian and Admission Level */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <motion.div whileHover={{ scale: 1.02 }}>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                Guardian Details <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={formData.guardianDetails}
                 onChange={(e) =>
-                  updateFormData("admissionLevel", e.target.value)
+                  updateFormData("guardianDetails", e.target.value)
                 }
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+                className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 bg-gray-50 focus:bg-white"
+                placeholder="Guardian's full name"
+              />
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.02 }}>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                Admission Level <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <select
+                  value={formData.admissionLevel}
+                  onChange={(e) =>
+                    updateFormData("admissionLevel", e.target.value)
+                  }
+                  className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 bg-gray-50 focus:bg-white appearance-none"
+                >
+                  <option value="">Select Level</option>
+                  <option value="Primary">Primary</option>
+                  <option value="Secondary">Secondary</option>
+                  <option value="Tertiary">Tertiary</option>
+                </select>
+                <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Academic History and Documents */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <motion.div whileHover={{ scale: 1.02 }}>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                Academic History <span className="text-red-500">*</span>
+                <span className="block text-xs text-gray-500 font-normal mt-1">
+                  Previous school or educational background
+                </span>
+              </label>
+              <textarea
+                value={formData.academicHistory}
+                onChange={(e) =>
+                  updateFormData("academicHistory", e.target.value)
+                }
+                className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 bg-gray-50 focus:bg-white resize-none"
+                rows="4"
+                placeholder="Tell us about your academic background..."
+              />
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.02 }}>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                Upload Documents <span className="text-red-500">*</span>
+              </label>
+              <motion.div
+                className="w-full px-6 py-12 border-2 border-dashed border-gray-300 rounded-xl text-center hover:border-blue-400 hover:bg-blue-50 transition-all duration-300 cursor-pointer group"
+                whileHover={{ scale: 1.02 }}
               >
-                <option>Primary</option>
-                <option>Secondary</option>
-                <option>Tertiary</option>
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            </div>
+                <Upload className="w-12 h-12 text-gray-400 group-hover:text-blue-500 mx-auto mb-4 transition-colors" />
+                <p className="text-gray-600 group-hover:text-blue-600 font-medium mb-2">
+                  Click to upload or drag files here
+                </p>
+                <p className="text-sm text-gray-400">
+                  PDF, DOC, DOCX up to 10MB
+                </p>
+              </motion.div>
+            </motion.div>
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Academic History*
-              <span className="text-xs text-gray-500 block">
-                Any previous school or background
-              </span>
-            </label>
-            <textarea
-              value={formData.academicHistory}
-              onChange={(e) =>
-                updateFormData("academicHistory", e.target.value)
-              }
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              rows="3"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Upload Document*
-            </label>
-            <div className="w-full px-4 py-12 border-2 border-dashed border-gray-300 rounded-lg text-center">
-              <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-              <p className="text-gray-500 text-sm">Upload documents</p>
-            </div>
-          </div>
+          {/* Continue Button */}
+          <motion.div className="pt-6">
+            <motion.button
+              onClick={nextStep}
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              Continue to Payment
+              <ArrowRight className="w-5 h-5" />
+            </motion.button>
+          </motion.div>
         </div>
-
-        <button
-          onClick={nextStep}
-          className="w-full bg-gray-400 hover:bg-gray-500 text-white font-semibold py-4 px-6 rounded-lg transition duration-200"
-        >
-          Proceed to Payment
-        </button>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 
   const Step2Payment = () => (
-    <div className="w-full mx-auto">
-      <h2 className="text-xl font-semibold text-center mb-8">
-        Step 2: Make Payment
-      </h2>
-      <div className="flex items-center gap-[2rem] flex-col lg:flex-row">
-        <div>
-          {/* instruction */}
-          <div className="bg-white rounded-lg p-6 mb-6 max-w-[488px] h-[236px]">
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-2">Tuition Fee</h3>
-              <div className="text-3xl font-bold text-blue-600 mb-2">
-                $100
-                <span className="text-sm font-normal text-gray-500">
-                  /session
-                </span>
-              </div>
-              <p className="text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px] text-[#333333]">
-                Empower your child’s learning journey for just $300 per session
-                – quality education, personalized attention, and a brighter
-                future.
-              </p>
+    <motion.div
+      className="max-w-4xl mx-auto"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+    >
+      <motion.div
+        className="text-center mb-12"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+      >
+        <h2 className="text-3xl font-bold text-gray-800 mb-4">
+          Secure Payment
+        </h2>
+        <p className="text-gray-600 text-lg">
+          Complete your application with our secure payment system
+        </p>
+      </motion.div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+        {/* Payment Card */}
+        <motion.div
+          className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100"
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CreditCard className="w-8 h-8 text-white" />
+            </div>
+            <h3 className="text-2xl font-bold text-gray-800 mb-2">
+              Tuition Fee
+            </h3>
+            <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-2">
+              $100
+              <span className="text-lg font-normal text-gray-500">
+                /session
+              </span>
+            </div>
+            <p className="text-gray-600 leading-relaxed">
+              Invest in quality education with personalized attention and
+              comprehensive learning support for your child's bright future.
+            </p>
+          </div>
+
+          <div className="space-y-4 mb-8">
+            <div className="flex items-center gap-3 text-gray-700">
+              <CheckCircle className="w-5 h-5 text-green-500" />
+              <span>Comprehensive curriculum</span>
+            </div>
+            <div className="flex items-center gap-3 text-gray-700">
+              <CheckCircle className="w-5 h-5 text-green-500" />
+              <span>Personalized attention</span>
+            </div>
+            <div className="flex items-center gap-3 text-gray-700">
+              <CheckCircle className="w-5 h-5 text-green-500" />
+              <span>Progress tracking</span>
             </div>
           </div>
-          <button
+
+          <motion.button
             onClick={nextStep}
-            className="w-full bg-[#0D1D75] hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 mb-6"
+            className="w-full bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
-            Proceed to payment
-          </button>
-        </div>
-        {/* end of intruction */}
-        {/* Payment illustration */}
+            <CreditCard className="w-5 h-5" />
+            Proceed to Payment
+          </motion.button>
+        </motion.div>
 
-        {/* <div className="bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg p-8 text-center">
-        <div className="relative">
-          <div className="w-32 h-20 bg-gray-800 rounded-lg mx-auto mb-4 relative">
-            <div className="absolute top-2 left-2 w-8 h-6 bg-gray-200 rounded"></div>
-            <div className="absolute bottom-2 right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-              <Check className="w-4 h-4 text-white" />
-            </div>
+        {/* Payment Illustration */}
+        <motion.div
+          className="relative"
+          initial={{ opacity: 0, x: 30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+        >
+          <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-12 text-center relative overflow-hidden">
+            {/* Decorative circles */}
+            <div className="absolute top-4 left-4 w-12 h-12 bg-blue-200 rounded-full opacity-60"></div>
+            <div className="absolute top-8 right-8 w-8 h-8 bg-purple-200 rounded-full opacity-80"></div>
+            <div className="absolute bottom-4 left-8 w-16 h-16 bg-green-200 rounded-full opacity-40"></div>
+            <div className="absolute bottom-8 right-4 w-10 h-10 bg-yellow-200 rounded-full opacity-70"></div>
+
+            {/* Credit card mockup */}
+            <motion.div
+              className="relative z-10 w-80 h-48 bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl mx-auto shadow-2xl"
+              whileHover={{ rotateY: 10, scale: 1.05 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="absolute top-6 left-6 w-12 h-8 bg-yellow-400 rounded-md"></div>
+              <div className="absolute bottom-6 right-6 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                <Check className="w-6 h-6 text-white" />
+              </div>
+              <div className="absolute bottom-6 left-6 text-white text-sm font-mono">
+                •••• •••• •••• 1234
+              </div>
+            </motion.div>
           </div>
-
-          <div className="absolute top-0 left-4 w-6 h-6 bg-orange-400 rounded-full opacity-80"></div>
-          <div className="absolute top-8 right-8 w-4 h-4 bg-yellow-400 rounded-full opacity-60"></div>
-          <div className="absolute bottom-4 left-8 w-8 h-8 bg-red-400 rounded-full opacity-70"></div>
-          <div className="absolute bottom-0 right-4 w-6 h-6 bg-purple-400 rounded-full opacity-80"></div>
-        </div>     
-     </div> */}
-
-        <div>
-          <img src={check} alt="" />
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 
   const Step3Review = () => (
-    <div className="max-w-4xl mx-auto">
-      <h2 className="text-xl font-semibold text-center mb-8">
-        Step 3: Application Review & Submit
-      </h2>
+    <motion.div
+      className="max-w-6xl mx-auto"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+    >
+      <motion.div
+        className="text-center mb-12"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.2 }}
+      >
+        <h2 className="text-3xl font-bold text-gray-800 mb-4">
+          Review & Submit
+        </h2>
+        <p className="text-gray-600 text-lg">
+          Please review your information before submitting
+        </p>
+      </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
-          {/* Personal Information */}
-          <div>
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Personal Information</h3>
-              <button
+        {/* Main Content */}
+        <motion.div
+          className="lg:col-span-2 space-y-6"
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          {/* Personal Information Card */}
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <User className="w-5 h-5 text-blue-600" />
+                Personal Information
+              </h3>
+              <motion.button
                 onClick={() => setCurrentStep(1)}
-                className="text-blue-600 hover:text-blue-700 text-sm flex items-center gap-1"
+                className="text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 hover:bg-blue-50 px-3 py-1 rounded-lg transition-colors"
+                whileHover={{ scale: 1.05 }}
               >
                 <Edit className="w-4 h-4" />
                 Edit
-              </button>
+              </motion.button>
             </div>
-            <div className="space-y-2 text-sm">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <span className="text-gray-600">Full name:</span>
-                  <p className="font-medium">
-                    {formData.firstName} {formData.lastName}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-gray-600">Date of birth:</span>
-                  <p className="font-medium">12 December, 2024</p>
-                </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <span className="text-sm text-gray-500 font-medium">
+                  Full Name
+                </span>
+                <p className="text-lg font-semibold text-gray-800">
+                  {formData.firstName || "Priscilla"}{" "}
+                  {formData.lastName || "Daniel"}
+                </p>
               </div>
               <div>
-                <span className="text-gray-600">Guardian Details:</span>
-                <p className="font-medium">Mr Daniel</p>
-                <p className="text-gray-500">+234 - 7056 7842</p>
+                <span className="text-sm text-gray-500 font-medium">
+                  Date of Birth
+                </span>
+                <p className="text-lg font-semibold text-gray-800">
+                  {formData.dateOfBirth || "2000-04-27"}
+                </p>
+              </div>
+              <div>
+                <span className="text-sm text-gray-500 font-medium">
+                  Gender
+                </span>
+                <p className="text-lg font-semibold text-gray-800">
+                  {formData.sex || "Female"}
+                </p>
+              </div>
+              <div>
+                <span className="text-sm text-gray-500 font-medium">
+                  Guardian
+                </span>
+                <p className="text-lg font-semibold text-gray-800">
+                  {formData.guardianDetails || "Mr & Mrs Daniel"}
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Academic History */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Academic History</h3>
-            <div className="space-y-2 text-sm">
+          {/* Academic History Card */}
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+            <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <FileText className="w-5 h-5 text-blue-600" />
+              Academic History
+            </h3>
+            <div className="space-y-4">
               <div>
-                <span className="text-gray-600">School Name:</span>
-                <p className="font-medium">St Michael International School</p>
+                <span className="text-sm text-gray-500 font-medium">
+                  Previous School
+                </span>
+                <p className="text-lg font-semibold text-gray-800">
+                  {formData.academicHistory ||
+                    "St Michael International School"}
+                </p>
               </div>
               <div>
-                <span className="text-gray-600">Grade:</span>
-                <p className="font-medium">Grade 6</p>
+                <span className="text-sm text-gray-500 font-medium">
+                  Admission Level
+                </span>
+                <p className="text-lg font-semibold text-gray-800">
+                  {formData.admissionLevel || "Primary"}
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Upload Documents */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Upload Documents</h3>
+          {/* Documents Card */}
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+            <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <FileText className="w-5 h-5 text-blue-600" />
+              Documents
+            </h3>
             <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">📄</span>
+              <div className="flex items-center gap-4 p-3 bg-green-50 rounded-lg">
+                <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-sm">Report Card</span>
+                <span className="font-medium text-gray-700">Report Card</span>
                 <div className="ml-auto">
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <div className="w-4 h-4 bg-green-500 rounded-full"></div>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">📋</span>
+              <div className="flex items-center gap-4 p-3 bg-green-50 rounded-lg">
+                <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-sm">Recommendation Letter</span>
+                <span className="font-medium text-gray-700">
+                  Recommendation Letter
+                </span>
                 <div className="ml-auto">
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <div className="w-4 h-4 bg-green-500 rounded-full"></div>
                 </div>
               </div>
-            </div>
-            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-              <span className="text-green-700 text-sm font-medium">
-                Status: Uploaded
-              </span>
             </div>
           </div>
 
-          {/* Payment Details */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Payment Details</h3>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Amount Paid:</span>
-                <span className="font-medium">$100.00</span>
+          {/* Payment Details Card */}
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+            <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <CreditCard className="w-5 h-5 text-blue-600" />
+              Payment Details
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <span className="text-sm text-gray-500 font-medium">
+                  Amount Paid
+                </span>
+                <p className="text-2xl font-bold text-green-600">$100.00</p>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Transaction ID:</span>
-                <span className="font-medium">RN104504072</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Payment Date:</span>
-                <span className="font-medium">3 December, 2024</span>
+              <div>
+                <span className="text-sm text-gray-500 font-medium">
+                  Transaction ID
+                </span>
+                <p className="text-lg font-semibold text-gray-800">
+                  RN104504072
+                </p>
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Profile Image Section */}
-        <div className="lg:col-span-1">
-          <div className="border rounded-lg p-4">
-            <img
-              src="/api/placeholder/300/300"
-              alt="Student Profile"
-              className="w-full h-64 object-cover rounded-lg mb-4"
-            />
-            <div className="space-y-3 text-sm">
-              <div className="flex items-start gap-2">
+        {/* Profile Section */}
+        <motion.div
+          className="lg:col-span-1"
+          initial={{ opacity: 0, x: 30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+        >
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 sticky top-4">
+            <div className="w-full h-64 bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl mb-6 flex items-center justify-center">
+              <User className="w-24 h-24 text-gray-400" />
+            </div>
+
+            <div className="space-y-4 text-sm">
+              <div className="flex items-start gap-3">
                 <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
-                <p className="text-gray-700">
+                <p className="text-gray-700 leading-relaxed">
                   I confirm that the above information is accurate to the best
                   of my knowledge.
                 </p>
               </div>
-              <div className="flex items-start gap-2">
+              <div className="flex items-start gap-3">
                 <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
-                <p className="text-gray-700">
+                <p className="text-gray-700 leading-relaxed">
                   I acknowledge receiving academic & financial information.
                 </p>
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
-      <div className="mt-8 flex gap-4">
-        <button
+      {/* Action Buttons */}
+      <motion.div
+        className="mt-12 flex flex-col sm:flex-row gap-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.5 }}
+      >
+        <motion.button
           onClick={prevStep}
-          className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-lg transition duration-200"
+          className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-4 px-8 rounded-xl transition-all duration-300 flex items-center justify-center gap-3"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
-          Back to Edit
-        </button>
-        <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
+          <ArrowLeft className="w-5 h-5" />
+          Back to Payment
+        </motion.button>
+        <motion.button
+          className="flex-1 bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <CheckCircle className="w-5 h-5" />
           Submit Application
-        </button>
-      </div>
-    </div>
+        </motion.button>
+      </motion.div>
+    </motion.div>
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 ">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-12 ">
       <div className="container mx-auto px-4 ">
         <StepIndicator />
 
