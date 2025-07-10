@@ -19,6 +19,8 @@
     "@splidejs/react-splide": "^0.7.12",
     "@tailwindcss/vite": "^4.1.7",
     "axios": "^1.10.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
     "framer-motion": "^12.12.1",
     "lucide-react": "^0.510.0",
     "react": "^19.1.0",

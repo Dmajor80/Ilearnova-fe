@@ -11,6 +11,7 @@ import {
   Calendar,
   Users,
   Award,
+  Linkedin,
   ChevronRight,
   Heart,
 } from "lucide-react";
@@ -41,10 +42,14 @@ export default function Footer() {
   ];
 
   const socialLinks = [
-    { icon: Facebook, href: "#", color: "hover:text-blue-400" },
-    { icon: Twitter, href: "#", color: "hover:text-sky-400" },
-    { icon: Instagram, href: "#", color: "hover:text-pink-400" },
-    { icon: Youtube, href: "#", color: "hover:text-red-400" },
+    { icon: Facebook, href: "https://www.facebook.com/ilearnova", color: "hover:text-blue-400" },
+    { icon: Twitter, href: "https://www.x.com/iilearnova", color: "hover:text-sky-400" },
+    { icon: Instagram, href: "https://www.instagram.com/ilearnova", color: "hover:text-pink-400" },
+    { icon: Youtube, href: "https://www.youtube.com/@ilearnova", color: "hover:text-red-400" },
+    { icon: Linkedin, href: "https://www.linkedin.com/company/dimatech-it-consultancy-and-general-services/", color: "hover:text-red-400" },
+    { icon: Twitter, href: "https://www.x.com/Dimatech2023", color: "hover:text-sky-400" },
+    { icon: Instagram, href: "https://www.instagram.com/Dimatech2023", color: "hover:text-pink-400" },
+    { icon: Youtube, href: "https://www.youtube.com/@DIMATECHIT", color: "hover:text-red-400" },
   ];
 
   return (
