@@ -7,7 +7,6 @@ import {
   Calendar,
   Users,
   Award,
-
   ChevronRight,
   Heart,
 } from "lucide-react";
@@ -53,12 +52,7 @@ export default function Footer() {
     { icon: FaXTwitter, href: "https://www.x.com/iilearnova", color: "hover:text-sky-400" },
     { icon: FaInstagram, href: "https://www.instagram.com/ilearnova", color: "hover:text-pink-400" },
     { icon: FaYoutube, href: "https://www.youtube.com/@ilearnova", color: "hover:text-red-400" },
-  ];
-  const footSocialLinks = [
     { icon: FaLinkedin, href: "https://www.linkedin.com/company/dimatech-it-consultancy-and-general-services/", color: "hover:text-red-400" },
-    { icon: FaXTwitter, href: "https://www.x.com/Dimatech2023", color: "hover:text-sky-400" },
-    { icon: FaInstagram, href: "https://www.instagram.com/Dimatech2023", color: "hover:text-pink-400" },
-    { icon: FaYoutube, href: "https://www.youtube.com/@DIMATECHIT", color: "hover:text-red-400" },
   ];
 
   return (
@@ -231,7 +225,7 @@ export default function Footer() {
                   Follow Us
                 </h5>
                 <div className="flex space-x-4">
-                  {footSocialLinks.map((social, index) => {
+                  {headSocialLinks.map((social, index) => {
                     const IconComponent = social.icon;
                     return (
                       <a
