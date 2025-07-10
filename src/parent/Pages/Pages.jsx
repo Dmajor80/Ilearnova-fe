@@ -7,10 +7,13 @@ import ParentMessages from "./ParentMessages";
 import ParentDashboard from "./ParentDashboard";
 import PaymentProcess from "./PaymentProcess";
 import { Route, Routes } from "react-router-dom";
+import SignupForm from "../../signup/SignupForm";
 
 function Pages() {
   return (
     <Routes>
+      {/* <Route path="/signup" element={<SignupForm />} /> */}
+      {/* <Route path="/parent-signup" element={<ParentSignup />} /> */}
       <Route path="/parent-dashboard" element={<ParentDashboard />} />
       <Route path="/parent-payments" element={<Payment />} />
       <Route path="/parent-timetable" element={<Timetable />} />
