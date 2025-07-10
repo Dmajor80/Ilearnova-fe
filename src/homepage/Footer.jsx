@@ -246,7 +246,7 @@ export default function Footer() {
           <div className="border-t border-white/20 pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
               <div className="text-sm text-gray-400 flex items-center">
-                <span>© {year} Excellence Academy. Made with</span>
+                <span>© {year} Ilearnova. Made with</span>
                 <Heart className="h-4 w-4 mx-1 text-red-400 animate-pulse" />
                 <span>for education.</span>
               </div>
