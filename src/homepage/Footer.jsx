@@ -11,7 +11,6 @@ import {
   ChevronRight,
   Heart,
 } from "lucide-react";
-
 import { FaFacebook, FaXTwitter, FaInstagram, FaYoutube, FaLinkedin } from "react-icons/fa6";
 
 
@@ -100,7 +99,7 @@ export default function Footer() {
                 development, and innovation since 1985.
               </p>
               {/* Social Links */}
-              <div className="pt-4">
+              <div className="pt-2">
                 <div className="flex space-x-4">
                   {headSocialLinks.map((social, index) => {
                     const IconComponent = social.icon;
