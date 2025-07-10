@@ -4,20 +4,28 @@ import {
   Mail,
   Phone,
   MapPin,
-  Facebook,
-  Twitter,
-  Instagram,
-  Youtube,
   Calendar,
   Users,
   Award,
-  Linkedin,
+
   ChevronRight,
   Heart,
 } from "lucide-react";
 
+import { FaFacebook, FaXTwitter, FaInstagram, FaYoutube, FaLinkedin } from "react-icons/fa6";
+
+
 export default function Footer() {
   const [isVisible, setIsVisible] = useState(false);
+  const [year, setYear] = useState(false)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setYear(new Date().getFullYear()), 1000
+    });
+
+    return () => clearInterval(interval);
+  }, [])
 
   useEffect(() => {
     setIsVisible(true);
@@ -41,15 +49,17 @@ export default function Footer() {
     { name: "Arts & Music", href: "#" },
   ];
 
-  const socialLinks = [
-    { icon: Facebook, href: "https://www.facebook.com/ilearnova", color: "hover:text-blue-400" },
-    { icon: Twitter, href: "https://www.x.com/iilearnova", color: "hover:text-sky-400" },
-    { icon: Instagram, href: "https://www.instagram.com/ilearnova", color: "hover:text-pink-400" },
-    { icon: Youtube, href: "https://www.youtube.com/@ilearnova", color: "hover:text-red-400" },
-    { icon: Linkedin, href: "https://www.linkedin.com/company/dimatech-it-consultancy-and-general-services/", color: "hover:text-red-400" },
-    { icon: Twitter, href: "https://www.x.com/Dimatech2023", color: "hover:text-sky-400" },
-    { icon: Instagram, href: "https://www.instagram.com/Dimatech2023", color: "hover:text-pink-400" },
-    { icon: Youtube, href: "https://www.youtube.com/@DIMATECHIT", color: "hover:text-red-400" },
+  const headSocialLinks = [
+    { icon: FaFacebook, href: "https://www.facebook.com/ilearnova", color: "hover:text-blue-400" },
+    { icon: FaXTwitter, href: "https://www.x.com/iilearnova", color: "hover:text-sky-400" },
+    { icon: FaInstagram, href: "https://www.instagram.com/ilearnova", color: "hover:text-pink-400" },
+    { icon: FaYoutube, href: "https://www.youtube.com/@ilearnova", color: "hover:text-red-400" },
+  ];
+  const footSocialLinks = [
+    { icon: FaLinkedin, href: "https://www.linkedin.com/company/dimatech-it-consultancy-and-general-services/", color: "hover:text-red-400" },
+    { icon: FaXTwitter, href: "https://www.x.com/Dimatech2023", color: "hover:text-sky-400" },
+    { icon: FaInstagram, href: "https://www.instagram.com/Dimatech2023", color: "hover:text-pink-400" },
+    { icon: FaYoutube, href: "https://www.youtube.com/@DIMATECHIT", color: "hover:text-red-400" },
   ];
 
   return (
@@ -64,9 +74,8 @@ export default function Footer() {
         </div>
 
         <div
-          className={`relative z-10 max-w-7xl mx-auto px-6 lg:px-8 py-16 transition-all duration-1000 ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-          }`}
+          className={`relative z-10 max-w-7xl mx-auto px-6 lg:px-8 py-16 transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+            }`}
         >
           {/* Main footer content */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
@@ -90,7 +99,23 @@ export default function Footer() {
                 Nurturing young minds with excellence in education, character
                 development, and innovation since 1985.
               </p>
-
+              {/* Social Links */}
+              <div className="pt-4">
+                <div className="flex space-x-4">
+                  {headSocialLinks.map((social, index) => {
+                    const IconComponent = social.icon;
+                    return (
+                      <a
+                        key={index}
+                        href={social.href}
+                        className={`p-2 bg-white/10 rounded-lg ${social.color} transition-all duration-300 hover:bg-white/20 hover:scale-110 hover:-translate-y-1`}
+                      >
+                        <IconComponent className="h-5 w-5" />
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
               {/* Stats */}
               <div className="grid grid-cols-3 gap-4 pt-4">
                 <div className="text-center group cursor-pointer">
@@ -201,13 +226,13 @@ export default function Footer() {
                 </div>
               </div>
 
-              {/* Social Links */}
+              {/* Social Links 2 */}
               <div className="pt-4">
                 <h5 className="text-sm font-medium text-white mb-3">
                   Follow Us
                 </h5>
                 <div className="flex space-x-4">
-                  {socialLinks.map((social, index) => {
+                  {footSocialLinks.map((social, index) => {
                     const IconComponent = social.icon;
                     return (
                       <a
@@ -228,7 +253,7 @@ export default function Footer() {
           <div className="border-t border-white/20 pt-8">
             <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
               <div className="text-sm text-gray-400 flex items-center">
-                <span>© 2024 Excellence Academy. Made with</span>
+                <span>© {year} Excellence Academy. Made with</span>
                 <Heart className="h-4 w-4 mx-1 text-red-400 animate-pulse" />
                 <span>for education.</span>
               </div>
