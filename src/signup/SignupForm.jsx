@@ -84,17 +84,18 @@ export default function SignupForm() {
 
   const submitSignup = async (userData) => {
     try {
-      const response = await fetch(
-        "https://api.ilearnova.com/api/auth/register/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify(userData),
-        }
-      );
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || "";
+      const registerUrl = baseUrl
+        ? `${baseUrl.replace(/\/$/, "")}/auth/register/`
+        : "/auth/register/";
+      const response = await fetch(registerUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(userData),
+      });
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Registration failed");
@@ -261,7 +262,7 @@ export default function SignupForm() {
               </div>
             )}
 
-            <div onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit}>
               <div className="w-full">
                 {currentStep === 1 && (
                   <div className="space-y-4">
@@ -410,7 +411,6 @@ export default function SignupForm() {
                     <button
                       type="submit"
                       disabled={loading}
-                      onClick={handleSubmit}
                       className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       {loading ? "Creating Account..." : "Sign Up"}
@@ -430,7 +430,7 @@ export default function SignupForm() {
                   ))}
                 </div>
               </div>
-            </div>
+            </form>
 
             {/* Footer Link */}
             <p
