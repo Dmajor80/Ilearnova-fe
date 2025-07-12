@@ -1,6 +1,8 @@
+/* eslint-disable no-unused-vars */
+// /* eslint-disable no-unused-vars */
 import { useState, useEffect } from "react";
 import { ArrowLeft, Moon, Sun } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 
 export default function SignupForm() {
   const [formData, setFormData] = useState({
@@ -24,7 +26,6 @@ export default function SignupForm() {
     const handleResize = () => {
       setWindowWidth(window.innerWidth);
     };
-
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -37,10 +38,31 @@ export default function SignupForm() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  // Loading state can be added if needed for UX improvements
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    // Add form submission logic here
+    setError("");
+    setSuccess("");
+    try {
+      const response = await fetch("https://api.ilearnova.com/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setSuccess(alert("Signup successful! You can now log in."));
+      } else {
+        setError(data.message || "Signup failed. Please try again.");
+      }
+    } catch (error) {
+      setError(alert("Network error. Please try again later."));
+    }
   };
 
   const toggleDarkMode = () => {
@@ -94,6 +116,7 @@ export default function SignupForm() {
         whileTap={{ scale: 0.95 }}
         className="fixed bottom-8 right-8 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-[#6a53ff] to-[#4680ff] p-0 shadow-lg"
         onClick={toggleDarkMode}
+
       >
         {darkMode ? (
           <Sun className="h-6 w-6 text-white" />
@@ -157,6 +180,12 @@ export default function SignupForm() {
 
                   {/* Form */}
                   <form onSubmit={handleSubmit}>
+                    {error && 
+                      <div className="mb-4 text-red-600 bg-red-100 rounded px-3 py-2 text-sm">{error}</div>
+                    }
+                    {success && 
+                      <div className="mb-4 text-green-700 bg-green-100 rounded px-3 py-2 text-sm">{success}</div>
+                    }
                     <AnimatePresence mode="wait">
                       {currentStep === 1 && (
                         <motion.div
@@ -172,7 +201,7 @@ export default function SignupForm() {
                               className="mb-3"
                             >
                               <label
-                                htmlFor="username"
+                                htmlFor="firstName"
                                 className={`ml-1.5 text-sm font-medium ${
                                   darkMode ? "text-white" : "text-navy-700"
                                 }`}
@@ -200,7 +229,7 @@ export default function SignupForm() {
                               className="mb-3"
                             >
                               <label
-                                htmlFor="username"
+                                htmlFor="lastName"
                                 className={`ml-1.5 text-sm font-medium ${
                                   darkMode ? "text-white" : "text-navy-700"
                                 }`}
@@ -219,7 +248,7 @@ export default function SignupForm() {
                                 className={`mt-2 flex h-12 w-full items-center justify-center rounded-xl border p-3 text-sm outline-none ${
                                   darkMode
                                     ? "bg-navy-800 border-gray-600 text-white"
-                                    : "bg-white border-gray-200 text-navy-700 border-[#d0d0d0]"
+                                    : "bg-white border-gray-200 text-navy-700"
                                 } focus:border-[#6a53ff] transition-all duration-200`}
                               />
                             </motion.div>
@@ -245,7 +274,7 @@ export default function SignupForm() {
                               className={`mt-2 flex h-12 w-full items-center justify-center rounded-xl border p-3 text-sm outline-none ${
                                 darkMode
                                   ? "bg-navy-800 border-gray-600 text-white"
-                                  : "bg-white border-gray-200 text-navy-700 border-[#d0d0d0]"
+                                  : "bg-white text-navy-700 border-[#d0d0d0]"
                               } focus:border-[#6a53ff] transition-all duration-200`}
                             />
                           </motion.div>
@@ -271,7 +300,7 @@ export default function SignupForm() {
                               className={`mt-2 flex h-12 w-full items-center justify-center rounded-xl border p-3 text-sm outline-none ${
                                 darkMode
                                   ? "bg-navy-800 border-gray-600 text-white"
-                                  : "bg-white border-gray-200 text-navy-700 border-[#d0d0d0]"
+                                  : "bg-white text-navy-700 border-[#d0d0d0]"
                               } focus:border-[#6a53ff] transition-all duration-200`}
                             />
                           </motion.div>
@@ -286,32 +315,6 @@ export default function SignupForm() {
                           animate="animate"
                           exit="exit"
                         >
-                          {/* <motion.div variants={itemVariants} className="mb-3">
-                            <label
-                              htmlFor="code"
-                              className={`ml-1.5 text-sm font-medium ${
-                                darkMode ? "text-white" : "text-navy-700"
-                              }`}
-                            >
-                              Code*
-                            </label>
-                            <motion.input
-                              whileFocus={{ scale: 1.01 }}
-                              type="text"
-                              id="code"
-                              required
-                              placeholder="3e43d"
-                              name="code"
-                              value={formData.code}
-                              onChange={handleChange}
-                              className={`mt-2 flex h-12 w-full items-center justify-center rounded-xl border p-3 text-sm outline-none ${
-                                darkMode
-                                  ? "bg-navy-800 border-gray-600 text-white"
-                                  : "bg-white border-gray-200 text-navy-700 border-[#d0d0d0]"
-                              } focus:border-[#6a53ff] transition-all duration-200`}
-                            />
-                          </motion.div> */}
-
                           <motion.div variants={itemVariants} className="mb-3">
                             <label
                               htmlFor="password"
@@ -333,7 +336,7 @@ export default function SignupForm() {
                               className={`mt-2 flex h-12 w-full items-center justify-center rounded-xl border p-3 text-sm outline-none ${
                                 darkMode
                                   ? "bg-navy-800 border-gray-600 text-white"
-                                  : "bg-white border-gray-200 text-navy-700 border-[#d0d0d0]"
+                                  : "bg-white text-navy-700 border-[#d0d0d0]"
                               } focus:border-[#6a53ff] transition-all duration-200`}
                             />
                           </motion.div>

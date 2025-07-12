@@ -3,33 +3,60 @@ import teacherIllustration from "/mother.png";
 import { Link } from "react-router-dom"
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+// --- REAL-LIFE AUTHENTICATION LOGIC ---
+// This function sends a POST request to your backend API endpoint.
+// The backend should check the credentials against a database and return a result.
+// Edit the fetch URL and response handling to match your backend API.
+const authenticateUser = async (email, password, organizationCode) => {
+  try {
+    // Replace the URL below with your actual backend endpoint
+    const response = await fetch('https://api.ilearnova.com/api/auth/login/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, organizationCode })
+    });
+    // The backend should return a JSON object with a success property (edit as needed)
+    const data = await response.json();
+    // You may need to adjust this depending on your backend response
+    return data.success === true;
+  } catch (err) {
+    // Network or server error
+    return false;
+  }
+};
+
+// --- DEFAULTS FOR DEMO PURPOSES ---
 const DEFAULT_EMAIL = "priscilladaniel@gmail.com";
 const DEFAULT_PASSWORD = "123456";
-
-
-const authenticateUser = async (email, password) => {
-  // Example: Replace with your actual authentication logic
-  // Simulate a database check
-  return email === DEFAULT_EMAIL && password === DEFAULT_PASSWORD;
-};
+const DEFAULT_ORGANIZATIONCODE = "123356";
 
 function ParentLogin() {
   const [email, setEmail] = useState(DEFAULT_EMAIL);
   const [password, setPassword] = useState(DEFAULT_PASSWORD);
+  const [organizationCode, setOrganizationCode] = useState(DEFAULT_ORGANIZATIONCODE);
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false)
   const navigate = useNavigate(); // Initialize navigate
 
 
+  // --- HANDLE FORM SUBMISSION ---
+  // This function is called when the user submits the login form.
+  // It calls authenticateUser and handles the result.
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const isAuthenticated = await authenticateUser(email, password);
+    setError("");
+    // Call the authentication function
+    const isAuthenticated = await authenticateUser(email, password, organizationCode);
     if (isAuthenticated) {
+      // If authentication succeeds, clear error and redirect
       setError("");
       navigate("/parent-dashboard"); // Redirect to dashboard
     } else {
-      setError("Invalid email or password.");
+      // If authentication fails, show error message
+      setError("Invalid email or password or organizatioin code.");
+      
     }
   };
 
@@ -99,6 +126,19 @@ function ParentLogin() {
             </div>
 
           </div>
+          <div className="mb-4">
+            <label className="block mb-2 text-gray-700">Enter Organization Code</label>
+
+            <div className="relative flex items-center">
+              <input
+                className="w-full mb-2 px-4 py-2 border rounded bg-gray-100"
+                value={organizationCode}
+                onChange={e => setOrganizationCode(e.target.value)}
+                required
+              />
+          </div>
+
+          </div>
           <div className="flex items-center justify-between mb-4">
             <label className="flex items-center text-sm">
               <input
@@ -119,7 +159,7 @@ function ParentLogin() {
             Login
           </button>
           <div className="text-center text-sm">
-            Don&apos;t have an account? <a href="#" className="text-blue-700 hover:underline">Sign in</a>
+            Don&apos;t have an account? <a href="/signup" className="text-blue-700 hover:underline">Sign in</a>
           </div>
         </form>
 
