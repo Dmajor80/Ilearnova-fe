@@ -98,7 +98,17 @@ export default function SignupForm() {
       });
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Registration failed");
+        let errorMsg = "Registration failed";
+        if (errorData) {
+          if (typeof errorData === "string") {
+            errorMsg = errorData;
+          } else if (errorData.message) {
+            errorMsg = errorData.message;
+          } else if (typeof errorData === "object") {
+            errorMsg = Object.values(errorData).flat().join(" ");
+          }
+        }
+        throw new Error(errorMsg);
       }
       return await response.json();
     } catch (error) {
