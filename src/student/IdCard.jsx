@@ -79,7 +79,7 @@ const IdCard = () => {
   ];
 
   const StepIndicator = () => (
-    <motion.div className="flex items-center justify-center mb-12 w-[200px] mx-auto sm:w-[330px] md:w-[500px] ">
+    <motion.div className="flex items-center justify-center mb-12 w-[200px] mx-auto sm:w-[200px] md:w-[500px] ">
       <div className="flex items-center space-x-8">
         {steps.map((step, index) => {
           const Icon = step.icon;
@@ -117,7 +117,7 @@ const IdCard = () => {
               </motion.div>
               {index < steps.length - 1 && (
                 <div
-                  className={`w-20 h-1 rounded-full transition-all duration-500 ${
+                  className={`max-w-20 h-1 rounded-full transition-all duration-500 ${
                     step.number < currentStep
                       ? "bg-gradient-to-r from-blue-500 to-green-500"
                       : "bg-gray-200"
@@ -133,7 +133,7 @@ const IdCard = () => {
 
   const Step1PersonalInfo = () => (
     <motion.div
-      className=" w-[350px] sm:w-[400px] md:w-[500px] lg:w-full mx-auto"
+      className=" w-[260px] sm:w-[300px] md:w-[500px] lg:w-full mx-auto"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}

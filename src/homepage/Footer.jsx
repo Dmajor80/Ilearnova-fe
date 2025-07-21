@@ -10,9 +10,11 @@ import {
   ChevronRight,
   Heart,
 } from "lucide-react";
+
 import { FaFacebook, FaXTwitter, FaInstagram, FaYoutube, FaLinkedin } from "react-icons/fa6";
 
 
+import { Link } from "react-router-dom";
 export default function Footer() {
   const [isVisible, setIsVisible] = useState(false);
   const [year, setYear] = useState(false)
@@ -53,6 +55,33 @@ export default function Footer() {
     { icon: FaInstagram, href: "https://www.instagram.com/ilearnova", color: "hover:text-pink-400" },
     { icon: FaYoutube, href: "https://www.youtube.com/@ilearnova", color: "hover:text-red-400" },
     { icon: FaLinkedin, href: "https://www.linkedin.com/company/dimatech-it-consultancy-and-general-services/", color: "hover:text-red-400" },
+
+  const socialLinks = [
+    {
+      icon: Facebook,
+      href: "https://www.facebook.com/ilearnova",
+      color: "hover:text-blue-400",
+    },
+    {
+      icon: Twitter,
+      href: "https://x.com/iilearnova",
+      color: "hover:text-sky-400",
+    },
+    {
+      icon: Instagram,
+      href: "https://www.instagram.com/iilearnova/",
+      color: "hover:text-pink-400",
+    },
+    {
+      icon: Youtube,
+      href: "https://www.youtube.com/@ilearnova",
+      color: "hover:text-red-400",
+    },
+    // {
+    //   icon: LinkedIn,
+    //   href: "https://www.linkedin.com/company/ilearnova/",
+    //   color: "hover:text-blue-400",
+    // },
   ];
 
   return (
@@ -167,15 +196,15 @@ export default function Footer() {
               <ul className="space-y-3">
                 {departments.map((dept, index) => (
                   <li key={index}>
-                    <a
-                      href={dept.href}
+                    <Link
+                      to={dept.href}
                       className="text-gray-300 hover:text-white transition-all duration-300 text-sm flex items-center group"
                     >
                       <ChevronRight className="h-3 w-3 mr-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300" />
                       <span className="group-hover:translate-x-2 transition-transform duration-300">
                         {dept.name}
                       </span>
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -228,13 +257,13 @@ export default function Footer() {
                   {headSocialLinks.map((social, index) => {
                     const IconComponent = social.icon;
                     return (
-                      <a
+                      <Link
                         key={index}
-                        href={social.href}
+                        to={social.href}
                         className={`p-2 bg-white/10 rounded-lg ${social.color} transition-all duration-300 hover:bg-white/20 hover:scale-110 hover:-translate-y-1`}
                       >
                         <IconComponent className="h-5 w-5" />
-                      </a>
+                      </Link>
                     );
                   })}
                 </div>
