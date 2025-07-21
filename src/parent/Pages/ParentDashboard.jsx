@@ -140,36 +140,7 @@ function ParentDashboard() {
           <div className="w-full max-w-5xl mx-auto p-4 md:p-6 lg:p-8 bg-white rounded-lg shadow-md">
             <h2 className="text-xl font-semibold mb-4 text-gray-800">Scores</h2>
             <BarGraph />
-            {/* <div className="w-full h-[400px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={barData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="subject" tick={{ fontSize: 12 }} />
-                  <YAxis domain={[0, 100]} />
-                  <Tooltip formatter={(value) => `${value} / 100`} />
-                  <Bar dataKey="score" radius={[4, 4, 0, 0]} barSize={40}>
-                    {data.map((entry, index) => (
-                      <cell key={`cell-${index}`} fill={getBarColor(entry.score)} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-
-            <div className="mt-6 flex flex-wrap gap-4 text-sm">
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 bg-[#facc15] rounded-full"></span>
-                <span>Between 60% - 80%</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 bg-[#22c55e] rounded-full"></span>
-                <span>Above 80%</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="w-3 h-3 bg-[#ef4444] rounded-full"></span>
-                <span>Below 50%</span>
-              </div>
-            </div> */}
+           
           </div>
 
           {/* Upcoming Classes */}
