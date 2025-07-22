@@ -470,7 +470,7 @@ const Exam = () => {
           <div className="flex justify-between items-center mb-6">
             <div>
               <h1
-                className="text-[14px]  sm:text-[16px] md:text-[20px] lg:text-[25px] font-semibold text-gray-800"
+                className="text-[10px]  sm:text-[12px] md:text-[14px] lg:text-[25px] font-semibold text-gray-800"
                 style={{ color: "rgba(18, 40, 164, 1)" }}
               >
                 Mathematics Final Exams
@@ -490,7 +490,8 @@ const Exam = () => {
                 {formatTime(timeLeft)}
               </div>
               <span className="text-sm text-gray-600">Left</span>
-              <span className="text-[10px] lg:text-[14px] text-blue-600 cursor-pointer">
+
+              <span className="text-[10px] sm:text-[12px] lg:text-[14px] text-blue-600 cursor-pointer">
                 Mark as review
               </span>
             </div>
