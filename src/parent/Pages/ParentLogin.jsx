@@ -4,10 +4,6 @@ import { Link } from "react-router-dom"
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-// --- REAL-LIFE AUTHENTICATION LOGIC ---
-// This function sends a POST request to your backend API endpoint.
-// The backend should check the credentials against a database and return a result.
-// Edit the fetch URL and response handling to match your backend API.
 const authenticateUser = async (email, password, organizationCode) => {
   try {
     // Replace the URL below with your actual backend endpoint
@@ -31,7 +27,7 @@ const DEFAULT_EMAIL = "priscilladaniel@gmail.com";
 const DEFAULT_PASSWORD = "123456";
 const DEFAULT_ORGANIZATIONCODE = "123356";
 
-function ParentLogin() {
+function ParentLogin() {4
   const [email, setEmail] = useState(DEFAULT_EMAIL);
   const [password, setPassword] = useState(DEFAULT_PASSWORD);
   const [organizationCode, setOrganizationCode] = useState(DEFAULT_ORGANIZATIONCODE);

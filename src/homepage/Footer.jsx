@@ -12,9 +12,9 @@ import {
 } from "lucide-react";
 
 import { FaFacebook, FaXTwitter, FaInstagram, FaYoutube, FaLinkedin } from "react-icons/fa6";
-
-
 import { Link } from "react-router-dom";
+
+
 export default function Footer() {
   const [isVisible, setIsVisible] = useState(false);
   const [year, setYear] = useState(false)
@@ -55,6 +55,7 @@ export default function Footer() {
     { icon: FaInstagram, href: "https://www.instagram.com/ilearnova", color: "hover:text-pink-400" },
     { icon: FaYoutube, href: "https://www.youtube.com/@ilearnova", color: "hover:text-red-400" },
     { icon: FaLinkedin, href: "https://www.linkedin.com/company/dimatech-it-consultancy-and-general-services/", color: "hover:text-red-400" },
+  ]
 
   const socialLinks = [
     {
@@ -94,10 +95,8 @@ export default function Footer() {
           <div className="absolute bottom-20 right-1/4 w-24 h-24 bg-pink-500/10 rounded-full blur-xl animate-pulse"></div>
           <div className="absolute top-1/2 left-1/3 w-16 h-16 bg-indigo-500/10 rounded-full blur-lg animate-ping"></div>
         </div>
-
-        <div
-          className={`relative z-10 max-w-7xl mx-auto px-6 lg:px-8 py-16 transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
-            }`}
+        <div className={`relative z-10 max-w-7xl mx-auto px-6 lg:px-8 py-16 transition-all duration-1000 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+          }`}
         >
           {/* Main footer content */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
