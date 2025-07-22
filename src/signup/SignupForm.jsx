@@ -105,21 +105,7 @@ export default function SignupForm() {
 
       if (!response.ok) {
         const errorData = await response.json();
-
-        // Handle specific field errors
-        let errorMessage = "Registration failed";
-
-        if (errorData.email && Array.isArray(errorData.email)) {
-          errorMessage = errorData.email[0];
-        } else if (errorData.username && Array.isArray(errorData.username)) {
-          errorMessage = errorData.username[0];
-        } else if (errorData.message) {
-          errorMessage = errorData.message;
-        } else if (errorData.detail) {
-          errorMessage = errorData.detail;
-        }
-
-        throw new Error(errorMessage);
+        throw new Error(errorData.message || "Registration failed");
       }
       return await response.json();
     } catch (error) {
