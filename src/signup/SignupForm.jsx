@@ -1,3 +1,9 @@
+/* eslint-disable no-unused-vars */
+// /* eslint-disable no-unused-vars */
+import { useState, useRef, useEffect } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import React from "react";
+import { ArrowLeft, Moon, Sun, AlertCircle, Mail } from "lucide-react";
 import React, { useState, useRef, useEffect } from "react";
 import {
   ArrowLeft,
@@ -16,6 +22,8 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+
+
 export default function SignupForm() {
   const [formData, setFormData] = useState({
     firstName: "",
@@ -34,6 +42,10 @@ export default function SignupForm() {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  // const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState("");
   const [notificationType, setNotificationType] = useState("success");
@@ -42,6 +54,13 @@ export default function SignupForm() {
   const inputRefs = useRef({});
   const navigate = useNavigate();
   useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+    const keys = Object.keys(formData);
+    keys.forEach((key) => {
     Object.keys(formData).forEach((key) => {
       if (!inputRefs.current[key]) {
         inputRefs.current[key] = React.createRef();
@@ -188,6 +207,8 @@ export default function SignupForm() {
     <div className="mb-6 group">
       <label
         htmlFor={name}
+        className={`block text-sm font-medium mb-2 ${darkMode ? "text-white" : "text-gray-700"
+          }`}
         className={`block text-sm font-semibold mb-3 transition-colors ${
           darkMode
             ? "text-gray-200 group-focus-within:text-blue-400"
@@ -196,6 +217,22 @@ export default function SignupForm() {
       >
         {label} {required && <span className="text-red-500 ml-1">*</span>}
       </label>
+      <input
+        ref={inputRefs.current[name]}
+        id={name}
+        type={type}
+        name={name}
+        value={formData[name]}
+        onChange={handleChange}
+        onKeyDown={(e) => handleKeyDown(e, nextField)}
+        placeholder={placeholder}
+        aria-describedby={errors[name] ? `${name}-error` : undefined}
+        aria-invalid={errors[name] ? "true" : "false"}
+        className={`w-full h-12 px-3 rounded-xl border text-sm outline-none transition-all duration-200 ${darkMode
+          ? "bg-gray-800 border-gray-600 text-white placeholder-gray-400"
+          : "bg-white border-gray-300 text-gray-700 placeholder-gray-500"
+          } ${errors[name] ? "border-red-500" : "focus:border-blue-500"}`}
+      />
       <div className="relative">
         {Icon && (
           <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10">
@@ -261,6 +298,35 @@ export default function SignupForm() {
 
   const prevStep = () => setCurrentStep((s) => Math.max(1, s - 1));
 
+  const toggleDarkMode = () => setDarkMode((prev) => !prev);
+  // The rest of your component (UI rendering) stays unchanged
+
+  return (
+    <div
+      className={`min-h-screen w-full transition-colors duration-300 ${darkMode ? "bg-gray-900 text-white" : "bg-white text-gray-700"
+        }`}
+    >
+      {/* Floating Button with Animation */}
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+        className="fixed bottom-8 right-8 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-[#6a53ff] to-[#4680ff] p-0 shadow-lg"
+        onClick={toggleDarkMode}>
+
+        {/* Dark Mode Toggle */}
+        <button
+          className="fixed top-4 right-4 z-50 p-3 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 shadow-lg hover:scale-110 transition-transform focus:outline-none focus:ring-2 focus:ring-blue-500"
+          onClick={() => setDarkMode(!darkMode)}
+          aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {darkMode ? (
+            <Sun className="w-5 h-5 text-white" />
+          ) : (
+            <Moon className="w-5 h-5 text-white" />
+          )}
+        </button>
+      </motion.button>
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
   const LoadingSpinner = () => (
     <div className="flex items-center justify-center">
       <div className="relative">
@@ -464,6 +530,318 @@ export default function SignupForm() {
           Back to Home
         </button>
 
+        {/* Form Container */}
+        <div className="mt-6 md:mt-8 mb-16 flex h-full w-full items-center justify-center px-1 md:mx-0 md:px-0 lg:mb-10 lg:items-center lg:justify-start">
+          <motion.div
+            className="w-full max-w-full flex-col items-center md:pl-4 lg:pl-0 xl:max-w-[420px]"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <motion.h4
+              variants={itemVariants}
+              className="mb-2.5 text-3xl md:text-4xl font-bold"
+            >
+              Sign Up
+            </motion.h4>
+            <motion.p
+              variants={itemVariants}
+              className={`mb-6 md:mb-9 ml-1 text-sm md:text-base ${darkMode ? "text-gray-300" : "text-gray-600"
+                }`}
+            >
+              Enter Credentials to sign up! Code to be gotten from
+              Ilearnova admin
+            </motion.p>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit}>
+              {error &&
+                <div className="mb-4 text-red-600 bg-red-100 rounded px-3 py-2 text-sm">{error}</div>
+              }
+              {success &&
+                <div className="mb-4 text-green-700 bg-green-100 rounded px-3 py-2 text-sm">{success}</div>
+              }
+              <AnimatePresence mode="wait">
+                {currentStep === 1 && (
+                  <motion.div
+                    key="step1"
+                    variants={formStepVariants}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                  >
+                    <div className="flex flex-col lg:flex-row gap-4">
+                      <motion.div
+                        variants={itemVariants}
+                        className="mb-3"
+                      >
+                        <label
+                          htmlFor="firstName"
+                          className={`ml-1.5 text-sm font-medium ${darkMode ? "text-white" : "text-navy-700"
+                            }`}
+                        >
+                          First Name*
+                        </label>
+                        <motion.input
+                          whileFocus={{ scale: 1.01 }}
+                          type="text"
+                          id="firstName"
+                          required
+                          placeholder="Ayodele"
+                          name="firstName"
+                          value={formData.firstName}
+                          onChange={handleChange}
+                          className={`mt-2 flex h-12 w-full items-center justify-center rounded-xl border p-3 text-sm outline-none ${darkMode
+                            ? "bg-navy-800 border-gray-600 text-white"
+                            : "bg-white  text-navy-700 border-[#d0d0d0]"
+                            } focus:border-[#6a53ff] transition-all duration-200`}
+                        />
+                      </motion.div>
+                      <motion.div
+                        variants={itemVariants}
+                        className="mb-3"
+                      >
+                        <label
+                          htmlFor="lastName"
+                          className={`ml-1.5 text-sm font-medium ${darkMode ? "text-white" : "text-navy-700"
+                            }`}
+                        >
+                          Last Name*
+                        </label>
+                        <motion.input
+                          whileFocus={{ scale: 1.01 }}
+                          type="text"
+                          id="lastName"
+                          required
+                          placeholder="Kayode"
+                          name="lastName"
+                          value={formData.lastName}
+                          onChange={handleChange}
+                          className={`mt-2 flex h-12 w-full items-center justify-center rounded-xl border p-3 text-sm outline-none ${darkMode
+                            ? "bg-navy-800 border-gray-600 text-white"
+                            : "bg-white border-gray-200 text-navy-700"
+                            } focus:border-[#6a53ff] transition-all duration-200`}
+                        />
+                      </motion.div>
+                    </div>
+                    <motion.div variants={itemVariants} className="mb-3">
+                      <label
+                        htmlFor="username"
+                        className={`ml-1.5 text-sm font-medium ${darkMode ? "text-white" : "text-navy-700"
+                          }`}
+                      >
+                        Username*
+                      </label>
+                      <motion.input
+                        whileFocus={{ scale: 1.01 }}
+                        type="text"
+                        id="username"
+                        required
+                        placeholder="Ilearnova123"
+                        name="username"
+                        value={formData.username}
+                        onChange={handleChange}
+                        className={`mt-2 flex h-12 w-full items-center justify-center rounded-xl border p-3 text-sm outline-none ${darkMode
+                          ? "bg-navy-800 border-gray-600 text-white"
+                          : "bg-white text-navy-700 border-[#d0d0d0]"
+                          } focus:border-[#6a53ff] transition-all duration-200`}
+                      />
+                    </motion.div>
+
+                    <motion.div variants={itemVariants} className="mb-3">
+                      <label
+                        htmlFor="email"
+                        className={`ml-1.5 text-sm font-medium ${darkMode ? "text-white" : "text-navy-700"
+                          }`}
+                      >
+                        Email*
+                      </label>
+                      <motion.input
+                        whileFocus={{ scale: 1.01 }}
+                        type="email"
+                        id="email"
+                        required
+                        placeholder="Ilearnova123@Ilearnova.com"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        className={`mt-2 flex h-12 w-full items-center justify-center rounded-xl border p-3 text-sm outline-none ${darkMode
+                          ? "bg-navy-800 border-gray-600 text-white"
+                          : "bg-white text-navy-700 border-[#d0d0d0]"
+                          } focus:border-[#6a53ff] transition-all duration-200`}
+                      />
+                    </motion.div>
+                  </motion.div>
+                )}
+
+                {currentStep === 2 && (
+                  <motion.div
+                    key="step2"
+                    variants={formStepVariants}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                  >
+                    <motion.div variants={itemVariants} className="mb-3">
+                      <label
+                        htmlFor="password"
+                        className={`ml-1.5 text-sm font-medium ${darkMode ? "text-white" : "text-navy-700"
+                          }`}
+                      >
+                        Password*
+                      </label>
+                      <motion.input
+                        whileFocus={{ scale: 1.01 }}
+                        type="password"
+                        id="password"
+                        required
+                        placeholder="Min. 8 characters"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        className={`mt-2 flex h-12 w-full items-center justify-center rounded-xl border p-3 text-sm outline-none ${darkMode
+                          ? "bg-navy-800 border-gray-600 text-white"
+                          : "bg-white text-navy-700 border-[#d0d0d0]"
+                          } focus:border-[#6a53ff] transition-all duration-200`}
+                      />
+                    </motion.div>
+
+                    <motion.div variants={itemVariants} className="mb-3">
+                      <label
+                        htmlFor="passwordConfirm"
+                        className={`ml-1.5 text-sm font-medium ${darkMode ? "text-white" : "text-navy-700"
+                          }`}
+                      >
+                        Confirm password*
+                      </label>
+                      <motion.input
+                        whileFocus={{ scale: 1.01 }}
+                        type="password"
+                        id="passwordConfirm"
+                        required
+                        placeholder="Min. 8 characters"
+                        name="passwordConfirm"
+                        value={formData.passwordConfirm}
+                        onChange={handleChange}
+                        className={`mt-2 flex h-12 w-full items-center justify-center rounded-xl border p-3 text-sm outline-none ${darkMode
+                          ? "bg-navy-800 border-gray-600 text-white"
+                          : "bg-white  text-navy-700 border-[#d0d0d0]"
+                          } focus:border-[#6a53ff] transition-all duration-200`}
+                      />
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Form Navigation Buttons */}
+              <div className="flex justify-between mt-6 mb-4">
+                {currentStep > 1 ? (
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    type="button"
+                    onClick={prevStep}
+                    className="px-4 py-2 rounded-lg border bg-transparent text-sm font-medium border-[#6a53ff] text-[#6a53ff]"
+                  >
+                    Previous
+                  </motion.button>
+                ) : (
+                  <div></div>
+                )}
+
+                {currentStep < 2 ? (
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    type="button"
+                    onClick={nextStep}
+                    className="px-4 py-2 rounded-lg bg-[#6a53ff] text-sm font-medium text-white"
+                  >
+                    Next
+                  </motion.button>
+                ) : (
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    type="submit"
+                    className="px-6 py-2 rounded-lg bg-[#6a53ff] text-sm font-medium text-white"
+                  >
+                    Sign Up
+                  </motion.button>
+                )}
+              </div>
+
+              {/* Form Steps Indicator */}
+              <div className="flex justify-center space-x-2 mt-2 mb-6">
+                {[1, 2].map((step) => (
+                  <motion.div
+                    key={step}
+                    initial={false}
+                    animate={{
+                      scale: currentStep === step ? 1.2 : 1,
+                      backgroundColor:
+                        currentStep === step
+                          ? "#6a53ff"
+                          : currentStep > step
+                            ? "#9c8aff"
+                            : "#e0e0e0",
+                    }}
+                    className="h-2 w-12 rounded-full"
+                  />
+                ))}
+              </div>
+            </form>
+
+            <motion.div
+              variants={itemVariants}
+              className="mt-4 text-center"
+            >
+              <span
+                className={`text-sm font-medium ${darkMode ? "text-gray-300" : "text-navy-700"
+                  }`}
+              >
+                already registered?
+              </span>
+              <motion.a
+                whileHover={{ scale: 1.05 }}
+                className="ml-1 text-sm font-medium text-[#6a53ff] hover:text-[#5a46e6]"
+                href="/login"
+              >
+                Login
+              </motion.a>
+            </motion.div>
+          </motion.div>
+        </div>
+
+        {/* Right side background image with animation - responsive visibility */}
+        <motion.div
+          className="absolute right-0 hidden h-full min-h-screen md:block lg:w-[49vw] 2xl:w-[44vw]"
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+        >
+          <div
+            className="absolute flex h-full w-full justify-center bg-cover bg-center lg:h-screen lg:rounded-bl-[120px] xl:h-[100vh] xl:rounded-bl-[200px]"
+            style={{
+              backgroundImage:
+                "url('https://dimatech-lsm-frontend.vercel.app/static/media/auth.639d277feb2fe0057614.png')",
+            }}
+          ></div>
+        </motion.div>
+      </div>
+
+      {/* Footer with responsive design */}
+      <motion.div
+        className={`z-[5] mx-auto flex w-full max-w-screen-sm flex-col items-center justify-between px-5 pb-4 lg:mb-6 lg:max-w-full lg:flex-row xl:mb-2 xl:w-[1310px] xl:pb-6 ${<div className="w-full grid lg:grid-cols-2 gap-8 xl:gap-16 items-center">
+          {/* Form Section */}
+          <div className="w-full">
+            <h1 className="text-3xl sm:text-4xl font-bold mb-2">Sign Up</h1>
+            <p
+              className={`mb-8 text-base sm:text-lg ${darkMode ? "text-gray-300" : "text-gray-600"
+                }`}
+            >
+              Create your account to get started
+            </p>
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 xl:gap-20 items-center">
           {/* Form Section */}
           <div className="w-full">
@@ -580,6 +958,35 @@ export default function SignupForm() {
                     <div className="mb-6 group">
                       <label
                         htmlFor="bio"
+
+                        className={`block text-sm font-medium mb-2 ${darkMode ? "text-white" : "text-gray-700"
+                          }`}
+                      >
+                        Bio <span className="text-red-500 ml-1">*</span>
+                      </label>
+                      <textarea
+                        ref={inputRefs.bio}
+                        id="bio"
+                        name="bio"
+                        value={formData.bio}
+                        onChange={(e) => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            bio: e.target.value,
+                          }));
+                        }}
+                        placeholder="Tell us about yourself"
+                        rows={4}
+                        aria-describedby={errors.bio ? "bio-error" : undefined}
+                        aria-invalid={errors.bio ? "true" : "false"}
+                        className={`w-full px-3 py-2 rounded-xl border text-sm outline-none transition-all duration-200 resize-none ${darkMode
+                          ? "bg-gray-800 border-gray-600 text-white placeholder-gray-400"
+                          : "bg-white border-gray-300 text-gray-700 placeholder-gray-500"
+                          } ${errors.bio
+                            ? "border-red-500"
+                            : "focus:border-blue-500"
+                          }`}
+                      />
                         className={`block text-sm font-semibold mb-3 transition-colors ${
                           darkMode
                             ? "text-gray-200 group-focus-within:text-blue-400"
@@ -694,11 +1101,24 @@ export default function SignupForm() {
                     </button>
                   )}
                 </div>
-              </div>
+
+                {/* Progress Indicator */}
+                <div className="flex justify-center mt-6 space-x-2">
+                  {[1, 2].map((step) => (
+                    <div
+                      key={step}
+                      className={`h-2 w-8 rounded-full transition-colors ${currentStep >= step ? "bg-blue-600" : "bg-gray-300"
+                        }`}
+                    />
+                  ))}
+                </div>              </div>
             </div>
 
             {/* Footer Link */}
             <p
+
+              className={`text-center mt-6 text-sm sm:text-base ${darkMode ? "text-gray-300" : "text-gray-600"
+                }`}
               className={`text-center mt-8 text-base ${
                 darkMode ? "text-gray-300" : "text-gray-600"
               }`}
@@ -729,7 +1149,6 @@ export default function SignupForm() {
             </div>
           </div>
         </div>
-      </div>
-    </div>
+          </div>
   );
 }
