@@ -1,10 +1,27 @@
 /* eslint-disable no-unused-vars */
 // /* eslint-disable no-unused-vars */
 import { useState, useRef, useEffect } from "react";
-// import { ArrowLeft, Moon, Sun } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
 import { ArrowLeft, Moon, Sun, AlertCircle, Mail } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import {
+  ArrowLeft,
+  Moon,
+  Sun,
+  AlertCircle,
+  Mail,
+  Check,
+  X,
+  User,
+  Lock,
+  Phone,
+  MapPin,
+  Calendar,
+  BookOpen,
+  CheckCircle,
+} from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
 
 export default function SignupForm() {
@@ -29,8 +46,13 @@ export default function SignupForm() {
   // const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState("");
+  const [notificationType, setNotificationType] = useState("success");
+  const [showEmailVerification, setShowEmailVerification] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
   const inputRefs = useRef({});
-
+  const navigate = useNavigate();
   useEffect(() => {
     const handleResize = () => {
       setWindowWidth(window.innerWidth);
@@ -39,19 +61,19 @@ export default function SignupForm() {
     return () => window.removeEventListener("resize", handleResize);
     const keys = Object.keys(formData);
     keys.forEach((key) => {
+    Object.keys(formData).forEach((key) => {
       if (!inputRefs.current[key]) {
         inputRefs.current[key] = React.createRef();
       }
     });
   }, []);
 
-  useEffect(() => {
-    if (currentStep === 1) {
-      inputRefs.current.firstName?.current?.focus();
-    } else if (currentStep === 2) {
-      inputRefs.current.bio?.current?.focus();
-    }
-  }, [currentStep]);
+  const showNotificationMessage = (message, type = "success") => {
+    setNotificationMessage(message);
+    setNotificationType(type);
+    setShowNotification(true);
+    setTimeout(() => setShowNotification(false), 6000);
+  };
 
   const validateStep = (step) => {
     const newErrors = {};
@@ -60,35 +82,27 @@ export default function SignupForm() {
         newErrors.firstName = "First name is required";
       if (!formData.lastName.trim())
         newErrors.lastName = "Last name is required";
-      if (!formData.username.trim()) {
+      if (!formData.username.trim())
         newErrors.username = "Username is required";
-      } else if (!/^[\w.@+-]+$/.test(formData.username)) {
-        newErrors.username =
-          "Username can only contain letters, digits and @/./+/-/_";
-      }
-      if (!formData.email.trim()) {
-        newErrors.email = "Email is required";
-      } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-        newErrors.email = "Please enter a valid email";
-      }
+      else if (!/^[\w.@+-]+$/.test(formData.username))
+        newErrors.username = "Invalid characters in username";
+      if (!formData.email.trim()) newErrors.email = "Email is required";
+      else if (!/\S+@\S+\.\S+/.test(formData.email))
+        newErrors.email = "Invalid email format";
       if (!formData.dateOfBirth.trim())
         newErrors.dateOfBirth = "Date of birth is required";
       if (!formData.address.trim()) newErrors.address = "Address is required";
-    }
-    if (step === 2) {
+    } else if (step === 2) {
       if (!formData.bio.trim()) newErrors.bio = "Bio is required";
       if (!formData.phoneNumber.trim())
         newErrors.phoneNumber = "Phone number is required";
-      if (!formData.password) {
-        newErrors.password = "Password is required";
-      } else if (formData.password.length < 8) {
-        newErrors.password = "Password must be at least 8 characters";
-      }
-      if (!formData.passwordConfirm) {
-        newErrors.passwordConfirm = "Please confirm your password";
-      } else if (formData.password !== formData.passwordConfirm) {
-        newErrors.passwordConfirm = "Passwords don't match";
-      }
+      if (!formData.password) newErrors.password = "Password is required";
+      else if (formData.password.length < 8)
+        newErrors.password = "Password too short";
+      if (!formData.passwordConfirm)
+        newErrors.passwordConfirm = "Confirm your password";
+      else if (formData.password !== formData.passwordConfirm)
+        newErrors.passwordConfirm = "Passwords do not match";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -96,46 +110,35 @@ export default function SignupForm() {
 
   const submitSignup = async (userData) => {
     try {
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || "";
-      const registerUrl = baseUrl
-        ? `${baseUrl.replace(/\/$/, "")}/auth/register/`
-        : "/auth/register/";
-      const response = await fetch(registerUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify(userData),
-      });
+      const response = await fetch(
+        "https://api.ilearnova.com/api/auth/register/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify(userData),
+        }
+      );
+
       if (!response.ok) {
         const errorData = await response.json();
-        let errorMsg = "Registration failed";
-        if (errorData) {
-          if (typeof errorData === "string") {
-            errorMsg = errorData;
-          } else if (errorData.message) {
-            errorMsg = errorData.message;
-          } else if (typeof errorData === "object") {
-            errorMsg = Object.values(errorData).flat().join(" ");
-          }
-        }
-        throw new Error(errorMsg);
+        throw new Error(errorData.message || "Registration failed");
       }
       return await response.json();
     } catch (error) {
-      if (error.name === "TypeError" && error.message.includes("fetch")) {
-        throw new Error("Network error. Please check your connection.");
-      }
-      throw error;
+      throw new Error(error.message || "Network error");
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateStep(2)) return;
+
     setLoading(true);
     setErrors({});
+
     try {
       const apiData = {
         username: formData.username,
@@ -149,31 +152,47 @@ export default function SignupForm() {
         password: formData.password,
         additional_data: {},
       };
+
       await submitSignup(apiData);
-      setShowConfirmation(true);
+
+      // Store user email and show verification screen
+      setUserEmail(formData.email);
+      setShowEmailVerification(true);
     } catch (error) {
+      let notificationType = "error";
+      let message = error.message;
+
+      // Check for specific error patterns and customize notifications
+      if (
+        message.toLowerCase().includes("user with this email already exists")
+      ) {
+        notificationType = "info";
+        message =
+          "An account with this email already exists. Please try logging in instead.";
+      } else if (
+        message.toLowerCase().includes("user with that username already exists")
+      ) {
+        notificationType = "info";
+        message =
+          "This username is already taken. Please choose a different username.";
+      } else if (
+        message.toLowerCase().includes("already exists") ||
+        message.toLowerCase().includes("already registered")
+      ) {
+        notificationType = "info";
+        message = "You are already registered! Please login instead.";
+      }
+
+      showNotificationMessage(message, notificationType);
       setErrors({ general: error.message });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleKeyDown = (e, nextField) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      if (nextField) {
-        inputRefs.current[nextField]?.current?.focus();
-      } else if (currentStep === 1) {
-        nextStep();
-      } else {
-        handleSubmit(e);
-      }
-    }
+  const handleConfirmEmail = () => {
+    // Redirect to login page
+    navigate("/new-login");
   };
 
   const InputField = ({
@@ -183,15 +202,20 @@ export default function SignupForm() {
     placeholder,
     required = false,
     nextField,
+    icon: Icon,
   }) => (
-    <div className="mb-4">
+    <div className="mb-6 group">
       <label
         htmlFor={name}
         className={`block text-sm font-medium mb-2 ${darkMode ? "text-white" : "text-gray-700"
           }`}
+        className={`block text-sm font-semibold mb-3 transition-colors ${
+          darkMode
+            ? "text-gray-200 group-focus-within:text-blue-400"
+            : "text-gray-700 group-focus-within:text-blue-600"
+        }`}
       >
-        {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
+        {label} {required && <span className="text-red-500 ml-1">*</span>}
       </label>
       <input
         ref={inputRefs.current[name]}
@@ -209,12 +233,57 @@ export default function SignupForm() {
           : "bg-white border-gray-300 text-gray-700 placeholder-gray-500"
           } ${errors[name] ? "border-red-500" : "focus:border-blue-500"}`}
       />
+      <div className="relative">
+        {Icon && (
+          <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10">
+            <Icon
+              className={`w-5 h-5 transition-colors ${
+                darkMode
+                  ? "text-gray-400 group-focus-within:text-blue-400"
+                  : "text-gray-500 group-focus-within:text-blue-600"
+              }`}
+            />
+          </div>
+        )}
+        <input
+          ref={inputRefs.current[name]}
+          id={name}
+          name={name}
+          type={type}
+          value={formData[name]}
+          placeholder={placeholder}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, [name]: e.target.value }))
+          }
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              nextField
+                ? inputRefs.current[nextField]?.current?.focus()
+                : currentStep === 1
+                ? nextStep()
+                : handleSubmit(e);
+            }
+          }}
+          className={`w-full ${
+            Icon ? "pl-12" : "pl-4"
+          } pr-4 py-4 rounded-2xl border-2 text-sm font-medium transition-all duration-300 ease-in-out outline-none ${
+            darkMode
+              ? "bg-gray-800/50 text-white border-gray-600 placeholder-gray-400 focus:bg-gray-800 focus:border-blue-500 focus:shadow-lg focus:shadow-blue-500/20"
+              : "bg-white text-gray-800 border-gray-200 placeholder-gray-500 focus:bg-blue-50/30 focus:border-blue-500 focus:shadow-lg focus:shadow-blue-500/20"
+          } ${
+            errors[name] ? "border-red-400 bg-red-50/30" : ""
+          } hover:border-gray-400`}
+          aria-invalid={errors[name] ? "true" : "false"}
+          aria-describedby={errors[name] ? `${name}-error` : undefined}
+        />
+      </div>
       {errors[name] && (
         <p
           id={`${name}-error`}
-          className="text-red-500 text-xs mt-1 flex items-center"
+          className="text-red-500 text-xs mt-2 flex items-center animate-pulse"
         >
-          <AlertCircle className="w-3 h-3 mr-1" />
+          <AlertCircle className="w-4 h-4 mr-2" />
           {errors[name]}
         </p>
       )}
@@ -222,14 +291,12 @@ export default function SignupForm() {
   );
 
   const nextStep = () => {
-    if (validateStep(currentStep) && currentStep < 2) {
-      setCurrentStep(currentStep + 1);
+    if (validateStep(currentStep)) {
+      setCurrentStep((s) => s + 1);
     }
   };
 
-  const prevStep = () => {
-    if (currentStep > 1) setCurrentStep(currentStep - 1);
-  };
+  const prevStep = () => setCurrentStep((s) => Math.max(1, s - 1));
 
   const toggleDarkMode = () => setDarkMode((prev) => !prev);
   // The rest of your component (UI rendering) stays unchanged
@@ -260,12 +327,206 @@ export default function SignupForm() {
         </button>
       </motion.button>
       <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+  const LoadingSpinner = () => (
+    <div className="flex items-center justify-center">
+      <div className="relative">
+        <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+        <div
+          className="absolute inset-0 w-8 h-8 border-4 border-transparent border-t-blue-200 rounded-full animate-spin"
+          style={{ animationDelay: "0.15s" }}
+        ></div>
+      </div>
+      <span className="ml-3 font-medium">Creating Account...</span>
+    </div>
+  );
+
+  // Email Verification Screen
+  if (showEmailVerification) {
+    return (
+      <div
+        className={`min-h-screen w-full transition-all duration-500 ${
+          darkMode
+            ? "bg-gradient-to-br from-gray-900 via-blue-900/20 to-gray-900 text-white"
+            : "bg-gradient-to-br from-blue-50 via-white to-purple-50 text-gray-800"
+        }`}
+      >
+        {/* Dark Mode Toggle */}
+        <button
+          className="fixed top-6 right-6 z-40 p-4 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 shadow-xl hover:shadow-2xl hover:scale-110 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-300"
+          onClick={() => setDarkMode(!darkMode)}
+          aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {darkMode ? (
+            <Sun className="w-6 h-6 text-white" />
+          ) : (
+            <Moon className="w-6 h-6 text-white" />
+          )}
+        </button>
+
+        <div className="w-full px-6 sm:px-8 lg:px-12 py-12">
+          <div className="max-w-2xl mx-auto">
+            <div className="text-center">
+              <div className="mb-8">
+                <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-r from-green-500 to-blue-500 mb-6">
+                  <CheckCircle className="w-12 h-12 text-white" />
+                </div>
+                <h1 className="text-4xl sm:text-5xl font-bold mb-4 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                  Registration Successful!
+                </h1>
+                <p
+                  className={`text-lg sm:text-xl mb-6 ${
+                    darkMode ? "text-gray-300" : "text-gray-600"
+                  }`}
+                >
+                  Please check your email to verify your account.
+                </p>
+              </div>
+
+              <div
+                className={`p-8 rounded-3xl backdrop-blur-lg transition-all duration-500 mb-8 ${
+                  darkMode
+                    ? "bg-gray-800/30 border border-gray-700/50"
+                    : "bg-white/70 border border-white/50 shadow-xl"
+                }`}
+              >
+                <div className="flex items-center justify-center mb-6">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30">
+                    <Mail className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                  </div>
+                </div>
+
+                <h2 className="text-2xl font-bold mb-4">
+                  Verify Your Email Address
+                </h2>
+
+                <p
+                  className={`text-base mb-4 ${
+                    darkMode ? "text-gray-300" : "text-gray-600"
+                  }`}
+                >
+                  We've sent a verification email to:
+                </p>
+
+                <p className="text-lg font-semibold text-blue-600 dark:text-blue-400 mb-6 break-all">
+                  {userEmail}
+                </p>
+
+                <div
+                  className={`text-sm ${
+                    darkMode ? "text-gray-400" : "text-gray-500"
+                  } mb-8 space-y-2`}
+                >
+                  <p>
+                    Please check your email and click the verification link to
+                    activate your account.
+                  </p>
+                  <p>
+                    Don't forget to check your spam/junk folder if you don't see
+                    the email in your inbox.
+                  </p>
+                </div>
+
+                <button
+                  onClick={handleConfirmEmail}
+                  className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-green-600 to-blue-600 text-white font-semibold rounded-2xl hover:from-green-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 shadow-lg"
+                >
+                  I've Confirmed - Go to Login
+                </button>
+              </div>
+
+              <p
+                className={`text-sm ${
+                  darkMode ? "text-gray-400" : "text-gray-500"
+                }`}
+              >
+                Didn't receive the email?{" "}
+                <button
+                  onClick={() =>
+                    showNotificationMessage(
+                      "Verification email resent!",
+                      "success"
+                    )
+                  }
+                  className="text-blue-600 hover:text-blue-700 font-semibold hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-1 py-1 transition-all duration-200"
+                >
+                  Resend verification email
+                </button>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`min-h-screen w-full transition-all duration-500 ${
+        darkMode
+          ? "bg-gradient-to-br from-gray-900 via-blue-900/20 to-gray-900 text-white"
+          : "bg-gradient-to-br from-blue-50 via-white to-purple-50 text-gray-800"
+      }`}
+    >
+      {/* Notification */}
+      {showNotification && (
+        <div
+          className={`fixed top-6 right-6 z-50 max-w-md p-4 rounded-2xl shadow-2xl transform transition-all duration-500 ${
+            notificationType === "success"
+              ? "bg-green-500 text-white"
+              : notificationType === "error"
+              ? "bg-red-500 text-white"
+              : "bg-blue-500 text-white"
+          } animate-bounce`}
+        >
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              {notificationType === "success" ? (
+                <Check className="w-6 h-6 mt-0.5" />
+              ) : notificationType === "error" ? (
+                <X className="w-6 h-6 mt-0.5" />
+              ) : (
+                <AlertCircle className="w-6 h-6 mt-0.5" />
+              )}
+            </div>
+            <div className="ml-3 flex-1">
+              <span className="font-semibold text-sm leading-relaxed">
+                {notificationMessage}
+              </span>
+            </div>
+            <button
+              onClick={() => setShowNotification(false)}
+              className="ml-2 flex-shrink-0 opacity-70 hover:opacity-100 transition-opacity"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Dark Mode Toggle */}
+      <button
+        className="fixed top-6 right-6 z-40 p-4 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 shadow-xl hover:shadow-2xl hover:scale-110 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-300"
+        onClick={() => setDarkMode(!darkMode)}
+        aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+      >
+        {darkMode ? (
+          <Sun className="w-6 h-6 text-white" />
+        ) : (
+          <Moon className="w-6 h-6 text-white" />
+        )}
+      </button>
+
+      <div className="w-full px-6 sm:px-8 lg:px-12 py-12">
         {/* Back Button */}
         <button
           onClick={() => alert("Going back to home...")}
-          className="inline-flex items-center text-gray-500 hover:text-gray-700 mb-8 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+          className={`inline-flex items-center px-6 py-3 rounded-xl font-medium transition-all duration-300 mb-8 ${
+            darkMode
+              ? "text-gray-300 hover:text-white hover:bg-gray-800"
+              : "text-gray-600 hover:text-gray-900 hover:bg-white"
+          } focus:outline-none focus:ring-4 focus:ring-blue-300`}
         >
-          <ArrowLeft className="w-4 h-4 mr-2" />
+          <ArrowLeft className="w-5 h-5 mr-3" />
           Back to Home
         </button>
 
@@ -581,49 +842,98 @@ export default function SignupForm() {
             >
               Create your account to get started
             </p>
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 xl:gap-20 items-center">
+          {/* Form Section */}
+          <div className="w-full">
+            <div className="text-center lg:text-left mb-10">
+              <h1 className="text-4xl sm:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Join Our School
+              </h1>
+              <p
+                className={`text-lg sm:text-xl ${
+                  darkMode ? "text-gray-300" : "text-gray-600"
+                }`}
+              >
+                Create your account and start your learning journey
+              </p>
+            </div>
 
-            {/* General Error */}
-            {errors.general && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center text-red-700">
-                <AlertCircle className="w-5 h-5 mr-2" />
-                {errors.general}
+            <div className="space-y-8">
+              {/* Progress Indicator */}
+              <div className="flex justify-center lg:justify-start mb-8">
+                <div className="flex items-center space-x-4">
+                  {[1, 2].map((step) => (
+                    <React.Fragment key={step}>
+                      <div
+                        className={`flex items-center justify-center w-12 h-12 rounded-full font-bold transition-all duration-300 ${
+                          currentStep >= step
+                            ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg"
+                            : darkMode
+                            ? "bg-gray-700 text-gray-400"
+                            : "bg-gray-200 text-gray-500"
+                        }`}
+                      >
+                        {step}
+                      </div>
+                      {step < 2 && (
+                        <div
+                          className={`w-16 h-1 rounded transition-all duration-300 ${
+                            currentStep > step
+                              ? "bg-gradient-to-r from-blue-500 to-purple-500"
+                              : darkMode
+                              ? "bg-gray-700"
+                              : "bg-gray-200"
+                          }`}
+                        />
+                      )}
+                    </React.Fragment>
+                  ))}
+                </div>
               </div>
-            )}
 
-            <form onSubmit={handleSubmit}>
-              <div className="w-full">
+              <div
+                className={`p-8 rounded-3xl backdrop-blur-lg transition-all duration-500 ${
+                  darkMode
+                    ? "bg-gray-800/30 border border-gray-700/50"
+                    : "bg-white/70 border border-white/50 shadow-xl"
+                }`}
+              >
                 {currentStep === 1 && (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                       <InputField
                         label="First Name"
                         name="firstName"
-                        placeholder="John"
+                        placeholder="Enter your first name"
                         required
                         nextField="lastName"
+                        icon={User}
                       />
                       <InputField
                         label="Last Name"
                         name="lastName"
-                        placeholder="Doe"
+                        placeholder="Enter your last name"
                         required
                         nextField="username"
+                        icon={User}
                       />
                     </div>
                     <InputField
                       label="Username"
                       name="username"
-                      placeholder="johndoe123"
+                      placeholder="Choose a unique username"
                       required
                       nextField="email"
+                      icon={User}
                     />
                     <InputField
-                      label="Email"
+                      label="Email Address"
                       name="email"
                       type="email"
-                      placeholder="john@example.com"
+                      placeholder="Enter your email"
                       required
                       nextField="dateOfBirth"
+                      icon={Mail}
                     />
                     <InputField
                       label="Date of Birth"
@@ -631,21 +941,24 @@ export default function SignupForm() {
                       type="date"
                       required
                       nextField="address"
+                      icon={Calendar}
                     />
                     <InputField
                       label="Address"
                       name="address"
-                      placeholder="123 Main St, City"
+                      placeholder="Enter your full address"
                       required
+                      icon={MapPin}
                     />
                   </div>
                 )}
 
                 {currentStep === 2 && (
-                  <div className="space-y-4">
-                    <div className="mb-4">
+                  <div className="space-y-6">
+                    <div className="mb-6 group">
                       <label
                         htmlFor="bio"
+
                         className={`block text-sm font-medium mb-2 ${darkMode ? "text-white" : "text-gray-700"
                           }`}
                       >
@@ -674,31 +987,71 @@ export default function SignupForm() {
                             : "focus:border-blue-500"
                           }`}
                       />
+                        className={`block text-sm font-semibold mb-3 transition-colors ${
+                          darkMode
+                            ? "text-gray-200 group-focus-within:text-blue-400"
+                            : "text-gray-700 group-focus-within:text-blue-600"
+                        }`}
+                      >
+                        Bio <span className="text-red-500 ml-1">*</span>
+                      </label>
+                      <div className="relative">
+                        <div className="absolute left-4 top-4 z-10">
+                          <BookOpen
+                            className={`w-5 h-5 transition-colors ${
+                              darkMode
+                                ? "text-gray-400 group-focus-within:text-blue-400"
+                                : "text-gray-500 group-focus-within:text-blue-600"
+                            }`}
+                          />
+                        </div>
+                        <textarea
+                          ref={inputRefs.current.bio}
+                          id="bio"
+                          name="bio"
+                          value={formData.bio}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              bio: e.target.value,
+                            }))
+                          }
+                          placeholder="Tell us about yourself and your interests"
+                          rows={5}
+                          className={`w-full pl-12 pr-4 py-4 rounded-2xl border-2 text-sm font-medium transition-all duration-300 ease-in-out outline-none resize-none ${
+                            darkMode
+                              ? "bg-gray-800/50 text-white border-gray-600 placeholder-gray-400 focus:bg-gray-800 focus:border-blue-500 focus:shadow-lg focus:shadow-blue-500/20"
+                              : "bg-white text-gray-800 border-gray-200 placeholder-gray-500 focus:bg-blue-50/30 focus:border-blue-500 focus:shadow-lg focus:shadow-blue-500/20"
+                          } ${
+                            errors.bio ? "border-red-400 bg-red-50/30" : ""
+                          } hover:border-gray-400`}
+                        />
+                      </div>
                       {errors.bio && (
-                        <p
-                          id="bio-error"
-                          className="text-red-500 text-xs mt-1 flex items-center"
-                        >
-                          <AlertCircle className="w-3 h-3 mr-1" />
+                        <p className="text-red-500 text-xs mt-2 flex items-center animate-pulse">
+                          <AlertCircle className="w-4 h-4 mr-2" />
                           {errors.bio}
                         </p>
                       )}
                     </div>
+
                     <InputField
                       label="Phone Number"
                       name="phoneNumber"
                       type="tel"
-                      placeholder="+1234567890"
+                      placeholder="Enter your phone number"
                       required
                       nextField="password"
+                      icon={Phone}
                     />
                     <InputField
                       label="Password"
                       name="password"
                       type="password"
-                      placeholder="Min. 8 characters"
+                      placeholder="Minimum 8 characters"
                       required
                       nextField="passwordConfirm"
+                      icon={Lock}
                     />
                     <InputField
                       label="Confirm Password"
@@ -706,19 +1059,24 @@ export default function SignupForm() {
                       type="password"
                       placeholder="Confirm your password"
                       required
+                      icon={Lock}
                     />
                   </div>
                 )}
 
                 {/* Navigation Buttons */}
-                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-8">
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-6 mt-10">
                   {currentStep > 1 ? (
                     <button
                       type="button"
                       onClick={prevStep}
-                      className="w-full sm:w-auto px-6 py-3 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full sm:w-auto px-8 py-4 rounded-2xl font-semibold transition-all duration-300 ${
+                        darkMode
+                          ? "border-2 border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white"
+                          : "border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white"
+                      } focus:outline-none focus:ring-4 focus:ring-blue-300`}
                     >
-                      Previous
+                      Previous Step
                     </button>
                   ) : (
                     <div className="hidden sm:block" />
@@ -728,17 +1086,18 @@ export default function SignupForm() {
                     <button
                       type="button"
                       onClick={nextStep}
-                      className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300 shadow-lg"
                     >
-                      Next
+                      Continue
                     </button>
                   ) : (
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      onClick={handleSubmit}
+                      className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-green-600 to-blue-600 text-white font-semibold rounded-2xl hover:from-green-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-4 focus:ring-green-300 shadow-lg min-w-[200px]"
                     >
-                      {loading ? "Creating Account..." : "Sign Up"}
+                      {loading ? <LoadingSpinner /> : "Create Account"}
                     </button>
                   )}
                 </div>
@@ -752,34 +1111,42 @@ export default function SignupForm() {
                         }`}
                     />
                   ))}
-                </div>
-              </div>
-            </form>
+                </div>              </div>
+            </div>
 
             {/* Footer Link */}
             <p
+
               className={`text-center mt-6 text-sm sm:text-base ${darkMode ? "text-gray-300" : "text-gray-600"
                 }`}
+              className={`text-center mt-8 text-base ${
+                darkMode ? "text-gray-300" : "text-gray-600"
+              }`}
             >
               Already have an account?{" "}
-              <button
-                onClick={() => alert("Going to login...")}
-                className="text-blue-600 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
-              >
-                Login here
-              </button>
+              <Link to="/new-login">
+                <button
+                  // onClick={handleConfirmEmail}
+                  className="text-blue-600 hover:text-blue-700 font-semibold hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1 transition-all duration-200"
+                >
+                  Login here
+                </button>
+              </Link>
             </p>
           </div>
 
           {/* Image Section */}
           <div className="hidden lg:block w-full">
-            <div
-              className="w-full h-96 xl:h-[500px] bg-cover bg-center rounded-2xl shadow-lg"
-              style={{
-                backgroundImage:
-                  "url('https://dimatech-lsm-frontend.vercel.app/static/media/auth.639d277feb2fe0057614.png')",
-              }}
-            />
+            <div className="relative">
+              <div
+                className="w-full h-[600px] bg-cover bg-center rounded-3xl shadow-2xl transform hover:scale-105 transition-transform duration-700"
+                style={{
+                  backgroundImage:
+                    "url('https://dimatech-lsm-frontend.vercel.app/static/media/auth.639d277feb2fe0057614.png')",
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-3xl"></div>
+            </div>
           </div>
         </div>
           </div>

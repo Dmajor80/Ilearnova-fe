@@ -8,11 +8,13 @@ import ParentDashboard from "./ParentDashboard";
 import PaymentProcess from "./PaymentProcess";
 import { Route, Routes } from "react-router-dom";
 import SignupForm from "../../signup/SignupForm";
+// import Normal from "../../signup/Normal";
 
 function Pages() {
   return (
     <Routes>
-      {/* <Route path="/signup" element={<SignupForm />} /> */}
+      {/* <Route path="/newUser" element={<Normal />} /> */}
+      {/* <Route path="/signup" element={<SignupForm />} className="hide" /> */}
       {/* <Route path="/parent-signup" element={<ParentSignup />} /> */}
       <Route path="/parent-dashboard" element={<ParentDashboard />} />
       <Route path="/parent-payments" element={<Payment />} />

@@ -4,7 +4,6 @@ import Pages from "./parent/Pages/Pages";
 import HomePage from "./homepage/HomePage";
 import SignupForm from "./signup/SignupForm";
 
-
 // Login Pages
 import LoginPage from "./teacher/LoginPage";
 import StudentLogin from "./student/StudentLogin";
@@ -34,15 +33,21 @@ import Report from "./admin/Report";
 
 import SchoolAdmin from "./School-Admin/SchoolAdmin";
 import Error from "./Error";
+import Normal from "./signup/Normal";
+import RegistererdHomePage from "./registerHomepage/RegistererdHomePage";
+// import LoginNormal from "./signup/LoginNormal";
 
 const App = () => {
   return (
     <>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/signup" element={<SignupForm />} />
+        <Route path="/home" element={<RegistererdHomePage />} />
+
         {/* teacher login */}
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupForm />} />
+        <Route path="/new-login" element={<Normal />} />
         {/* student login */}
         <Route path="/student-login" element={<StudentLogin />} />
         {/*end of  student login */}
