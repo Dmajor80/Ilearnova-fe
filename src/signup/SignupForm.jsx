@@ -231,6 +231,7 @@ export default function SignupForm() {
     if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
+  const toggleDarkMode = () => setDarkMode((prev) => !prev);
   // The rest of your component (UI rendering) stays unchanged
 
   return (
@@ -781,7 +782,6 @@ export default function SignupForm() {
             />
           </div>
         </div>
-          </motion.div>
-          </div >
+          </div>
   );
 }
