@@ -59,22 +59,22 @@ export default function Footer() {
 
   const socialLinks = [
     {
-      icon: Facebook,
+      icon: FaFacebook,
       href: "https://www.facebook.com/ilearnova",
       color: "hover:text-blue-400",
     },
     {
-      icon: Twitter,
+      icon: FaXTwitter,
       href: "https://x.com/iilearnova",
       color: "hover:text-sky-400",
     },
     {
-      icon: Instagram,
+      icon: FaInstagram,
       href: "https://www.instagram.com/iilearnova/",
       color: "hover:text-pink-400",
     },
     {
-      icon: Youtube,
+      icon: FaYoutube,
       href: "https://www.youtube.com/@ilearnova",
       color: "hover:text-red-400",
     },

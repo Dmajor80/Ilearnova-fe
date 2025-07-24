@@ -1,10 +1,6 @@
 /* eslint-disable no-unused-vars */
-// /* eslint-disable no-unused-vars */
-import { useState, useRef, useEffect } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import React from "react";
-import { ArrowLeft, Moon, Sun, AlertCircle, Mail } from "lucide-react";
 import React, { useState, useRef, useEffect } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeft,
   Moon,
@@ -22,7 +18,6 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-
 
 export default function SignupForm() {
   const [formData, setFormData] = useState({
@@ -43,7 +38,7 @@ export default function SignupForm() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [showConfirmation, setShowConfirmation] = useState(false);
-  // const [error, setError] = useState("");
+  const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
   const [showNotification, setShowNotification] = useState(false);
@@ -53,20 +48,19 @@ export default function SignupForm() {
   const [userEmail, setUserEmail] = useState("");
   const inputRefs = useRef({});
   const navigate = useNavigate();
+
   useEffect(() => {
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth);
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-    const keys = Object.keys(formData);
-    keys.forEach((key) => {
     Object.keys(formData).forEach((key) => {
       if (!inputRefs.current[key]) {
         inputRefs.current[key] = React.createRef();
       }
     });
   }, []);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const showNotificationMessage = (message, type = "success") => {
     setNotificationMessage(message);
@@ -207,8 +201,6 @@ export default function SignupForm() {
     <div className="mb-6 group">
       <label
         htmlFor={name}
-        className={`block text-sm font-medium mb-2 ${darkMode ? "text-white" : "text-gray-700"
-          }`}
         className={`block text-sm font-semibold mb-3 transition-colors ${
           darkMode
             ? "text-gray-200 group-focus-within:text-blue-400"
@@ -217,22 +209,6 @@ export default function SignupForm() {
       >
         {label} {required && <span className="text-red-500 ml-1">*</span>}
       </label>
-      <input
-        ref={inputRefs.current[name]}
-        id={name}
-        type={type}
-        name={name}
-        value={formData[name]}
-        onChange={handleChange}
-        onKeyDown={(e) => handleKeyDown(e, nextField)}
-        placeholder={placeholder}
-        aria-describedby={errors[name] ? `${name}-error` : undefined}
-        aria-invalid={errors[name] ? "true" : "false"}
-        className={`w-full h-12 px-3 rounded-xl border text-sm outline-none transition-all duration-200 ${darkMode
-          ? "bg-gray-800 border-gray-600 text-white placeholder-gray-400"
-          : "bg-white border-gray-300 text-gray-700 placeholder-gray-500"
-          } ${errors[name] ? "border-red-500" : "focus:border-blue-500"}`}
-      />
       <div className="relative">
         {Icon && (
           <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10">
@@ -252,17 +228,17 @@ export default function SignupForm() {
           type={type}
           value={formData[name]}
           placeholder={placeholder}
-          onChange={(e) =>
-            setFormData((prev) => ({ ...prev, [name]: e.target.value }))
-          }
+          onChange={handleChange}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               e.preventDefault();
-              nextField
-                ? inputRefs.current[nextField]?.current?.focus()
-                : currentStep === 1
-                ? nextStep()
-                : handleSubmit(e);
+              if (nextField && inputRefs.current[nextField]) {
+                inputRefs.current[nextField].current.focus();
+              } else if (currentStep === 1) {
+                nextStep();
+              } else {
+                handleSubmit(e);
+              }
             }
           }}
           className={`w-full ${
@@ -299,34 +275,7 @@ export default function SignupForm() {
   const prevStep = () => setCurrentStep((s) => Math.max(1, s - 1));
 
   const toggleDarkMode = () => setDarkMode((prev) => !prev);
-  // The rest of your component (UI rendering) stays unchanged
 
-  return (
-    <div
-      className={`min-h-screen w-full transition-colors duration-300 ${darkMode ? "bg-gray-900 text-white" : "bg-white text-gray-700"
-        }`}
-    >
-      {/* Floating Button with Animation */}
-      <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-        className="fixed bottom-8 right-8 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-[#6a53ff] to-[#4680ff] p-0 shadow-lg"
-        onClick={toggleDarkMode}>
-
-        {/* Dark Mode Toggle */}
-        <button
-          className="fixed top-4 right-4 z-50 p-3 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 shadow-lg hover:scale-110 transition-transform focus:outline-none focus:ring-2 focus:ring-blue-500"
-          onClick={() => setDarkMode(!darkMode)}
-          aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-        >
-          {darkMode ? (
-            <Sun className="w-5 h-5 text-white" />
-          ) : (
-            <Moon className="w-5 h-5 text-white" />
-          )}
-        </button>
-      </motion.button>
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
   const LoadingSpinner = () => (
     <div className="flex items-center justify-center">
       <div className="relative">
@@ -340,7 +289,6 @@ export default function SignupForm() {
     </div>
   );
 
-  // Email Verification Screen
   if (showEmailVerification) {
     return (
       <div
@@ -350,7 +298,6 @@ export default function SignupForm() {
             : "bg-gradient-to-br from-blue-50 via-white to-purple-50 text-gray-800"
         }`}
       >
-        {/* Dark Mode Toggle */}
         <button
           className="fixed top-6 right-6 z-40 p-4 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 shadow-xl hover:shadow-2xl hover:scale-110 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-300"
           onClick={() => setDarkMode(!darkMode)}
@@ -467,7 +414,6 @@ export default function SignupForm() {
           : "bg-gradient-to-br from-blue-50 via-white to-purple-50 text-gray-800"
       }`}
     >
-      {/* Notification */}
       {showNotification && (
         <div
           className={`fixed top-6 right-6 z-50 max-w-md p-4 rounded-2xl shadow-2xl transform transition-all duration-500 ${
@@ -503,7 +449,6 @@ export default function SignupForm() {
         </div>
       )}
 
-      {/* Dark Mode Toggle */}
       <button
         className="fixed top-6 right-6 z-40 p-4 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 shadow-xl hover:shadow-2xl hover:scale-110 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-300"
         onClick={() => setDarkMode(!darkMode)}
@@ -517,333 +462,7 @@ export default function SignupForm() {
       </button>
 
       <div className="w-full px-6 sm:px-8 lg:px-12 py-12">
-        {/* Back Button */}
-        <button
-          onClick={() => alert("Going back to home...")}
-          className={`inline-flex items-center px-6 py-3 rounded-xl font-medium transition-all duration-300 mb-8 ${
-            darkMode
-              ? "text-gray-300 hover:text-white hover:bg-gray-800"
-              : "text-gray-600 hover:text-gray-900 hover:bg-white"
-          } focus:outline-none focus:ring-4 focus:ring-blue-300`}
-        >
-          <ArrowLeft className="w-5 h-5 mr-3" />
-          Back to Home
-        </button>
-
-        {/* Form Container */}
-        <div className="mt-6 md:mt-8 mb-16 flex h-full w-full items-center justify-center px-1 md:mx-0 md:px-0 lg:mb-10 lg:items-center lg:justify-start">
-          <motion.div
-            className="w-full max-w-full flex-col items-center md:pl-4 lg:pl-0 xl:max-w-[420px]"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            <motion.h4
-              variants={itemVariants}
-              className="mb-2.5 text-3xl md:text-4xl font-bold"
-            >
-              Sign Up
-            </motion.h4>
-            <motion.p
-              variants={itemVariants}
-              className={`mb-6 md:mb-9 ml-1 text-sm md:text-base ${darkMode ? "text-gray-300" : "text-gray-600"
-                }`}
-            >
-              Enter Credentials to sign up! Code to be gotten from
-              Ilearnova admin
-            </motion.p>
-
-            {/* Form */}
-            <form onSubmit={handleSubmit}>
-              {error &&
-                <div className="mb-4 text-red-600 bg-red-100 rounded px-3 py-2 text-sm">{error}</div>
-              }
-              {success &&
-                <div className="mb-4 text-green-700 bg-green-100 rounded px-3 py-2 text-sm">{success}</div>
-              }
-              <AnimatePresence mode="wait">
-                {currentStep === 1 && (
-                  <motion.div
-                    key="step1"
-                    variants={formStepVariants}
-                    initial="initial"
-                    animate="animate"
-                    exit="exit"
-                  >
-                    <div className="flex flex-col lg:flex-row gap-4">
-                      <motion.div
-                        variants={itemVariants}
-                        className="mb-3"
-                      >
-                        <label
-                          htmlFor="firstName"
-                          className={`ml-1.5 text-sm font-medium ${darkMode ? "text-white" : "text-navy-700"
-                            }`}
-                        >
-                          First Name*
-                        </label>
-                        <motion.input
-                          whileFocus={{ scale: 1.01 }}
-                          type="text"
-                          id="firstName"
-                          required
-                          placeholder="Ayodele"
-                          name="firstName"
-                          value={formData.firstName}
-                          onChange={handleChange}
-                          className={`mt-2 flex h-12 w-full items-center justify-center rounded-xl border p-3 text-sm outline-none ${darkMode
-                            ? "bg-navy-800 border-gray-600 text-white"
-                            : "bg-white  text-navy-700 border-[#d0d0d0]"
-                            } focus:border-[#6a53ff] transition-all duration-200`}
-                        />
-                      </motion.div>
-                      <motion.div
-                        variants={itemVariants}
-                        className="mb-3"
-                      >
-                        <label
-                          htmlFor="lastName"
-                          className={`ml-1.5 text-sm font-medium ${darkMode ? "text-white" : "text-navy-700"
-                            }`}
-                        >
-                          Last Name*
-                        </label>
-                        <motion.input
-                          whileFocus={{ scale: 1.01 }}
-                          type="text"
-                          id="lastName"
-                          required
-                          placeholder="Kayode"
-                          name="lastName"
-                          value={formData.lastName}
-                          onChange={handleChange}
-                          className={`mt-2 flex h-12 w-full items-center justify-center rounded-xl border p-3 text-sm outline-none ${darkMode
-                            ? "bg-navy-800 border-gray-600 text-white"
-                            : "bg-white border-gray-200 text-navy-700"
-                            } focus:border-[#6a53ff] transition-all duration-200`}
-                        />
-                      </motion.div>
-                    </div>
-                    <motion.div variants={itemVariants} className="mb-3">
-                      <label
-                        htmlFor="username"
-                        className={`ml-1.5 text-sm font-medium ${darkMode ? "text-white" : "text-navy-700"
-                          }`}
-                      >
-                        Username*
-                      </label>
-                      <motion.input
-                        whileFocus={{ scale: 1.01 }}
-                        type="text"
-                        id="username"
-                        required
-                        placeholder="Ilearnova123"
-                        name="username"
-                        value={formData.username}
-                        onChange={handleChange}
-                        className={`mt-2 flex h-12 w-full items-center justify-center rounded-xl border p-3 text-sm outline-none ${darkMode
-                          ? "bg-navy-800 border-gray-600 text-white"
-                          : "bg-white text-navy-700 border-[#d0d0d0]"
-                          } focus:border-[#6a53ff] transition-all duration-200`}
-                      />
-                    </motion.div>
-
-                    <motion.div variants={itemVariants} className="mb-3">
-                      <label
-                        htmlFor="email"
-                        className={`ml-1.5 text-sm font-medium ${darkMode ? "text-white" : "text-navy-700"
-                          }`}
-                      >
-                        Email*
-                      </label>
-                      <motion.input
-                        whileFocus={{ scale: 1.01 }}
-                        type="email"
-                        id="email"
-                        required
-                        placeholder="Ilearnova123@Ilearnova.com"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className={`mt-2 flex h-12 w-full items-center justify-center rounded-xl border p-3 text-sm outline-none ${darkMode
-                          ? "bg-navy-800 border-gray-600 text-white"
-                          : "bg-white text-navy-700 border-[#d0d0d0]"
-                          } focus:border-[#6a53ff] transition-all duration-200`}
-                      />
-                    </motion.div>
-                  </motion.div>
-                )}
-
-                {currentStep === 2 && (
-                  <motion.div
-                    key="step2"
-                    variants={formStepVariants}
-                    initial="initial"
-                    animate="animate"
-                    exit="exit"
-                  >
-                    <motion.div variants={itemVariants} className="mb-3">
-                      <label
-                        htmlFor="password"
-                        className={`ml-1.5 text-sm font-medium ${darkMode ? "text-white" : "text-navy-700"
-                          }`}
-                      >
-                        Password*
-                      </label>
-                      <motion.input
-                        whileFocus={{ scale: 1.01 }}
-                        type="password"
-                        id="password"
-                        required
-                        placeholder="Min. 8 characters"
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        className={`mt-2 flex h-12 w-full items-center justify-center rounded-xl border p-3 text-sm outline-none ${darkMode
-                          ? "bg-navy-800 border-gray-600 text-white"
-                          : "bg-white text-navy-700 border-[#d0d0d0]"
-                          } focus:border-[#6a53ff] transition-all duration-200`}
-                      />
-                    </motion.div>
-
-                    <motion.div variants={itemVariants} className="mb-3">
-                      <label
-                        htmlFor="passwordConfirm"
-                        className={`ml-1.5 text-sm font-medium ${darkMode ? "text-white" : "text-navy-700"
-                          }`}
-                      >
-                        Confirm password*
-                      </label>
-                      <motion.input
-                        whileFocus={{ scale: 1.01 }}
-                        type="password"
-                        id="passwordConfirm"
-                        required
-                        placeholder="Min. 8 characters"
-                        name="passwordConfirm"
-                        value={formData.passwordConfirm}
-                        onChange={handleChange}
-                        className={`mt-2 flex h-12 w-full items-center justify-center rounded-xl border p-3 text-sm outline-none ${darkMode
-                          ? "bg-navy-800 border-gray-600 text-white"
-                          : "bg-white  text-navy-700 border-[#d0d0d0]"
-                          } focus:border-[#6a53ff] transition-all duration-200`}
-                      />
-                    </motion.div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Form Navigation Buttons */}
-              <div className="flex justify-between mt-6 mb-4">
-                {currentStep > 1 ? (
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    type="button"
-                    onClick={prevStep}
-                    className="px-4 py-2 rounded-lg border bg-transparent text-sm font-medium border-[#6a53ff] text-[#6a53ff]"
-                  >
-                    Previous
-                  </motion.button>
-                ) : (
-                  <div></div>
-                )}
-
-                {currentStep < 2 ? (
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    type="button"
-                    onClick={nextStep}
-                    className="px-4 py-2 rounded-lg bg-[#6a53ff] text-sm font-medium text-white"
-                  >
-                    Next
-                  </motion.button>
-                ) : (
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    type="submit"
-                    className="px-6 py-2 rounded-lg bg-[#6a53ff] text-sm font-medium text-white"
-                  >
-                    Sign Up
-                  </motion.button>
-                )}
-              </div>
-
-              {/* Form Steps Indicator */}
-              <div className="flex justify-center space-x-2 mt-2 mb-6">
-                {[1, 2].map((step) => (
-                  <motion.div
-                    key={step}
-                    initial={false}
-                    animate={{
-                      scale: currentStep === step ? 1.2 : 1,
-                      backgroundColor:
-                        currentStep === step
-                          ? "#6a53ff"
-                          : currentStep > step
-                            ? "#9c8aff"
-                            : "#e0e0e0",
-                    }}
-                    className="h-2 w-12 rounded-full"
-                  />
-                ))}
-              </div>
-            </form>
-
-            <motion.div
-              variants={itemVariants}
-              className="mt-4 text-center"
-            >
-              <span
-                className={`text-sm font-medium ${darkMode ? "text-gray-300" : "text-navy-700"
-                  }`}
-              >
-                already registered?
-              </span>
-              <motion.a
-                whileHover={{ scale: 1.05 }}
-                className="ml-1 text-sm font-medium text-[#6a53ff] hover:text-[#5a46e6]"
-                href="/login"
-              >
-                Login
-              </motion.a>
-            </motion.div>
-          </motion.div>
-        </div>
-
-        {/* Right side background image with animation - responsive visibility */}
-        <motion.div
-          className="absolute right-0 hidden h-full min-h-screen md:block lg:w-[49vw] 2xl:w-[44vw]"
-          initial={{ opacity: 0, x: 50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-        >
-          <div
-            className="absolute flex h-full w-full justify-center bg-cover bg-center lg:h-screen lg:rounded-bl-[120px] xl:h-[100vh] xl:rounded-bl-[200px]"
-            style={{
-              backgroundImage:
-                "url('https://dimatech-lsm-frontend.vercel.app/static/media/auth.639d277feb2fe0057614.png')",
-            }}
-          ></div>
-        </motion.div>
-      </div>
-
-      {/* Footer with responsive design */}
-      <motion.div
-        className={`z-[5] mx-auto flex w-full max-w-screen-sm flex-col items-center justify-between px-5 pb-4 lg:mb-6 lg:max-w-full lg:flex-row xl:mb-2 xl:w-[1310px] xl:pb-6 ${<div className="w-full grid lg:grid-cols-2 gap-8 xl:gap-16 items-center">
-          {/* Form Section */}
-          <div className="w-full">
-            <h1 className="text-3xl sm:text-4xl font-bold mb-2">Sign Up</h1>
-            <p
-              className={`mb-8 text-base sm:text-lg ${darkMode ? "text-gray-300" : "text-gray-600"
-                }`}
-            >
-              Create your account to get started
-            </p>
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 xl:gap-20 items-center">
-          {/* Form Section */}
           <div className="w-full">
             <div className="text-center lg:text-left mb-10">
               <h1 className="text-4xl sm:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -859,7 +478,6 @@ export default function SignupForm() {
             </div>
 
             <div className="space-y-8">
-              {/* Progress Indicator */}
               <div className="flex justify-center lg:justify-start mb-8">
                 <div className="flex items-center space-x-4">
                   {[1, 2].map((step) => (
@@ -898,173 +516,154 @@ export default function SignupForm() {
                     : "bg-white/70 border border-white/50 shadow-xl"
                 }`}
               >
-                {currentStep === 1 && (
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                      <InputField
-                        label="First Name"
-                        name="firstName"
-                        placeholder="Enter your first name"
-                        required
-                        nextField="lastName"
-                        icon={User}
-                      />
-                      <InputField
-                        label="Last Name"
-                        name="lastName"
-                        placeholder="Enter your last name"
-                        required
-                        nextField="username"
-                        icon={User}
-                      />
-                    </div>
-                    <InputField
-                      label="Username"
-                      name="username"
-                      placeholder="Choose a unique username"
-                      required
-                      nextField="email"
-                      icon={User}
-                    />
-                    <InputField
-                      label="Email Address"
-                      name="email"
-                      type="email"
-                      placeholder="Enter your email"
-                      required
-                      nextField="dateOfBirth"
-                      icon={Mail}
-                    />
-                    <InputField
-                      label="Date of Birth"
-                      name="dateOfBirth"
-                      type="date"
-                      required
-                      nextField="address"
-                      icon={Calendar}
-                    />
-                    <InputField
-                      label="Address"
-                      name="address"
-                      placeholder="Enter your full address"
-                      required
-                      icon={MapPin}
-                    />
-                  </div>
-                )}
-
-                {currentStep === 2 && (
-                  <div className="space-y-6">
-                    <div className="mb-6 group">
-                      <label
-                        htmlFor="bio"
-
-                        className={`block text-sm font-medium mb-2 ${darkMode ? "text-white" : "text-gray-700"
-                          }`}
-                      >
-                        Bio <span className="text-red-500 ml-1">*</span>
-                      </label>
-                      <textarea
-                        ref={inputRefs.bio}
-                        id="bio"
-                        name="bio"
-                        value={formData.bio}
-                        onChange={(e) => {
-                          setFormData((prev) => ({
-                            ...prev,
-                            bio: e.target.value,
-                          }));
-                        }}
-                        placeholder="Tell us about yourself"
-                        rows={4}
-                        aria-describedby={errors.bio ? "bio-error" : undefined}
-                        aria-invalid={errors.bio ? "true" : "false"}
-                        className={`w-full px-3 py-2 rounded-xl border text-sm outline-none transition-all duration-200 resize-none ${darkMode
-                          ? "bg-gray-800 border-gray-600 text-white placeholder-gray-400"
-                          : "bg-white border-gray-300 text-gray-700 placeholder-gray-500"
-                          } ${errors.bio
-                            ? "border-red-500"
-                            : "focus:border-blue-500"
-                          }`}
-                      />
-                        className={`block text-sm font-semibold mb-3 transition-colors ${
-                          darkMode
-                            ? "text-gray-200 group-focus-within:text-blue-400"
-                            : "text-gray-700 group-focus-within:text-blue-600"
-                        }`}
-                      >
-                        Bio <span className="text-red-500 ml-1">*</span>
-                      </label>
-                      <div className="relative">
-                        <div className="absolute left-4 top-4 z-10">
-                          <BookOpen
-                            className={`w-5 h-5 transition-colors ${
-                              darkMode
-                                ? "text-gray-400 group-focus-within:text-blue-400"
-                                : "text-gray-500 group-focus-within:text-blue-600"
-                            }`}
-                          />
-                        </div>
-                        <textarea
-                          ref={inputRefs.current.bio}
-                          id="bio"
-                          name="bio"
-                          value={formData.bio}
-                          onChange={(e) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              bio: e.target.value,
-                            }))
-                          }
-                          placeholder="Tell us about yourself and your interests"
-                          rows={5}
-                          className={`w-full pl-12 pr-4 py-4 rounded-2xl border-2 text-sm font-medium transition-all duration-300 ease-in-out outline-none resize-none ${
-                            darkMode
-                              ? "bg-gray-800/50 text-white border-gray-600 placeholder-gray-400 focus:bg-gray-800 focus:border-blue-500 focus:shadow-lg focus:shadow-blue-500/20"
-                              : "bg-white text-gray-800 border-gray-200 placeholder-gray-500 focus:bg-blue-50/30 focus:border-blue-500 focus:shadow-lg focus:shadow-blue-500/20"
-                          } ${
-                            errors.bio ? "border-red-400 bg-red-50/30" : ""
-                          } hover:border-gray-400`}
+                <AnimatePresence mode="wait">
+                  {currentStep === 1 && (
+                    <motion.div
+                      key="step1"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ duration: 0.3 }}
+                      className="space-y-6"
+                    >
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <InputField
+                          label="First Name"
+                          name="firstName"
+                          placeholder="Enter your first name"
+                          required
+                          nextField="lastName"
+                          icon={User}
+                        />
+                        <InputField
+                          label="Last Name"
+                          name="lastName"
+                          placeholder="Enter your last name"
+                          required
+                          nextField="username"
+                          icon={User}
                         />
                       </div>
-                      {errors.bio && (
-                        <p className="text-red-500 text-xs mt-2 flex items-center animate-pulse">
-                          <AlertCircle className="w-4 h-4 mr-2" />
-                          {errors.bio}
-                        </p>
-                      )}
-                    </div>
+                      <InputField
+                        label="Username"
+                        name="username"
+                        placeholder="Choose a unique username"
+                        required
+                        nextField="email"
+                        icon={User}
+                      />
+                      <InputField
+                        label="Email Address"
+                        name="email"
+                        type="email"
+                        placeholder="Enter your email"
+                        required
+                        nextField="dateOfBirth"
+                        icon={Mail}
+                      />
+                      <InputField
+                        label="Date of Birth"
+                        name="dateOfBirth"
+                        type="date"
+                        required
+                        nextField="address"
+                        icon={Calendar}
+                      />
+                      <InputField
+                        label="Address"
+                        name="address"
+                        placeholder="Enter your full address"
+                        required
+                        icon={MapPin}
+                      />
+                    </motion.div>
+                  )}
 
-                    <InputField
-                      label="Phone Number"
-                      name="phoneNumber"
-                      type="tel"
-                      placeholder="Enter your phone number"
-                      required
-                      nextField="password"
-                      icon={Phone}
-                    />
-                    <InputField
-                      label="Password"
-                      name="password"
-                      type="password"
-                      placeholder="Minimum 8 characters"
-                      required
-                      nextField="passwordConfirm"
-                      icon={Lock}
-                    />
-                    <InputField
-                      label="Confirm Password"
-                      name="passwordConfirm"
-                      type="password"
-                      placeholder="Confirm your password"
-                      required
-                      icon={Lock}
-                    />
-                  </div>
-                )}
+                  {currentStep === 2 && (
+                    <motion.div
+                      key="step2"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ duration: 0.3 }}
+                      className="space-y-6"
+                    >
+                      <div className="mb-6 group">
+                        <label
+                          htmlFor="bio"
+                          className={`block text-sm font-semibold mb-3 transition-colors ${
+                            darkMode
+                              ? "text-gray-200 group-focus-within:text-blue-400"
+                              : "text-gray-700 group-focus-within:text-blue-600"
+                          }`}
+                        >
+                          Bio <span className="text-red-500 ml-1">*</span>
+                        </label>
+                        <div className="relative">
+                          <div className="absolute left-4 top-4 z-10">
+                            <BookOpen
+                              className={`w-5 h-5 transition-colors ${
+                                darkMode
+                                  ? "text-gray-400 group-focus-within:text-blue-400"
+                                  : "text-gray-500 group-focus-within:text-blue-600"
+                              }`}
+                            />
+                          </div>
+                          <textarea
+                            ref={inputRefs.current.bio}
+                            id="bio"
+                            name="bio"
+                            value={formData.bio}
+                            onChange={handleChange}
+                            placeholder="Tell us about yourself and your interests"
+                            rows={5}
+                            className={`w-full pl-12 pr-4 py-4 rounded-2xl border-2 text-sm font-medium transition-all duration-300 ease-in-out outline-none resize-none ${
+                              darkMode
+                                ? "bg-gray-800/50 text-white border-gray-600 placeholder-gray-400 focus:bg-gray-800 focus:border-blue-500 focus:shadow-lg focus:shadow-blue-500/20"
+                                : "bg-white text-gray-800 border-gray-200 placeholder-gray-500 focus:bg-blue-50/30 focus:border-blue-500 focus:shadow-lg focus:shadow-blue-500/20"
+                            } ${
+                              errors.bio ? "border-red-400 bg-red-50/30" : ""
+                            } hover:border-gray-400`}
+                          />
+                        </div>
+                        {errors.bio && (
+                          <p className="text-red-500 text-xs mt-2 flex items-center animate-pulse">
+                            <AlertCircle className="w-4 h-4 mr-2" />
+                            {errors.bio}
+                          </p>
+                        )}
+                      </div>
 
-                {/* Navigation Buttons */}
+                      <InputField
+                        label="Phone Number"
+                        name="phoneNumber"
+                        type="tel"
+                        placeholder="Enter your phone number"
+                        required
+                        nextField="password"
+                        icon={Phone}
+                      />
+                      <InputField
+                        label="Password"
+                        name="password"
+                        type="password"
+                        placeholder="Minimum 8 characters"
+                        required
+                        nextField="passwordConfirm"
+                        icon={Lock}
+                      />
+                      <InputField
+                        label="Confirm Password"
+                        name="passwordConfirm"
+                        type="password"
+                        placeholder="Confirm your password"
+                        required
+                        icon={Lock}
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-6 mt-10">
                   {currentStep > 1 ? (
                     <button
@@ -1101,41 +700,23 @@ export default function SignupForm() {
                     </button>
                   )}
                 </div>
-
-                {/* Progress Indicator */}
-                <div className="flex justify-center mt-6 space-x-2">
-                  {[1, 2].map((step) => (
-                    <div
-                      key={step}
-                      className={`h-2 w-8 rounded-full transition-colors ${currentStep >= step ? "bg-blue-600" : "bg-gray-300"
-                        }`}
-                    />
-                  ))}
-                </div>              </div>
+              </div>
             </div>
 
-            {/* Footer Link */}
             <p
-
-              className={`text-center mt-6 text-sm sm:text-base ${darkMode ? "text-gray-300" : "text-gray-600"
-                }`}
               className={`text-center mt-8 text-base ${
                 darkMode ? "text-gray-300" : "text-gray-600"
               }`}
             >
               Already have an account?{" "}
               <Link to="/new-login">
-                <button
-                  // onClick={handleConfirmEmail}
-                  className="text-blue-600 hover:text-blue-700 font-semibold hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1 transition-all duration-200"
-                >
+                <button className="text-blue-600 hover:text-blue-700 font-semibold hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1 transition-all duration-200">
                   Login here
                 </button>
               </Link>
             </p>
           </div>
 
-          {/* Image Section */}
           <div className="hidden lg:block w-full">
             <div className="relative">
               <div
@@ -1149,6 +730,7 @@ export default function SignupForm() {
             </div>
           </div>
         </div>
-          </div>
+      </div>
+    </div>
   );
 }
