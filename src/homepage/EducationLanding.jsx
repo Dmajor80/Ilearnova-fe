@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import junior from "../homepage/junior.png";
-import secondary from "../homepage/secondary.png";
-import senior from "../homepage/senior.png";
+import junior from "../assets/junior.png";
+import secondary from "../assets/secondary.png";
+import senior from "../assets/senior.png";
 const EducationLanding = () => {
   const [isVisible, setIsVisible] = useState(false);
 
