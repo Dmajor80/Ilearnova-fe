@@ -35,7 +35,9 @@ import SchoolAdmin from "./School-Admin/SchoolAdmin";
 import Error from "./Error";
 import Normal from "./signup/Normal";
 import RegistererdHomePage from "./registerHomepage/RegistererdHomePage";
-// import LoginNormal from "./signup/LoginNormal";
+ // import LoginNormal from "./signup/LoginNormal";
+import VerifySuccess from "./confirm/VerifySuccess";
+import VerifyFailure from "./confirm/VerifyFailure";
 
 const App = () => {
   return (
@@ -47,6 +49,8 @@ const App = () => {
         {/* teacher login */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupForm />} />
+        <Route path="/verify-success" element={<VerifySuccess />} />
+        <Route path="/verify-failure" element={<VerifyFailure />} />
         <Route path="/new-login" element={<Normal />} />
         {/* student login */}
         <Route path="/student-login" element={<StudentLogin />} />
