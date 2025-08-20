@@ -144,7 +144,7 @@ export default function SignupForm() {
     passwordConfirm: "",
   });
 
-  const [darkMode] = useState(false);
+  const [darkMode] = useState(() => window.matchMedia("(prefers-color-scheme: dark)").matches);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [showNotification, setShowNotification] = useState(false);
@@ -293,7 +293,7 @@ export default function SignupForm() {
       <div
         className={`min-h-screen w-full transition-all duration-500 ${
           darkMode
-            ? "bg-gradient-to-br from-gray-900 via-blue-900/20 to-gray-900 text-white"
+            ? "bg-gradient-to-br from-gray-950 via-gray-900 to-black text-gray-100"
             : "bg-gradient-to-br from-blue-50 via-white to-purple-50 text-gray-800"
         }`}
       >
@@ -409,7 +409,7 @@ export default function SignupForm() {
     <div
       className={`min-h-screen w-full transition-all duration-500 ${
         darkMode
-          ? "bg-gradient-to-br from-gray-900 via-blue-900/20 to-gray-900 text-white"
+          ? "bg-gradient-to-br from-gray-950 via-gray-900 to-black text-gray-100"
           : "bg-gradient-to-br from-blue-50 via-white to-purple-50 text-gray-800"
       }`}
     >
@@ -464,7 +464,7 @@ export default function SignupForm() {
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 xl:gap-20 items-center">
           <div className="w-full">
             <div className="text-center lg:text-left mb-10">
-              <h1 className="text-4xl sm:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className={`text-4xl sm:text-5xl font-bold mb-4 ${darkMode ? "text-white" : "bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent"}`}>
                 Join Our School
               </h1>
               <p
@@ -593,7 +593,7 @@ export default function SignupForm() {
               }`}
             >
               Already have an account?{" "}
-              <Link to="/new-login">
+              <Link to="/login">
                 <button className="text-blue-600 hover:text-blue-700 font-semibold hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1 transition-all duration-200">
                   Login here
                 </button>
@@ -610,7 +610,7 @@ export default function SignupForm() {
                     "url('https://dimatech-lsm-frontend.vercel.app/static/media/auth.639d277feb2fe0057614.png')",
                 }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-3xl"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent rounded-3xl"></div>
             </div>
           </div>
         </div>

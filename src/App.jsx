@@ -2,7 +2,7 @@ import React from "react";
 import { Route, Routes } from "react-router-dom";
 import Pages from "./parent/Pages/Pages";
 import HomePage from "./homepage/HomePage";
-import SignupForm from "./signup/SignupForm";
+import SignupForm from "./auth/SignupForm";
 
 // Login Pages
 import LoginPage from "./teacher/LoginPage";
@@ -33,7 +33,7 @@ import Report from "./admin/Report";
 
 import SchoolAdmin from "./School-Admin/SchoolAdmin";
 import Error from "./Error";
-import Normal from "./signup/Normal";
+import Normal from "./auth/login";
 import RegistererdHomePage from "./registerHomepage/RegistererdHomePage";
  // import LoginNormal from "./signup/LoginNormal";
 import VerifySuccess from "./confirm/VerifySuccess";
@@ -47,11 +47,11 @@ const App = () => {
         <Route path="/home" element={<RegistererdHomePage />} />
 
         {/* teacher login */}
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="/new-login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupForm />} />
         <Route path="/verify-success" element={<VerifySuccess />} />
         <Route path="/verify-failure" element={<VerifyFailure />} />
-        <Route path="/new-login" element={<Normal />} />
+        <Route path="/login" element={<Normal />} />
         {/* student login */}
         <Route path="/student-login" element={<StudentLogin />} />
         {/*end of  student login */}

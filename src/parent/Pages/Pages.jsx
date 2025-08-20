@@ -7,7 +7,7 @@ import ParentMessages from "./ParentMessages";
 import ParentDashboard from "./ParentDashboard";
 import PaymentProcess from "./PaymentProcess";
 import { Route, Routes } from "react-router-dom";
-import SignupForm from "../../signup/SignupForm";
+import SignupForm from "../../auth/SignupForm";
 // import Normal from "../../signup/Normal";
 
 function Pages() {

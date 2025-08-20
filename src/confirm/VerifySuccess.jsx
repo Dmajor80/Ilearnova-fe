@@ -8,11 +8,9 @@ const VerifySuccess = () => {
 
   const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const statusParam = (params.get("status") || "").toLowerCase();
-  const reason = (params.get("reason") || "").toLowerCase(); // e.g., "already_verified"
+  const reason = (params.get("reason") || "").toLowerCase();
   const email = params.get("email") || "";
 
-  // Default to success for this route (backend already verified),
-  // but keep param for display consistency.
   const isAlreadyVerified = reason === "already_verified";
 
   const [seconds, setSeconds] = useState(5);
@@ -64,7 +62,7 @@ const VerifySuccess = () => {
               <span>Redirecting to the login page in {seconds}s...</span>
             </div>
             <button
-              onClick={() => navigate("/new-login")}
+              onClick={() => navigate("/login")}
               className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-green-600 to-blue-600 text-white font-semibold rounded-2xl hover:from-green-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 shadow-lg"
             >
               Continue to Login Now
@@ -74,7 +72,7 @@ const VerifySuccess = () => {
           <p className="text-sm text-gray-500 mt-6">
             Not redirected?{" "}
             <button
-              onClick={() => navigate("/new-login")}
+              onClick={() => navigate("/login")}
               className="text-blue-600 hover:text-blue-700 font-semibold hover:underline focus:outline-none rounded px-1 py-1"
             >
               Click here

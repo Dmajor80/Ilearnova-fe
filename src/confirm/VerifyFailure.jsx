@@ -18,8 +18,8 @@ const VerifyFailure = () => {
   const navigate = useNavigate();
 
   const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
-  const statusParam = (params.get("status") || "").toLowerCase(); // typically "failed"
-  const reason = (params.get("reason") || "").toLowerCase(); // "missing_token" | "invalid_or_expired"
+  const statusParam = (params.get("status") || "").toLowerCase();
+  const reason = (params.get("reason") || "").toLowerCase();
   const email = params.get("email") || "";
 
   return (
@@ -56,7 +56,7 @@ const VerifyFailure = () => {
                 Back to Signup
               </Link>
               <button
-                onClick={() => navigate("/new-login")}
+                onClick={() => navigate("/login")}
                 className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-300 shadow"
               >
                 Go to Login
