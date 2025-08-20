@@ -3,201 +3,51 @@ import React, { useState, useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeft,
-  Moon,
-  Sun,
+  // Moon,
+  // Sun,
   AlertCircle,
   Mail,
   Check,
   X,
   User,
   Lock,
-  Phone,
-  MapPin,
-  Calendar,
-  BookOpen,
   CheckCircle,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
-export default function SignupForm() {
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    username: "",
-    email: "",
-    address: "",
-    dateOfBirth: "",
-    bio: "",
-    phoneNumber: "",
-    password: "",
-    passwordConfirm: "",
-  });
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center">
+    <div className="relative">
+      <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
+      <div
+        className="absolute inset-0 w-8 h-8 border-4 border-transparent border-t-blue-200 rounded-full animate-spin"
+        style={{ animationDelay: "0.15s" }}
+      ></div>
+    </div>
+    <span className="ml-3 font-medium">Creating Account...</span>
+  </div>
+);
 
-  const [darkMode, setDarkMode] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-
-  const [showNotification, setShowNotification] = useState(false);
-  const [notificationMessage, setNotificationMessage] = useState("");
-  const [notificationType, setNotificationType] = useState("success");
-  const [showEmailVerification, setShowEmailVerification] = useState(false);
-  const [userEmail, setUserEmail] = useState("");
-  const inputRefs = useRef({});
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    Object.keys(formData).forEach((key) => {
-      if (!inputRefs.current[key]) {
-        inputRefs.current[key] = React.createRef();
-      }
-    });
-  }, []);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const showNotificationMessage = (message, type = "success") => {
-    setNotificationMessage(message);
-    setNotificationType(type);
-    setShowNotification(true);
-    setTimeout(() => setShowNotification(false), 6000);
-  };
-
-  const validateStep = (step) => {
-    const newErrors = {};
-    if (step === 1) {
-      if (!formData.firstName.trim())
-        newErrors.firstName = "First name is required";
-      if (!formData.lastName.trim())
-        newErrors.lastName = "Last name is required";
-      if (!formData.username.trim())
-        newErrors.username = "Username is required";
-      else if (!/^[\w.@+-]+$/.test(formData.username))
-        newErrors.username = "Invalid characters in username";
-      if (!formData.email.trim()) newErrors.email = "Email is required";
-      else if (!/\S+@\S+\.\S+/.test(formData.email))
-        newErrors.email = "Invalid email format";
-      if (!formData.dateOfBirth.trim())
-        newErrors.dateOfBirth = "Date of birth is required";
-      if (!formData.address.trim()) newErrors.address = "Address is required";
-    } else if (step === 2) {
-      if (!formData.bio.trim()) newErrors.bio = "Bio is required";
-      if (!formData.phoneNumber.trim())
-        newErrors.phoneNumber = "Phone number is required";
-      if (!formData.password) newErrors.password = "Password is required";
-      else if (formData.password.length < 8)
-        newErrors.password = "Password too short";
-      if (!formData.passwordConfirm)
-        newErrors.passwordConfirm = "Confirm your password";
-      else if (formData.password !== formData.passwordConfirm)
-        newErrors.passwordConfirm = "Passwords do not match";
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const submitSignup = async (userData) => {
-    try {
-      const response = await fetch(
-        "https://api.ilearnova.com/api/auth/register/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify(userData),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Registration failed");
-      }
-      return await response.json();
-    } catch (error) {
-      throw new Error(error.message || "Network error");
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateStep(2)) return;
-
-    setLoading(true);
-    setErrors({});
-
-    try {
-      const apiData = {
-        username: formData.username,
-        email: formData.email,
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        bio: formData.bio,
-        phone_number: formData.phoneNumber,
-        date_of_birth: formData.dateOfBirth,
-        address: formData.address,
-        password: formData.password,
-        additional_data: {},
-      };
-
-      await submitSignup(apiData);
-
-      // Store user email and show verification screen
-      setUserEmail(formData.email);
-      setShowEmailVerification(true);
-    } catch (error) {
-      let notificationType = "error";
-      let message = error.message;
-
-      // Check for specific error patterns and customize notifications
-      if (
-        message.toLowerCase().includes("user with this email already exists")
-      ) {
-        notificationType = "info";
-        message =
-          "An account with this email already exists. Please try logging in instead.";
-      } else if (
-        message.toLowerCase().includes("user with that username already exists")
-      ) {
-        notificationType = "info";
-        message =
-          "This username is already taken. Please choose a different username.";
-      } else if (
-        message.toLowerCase().includes("already exists") ||
-        message.toLowerCase().includes("already registered")
-      ) {
-        notificationType = "info";
-        message = "You are already registered! Please login instead.";
-      }
-
-      showNotificationMessage(message, notificationType);
-      setErrors({ general: error.message });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleConfirmEmail = () => {
-    // Redirect to login page
-    navigate("/new-login");
-  };
-
-  const InputField = ({
-    label,
-    name,
-    type = "text",
-    placeholder,
-    required = false,
-    nextField,
-    icon: Icon,
-  }) => (
+const InputField = React.memo(function InputField({
+  label,
+  name,
+  type = "text",
+  placeholder,
+  required = false,
+  nextField,
+  icon: Icon,
+  darkMode,
+  errors,
+  formData,
+  inputRefs,
+  handleChange,
+  handleSubmit,
+}) {
+  const [showPassword, setShowPassword] = useState(false);
+  const isPassword = type === "password";
+  return (
     <div className="mb-6 group">
       <label
         htmlFor={name}
@@ -225,7 +75,7 @@ export default function SignupForm() {
           ref={inputRefs.current[name]}
           id={name}
           name={name}
-          type={type}
+          type={isPassword && showPassword ? "text" : type}
           value={formData[name]}
           placeholder={placeholder}
           onChange={handleChange}
@@ -234,8 +84,6 @@ export default function SignupForm() {
               e.preventDefault();
               if (nextField && inputRefs.current[nextField]) {
                 inputRefs.current[nextField].current.focus();
-              } else if (currentStep === 1) {
-                nextStep();
               } else {
                 handleSubmit(e);
               }
@@ -243,7 +91,7 @@ export default function SignupForm() {
           }}
           className={`w-full ${
             Icon ? "pl-12" : "pl-4"
-          } pr-4 py-4 rounded-2xl border-2 text-sm font-medium transition-all duration-300 ease-in-out outline-none ${
+          } ${isPassword ? "pr-12" : "pr-4"} py-4 rounded-2xl border-2 text-sm font-medium transition-all duration-300 ease-in-out outline-none ${
             darkMode
               ? "bg-gray-800/50 text-white border-gray-600 placeholder-gray-400 focus:bg-gray-800 focus:border-blue-500 focus:shadow-lg focus:shadow-blue-500/20"
               : "bg-white text-gray-800 border-gray-200 placeholder-gray-500 focus:bg-blue-50/30 focus:border-blue-500 focus:shadow-lg focus:shadow-blue-500/20"
@@ -253,6 +101,25 @@ export default function SignupForm() {
           aria-invalid={errors[name] ? "true" : "false"}
           aria-describedby={errors[name] ? `${name}-error` : undefined}
         />
+        {isPassword && (
+          <button
+            type="button"
+            onClick={() => setShowPassword((v) => !v)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            tabIndex={-1}
+          >
+            {showPassword ? (
+              <EyeOff
+                className={`w-5 h-5 ${darkMode ? "text-gray-300" : "text-gray-600"}`}
+              />
+            ) : (
+              <Eye
+                className={`w-5 h-5 ${darkMode ? "text-gray-300" : "text-gray-600"}`}
+              />
+            )}
+          </button>
+        )}
       </div>
       {errors[name] && (
         <p
@@ -265,29 +132,161 @@ export default function SignupForm() {
       )}
     </div>
   );
+});
 
-  const nextStep = () => {
-    if (validateStep(currentStep)) {
-      setCurrentStep((s) => s + 1);
+export default function SignupForm() {
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    username: "",
+    email: "",
+    password: "",
+    passwordConfirm: "",
+  });
+
+  const [darkMode] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState("");
+  const [notificationType, setNotificationType] = useState("success");
+  const [showEmailVerification, setShowEmailVerification] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+  const inputRefs = useRef({});
+  const navigate = useNavigate();
+
+  // Environment variables
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+  useEffect(() => {
+    Object.keys(formData).forEach((key) => {
+      if (!inputRefs.current[key]) {
+        inputRefs.current[key] = React.createRef();
+      }
+    });
+  }, []);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const showNotificationMessage = (message, type = "success") => {
+    setNotificationMessage(message);
+    setNotificationType(type);
+    setShowNotification(true);
+    setTimeout(() => setShowNotification(false), 6000);
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = "First name is required";
+    }
+    
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = "Last name is required";
+    }
+    
+    if (!formData.username || !formData.username.trim()) {
+      newErrors.username = "Username is required";
+    }
+    
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Invalid email format";
+    }
+    
+    if (!formData.password) {
+      newErrors.password = "Password is required";
+    } else if (formData.password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters";
+    }
+    
+    if (!formData.passwordConfirm) {
+      newErrors.passwordConfirm = "Confirm your password";
+    } else if (formData.password !== formData.passwordConfirm) {
+      newErrors.passwordConfirm = "Passwords do not match";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const submitSignup = async (userData) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/register/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(userData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Registration failed");
+      }
+      return await response.json();
+    } catch (error) {
+      throw new Error(error.message || "Network error");
     }
   };
 
-  const prevStep = () => setCurrentStep((s) => Math.max(1, s - 1));
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
 
-  const toggleDarkMode = () => setDarkMode((prev) => !prev);
+    setLoading(true);
+    setErrors({});
 
-  const LoadingSpinner = () => (
-    <div className="flex items-center justify-center">
-      <div className="relative">
-        <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
-        <div
-          className="absolute inset-0 w-8 h-8 border-4 border-transparent border-t-blue-200 rounded-full animate-spin"
-          style={{ animationDelay: "0.15s" }}
-        ></div>
-      </div>
-      <span className="ml-3 font-medium">Creating Account...</span>
-    </div>
-  );
+    try {
+      const apiData = {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+      };
+
+      await submitSignup(apiData);
+
+      // Store user email and show verification screen
+      setUserEmail(formData.email);
+      setShowEmailVerification(true);
+    } catch (error) {
+      let notificationType = "error";
+      let message = error.message;
+
+      // Check for specific error patterns and customize notifications
+      if (
+        message.toLowerCase().includes("user with this email already exists")
+      ) {
+        notificationType = "info";
+        message =
+          "An account with this email already exists. Please try logging in instead.";
+      } else if (
+        message.toLowerCase().includes("already exists") ||
+        message.toLowerCase().includes("already registered")
+      ) {
+        notificationType = "info";
+        message = "You are already registered! Please login instead.";
+      }
+
+      showNotificationMessage(message, notificationType);
+      setErrors({ general: error.message });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleConfirmEmail = () => {
+    // Redirect to login page
+    navigate("/new-login");
+  };
 
   if (showEmailVerification) {
     return (
@@ -298,7 +297,7 @@ export default function SignupForm() {
             : "bg-gradient-to-br from-blue-50 via-white to-purple-50 text-gray-800"
         }`}
       >
-        <button
+        {/* <button
           className="fixed top-6 right-6 z-40 p-4 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 shadow-xl hover:shadow-2xl hover:scale-110 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-300"
           onClick={() => setDarkMode(!darkMode)}
           aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
@@ -308,7 +307,7 @@ export default function SignupForm() {
           ) : (
             <Moon className="w-6 h-6 text-white" />
           )}
-        </button>
+        </button> */}
 
         <div className="w-full px-6 sm:px-8 lg:px-12 py-12">
           <div className="max-w-2xl mx-auto">
@@ -449,7 +448,7 @@ export default function SignupForm() {
         </div>
       )}
 
-      <button
+      {/* <button
         className="fixed top-6 right-6 z-40 p-4 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 shadow-xl hover:shadow-2xl hover:scale-110 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-300"
         onClick={() => setDarkMode(!darkMode)}
         aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
@@ -459,7 +458,7 @@ export default function SignupForm() {
         ) : (
           <Moon className="w-6 h-6 text-white" />
         )}
-      </button>
+      </button> */}
 
       <div className="w-full px-6 sm:px-8 lg:px-12 py-12">
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 xl:gap-20 items-center">
@@ -477,230 +476,115 @@ export default function SignupForm() {
               </p>
             </div>
 
-            <div className="space-y-8">
-              <div className="flex justify-center lg:justify-start mb-8">
-                <div className="flex items-center space-x-4">
-                  {[1, 2].map((step) => (
-                    <React.Fragment key={step}>
-                      <div
-                        className={`flex items-center justify-center w-12 h-12 rounded-full font-bold transition-all duration-300 ${
-                          currentStep >= step
-                            ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg"
-                            : darkMode
-                            ? "bg-gray-700 text-gray-400"
-                            : "bg-gray-200 text-gray-500"
-                        }`}
-                      >
-                        {step}
-                      </div>
-                      {step < 2 && (
-                        <div
-                          className={`w-16 h-1 rounded transition-all duration-300 ${
-                            currentStep > step
-                              ? "bg-gradient-to-r from-blue-500 to-purple-500"
-                              : darkMode
-                              ? "bg-gray-700"
-                              : "bg-gray-200"
-                          }`}
-                        />
-                      )}
-                    </React.Fragment>
-                  ))}
+            <div
+              className={`p-8 rounded-3xl backdrop-blur-lg transition-all duration-500 ${
+                darkMode
+                  ? "bg-gray-800/30 border border-gray-700/50"
+                  : "bg-white/70 border border-white/50 shadow-xl"
+              }`}
+            >
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <InputField
+                    label="First Name"
+                    name="firstName"
+                    placeholder="Enter your first name"
+                    required
+                    nextField="lastName"
+                    icon={User}
+                    darkMode={darkMode}
+                    errors={errors}
+                    formData={formData}
+                    inputRefs={inputRefs}
+                    handleChange={handleChange}
+                    handleSubmit={handleSubmit}
+                  />
+                  <InputField
+                    label="Last Name"
+                    name="lastName"
+                    placeholder="Enter your last name"
+                    required
+                    nextField="username"
+                    icon={User}
+                    darkMode={darkMode}
+                    errors={errors}
+                    formData={formData}
+                    inputRefs={inputRefs}
+                    handleChange={handleChange}
+                    handleSubmit={handleSubmit}
+                  />
                 </div>
-              </div>
+                
+                <InputField
+                  label="Username"
+                  name="username"
+                  placeholder="Choose a username"
+                  required
+                  nextField="email"
+                  icon={User}
+                  darkMode={darkMode}
+                  errors={errors}
+                  formData={formData}
+                  inputRefs={inputRefs}
+                  handleChange={handleChange}
+                  handleSubmit={handleSubmit}
+                />
+                
+                <InputField
+                  label="Email Address"
+                  name="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  required
+                  nextField="password"
+                  icon={Mail}
+                  darkMode={darkMode}
+                  errors={errors}
+                  formData={formData}
+                  inputRefs={inputRefs}
+                  handleChange={handleChange}
+                  handleSubmit={handleSubmit}
+                />
+                
+                <InputField
+                  label="Password"
+                  name="password"
+                  type="password"
+                  placeholder="Minimum 8 characters"
+                  required
+                  nextField="passwordConfirm"
+                  icon={Lock}
+                  darkMode={darkMode}
+                  errors={errors}
+                  formData={formData}
+                  inputRefs={inputRefs}
+                  handleChange={handleChange}
+                  handleSubmit={handleSubmit}
+                />
+                
+                <InputField
+                  label="Confirm Password"
+                  name="passwordConfirm"
+                  type="password"
+                  placeholder="Confirm your password"
+                  required
+                  icon={Lock}
+                  darkMode={darkMode}
+                  errors={errors}
+                  formData={formData}
+                  inputRefs={inputRefs}
+                  handleChange={handleChange}
+                  handleSubmit={handleSubmit}
+                />
 
-              <div
-                className={`p-8 rounded-3xl backdrop-blur-lg transition-all duration-500 ${
-                  darkMode
-                    ? "bg-gray-800/30 border border-gray-700/50"
-                    : "bg-white/70 border border-white/50 shadow-xl"
-                }`}
-              >
-                <AnimatePresence mode="wait">
-                  {currentStep === 1 && (
-                    <motion.div
-                      key="step1"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                      transition={{ duration: 0.3 }}
-                      className="space-y-6"
-                    >
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <InputField
-                          label="First Name"
-                          name="firstName"
-                          placeholder="Enter your first name"
-                          required
-                          nextField="lastName"
-                          icon={User}
-                        />
-                        <InputField
-                          label="Last Name"
-                          name="lastName"
-                          placeholder="Enter your last name"
-                          required
-                          nextField="username"
-                          icon={User}
-                        />
-                      </div>
-                      <InputField
-                        label="Username"
-                        name="username"
-                        placeholder="Choose a unique username"
-                        required
-                        nextField="email"
-                        icon={User}
-                      />
-                      <InputField
-                        label="Email Address"
-                        name="email"
-                        type="email"
-                        placeholder="Enter your email"
-                        required
-                        nextField="dateOfBirth"
-                        icon={Mail}
-                      />
-                      <InputField
-                        label="Date of Birth"
-                        name="dateOfBirth"
-                        type="date"
-                        required
-                        nextField="address"
-                        icon={Calendar}
-                      />
-                      <InputField
-                        label="Address"
-                        name="address"
-                        placeholder="Enter your full address"
-                        required
-                        icon={MapPin}
-                      />
-                    </motion.div>
-                  )}
-
-                  {currentStep === 2 && (
-                    <motion.div
-                      key="step2"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                      transition={{ duration: 0.3 }}
-                      className="space-y-6"
-                    >
-                      <div className="mb-6 group">
-                        <label
-                          htmlFor="bio"
-                          className={`block text-sm font-semibold mb-3 transition-colors ${
-                            darkMode
-                              ? "text-gray-200 group-focus-within:text-blue-400"
-                              : "text-gray-700 group-focus-within:text-blue-600"
-                          }`}
-                        >
-                          Bio <span className="text-red-500 ml-1">*</span>
-                        </label>
-                        <div className="relative">
-                          <div className="absolute left-4 top-4 z-10">
-                            <BookOpen
-                              className={`w-5 h-5 transition-colors ${
-                                darkMode
-                                  ? "text-gray-400 group-focus-within:text-blue-400"
-                                  : "text-gray-500 group-focus-within:text-blue-600"
-                              }`}
-                            />
-                          </div>
-                          <textarea
-                            ref={inputRefs.current.bio}
-                            id="bio"
-                            name="bio"
-                            value={formData.bio}
-                            onChange={handleChange}
-                            placeholder="Tell us about yourself and your interests"
-                            rows={5}
-                            className={`w-full pl-12 pr-4 py-4 rounded-2xl border-2 text-sm font-medium transition-all duration-300 ease-in-out outline-none resize-none ${
-                              darkMode
-                                ? "bg-gray-800/50 text-white border-gray-600 placeholder-gray-400 focus:bg-gray-800 focus:border-blue-500 focus:shadow-lg focus:shadow-blue-500/20"
-                                : "bg-white text-gray-800 border-gray-200 placeholder-gray-500 focus:bg-blue-50/30 focus:border-blue-500 focus:shadow-lg focus:shadow-blue-500/20"
-                            } ${
-                              errors.bio ? "border-red-400 bg-red-50/30" : ""
-                            } hover:border-gray-400`}
-                          />
-                        </div>
-                        {errors.bio && (
-                          <p className="text-red-500 text-xs mt-2 flex items-center animate-pulse">
-                            <AlertCircle className="w-4 h-4 mr-2" />
-                            {errors.bio}
-                          </p>
-                        )}
-                      </div>
-
-                      <InputField
-                        label="Phone Number"
-                        name="phoneNumber"
-                        type="tel"
-                        placeholder="Enter your phone number"
-                        required
-                        nextField="password"
-                        icon={Phone}
-                      />
-                      <InputField
-                        label="Password"
-                        name="password"
-                        type="password"
-                        placeholder="Minimum 8 characters"
-                        required
-                        nextField="passwordConfirm"
-                        icon={Lock}
-                      />
-                      <InputField
-                        label="Confirm Password"
-                        name="passwordConfirm"
-                        type="password"
-                        placeholder="Confirm your password"
-                        required
-                        icon={Lock}
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                <div className="flex flex-col sm:flex-row justify-between items-center gap-6 mt-10">
-                  {currentStep > 1 ? (
-                    <button
-                      type="button"
-                      onClick={prevStep}
-                      className={`w-full sm:w-auto px-8 py-4 rounded-2xl font-semibold transition-all duration-300 ${
-                        darkMode
-                          ? "border-2 border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white"
-                          : "border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white"
-                      } focus:outline-none focus:ring-4 focus:ring-blue-300`}
-                    >
-                      Previous Step
-                    </button>
-                  ) : (
-                    <div className="hidden sm:block" />
-                  )}
-
-                  {currentStep < 2 ? (
-                    <button
-                      type="button"
-                      onClick={nextStep}
-                      className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300 shadow-lg"
-                    >
-                      Continue
-                    </button>
-                  ) : (
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      onClick={handleSubmit}
-                      className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-green-600 to-blue-600 text-white font-semibold rounded-2xl hover:from-green-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-4 focus:ring-green-300 shadow-lg min-w-[200px]"
-                    >
-                      {loading ? <LoadingSpinner /> : "Create Account"}
-                    </button>
-                  )}
-                </div>
-              </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full px-8 py-4 bg-gradient-to-r from-green-600 to-blue-600 text-white font-semibold rounded-2xl hover:from-green-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-4 focus:ring-green-300 shadow-lg"
+                >
+                  {loading ? <LoadingSpinner /> : "Create Account"}
+                </button>
+              </form>
             </div>
 
             <p
