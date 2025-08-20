@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Menu, X, User, LogOut, Settings, UserCircle, Sparkles, GraduationCap } from "lucide-react";
+import { createPortal } from "react-dom";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -199,7 +200,7 @@ const Navbar = () => {
           <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
             <div className="flex flex-shrink-0 items-center">
               <img
-                className="h-10 w-16 drop-shadow-lg"
+                className="h-10 w-10 rounded-full object-cover drop-shadow-lg"
                 src={LOGO_URL}
                 alt="School Portal"
               />
@@ -208,7 +209,7 @@ const Navbar = () => {
             {/* Desktop navigation links */}
             <div className="hidden sm:ml-8 sm:block">
               <div className="flex items-center space-x-2">
-                {!isAuthenticated ? (
+                {!isAuthenticated && (
                   <>
                     {/* Modern Signup Button */}
                     <button
@@ -229,14 +230,6 @@ const Navbar = () => {
                       <span>Sign In</span>
                     </button>
                   </>
-                ) : (
-                  <a
-                    className="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 px-6 py-2.5 text-sm font-medium text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-emerald-600 hover:to-teal-700 hover:shadow-xl cursor-pointer"
-                    href={`${CDN_BASE_URL}/1app/app-release.apk`}
-                  >
-                    <span>📱</span>
-                    Download App
-                  </a>
                 )}
               </div>
             </div>
@@ -244,6 +237,13 @@ const Navbar = () => {
 
           {/* User menu */}
           <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+            <a
+              className="hidden sm:inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 px-5 py-2 text-sm font-medium text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-emerald-600 hover:to-teal-700 hover:shadow-xl cursor-pointer mr-2"
+              href={`${CDN_BASE_URL}/1app/app-release.apk`}
+            >
+              <span>📱</span>
+              Download App
+            </a>
             {isAuthenticated && (
               <div className="relative ml-3 user-menu-container">
                 <div>
@@ -394,16 +394,17 @@ const Navbar = () => {
       </div>
 
       {/* Mobile menu */}
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-40 transform overflow-hidden bg-black/50 backdrop-blur-sm transition-opacity">
+      {isMobileMenuOpen &&
+        createPortal(
+          <div className="fixed inset-0 z-[2147483647] transform overflow-hidden bg-black/50 backdrop-blur-sm transition-opacity">
           <div
-            className="mobile-menu-container fixed inset-y-0 left-0 flex w-80 transform flex-col bg-gradient-to-br from-slate-900/95 via-purple-900/95 to-slate-900/95 backdrop-blur-xl shadow-2xl transition-transform border-r border-white/10"
+            className="mobile-menu-container fixed inset-y-0 left-0 z-[2147483646] flex w-80 transform flex-col bg-gradient-to-br from-slate-900/95 via-purple-900/95 to-slate-900/95 backdrop-blur-xl shadow-2xl transition-transform border-r border-white/10"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex h-16 items-center justify-between px-6 border-b border-white/10">
               <div className="flex-shrink-0">
                 <img
-                  className="h-8 w-auto drop-shadow-lg"
+                  className="h-8 w-8 rounded-full object-cover drop-shadow-lg"
                   src={LOGO_URL}
                   alt="School Portal"
                 />
@@ -445,14 +446,7 @@ const Navbar = () => {
                   </button>
                 </>
               ) : (
-                <a
-                  className="group flex items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 px-6 py-4 text-base font-medium text-white shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer"
-                  href={`${CDN_BASE_URL}/1app/app-release.apk`}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <span className="text-lg">📱</span>
-                  Download App
-                </a>
+                <></>
               )}
             </div>
 
@@ -542,8 +536,19 @@ const Navbar = () => {
                 </div>
               </div>
             )}
+            <div className="px-4 py-4 mt-auto border-t border-white/10">
+              <a
+                className="group flex items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 px-6 py-4 text-base font-medium text-white shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer w-full"
+                href={`${CDN_BASE_URL}/1app/app-release.apk`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <span className="text-lg">📱</span>
+                Download App
+              </a>
+            </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </nav>
   );
