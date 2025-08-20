@@ -34,6 +34,9 @@ import Report from "./admin/Report";
 import SchoolAdmin from "./School-Admin/SchoolAdmin";
 import Error from "./Error";
 import Normal from "./auth/login";
+import ForgotPassword from "./auth/ForgotPassword";
+import VerifyOtp from "./auth/VerifyOtp";
+import ResetPassword from "./auth/ResetPassword";
 import RegistererdHomePage from "./registerHomepage/RegistererdHomePage";
  // import LoginNormal from "./signup/LoginNormal";
 import VerifySuccess from "./confirm/VerifySuccess";
@@ -52,6 +55,9 @@ const App = () => {
         <Route path="/verify-success" element={<VerifySuccess />} />
         <Route path="/verify-failure" element={<VerifyFailure />} />
         <Route path="/login" element={<Normal />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/verify-otp" element={<VerifyOtp />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         {/* student login */}
         <Route path="/student-login" element={<StudentLogin />} />
         {/*end of  student login */}

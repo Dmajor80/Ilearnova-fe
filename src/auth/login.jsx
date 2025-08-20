@@ -150,6 +150,15 @@ export default function Normal() {
     setTimeout(() => inputRefs.current.username?.current?.focus(), 100);
   }, []);
 
+  useEffect(() => {
+    const prefill =
+      sessionStorage.getItem("prefill_username") ||
+      localStorage.getItem("prefill_username");
+    if (prefill) {
+      setFormData((prev) => ({ ...prev, username: prefill }));
+    }
+  }, []);
+
   const showNotificationMessage = (message, type = "success") => {
     setNotificationMessage(message);
     setNotificationType(type);
@@ -443,7 +452,7 @@ export default function Normal() {
 
                   <button
                     type="button"
-                    onClick={() => console.log("Forgot password clicked")}
+                    onClick={() => navigate("/forgot-password")}
                     className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1 transition-all duration-200"
                     disabled={loading}
                   >
