@@ -1,9 +1,87 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Building2, Mail, Phone, MapPin, User as UserIcon, Check, X } from "lucide-react";
 import { authorizedFetch } from "../api/auth";
 import { API_BASE_URL } from "../api/config";
 
+// Memoized, focus-stable input similar to login/signup InputField
+const InputField = React.memo(function InputField({
+  label,
+  name,
+  type = "text",
+  placeholder,
+  nextField,
+  icon: Icon,
+  darkMode,
+  errors,
+  formData,
+  inputRefs,
+  handleChange,
+  handleSubmit,
+  disabled = false,
+}) {
+  return (
+    <div className="mb-6 group">
+      <label
+        htmlFor={name}
+        className={`block text-sm font-semibold mb-3 transition-colors ${
+          darkMode
+            ? "text-gray-200 group-focus-within:text-blue-400"
+            : "text-gray-700 group-focus-within:text-blue-600"
+        }`}
+      >
+        {label} <span className="text-red-500 ml-1">*</span>
+      </label>
+      <div className="relative">
+        {Icon && (
+          <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10">
+            <Icon
+              className={`w-5 h-5 transition-colors ${
+                darkMode
+                  ? "text-gray-400 group-focus-within:text-blue-400"
+                  : "text-gray-500 group-focus-within:text-blue-600"
+              }`}
+            />
+          </div>
+        )}
+        <input
+          ref={inputRefs.current[name]}
+          id={name}
+          name={name}
+          type={type}
+          value={formData[name]}
+          placeholder={placeholder}
+          onChange={(e) => handleChange(name, e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              if (nextField && inputRefs.current[nextField]) {
+                inputRefs.current[nextField].current?.focus();
+              } else {
+                handleSubmit(e);
+              }
+            }
+          }}
+          className={`w-full ${Icon ? "pl-12" : "pl-4"} pr-4 py-4 rounded-2xl border-2 text-sm font-medium transition-all duration-300 ease-in-out outline-none ${
+            darkMode
+              ? "bg-gray-800/50 text-white border-gray-600 placeholder-gray-400 focus:bg-gray-800 focus:border-blue-500 focus:shadow-lg focus:shadow-blue-500/20"
+              : "bg-white text-gray-800 border-gray-200 placeholder-gray-500 focus:bg-blue-50/30 focus:border-blue-500 focus:shadow-lg focus:shadow-blue-500/20"
+          } ${errors[name] ? "border-red-400 bg-red-50/30" : ""} hover:border-gray-400`}
+          aria-invalid={errors[name] ? "true" : "false"}
+          aria-describedby={errors[name] ? `${name}-error` : undefined}
+          disabled={disabled}
+          autoComplete="off"
+        />
+      </div>
+      {errors[name] && (
+        <p id={`${name}-error`} className="text-red-500 text-xs mt-2 flex items-center" role="alert">
+          <X className="w-4 h-4 mr-2 flex-shrink-0" />
+          {errors[name]}
+        </p>
+      )}
+    </div>
+  );
+});
 
 export default function OrganizationDetails() {
   const navigate = useNavigate();
@@ -25,6 +103,14 @@ export default function OrganizationDetails() {
     show: false,
     type: "success",
     message: "",
+  });
+
+  // Stable refs for focus control
+  const inputRefs = useRef({
+    name: React.createRef(),
+    address: React.createRef(),
+    email: React.createRef(),
+    phone_number: React.createRef(),
   });
 
   const getToken = () =>
@@ -53,6 +139,14 @@ export default function OrganizationDetails() {
     const email = storedUser?.email || prefillUsername || "";
     setForm((f) => ({ ...f, email }));
   }, [navigate, storedUser, prefillUsername]);
+
+  // Initial focus on "name" field
+  useEffect(() => {
+    const t = setTimeout(() => {
+      inputRefs.current.name?.current?.focus();
+    }, 120);
+    return () => clearTimeout(t);
+  }, []);
 
   const showNotification = (message, type = "success") => {
     setNotification({ show: true, type, message });
@@ -131,56 +225,6 @@ export default function OrganizationDetails() {
     }
   };
 
-  const Field = ({ label, name, type = "text", placeholder, icon: Icon }) => (
-    <div className="mb-6 group">
-      <label
-        htmlFor={name}
-        className={`block text-sm font-semibold mb-3 transition-colors ${
-          darkMode
-            ? "text-gray-200 group-focus-within:text-blue-400"
-            : "text-gray-700 group-focus-within:text-blue-600"
-        }`}
-      >
-        {label} <span className="text-red-500 ml-1">*</span>
-      </label>
-      <div className="relative">
-        {Icon && (
-          <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10">
-            <Icon
-              className={`w-5 h-5 transition-colors ${
-                darkMode
-                  ? "text-gray-400 group-focus-within:text-blue-400"
-                  : "text-gray-500 group-focus-within:text-blue-600"
-              }`}
-            />
-          </div>
-        )}
-        <input
-          id={name}
-          name={name}
-          type={type}
-          value={form[name]}
-          placeholder={placeholder}
-          onChange={(e) => handleChange(name, e.target.value)}
-          className={`w-full ${Icon ? "pl-12" : "pl-4"} pr-4 py-4 rounded-2xl border-2 text-sm font-medium transition-all duration-300 ease-in-out outline-none ${
-            darkMode
-              ? "bg-gray-800/50 text-white border-gray-600 placeholder-gray-400 focus:bg-gray-800 focus:border-blue-500 focus:shadow-lg focus:shadow-blue-500/20"
-              : "bg-white text-gray-800 border-gray-200 placeholder-gray-500 focus:bg-blue-50/30 focus:border-blue-500 focus:shadow-lg focus:shadow-blue-500/20"
-          } ${errors[name] ? "border-red-400 bg-red-50/30" : ""} hover:border-gray-400`}
-          aria-invalid={errors[name] ? "true" : "false"}
-          aria-describedby={errors[name] ? `${name}-error` : undefined}
-          disabled={loading}
-        />
-      </div>
-      {errors[name] && (
-        <p id={`${name}-error`} className="text-red-500 text-xs mt-2 flex items-center" role="alert">
-          <X className="w-4 h-4 mr-2 flex-shrink-0" />
-          {errors[name]}
-        </p>
-      )}
-    </div>
-  );
-
   return (
     <div
       className={`min-h-screen w-full transition-all duration-500 ${
@@ -251,31 +295,62 @@ export default function OrganizationDetails() {
           </div>
 
           <form onSubmit={onSubmit} noValidate>
-            <Field
+            <InputField
               label="Organization Name"
               name="name"
               placeholder="Enter organization name"
               icon={UserIcon}
+              nextField="address"
+              darkMode={darkMode}
+              errors={errors}
+              formData={form}
+              inputRefs={inputRefs}
+              handleChange={handleChange}
+              handleSubmit={onSubmit}
+              disabled={loading}
             />
-            <Field
+            <InputField
               label="Address"
               name="address"
               placeholder="Enter organization address"
               icon={MapPin}
+              nextField="email"
+              darkMode={darkMode}
+              errors={errors}
+              formData={form}
+              inputRefs={inputRefs}
+              handleChange={handleChange}
+              handleSubmit={onSubmit}
+              disabled={loading}
             />
-            <Field
+            <InputField
               label="Email"
               name="email"
               type="email"
               placeholder="Contact email"
               icon={Mail}
+              nextField="phone_number"
+              darkMode={darkMode}
+              errors={errors}
+              formData={form}
+              inputRefs={inputRefs}
+              handleChange={handleChange}
+              handleSubmit={onSubmit}
+              disabled={loading}
             />
-            <Field
+            <InputField
               label="Phone Number"
               name="phone_number"
               type="tel"
               placeholder="Contact phone number"
               icon={Phone}
+              darkMode={darkMode}
+              errors={errors}
+              formData={form}
+              inputRefs={inputRefs}
+              handleChange={handleChange}
+              handleSubmit={onSubmit}
+              disabled={loading}
             />
 
             <div className="flex items-center justify-between mt-6">
