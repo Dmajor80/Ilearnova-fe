@@ -20,7 +20,7 @@ const VerifySuccess = () => {
       setSeconds((s) => {
         if (s <= 1) {
           clearInterval(timer);
-          navigate("/new-login", { replace: true });
+          navigate("/login", { replace: true });
           return 0;
         }
         return s - 1;

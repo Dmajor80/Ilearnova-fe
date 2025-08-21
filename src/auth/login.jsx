@@ -277,17 +277,9 @@ export default function Login() {
 
       setLoginAttempts(0); // Reset attempts on success
 
-      // First-time onboarding
-      if (response.user && response.user.first_time_user) {
-        navigate("/select-user-type", { replace: true });
-        return;
-      }
-
-      showNotificationMessage("Login successful! Welcome back!", "success");
-
-      setTimeout(() => {
-        navigate("/home");
-      }, 1000);
+      // Post-login central redirect
+      navigate("/post-login", { replace: true });
+      return;
     } catch (error) {
       setLoginAttempts((prev) => prev + 1);
       let notificationType = "error";

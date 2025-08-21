@@ -3,8 +3,6 @@ import React, { useState, useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeft,
-  // Moon,
-  // Sun,
   AlertCircle,
   Mail,
   Check,
@@ -283,7 +281,7 @@ export default function SignupForm() {
 
   const handleConfirmEmail = () => {
     // Redirect to login page
-    navigate("/new-login");
+    navigate("/login");
   };
 
   if (showEmailVerification) {
@@ -295,18 +293,6 @@ export default function SignupForm() {
             : "bg-gradient-to-br from-blue-50 via-white to-purple-50 text-gray-800"
         }`}
       >
-        {/* <button
-          className="fixed top-6 right-6 z-40 p-4 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 shadow-xl hover:shadow-2xl hover:scale-110 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-300"
-          onClick={() => setDarkMode(!darkMode)}
-          aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-        >
-          {darkMode ? (
-            <Sun className="w-6 h-6 text-white" />
-          ) : (
-            <Moon className="w-6 h-6 text-white" />
-          )}
-        </button> */}
-
         <div className="w-full px-6 sm:px-8 lg:px-12 py-12">
           <div className="max-w-2xl mx-auto">
             <div className="text-center">
@@ -445,18 +431,6 @@ export default function SignupForm() {
           </div>
         </div>
       )}
-
-      {/* <button
-        className="fixed top-6 right-6 z-40 p-4 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 shadow-xl hover:shadow-2xl hover:scale-110 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-300"
-        onClick={() => setDarkMode(!darkMode)}
-        aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-      >
-        {darkMode ? (
-          <Sun className="w-6 h-6 text-white" />
-        ) : (
-          <Moon className="w-6 h-6 text-white" />
-        )}
-      </button> */}
 
       <div className="w-full px-6 sm:px-8 lg:px-12 py-12">
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 xl:gap-20 items-center">

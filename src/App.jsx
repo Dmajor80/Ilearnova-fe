@@ -44,6 +44,7 @@ import VerifyFailure from "./confirm/VerifyFailure";
 import SelectUserType from "./onboarding/SelectUserType";
 import OrganizationDetails from "./onboarding/OrganizationDetails";
 import RequireAuth from "./auth/RequireAuth";
+import PostLoginRedirect from "./auth/PostLoginRedirect";
 
 const App = () => {
   return (
@@ -58,6 +59,7 @@ const App = () => {
         <Route path="/verify-success" element={<VerifySuccess />} />
         <Route path="/verify-failure" element={<VerifyFailure />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/post-login" element={<RequireAuth><PostLoginRedirect /></RequireAuth>} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/verify-otp" element={<VerifyOtp />} />
         <Route path="/reset-password" element={<ResetPassword />} />
