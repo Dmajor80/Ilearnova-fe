@@ -44,7 +44,7 @@ export default function RoleGate({ children, anyOf, fallbackTo = "/forbidden" })
 
   let roles = [];
   if (Array.isArray(user?.roles)) {
-    roles = user.roles.map((r) => String(r || "").toLowerCase());
+    roles = user.roles.map((r) => String(r.role?.code || "").toLowerCase());
   } else if (typeof user?.role === "string") {
     roles = [String(user.role).toLowerCase()];
   }

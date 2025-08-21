@@ -56,13 +56,13 @@ export function OrganizationProvider({ children }) {
     function init() {
       const user = readUserDataFromStorage();
       const userOrgs = Array.isArray(user?.organizations) ? user.organizations : [];
-      const selectedOrgId = user?.selectedOrgId || user?.selected_org_id || null;
+      const selectedOrgId = user?.selectedOrgId || null;
 
       let initialOrgId = selectedOrgId;
       if (!initialOrgId) {
         // If exactly one org, auto-select it
         if (userOrgs.length === 1) {
-          initialOrgId = userOrgs[0]?.id || null;
+          initialOrgId = userOrgs[0]?.organization.id || null;
         }
       }
 
@@ -85,8 +85,7 @@ export function OrganizationProvider({ children }) {
     if (!user) return;
     const nextUser = {
       ...user,
-      selectedOrgId: orgId, // prefer camelCase going forward
-      selected_org_id: orgId, // keep snake_case for compatibility if backend expects it back later
+      selectedOrgId: orgId,
     };
     writeUserDataToStorage(nextUser);
   }, []);
