@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Lock, AlertCircle, Check, X, Eye, EyeOff, ArrowLeft, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../api/config";
+
 
 const PasswordField = React.memo(function PasswordField({
   label,
@@ -88,7 +90,6 @@ export default function ResetPassword() {
   const [darkMode] = useState(() =>
     window.matchMedia("(prefers-color-scheme: dark)").matches
   );
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");

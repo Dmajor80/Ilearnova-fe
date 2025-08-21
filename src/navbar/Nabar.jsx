@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Menu, X, User, LogOut, Settings, UserCircle, Sparkles, GraduationCap } from "lucide-react";
 import { createPortal } from "react-dom";
+import { API_BASE_URL, CDN_BASE_URL, LOGO_URL } from "../api/config";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -8,12 +9,6 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  // Environment variables - use these in your actual environment
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-  const CDN_BASE_URL = import.meta.env.VITE_CDN_BASE_URL;
-  const LOGO_URL = import.meta.env.VITE_LOGO_URL;
-
 
   const apiUrl = (path) =>
   `${String(API_BASE_URL).replace(/\/+$/, "")}${path.startsWith("/") ? path : `/${path}`}`;

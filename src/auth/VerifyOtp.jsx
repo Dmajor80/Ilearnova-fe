@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AlertCircle, Check, X, Loader2, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../api/config";
 
 const OtpInput = ({ value, onChange, onComplete, disabled, darkMode }) => {
   const inputsRef = useRef([]);
@@ -102,7 +103,6 @@ export default function VerifyOtp() {
   const [darkMode] = useState(() =>
     window.matchMedia("(prefers-color-scheme: dark)").matches
   );
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const [otp, setOtp] = useState(new Array(6).fill("").join(""));
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);

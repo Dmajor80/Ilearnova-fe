@@ -8,12 +8,12 @@ import ParentDashboard from "./ParentDashboard";
 import PaymentProcess from "./PaymentProcess";
 import { Route, Routes } from "react-router-dom";
 import SignupForm from "../../auth/SignupForm";
-// import Normal from "../../signup/Normal";
+// import Login from "../../signup/Login";
 
 function Pages() {
   return (
     <Routes>
-      {/* <Route path="/newUser" element={<Normal />} /> */}
+      {/* <Route path="/newUser" element={<Login />} /> */}
       {/* <Route path="/signup" element={<SignupForm />} className="hide" /> */}
       {/* <Route path="/parent-signup" element={<ParentSignup />} /> */}
       <Route path="/parent-dashboard" element={<ParentDashboard />} />

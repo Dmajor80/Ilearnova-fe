@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Mail, ArrowLeft, AlertCircle, Check, X, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../api/config";
 
 const InputField = React.memo(function InputField({
   label,
@@ -78,7 +79,6 @@ export default function ForgotPassword() {
   const [darkMode] = useState(() =>
     window.matchMedia("(prefers-color-scheme: dark)").matches
   );
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const [email, setEmail] = useState("");
   const [errors, setErrors] = useState({});

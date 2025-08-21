@@ -12,6 +12,7 @@ import {
   GraduationCap,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../api/config";
 
 const InputField = React.memo(function InputField({
   label,
@@ -119,7 +120,7 @@ const InputField = React.memo(function InputField({
   );
 });
 
-export default function Normal() {
+export default function Login() {
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -140,9 +141,7 @@ export default function Normal() {
     password: React.createRef(),
   });
   const navigate = useNavigate();
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const handleToSignUp = () => {
-    // In a real app, you'd use navigate from react-router-dom
     navigate("/signup");
   };
 
@@ -255,25 +254,40 @@ export default function Normal() {
 
       const response = await submitLogin(loginData);
 
-      // Store token if provided
-      if (response.token || response.access_token) {
-        const token = response.token || response.access_token;
-        // Note: In Claude artifacts, localStorage isn't available, but this is the correct implementation
-        const storage = rememberMe ? localStorage : sessionStorage;
-        storage?.setItem("auth_token", token);
-
-        if (response.user) {
-          storage?.setItem("user_data", JSON.stringify(response.user));
+      // Store tokens and user
+      const storage = rememberMe ? localStorage : sessionStorage;
+      const access = response.access || response.token || response.access_token;
+      const refresh = response.refresh;
+      if (access) {
+        storage?.setItem("auth_access", access);
+      }
+      if (refresh) {
+        storage?.setItem("auth_refresh", refresh);
+      }
+      if (response.user) {
+        storage?.setItem("user_data", JSON.stringify(response.user));
+        // Helpful prefill for subsequent forms
+        if (response.user.username || response.user.email) {
+          storage?.setItem(
+            "prefill_username",
+            response.user.username || response.user.email
+          );
         }
       }
 
-      showNotificationMessage("Login successful! Welcome back!", "success");
       setLoginAttempts(0); // Reset attempts on success
 
+      // First-time onboarding
+      if (response.user && response.user.first_time_user) {
+        navigate("/select-user-type", { replace: true });
+        return;
+      }
+
+      showNotificationMessage("Login successful! Welcome back!", "success");
+
       setTimeout(() => {
-        // Redirect to dashboard
         navigate("/home");
-      }, 2000);
+      }, 1000);
     } catch (error) {
       setLoginAttempts((prev) => prev + 1);
       let notificationType = "error";

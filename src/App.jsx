@@ -33,7 +33,7 @@ import Report from "./admin/Report";
 
 import SchoolAdmin from "./School-Admin/SchoolAdmin";
 import Error from "./Error";
-import Normal from "./auth/login";
+import Login from "./auth/login";
 import ForgotPassword from "./auth/ForgotPassword";
 import VerifyOtp from "./auth/VerifyOtp";
 import ResetPassword from "./auth/ResetPassword";
@@ -41,23 +41,28 @@ import RegistererdHomePage from "./registerHomepage/RegistererdHomePage";
  // import LoginNormal from "./signup/LoginNormal";
 import VerifySuccess from "./confirm/VerifySuccess";
 import VerifyFailure from "./confirm/VerifyFailure";
+import SelectUserType from "./onboarding/SelectUserType";
+import OrganizationDetails from "./onboarding/OrganizationDetails";
+import RequireAuth from "./auth/RequireAuth";
 
 const App = () => {
   return (
     <>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/home" element={<RegistererdHomePage />} />
+        <Route path="/home" element={<RequireAuth><RegistererdHomePage /></RequireAuth>} />
 
         {/* teacher login */}
         <Route path="/new-login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupForm />} />
         <Route path="/verify-success" element={<VerifySuccess />} />
         <Route path="/verify-failure" element={<VerifyFailure />} />
-        <Route path="/login" element={<Normal />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/verify-otp" element={<VerifyOtp />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/select-user-type" element={<RequireAuth><SelectUserType /></RequireAuth>} />
+        <Route path="/organization-details" element={<RequireAuth><OrganizationDetails /></RequireAuth>} />
         {/* student login */}
         <Route path="/student-login" element={<StudentLogin />} />
         {/*end of  student login */}
@@ -69,9 +74,9 @@ const App = () => {
         {/* Admin login */}
         <Route path="/Admin-login" element={<AdminLogin />} />
 
-        <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
+        <Route path="/teacher-dashboard" element={<RequireAuth><TeacherDashboard /></RequireAuth>} />
         {/* student dashboard */}
-        <Route path="/student-dashboard" element={<StudentDashboard />} />
+        <Route path="/student-dashboard" element={<RequireAuth><StudentDashboard /></RequireAuth>} />
         <Route path="overview" element={<Overview />} />
         <Route path="IDcard" element={<IdCard />} />
         <Route path="attendance" element={<Attendance />} />
@@ -87,7 +92,7 @@ const App = () => {
         {/* <Route path="/course-page" element={<CoursePage />} /> */}
         {/* end of course page */}
         {/* student dashboard */}
-        <Route path="/student-dashboard" element={<StudentDashboard />}>
+        <Route path="/student-dashboard" element={<RequireAuth><StudentDashboard /></RequireAuth>}>
           <Route path="/student-dashboard" element={<Overview />} />
           <Route path="overview" element={<Overview />} />
           <Route path="IDcard" element={<IdCard />} />
@@ -103,7 +108,7 @@ const App = () => {
         </Route>
         {/* end of student dashboard */}
         {/* admin section */}
-        <Route path="/admin-dashboard" element={<AdminDashboard />}>
+        <Route path="/admin-dashboard" element={<RequireAuth><AdminDashboard /></RequireAuth>}>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="users" element={<Users />} />
           <Route path="users/new-user" element={<NewUser />} />
@@ -111,7 +116,7 @@ const App = () => {
           <Route path="*" element={<Error />} />
         </Route>
         {/*end of  admin section */}
-        <Route path="/dashboard" element={<SchoolAdmin />} />
+        <Route path="/dashboard" element={<RequireAuth><SchoolAdmin /></RequireAuth>} />
       </Routes>
       <Pages />
     </>

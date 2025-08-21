@@ -16,6 +16,7 @@ import {
   EyeOff,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../api/config";
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center">
@@ -154,9 +155,6 @@ export default function SignupForm() {
   const [userEmail, setUserEmail] = useState("");
   const inputRefs = useRef({});
   const navigate = useNavigate();
-
-  // Environment variables
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
     Object.keys(formData).forEach((key) => {
