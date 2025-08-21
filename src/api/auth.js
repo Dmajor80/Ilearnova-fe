@@ -145,19 +145,41 @@ export function getAuthHeader() {
   return access ? { Authorization: `Bearer ${access}` } : {};
 }
 
+// Read current org id from persisted user_data (same storage used for tokens)
+function getCurrentOrgIdFromStorage() {
+  try {
+    const store = getAuthStorage();
+    const raw =
+      store?.getItem("user_data") ||
+      window.localStorage.getItem("user_data") ||
+      window.sessionStorage.getItem("user_data");
+    if (!raw) return null;
+    const user = JSON.parse(raw);
+    return user?.selectedOrgId || user?.selected_org_id || null;
+  } catch {
+    return null;
+  }
+}
+
 export async function authorizedFetch(input, init = {}) {
-  const buildHeaders = (token) => {
-    const base = init && init.headers ? init.headers : {};
-    return token ? { ...base, Authorization: `Bearer ${token}` } : base;
+  // Build headers including Authorization and optional org scoping
+  const buildHeaders = (token, orgId) => {
+    const base = (init && init.headers) ? init.headers : {};
+    let headers = token ? { ...base, Authorization: `Bearer ${token}` } : { ...base };
+    if (orgId) {
+      headers = { ...headers, "X-Org-Id": orgId };
+    }
+    return headers;
   };
 
   // Ensure we have a valid access token before making the request
   await ensureValidAccessToken();
   let { access } = getTokens();
+  const orgId = getCurrentOrgIdFromStorage();
 
   let res = await fetch(input, {
     ...(init || {}),
-    headers: buildHeaders(access),
+    headers: buildHeaders(access, orgId),
   });
 
   // If unauthorized, try to refresh once and retry the original request
@@ -167,7 +189,7 @@ export async function authorizedFetch(input, init = {}) {
       ({ access } = getTokens());
       res = await fetch(input, {
         ...(init || {}),
-        headers: buildHeaders(access),
+        headers: buildHeaders(access, orgId),
       });
     }
   }
