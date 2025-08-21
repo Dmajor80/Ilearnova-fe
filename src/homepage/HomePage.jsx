@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import Navbar from "../navbar/Nabar";
+import Navbar from "../navbar/Navbar";
 import { motion, useAnimation, useScroll, useTransform } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 
@@ -258,7 +258,6 @@ const HomePage = () => {
         {/* What is Ilearnova Section */}
         <div className="container mx-auto px-4 py-12 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 rounded-3xl my-12">
           <FadeInUp>
-            x
             <div className="mt-10 whitespace-nowrap text-center text-[30px] sm:text-[34px] lg:text-[40px] font-bold text-teal-500">
               What is <span className="text-white">Ilearnova?</span>
             </div>
@@ -286,7 +285,7 @@ const HomePage = () => {
                   Everything you can do in a physical classroom, you can do with
                   Ilearnova
                 </span>
-                <div className="text-[18px] sm:text-[20px] lg:text-[24px] mt-4 text-center leading-6 sm:leading-10 tracking-wide text-white sm:px-32">
+                <div className="mt-4 text-center text-white text-[18px] sm:text-[20px] lg:text-[22px] leading-7 sm:leading-8 tracking-wide px-4 sm:px-6 md:px-8 max-w-3xl mx-auto">
                   Ilearnova's school management software helps traditional and
                   online schools manage scheduling, attendance, payments and
                   virtual classrooms all in one secure cloud-based system.
@@ -476,7 +475,7 @@ const HomePage = () => {
                 </span>{" "}
                 <span className="font-semibold">Tools for Educators</span>
               </div>
-              <div className="text-[18px] sm:text-[20px] lg:text-[24px] mt-5 text-center leading-6 sm:leading-10 tracking-wide text-white sm:px-32">
+              <div className="mt-5 text-center text-white text-[18px] sm:text-[20px] lg:text-[22px] leading-7 sm:leading-8 tracking-wide px-4 sm:px-6 md:px-8 max-w-3xl mx-auto">
                 Class provides tools to help run and manage the class such as
                 Class Roster, <br className="hidden md:block" />
                 Attendance, and more. With the Gradebook, teachers can review

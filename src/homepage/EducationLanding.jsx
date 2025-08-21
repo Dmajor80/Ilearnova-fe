@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import junior from "../homepage/junior.png";
-import secondary from "../homepage/secondary.png";
-import senior from "../homepage/senior.png";
+import junior from "../assets/junior.png";
+import secondary from "../assets/secondary.png";
+import senior from "../assets/senior.png";
 const EducationLanding = () => {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -47,8 +47,8 @@ const EducationLanding = () => {
             }`}
             style={{ transitionDelay: "600ms" }}
           >
-            <div className="">
-              <img src={junior} alt="" className="w-full" />
+            <div className="h-64">
+              <img src={junior} alt="" className="h-full w-full object-cover" />
             </div>
             <div className="p-6">
               <h3 className="text-2xl font-bold text-gray-800 mb-4 group-hover:text-amber-600 transition-colors duration-300">
@@ -71,7 +71,7 @@ const EducationLanding = () => {
             style={{ transitionDelay: "800ms" }}
           >
             <div className="h-64 ">
-              <img src={secondary} alt="" className="w-full" />
+              <img src={secondary} alt="" className="h-full w-full object-cover" />
             </div>
             <div className="p-6">
               <h3 className="text-2xl font-bold text-gray-800 mb-4 group-hover:text-emerald-600 transition-colors duration-300">
@@ -94,7 +94,7 @@ const EducationLanding = () => {
             style={{ transitionDelay: "1000ms" }}
           >
             <div className="h-64 ">
-              <img src={senior} alt="" className="w-full" />
+              <img src={senior} alt="" className="h-full w-full object-cover" />
             </div>
             <div className="p-6">
               <h3 className="text-2xl font-bold text-gray-800 mb-4 group-hover:text-rose-600 transition-colors duration-300">
@@ -119,7 +119,7 @@ const EducationLanding = () => {
               <img
                 src="https://plus.unsplash.com/premium_photo-1661375359328-bc2a7948a7fd?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTN8fHRlcnRpYXJ5JTIwZWR1Y2F0aW9ufGVufDB8fDB8fHww"
                 alt=""
-                className="w-full"
+                className="h-full w-full object-cover"
               />
             </div>
             <div className="p-6">

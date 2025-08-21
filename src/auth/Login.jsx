@@ -1,9 +1,6 @@
 import React from "react";
 import { useState, useRef, useEffect } from "react";
 import {
-  ArrowLeft,
-  Moon,
-  Sun,
   AlertCircle,
   Mail,
   Lock,
@@ -15,20 +12,125 @@ import {
   GraduationCap,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../api/config";
 
-export default function Normal() {
+const InputField = React.memo(function InputField({
+  label,
+  name,
+  type = "text",
+  placeholder,
+  nextField,
+  icon: Icon,
+  darkMode,
+  errors,
+  formData,
+  inputRefs,
+  handleChange,
+  handleSubmit,
+  showToggle = false,
+  disabled = false,
+}) {
+  const [showPassword, setShowPassword] = useState(false);
+  const isPassword = showToggle || type === "password";
+
+  return (
+    <div className="mb-6 group">
+      <label
+        htmlFor={name}
+        className={`block text-sm font-semibold mb-3 transition-colors ${
+          darkMode
+            ? "text-gray-200 group-focus-within:text-blue-400"
+            : "text-gray-700 group-focus-within:text-blue-600"
+        }`}
+      >
+        {label} <span className="text-red-500 ml-1">*</span>
+      </label>
+      <div className="relative">
+        {Icon && (
+          <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10">
+            <Icon
+              className={`w-5 h-5 transition-colors ${
+                darkMode
+                  ? "text-gray-400 group-focus-within:text-blue-400"
+                  : "text-gray-500 group-focus-within:text-blue-600"
+              }`}
+            />
+          </div>
+        )}
+        <input
+          ref={inputRefs.current[name]}
+          id={name}
+          name={name}
+          type={isPassword && showPassword ? "text" : type}
+          value={formData[name]}
+          placeholder={placeholder}
+          onChange={(e) => handleChange(name, e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              if (nextField && inputRefs.current[nextField]) {
+                inputRefs.current[nextField].current?.focus();
+              } else {
+                handleSubmit(e);
+              }
+            }
+          }}
+          className={`w-full ${Icon ? "pl-12" : "pl-4"} ${
+            isPassword ? "pr-12" : "pr-4"
+          } py-4 rounded-2xl border-2 text-sm font-medium transition-all duration-300 ease-in-out outline-none ${
+            darkMode
+              ? "bg-gray-800/50 text-white border-gray-600 placeholder-gray-400 focus:bg-gray-800 focus:border-blue-500 focus:shadow-lg focus:shadow-blue-500/20"
+              : "bg-white text-gray-800 border-gray-200 placeholder-gray-500 focus:bg-blue-50/30 focus:border-blue-500 focus:shadow-lg focus:shadow-blue-500/20"
+          } ${errors[name] ? "border-red-400 bg-red-50/30" : ""} hover:border-gray-400`}
+          aria-invalid={errors[name] ? "true" : "false"}
+          aria-describedby={errors[name] ? `${name}-error` : undefined}
+          disabled={disabled}
+        />
+        {isPassword && (
+          <button
+            type="button"
+            onClick={() => setShowPassword((v) => !v)}
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 p-1 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
+            tabIndex={-1}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+          >
+            {showPassword ? (
+              <EyeOff
+                className={`w-5 h-5 ${darkMode ? "text-gray-400" : "text-gray-500"}`}
+              />
+            ) : (
+              <Eye
+                className={`w-5 h-5 ${darkMode ? "text-gray-400" : "text-gray-500"}`}
+              />
+            )}
+          </button>
+        )}
+      </div>
+      {errors[name] && (
+        <p
+          id={`${name}-error`}
+          className="text-red-500 text-xs mt-2 flex items-center"
+          role="alert"
+        >
+          <AlertCircle className="w-4 h-4 mr-2 flex-shrink-0" />
+          {errors[name]}
+        </p>
+      )}
+    </div>
+  );
+});
+
+export default function Login() {
   const [formData, setFormData] = useState({
     username: "",
     password: "",
   });
 
-  const [darkMode, setDarkMode] = useState(() => {
-    // Initialize dark mode from user's system preference
+  const [darkMode] = useState(() => {
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
-  const [showPassword, setShowPassword] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState("");
   const [notificationType, setNotificationType] = useState("success");
@@ -40,12 +142,20 @@ export default function Normal() {
   });
   const navigate = useNavigate();
   const handleToSignUp = () => {
-    // In a real app, you'd use navigate from react-router-dom
     navigate("/signup");
   };
 
   useEffect(() => {
     setTimeout(() => inputRefs.current.username?.current?.focus(), 100);
+  }, []);
+
+  useEffect(() => {
+    const prefill =
+      sessionStorage.getItem("prefill_username") ||
+      localStorage.getItem("prefill_username");
+    if (prefill) {
+      setFormData((prev) => ({ ...prev, username: prefill }));
+    }
   }, []);
 
   const showNotificationMessage = (message, type = "success") => {
@@ -78,7 +188,7 @@ export default function Normal() {
     try {
       // Simulated API call - replace with your actual endpoint
       const response = await fetch(
-        "https://api.ilearnova.com/api/auth/login/",
+        `${API_BASE_URL}/api/auth/login/`,
         {
           method: "POST",
           headers: {
@@ -144,25 +254,32 @@ export default function Normal() {
 
       const response = await submitLogin(loginData);
 
-      // Store token if provided
-      if (response.token || response.access_token) {
-        const token = response.token || response.access_token;
-        // Note: In Claude artifacts, localStorage isn't available, but this is the correct implementation
-        const storage = rememberMe ? localStorage : sessionStorage;
-        storage?.setItem("auth_token", token);
-
-        if (response.user) {
-          storage?.setItem("user_data", JSON.stringify(response.user));
+      // Store tokens and user
+      const storage = rememberMe ? localStorage : sessionStorage;
+      const access = response.access || response.token || response.access_token;
+      const refresh = response.refresh;
+      if (access) {
+        storage?.setItem("auth_access", access);
+      }
+      if (refresh) {
+        storage?.setItem("auth_refresh", refresh);
+      }
+      if (response.user) {
+        storage?.setItem("user_data", JSON.stringify(response.user));
+        // Helpful prefill for subsequent forms
+        if (response.user.username || response.user.email) {
+          storage?.setItem(
+            "prefill_username",
+            response.user.username || response.user.email
+          );
         }
       }
 
-      showNotificationMessage("Login successful! Welcome back!", "success");
       setLoginAttempts(0); // Reset attempts on success
 
-      setTimeout(() => {
-        // Redirect to dashboard
-        navigate("/home");
-      }, 2000);
+      // Post-login central redirect
+      navigate("/post-login", { replace: true });
+      return;
     } catch (error) {
       setLoginAttempts((prev) => prev + 1);
       let notificationType = "error";
@@ -196,104 +313,6 @@ export default function Normal() {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
-  const InputField = ({
-    label,
-    name,
-    type = "text",
-    placeholder,
-    icon: Icon,
-    showToggle = false,
-  }) => {
-    return (
-      <div className="mb-6 group">
-        <label
-          htmlFor={name}
-          className={`block text-sm font-semibold mb-3 transition-colors ${
-            darkMode
-              ? "text-gray-200 group-focus-within:text-blue-400"
-              : "text-gray-700 group-focus-within:text-blue-600"
-          }`}
-        >
-          {label} <span className="text-red-500 ml-1">*</span>
-        </label>
-        <div className="relative">
-          <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10">
-            <Icon
-              className={`w-5 h-5 transition-colors ${
-                darkMode
-                  ? "text-gray-400 group-focus-within:text-blue-400"
-                  : "text-gray-500 group-focus-within:text-blue-600"
-              }`}
-            />
-          </div>
-          <input
-            ref={inputRefs.current[name]}
-            id={name}
-            name={name}
-            type={showToggle ? (showPassword ? "text" : "password") : type}
-            value={formData[name]}
-            placeholder={placeholder}
-            autoComplete={name === "username" ? "username" : "current-password"}
-            onChange={(e) => handleInputChange(name, e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                if (name === "username") {
-                  inputRefs.current.password?.current?.focus();
-                } else {
-                  handleSubmit(e);
-                }
-              }
-            }}
-            className={`w-full pl-12 ${
-              showToggle ? "pr-12" : "pr-4"
-            } py-4 rounded-2xl border-2 text-sm font-medium transition-all duration-300 ease-in-out outline-none ${
-              darkMode
-                ? "bg-gray-800/50 text-white border-gray-600 placeholder-gray-400 focus:bg-gray-800 focus:border-blue-500 focus:shadow-lg focus:shadow-blue-500/20"
-                : "bg-white text-gray-800 border-gray-200 placeholder-gray-500 focus:bg-blue-50/30 focus:border-blue-500 focus:shadow-lg focus:shadow-blue-500/20"
-            } ${
-              errors[name] ? "border-red-400 bg-red-50/30" : ""
-            } hover:border-gray-400`}
-            aria-invalid={errors[name] ? "true" : "false"}
-            aria-describedby={errors[name] ? `${name}-error` : undefined}
-            disabled={loading}
-          />
-          {showToggle && (
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 p-1 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
-              tabIndex={-1}
-            >
-              {showPassword ? (
-                <EyeOff
-                  className={`w-5 h-5 ${
-                    darkMode ? "text-gray-400" : "text-gray-500"
-                  }`}
-                />
-              ) : (
-                <Eye
-                  className={`w-5 h-5 ${
-                    darkMode ? "text-gray-400" : "text-gray-500"
-                  }`}
-                />
-              )}
-            </button>
-          )}
-        </div>
-        {errors[name] && (
-          <p
-            id={`${name}-error`}
-            className="text-red-500 text-xs mt-2 flex items-center"
-            role="alert"
-          >
-            <AlertCircle className="w-4 h-4 mr-2 flex-shrink-0" />
-            {errors[name]}
-          </p>
-        )}
-      </div>
-    );
-  };
 
   const LoadingSpinner = () => (
     <div className="flex items-center justify-center">
@@ -311,7 +330,7 @@ export default function Normal() {
     <div
       className={`min-h-screen w-full transition-all duration-500 ${
         darkMode
-          ? "bg-gradient-to-br from-gray-900 via-blue-900/20 to-gray-900 text-white"
+          ? "bg-gradient-to-br from-gray-950 via-gray-900 to-black text-gray-100"
           : "bg-gradient-to-br from-blue-50 via-white to-purple-50 text-gray-800"
       }`}
     >
@@ -358,42 +377,19 @@ export default function Normal() {
         </div>
       )}
 
-      {/* Dark Mode Toggle */}
-      <button
-        className="fixed top-6 right-6 z-40 p-4 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 shadow-xl hover:shadow-2xl hover:scale-110 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-300"
-        onClick={() => setDarkMode(!darkMode)}
-        aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-      >
-        {darkMode ? (
-          <Sun className="w-6 h-6 text-white" />
-        ) : (
-          <Moon className="w-6 h-6 text-white" />
-        )}
-      </button>
 
       <div className="w-full px-6 sm:px-8 lg:px-12 py-12">
-        {/* Back Button */}
-        <button
-          onClick={() => console.log("Navigate to home")}
-          className={`inline-flex items-center px-6 py-3 rounded-xl font-medium transition-all duration-300 mb-8 ${
-            darkMode
-              ? "text-gray-300 hover:text-white hover:bg-gray-800"
-              : "text-gray-600 hover:text-gray-900 hover:bg-white"
-          } focus:outline-none focus:ring-4 focus:ring-blue-300`}
-        >
-          <ArrowLeft className="w-5 h-5 mr-3" />
-          Back to Home
-        </button>
+        
 
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 xl:gap-20 items-center min-h-[600px]">
           {/* Form Section */}
           <div className="w-full max-w-md mx-auto lg:mx-0">
             <div className="text-center lg:text-left mb-10">
               <div className="flex items-center justify-center lg:justify-start mb-4">
-                <div className="p-3 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 mr-4">
+                <div className="p-3 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-600 mr-4">
                   <GraduationCap className="w-8 h-8 text-white" />
                 </div>
-                <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <h1 className={`text-4xl sm:text-5xl font-bold ${darkMode ? "text-white" : "bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent"}`}>
                   Welcome Back
                 </h1>
               </div>
@@ -408,23 +404,7 @@ export default function Normal() {
 
             <form onSubmit={handleSubmit} autoComplete="off">
               <div className="space-y-6">
-                {/* Demo Credentials Helper */}
-                <div
-                  className={`p-4 rounded-xl ${
-                    darkMode
-                      ? "bg-blue-900/20 border border-blue-700/30"
-                      : "bg-blue-50 border border-blue-200"
-                  }`}
-                >
-                  <p
-                    className={`text-sm ${
-                      darkMode ? "text-blue-300" : "text-blue-700"
-                    }`}
-                  >
-                    <strong>Demo credentials:</strong> username: demo, password:
-                    password123
-                  </p>
-                </div>
+                
 
                 <InputField
                   label="Username"
@@ -432,6 +412,14 @@ export default function Normal() {
                   type="text"
                   placeholder="Enter your username"
                   icon={Mail}
+                  nextField="password"
+                  darkMode={darkMode}
+                  errors={errors}
+                  formData={formData}
+                  inputRefs={inputRefs}
+                  handleChange={handleInputChange}
+                  handleSubmit={handleSubmit}
+                  disabled={loading}
                 />
 
                 <InputField
@@ -440,6 +428,13 @@ export default function Normal() {
                   placeholder="Enter your password"
                   icon={Lock}
                   showToggle={true}
+                  darkMode={darkMode}
+                  errors={errors}
+                  formData={formData}
+                  inputRefs={inputRefs}
+                  handleChange={handleInputChange}
+                  handleSubmit={handleSubmit}
+                  disabled={loading}
                 />
 
                 {/* Remember Me & Forgot Password */}
@@ -463,7 +458,7 @@ export default function Normal() {
 
                   <button
                     type="button"
-                    onClick={() => console.log("Forgot password clicked")}
+                    onClick={() => navigate("/forgot-password")}
                     className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1 transition-all duration-200"
                     disabled={loading}
                   >
@@ -483,7 +478,7 @@ export default function Normal() {
                 <button
                   type="submit"
                   disabled={loading || loginAttempts >= 3}
-                  className="w-full px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-4 focus:ring-blue-300 shadow-lg"
+                  className="w-full px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-cyan-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-4 focus:ring-blue-300 shadow-lg"
                 >
                   {loading ? <LoadingSpinner /> : "Sign In"}
                 </button>
@@ -554,15 +549,39 @@ export default function Normal() {
                     "url('https://dimatech-lsm-frontend.vercel.app/static/media/auth.639d277feb2fe0057614.png')",
                 }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-3xl"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent rounded-3xl"></div>
 
               {/* Overlay Content */}
-              <div className="absolute bottom-8 left-8 right-8 text-white">
-                <h3 className="text-2xl font-bold mb-2">Continue Learning</h3>
-                <p className="text-lg opacity-90">
-                  Access your courses, assignments, and connect with your
-                  classmates.
-                </p>
+              <div className="absolute inset-0 flex items-end p-8 text-white">
+                <div className="w-full max-w-md rounded-3xl border border-white/20 bg-white/10 dark:bg-black/20 backdrop-blur-xl p-6 shadow-2xl">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 flex items-center justify-center">
+                      <GraduationCap className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-extrabold tracking-tight">Continue Learning</h3>
+                  </div>
+                  <p className="text-sm sm:text-base text-white/90 mb-4">
+                    Access your courses, track progress, and stay in sync with your classmates.
+                  </p>
+                  <div className="flex flex-wrap gap-2 mb-5">
+                    <span className="px-3 py-1 text-xs rounded-full bg-white/15 border border-white/20">Personalized roadmap</span>
+                    <span className="px-3 py-1 text-xs rounded-full bg-white/15 border border-white/20">Assignments</span>
+                    <span className="px-3 py-1 text-xs rounded-full bg-white/15 border border-white/20">Messages</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={handleToSignUp}
+                      className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold shadow-lg hover:from-blue-700 hover:to-cyan-700 transition-all"
+                    >
+                      Create Account
+                    </button>
+                    <div className="ml-auto flex items-center gap-2 text-white/90">
+                      <Check className="w-5 h-5" />
+                      <span className="text-xs">Fast, secure and reliable</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
