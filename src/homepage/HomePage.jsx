@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import Navbar from "../navbar/Nabar";
+import Navbar from "../navbar/Navbar";
 import { motion, useAnimation, useScroll, useTransform } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 

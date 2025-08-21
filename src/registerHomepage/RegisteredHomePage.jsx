@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import Navbar from "../navbar/Nabar";
+import Navbar from "../navbar/Navbar";
 import { motion, useAnimation, useScroll, useTransform } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 
@@ -88,7 +88,7 @@ const CounterAnimation = ({ end, title, className, textColor = "" }) => {
   );
 };
 
-const RegistererdHomePage = () => {
+const RegisteredHomePage = () => {
   // Parallax effect for hero section
   const { scrollY } = useScroll();
   const heroY = useTransform(scrollY, [0, 500], [0, -100]);
@@ -538,4 +538,4 @@ const RegistererdHomePage = () => {
   );
 };
 
-export default RegistererdHomePage;
+export default RegisteredHomePage;

@@ -37,7 +37,7 @@ import Login from "./auth/login";
 import ForgotPassword from "./auth/ForgotPassword";
 import VerifyOtp from "./auth/VerifyOtp";
 import ResetPassword from "./auth/ResetPassword";
-import RegistererdHomePage from "./registerHomepage/RegistererdHomePage";
+import RegisteredHomePage from "./registerHomepage/RegisteredHomePage";
  // import LoginNormal from "./signup/LoginNormal";
 import VerifySuccess from "./confirm/VerifySuccess";
 import VerifyFailure from "./confirm/VerifyFailure";
@@ -50,7 +50,7 @@ const App = () => {
     <>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/home" element={<RequireAuth><RegistererdHomePage /></RequireAuth>} />
+        <Route path="/home" element={<RequireAuth><RegisteredHomePage /></RequireAuth>} />
 
         {/* teacher login */}
         <Route path="/new-login" element={<LoginPage />} />
