@@ -33,12 +33,11 @@ import Report from "./admin/Report";
 
 import SchoolAdmin from "./School-Admin/SchoolAdmin";
 import Error from "./Error";
-import Login from "./auth/login";
+import Login from "./auth/Login";
 import ForgotPassword from "./auth/ForgotPassword";
 import VerifyOtp from "./auth/VerifyOtp";
 import ResetPassword from "./auth/ResetPassword";
 import RegisteredHomePage from "./registerHomepage/RegisteredHomePage";
- // import LoginNormal from "./signup/LoginNormal";
 import VerifySuccess from "./confirm/VerifySuccess";
 import VerifyFailure from "./confirm/VerifyFailure";
 import SelectUserType from "./onboarding/SelectUserType";
@@ -73,7 +72,6 @@ const App = () => {
         <Route path="/student-login" element={<Navigate to="/login" replace />} />
         {/*end of  student login */}
         {/* parent login */}
-        <Route path="/parent-login" element={<Navigate to="/login" replace />} />
         {/*end of  parent login */}
         {/* Parent login */}
         <Route path="/parent-login" element={<Navigate to="/login" replace />} />
