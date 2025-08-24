@@ -3,21 +3,29 @@ import teacherIllustration from "/mother.png";
 import { Link } from "react-router-dom"
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { http } from "../../api/baseClient";
+import { setTokens } from "../../api/auth";
 
 const authenticateUser = async (email, password, organizationCode) => {
   try {
-    // Replace the URL below with your actual backend endpoint
-    const response = await fetch('https://api.ilearnova.com/api/auth/login/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, organizationCode })
+    const data = await http.post("/api/auth/login/", {
+      body: { email, password, organizationCode },
+      auth: false,
     });
-    // The backend should return a JSON object with a success property (edit as needed)
-    const data = await response.json();
-    // You may need to adjust this depending on your backend response
-    return data.success === true;
+
+    // Persist tokens if backend returns them (optional but recommended)
+    const access = data.access || data.token || data.access_token;
+    const refresh = data.refresh;
+    if (access || refresh) {
+      setTokens({ access, refresh }, window.localStorage);
+      if (data.user) {
+        window.localStorage.setItem("user_data", JSON.stringify(data.user));
+      }
+    }
+
+    // If we reached here, http.post did not throw; treat as success
+    return data?.success === true || !!access || true;
   } catch (err) {
-    // Network or server error
     return false;
   }
 };
@@ -27,7 +35,7 @@ const DEFAULT_EMAIL = "priscilladaniel@gmail.com";
 const DEFAULT_PASSWORD = "123456";
 const DEFAULT_ORGANIZATIONCODE = "123356";
 
-function ParentLogin() {4
+function ParentLogin() {
   const [email, setEmail] = useState(DEFAULT_EMAIL);
   const [password, setPassword] = useState(DEFAULT_PASSWORD);
   const [organizationCode, setOrganizationCode] = useState(DEFAULT_ORGANIZATIONCODE);

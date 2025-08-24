@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AlertCircle, Check, X, Loader2, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { API_BASE_URL } from "../api/config";
+import { http } from "../api/baseClient";
 
 const OtpInput = ({ value, onChange, onComplete, disabled, darkMode }) => {
   const inputsRef = useRef([]);
@@ -146,21 +146,11 @@ export default function VerifyOtp() {
     setErrors({});
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/verify-otp/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({ email, otp }),
+      const data = await http.post("/api/verify-otp/", {
+        body: { email, otp },
+        auth: false,
       });
 
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        const msg =
-          data.detail ||
-          data.message ||
-          data.error ||
-          "Invalid or expired code. Please try again.";
-        throw new Error(msg);
-      }
       const prefillEmail = data?.prefill?.email || email;
       const prefillUsername = data?.prefill?.username || email;
 
@@ -191,17 +181,10 @@ export default function VerifyOtp() {
     if (!email) return;
     setResending(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/api/resend-otp/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({ email }),
+      await http.post("/api/resend-otp/", {
+        body: { email },
+        auth: false,
       });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        const msg = data.detail || data.message || data.error || "Failed to resend OTP.";
-        throw new Error(msg);
-      }
       notify("OTP resent. Please check your email.", "success", 3000);
     } catch (e) {
       notify(e.message || "Network error", "error");

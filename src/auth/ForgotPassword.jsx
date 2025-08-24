@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Mail, ArrowLeft, AlertCircle, Check, X, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { API_BASE_URL } from "../api/config";
+import { http } from "../api/baseClient";
 
 const InputField = React.memo(function InputField({
   label,
@@ -119,18 +119,10 @@ export default function ForgotPassword() {
     setErrors({});
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/forgot-password/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({ email }),
+      await http.post("/api/forgot-password/", {
+        body: { email },
+        auth: false,
       });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        const msg =
-          data.detail || data.message || data.error || "Failed to send OTP. Please try again.";
-        throw new Error(msg);
-      }
 
       // Persist email for OTP verify + prefill login later
       sessionStorage.setItem("otp_email", email);

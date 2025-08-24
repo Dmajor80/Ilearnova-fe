@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { User, Building2, Check, X } from "lucide-react";
-import { authorizedFetch } from "../api/auth";
-import { API_BASE_URL } from "../api/config";
+import { http } from "../api/baseClient";
 
 export default function SelectUserType() {
   const navigate = useNavigate();
@@ -44,21 +43,9 @@ export default function SelectUserType() {
 
     setLoading(true);
     try {
-      const res = await authorizedFetch(`${API_BASE_URL}/api/user-type/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify(body),
+      await http.post("/api/user-type/", {
+        body,
       });
-
-      if (!res.ok) {
-        const err = await safeJson(res);
-        const msg =
-          err?.detail || err?.message || err?.error || "Failed to save user type";
-        throw new Error(msg);
-      }
 
       // Persist selection
       try {

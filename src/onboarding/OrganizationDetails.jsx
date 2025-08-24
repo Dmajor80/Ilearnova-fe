@@ -1,8 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Building2, Mail, Phone, MapPin, User as UserIcon, Check, X } from "lucide-react";
-import { authorizedFetch } from "../api/auth";
-import { API_BASE_URL } from "../api/config";
+import { http } from "../api/baseClient";
 
 // Memoized, focus-stable input similar to login/signup InputField
 const InputField = React.memo(function InputField({
@@ -192,21 +191,9 @@ export default function OrganizationDetails() {
         phone_number: form.phone_number.trim(),
       };
 
-      const res = await authorizedFetch(`${API_BASE_URL}/api/user-type/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify(body),
+      await http.post("/api/user-type/", {
+        body,
       });
-
-      if (!res.ok) {
-        const err = await safeJson(res);
-        const msg =
-          err?.detail || err?.message || err?.error || "Failed to save organization details";
-        throw new Error(msg);
-      }
 
       // Persist details
       try {

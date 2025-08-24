@@ -14,7 +14,7 @@ import {
   EyeOff,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { API_BASE_URL } from "../api/config";
+import { http } from "../api/baseClient";
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center">
@@ -212,24 +212,10 @@ export default function SignupForm() {
   };
 
   const submitSignup = async (userData) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/register/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify(userData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Registration failed");
-      }
-      return await response.json();
-    } catch (error) {
-      throw new Error(error.message || "Network error");
-    }
+    return await http.post("/api/auth/register/", {
+      body: userData,
+      auth: false,
+    });
   };
 
   const handleSubmit = async (e) => {

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Lock, AlertCircle, Check, X, Eye, EyeOff, ArrowLeft, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { API_BASE_URL } from "../api/config";
+import { http } from "../api/baseClient";
 
 
 const PasswordField = React.memo(function PasswordField({
@@ -150,18 +150,10 @@ export default function ResetPassword() {
         confirm_password: passwordConfirm,
       };
 
-      const res = await fetch(`${API_BASE_URL}/api/reset-password/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(payload),
+      await http.post("/api/reset-password/", {
+        body: payload,
+        auth: false,
       });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        const msg =
-          data.detail || data.message || data.error || "Failed to reset password. Please try again.";
-        throw new Error(msg);
-      }
 
       // Cleanup and redirect to login with prefilled username
       const prefill =

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Menu, X, User, LogOut, Settings, UserCircle, Sparkles, GraduationCap } from "lucide-react";
 import { createPortal } from "react-dom";
-import { API_BASE_URL, CDN_BASE_URL, LOGO_URL } from "../api/config";
+import { CDN_BASE_URL, LOGO_URL } from "../api/config";
+import { http } from "../api/baseClient";
+import { clearAuth } from "../api/auth";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -10,47 +12,24 @@ const Navbar = () => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const apiUrl = (path) =>
-  `${String(API_BASE_URL).replace(/\/+$/, "")}${path.startsWith("/") ? path : `/${path}`}`;
 
-  // Check authentication status using environment variable
+  // Check authentication status using centralized http client
   useEffect(() => {
+    const ac = new AbortController();
     const checkAuthStatus = async () => {
       try {
-        const token = localStorage.getItem("authToken");
-        if (token) {
-          const response = await fetch(apiUrl("/api/auth/profile/"), {
-            method: "GET",
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          });
-
-          if (response.ok) {
-            const userData = await response.json();
-            setUser(userData);
-            setIsAuthenticated(true);
-          } else {
-            localStorage.removeItem("authToken");
-            setUser(null);
-            setIsAuthenticated(false);
-          }
-        } else {
-          setUser(null);
-          setIsAuthenticated(false);
-        }
+        const userData = await http.get("/api/auth/profile/", { signal: ac.signal });
+        setUser(userData);
+        setIsAuthenticated(true);
       } catch (error) {
-        console.error("Error checking auth status:", error);
-        localStorage.removeItem("authToken");
         setUser(null);
         setIsAuthenticated(false);
       }
     };
 
     checkAuthStatus();
-  }, [API_BASE_URL]);
+    return () => ac.abort();
+  }, []);
 
   // Close mobile menu when screen size changes to desktop
   useEffect(() => {
@@ -105,23 +84,14 @@ const Navbar = () => {
     };
   }, []);
 
-  // Handle logout using environment variable
+  // Handle logout using centralized http client
   const handleLogout = async () => {
     try {
-      const token = localStorage.getItem("authToken");
-      if (token) {
-        await fetch(apiUrl("/api/auth/logout/"), {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-      }
+      await http.post("/api/auth/logout/");
     } catch (error) {
       console.error("Logout API call failed:", error);
     } finally {
-      localStorage.removeItem("authToken");
+      clearAuth();
       setUser(null);
       setIsAuthenticated(false);
       setIsUserMenuOpen(false);

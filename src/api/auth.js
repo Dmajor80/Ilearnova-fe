@@ -1,5 +1,7 @@
 import { API_BASE_URL, REFRESH_PATH } from "./config";
 
+let refreshPromise = null;
+
 // Small URL join helper to avoid double slashes
 function joinUrl(base, path) {
   const b = (base || "").replace(/\/+$/, "");
@@ -98,6 +100,10 @@ export async function ensureValidAccessToken() {
 
 // Attempt to refresh access token using refresh token
 export async function refreshAccessToken() {
+  if (refreshPromise) {
+    return await refreshPromise;
+  }
+
   const { refresh, store } = getTokens();
   if (!refresh) {
     return { ok: false, error: "No refresh token" };
@@ -105,37 +111,45 @@ export async function refreshAccessToken() {
 
   const url = joinUrl(API_BASE_URL, REFRESH_PATH);
 
+  refreshPromise = (async () => {
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ refresh }),
+      });
+
+      if (!res.ok) {
+        let errMsg = "Failed to refresh token";
+        try {
+          const data = await res.json();
+          errMsg = data?.detail || data?.message || data?.error || errMsg;
+        } catch {}
+        return { ok: false, error: errMsg };
+      }
+
+      const data = await res.json();
+      const newAccess = data.access || data.token || data.access_token;
+      const newRefresh = data.refresh; // some APIs may rotate refresh tokens
+
+      if (!newAccess) {
+        return { ok: false, error: "No access token in refresh response" };
+      }
+
+      setTokens({ access: newAccess, refresh: newRefresh || refresh }, store);
+      return { ok: true, access: newAccess, refresh: newRefresh || refresh };
+    } catch (e) {
+      return { ok: false, error: e?.message || "Network error" };
+    }
+  })();
+
   try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({ refresh }),
-    });
-
-    if (!res.ok) {
-      let errMsg = "Failed to refresh token";
-      try {
-        const data = await res.json();
-        errMsg = data?.detail || data?.message || data?.error || errMsg;
-      } catch {}
-      return { ok: false, error: errMsg };
-    }
-
-    const data = await res.json();
-    const newAccess = data.access || data.token || data.access_token;
-    const newRefresh = data.refresh; // some APIs may rotate refresh tokens
-
-    if (!newAccess) {
-      return { ok: false, error: "No access token in refresh response" };
-    }
-
-    setTokens({ access: newAccess, refresh: newRefresh || refresh }, store);
-    return { ok: true, access: newAccess, refresh: newRefresh || refresh };
-  } catch (e) {
-    return { ok: false, error: e?.message || "Network error" };
+    return await refreshPromise;
+  } finally {
+    refreshPromise = null;
   }
 }
 
@@ -191,6 +205,9 @@ export async function authorizedFetch(input, init = {}) {
         ...(init || {}),
         headers: buildHeaders(access, orgId),
       });
+    } else {
+      // Refresh failed; clear tokens so UI can react (e.g., redirect to login)
+      clearAuth();
     }
   }
 

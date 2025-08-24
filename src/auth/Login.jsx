@@ -12,7 +12,8 @@ import {
   GraduationCap,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { API_BASE_URL } from "../api/config";
+import { http } from "../api/baseClient";
+import { setTokens } from "../api/auth";
 
 const InputField = React.memo(function InputField({
   label,
@@ -185,48 +186,10 @@ export default function Login() {
   };
 
   const submitLogin = async (userData) => {
-    try {
-      // Simulated API call - replace with your actual endpoint
-      const response = await fetch(
-        `${API_BASE_URL}/api/auth/login/`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify(userData),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        let errorMessage = "Login failed";
-
-        if (
-          errorData.non_field_errors &&
-          Array.isArray(errorData.non_field_errors)
-        ) {
-          errorMessage = errorData.non_field_errors[0];
-        } else if (errorData.detail) {
-          errorMessage = errorData.detail;
-        } else if (errorData.message) {
-          errorMessage = errorData.message;
-        } else if (errorData.error) {
-          errorMessage = errorData.error;
-        }
-
-        throw new Error(errorMessage);
-      }
-      return await response.json();
-    } catch (error) {
-      // For demo purposes, simulate different responses
-      if (userData.username === "demo" && userData.password === "password123") {
-        return { token: "demo_token_12345", user: { id: 1, username: "demo" } };
-      }
-      throw new Error(error.message || "Network error");
-    }
-    // Simulate network delay
+    return await http.post("/api/auth/login/", {
+      body: userData,
+      auth: false,
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -255,15 +218,10 @@ export default function Login() {
       const response = await submitLogin(loginData);
 
       // Store tokens and user
-      const storage = rememberMe ? localStorage : sessionStorage;
+      const storage = rememberMe ? window.localStorage : window.sessionStorage;
       const access = response.access || response.token || response.access_token;
       const refresh = response.refresh;
-      if (access) {
-        storage?.setItem("auth_access", access);
-      }
-      if (refresh) {
-        storage?.setItem("auth_refresh", refresh);
-      }
+      setTokens({ access, refresh }, storage);
       if (response.user) {
         storage?.setItem("user_data", JSON.stringify(response.user));
         // Helpful prefill for subsequent forms

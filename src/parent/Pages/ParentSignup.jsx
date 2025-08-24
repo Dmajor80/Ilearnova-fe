@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState } from "react"
 import { useNavigate } from "react-router-dom";
+import { http } from "../../api/baseClient";
 
 
 function Signup() {
@@ -44,25 +45,20 @@ function Signup() {
         e.preventDefault();
         setLoading(true);
         try {
-            const response = await fetch("https://api.ilearnova.com/api/auth/register/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, firstName, lastName, birthDate, address, phone,  email, password }),
+            const data = await http.post("/api/auth/register/", {
+                body: { username, firstName, lastName, birthDate, address, phone, email, password },
+                auth: false,
             });
-            const data = await response.json();
-            // if (response.ok && data.success) { ... }
-            console.log(data)
-            if (response.ok && data.status === "success") {
-                // Optionally store token/user info
-                // localStorage.setItem("token", data.token);
-                // localStorage.setItem("adminName", data.user.name);
+            console.log(data);
+            if (data?.status === "success" || data?.success === true) {
                 navigate("/login");
             } else {
-                alert(data.message || "Account creation failed.");
+                alert(data?.message || "Account creation failed.");
             }
         } catch (error) {
-            alert("Network error. Please try again.");
-            console.log(error)
+            const msg = error?.data?.detail || error?.message || "Network error. Please try again.";
+            alert(msg);
+            console.log(error);
         } finally {
             setLoading(false);
         }
