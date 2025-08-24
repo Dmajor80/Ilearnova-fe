@@ -1,275 +1,31 @@
 import React from "react";
-import { useState, useRef, useEffect } from "react";
-import {
-  AlertCircle,
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-  Check,
-  X,
-  BookOpen,
-  GraduationCap,
-} from "lucide-react";
+import { Mail, Lock, Check, BookOpen, GraduationCap } from "lucide-react";
+import InputField from "@/components/ui/InputField";
+import NotificationBar from "@/components/ui/NotificationBar";
 import { useNavigate } from "react-router-dom";
-import { http } from "../../api/baseClient";
-import { setTokens } from "../../api/auth";
-
-const InputField = React.memo(function InputField({
-  label,
-  name,
-  type = "text",
-  placeholder,
-  nextField,
-  icon: Icon,
-  darkMode,
-  errors,
-  formData,
-  inputRefs,
-  handleChange,
-  handleSubmit,
-  showToggle = false,
-  disabled = false,
-}) {
-  const [showPassword, setShowPassword] = useState(false);
-  const isPassword = showToggle || type === "password";
-
-  return (
-    <div className="mb-6 group">
-      <label
-        htmlFor={name}
-        className={`block text-sm font-semibold mb-3 transition-colors ${
-          darkMode
-            ? "text-gray-200 group-focus-within:text-blue-400"
-            : "text-gray-700 group-focus-within:text-blue-600"
-        }`}
-      >
-        {label} <span className="text-red-500 ml-1">*</span>
-      </label>
-      <div className="relative">
-        {Icon && (
-          <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10">
-            <Icon
-              className={`w-5 h-5 transition-colors ${
-                darkMode
-                  ? "text-gray-400 group-focus-within:text-blue-400"
-                  : "text-gray-500 group-focus-within:text-blue-600"
-              }`}
-            />
-          </div>
-        )}
-        <input
-          ref={inputRefs.current[name]}
-          id={name}
-          name={name}
-          type={isPassword && showPassword ? "text" : type}
-          value={formData[name]}
-          placeholder={placeholder}
-          onChange={(e) => handleChange(name, e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              if (nextField && inputRefs.current[nextField]) {
-                inputRefs.current[nextField].current?.focus();
-              } else {
-                handleSubmit(e);
-              }
-            }
-          }}
-          className={`w-full ${Icon ? "pl-12" : "pl-4"} ${
-            isPassword ? "pr-12" : "pr-4"
-          } py-4 rounded-2xl border-2 text-sm font-medium transition-all duration-300 ease-in-out outline-none ${
-            darkMode
-              ? "bg-gray-800/50 text-white border-gray-600 placeholder-gray-400 focus:bg-gray-800 focus:border-blue-500 focus:shadow-lg focus:shadow-blue-500/20"
-              : "bg-white text-gray-800 border-gray-200 placeholder-gray-500 focus:bg-blue-50/30 focus:border-blue-500 focus:shadow-lg focus:shadow-blue-500/20"
-          } ${errors[name] ? "border-red-400 bg-red-50/30" : ""} hover:border-gray-400`}
-          aria-invalid={errors[name] ? "true" : "false"}
-          aria-describedby={errors[name] ? `${name}-error` : undefined}
-          disabled={disabled}
-        />
-        {isPassword && (
-          <button
-            type="button"
-            onClick={() => setShowPassword((v) => !v)}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 p-1 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
-            tabIndex={-1}
-            aria-label={showPassword ? "Hide password" : "Show password"}
-          >
-            {showPassword ? (
-              <EyeOff
-                className={`w-5 h-5 ${darkMode ? "text-gray-400" : "text-gray-500"}`}
-              />
-            ) : (
-              <Eye
-                className={`w-5 h-5 ${darkMode ? "text-gray-400" : "text-gray-500"}`}
-              />
-            )}
-          </button>
-        )}
-      </div>
-      {errors[name] && (
-        <p
-          id={`${name}-error`}
-          className="text-red-500 text-xs mt-2 flex items-center"
-          role="alert"
-        >
-          <AlertCircle className="w-4 h-4 mr-2 flex-shrink-0" />
-          {errors[name]}
-        </p>
-      )}
-    </div>
-  );
-});
+import useLogin from "@/hooks/useLogin";
 
 export default function Login() {
-  const [formData, setFormData] = useState({
-    username: "",
-    password: "",
+  const navigate = useNavigate();
+
+  const {
+    formData,
+    rememberMe,
+    loading,
+    errors,
+    loginAttempts,
+    darkMode,
+    inputRefs,
+    handleInputChange,
+    setRememberMe,
+    handleSubmit,
+    notification,
+  } = useLogin({
+    onSuccess: () => navigate("/post-login", { replace: true }),
   });
 
-  const [darkMode] = useState(() => {
-    return window.matchMedia("(prefers-color-scheme: dark)").matches;
-  });
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
-  const [showNotification, setShowNotification] = useState(false);
-  const [notificationMessage, setNotificationMessage] = useState("");
-  const [notificationType, setNotificationType] = useState("success");
-  const [rememberMe, setRememberMe] = useState(false);
-  const [loginAttempts, setLoginAttempts] = useState(0);
-  const inputRefs = useRef({
-    username: React.createRef(),
-    password: React.createRef(),
-  });
-  const navigate = useNavigate();
   const handleToSignUp = () => {
     navigate("/signup");
-  };
-
-  useEffect(() => {
-    setTimeout(() => inputRefs.current.username?.current?.focus(), 100);
-  }, []);
-
-  useEffect(() => {
-    const prefill =
-      sessionStorage.getItem("prefill_username") ||
-      localStorage.getItem("prefill_username");
-    if (prefill) {
-      setFormData((prev) => ({ ...prev, username: prefill }));
-    }
-  }, []);
-
-  const showNotificationMessage = (message, type = "success") => {
-    setNotificationMessage(message);
-    setNotificationType(type);
-    setShowNotification(true);
-    setTimeout(() => setShowNotification(false), 5000);
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!formData.username.trim()) {
-      newErrors.username = "Username is required";
-    } else if (formData.username.length < 3) {
-      newErrors.username = "Username must be at least 3 characters";
-    }
-
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const submitLogin = async (userData) => {
-    return await http.post("/api/auth/login/", {
-      body: userData,
-      auth: false,
-    });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // Rate limiting for failed attempts
-    if (loginAttempts >= 3) {
-      showNotificationMessage(
-        "Too many failed attempts. Please wait before trying again.",
-        "error"
-      );
-      return;
-    }
-
-    if (!validateForm()) return;
-
-    setLoading(true);
-    setErrors({});
-
-    try {
-      const loginData = {
-        username: formData.username,
-        password: formData.password,
-      };
-
-      const response = await submitLogin(loginData);
-
-      // Store tokens and user
-      const storage = rememberMe ? window.localStorage : window.sessionStorage;
-      const access = response.access || response.token || response.access_token;
-      const refresh = response.refresh;
-      setTokens({ access, refresh }, storage);
-      if (response.user) {
-        storage?.setItem("user_data", JSON.stringify(response.user));
-        // Helpful prefill for subsequent forms
-        if (response.user.username || response.user.email) {
-          storage?.setItem(
-            "prefill_username",
-            response.user.username || response.user.email
-          );
-        }
-      }
-
-      setLoginAttempts(0); // Reset attempts on success
-
-      // Post-login central redirect
-      navigate("/post-login", { replace: true });
-      return;
-    } catch (error) {
-      setLoginAttempts((prev) => prev + 1);
-      let notificationType = "error";
-      let message = error.message;
-
-      if (
-        message.toLowerCase().includes("invalid credentials") ||
-        message.toLowerCase().includes("incorrect password") ||
-        message.toLowerCase().includes("user not found")
-      ) {
-        message =
-          "Invalid username or password. Please check your credentials and try again.";
-      } else if (message.toLowerCase().includes("account not verified")) {
-        notificationType = "info";
-        message = "Please verify your email address before logging in.";
-      } else if (message.toLowerCase().includes("account disabled")) {
-        message = "Your account has been disabled. Please contact support.";
-      }
-
-      showNotificationMessage(message, notificationType);
-      setErrors({ general: error.message });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleInputChange = (name, value) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear field-specific errors when user starts typing
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
-    }
   };
 
   const LoadingSpinner = () => (
@@ -293,52 +49,14 @@ export default function Login() {
       }`}
     >
       {/* Notification */}
-      {showNotification && (
-        <div
-          className={`fixed top-6 right-6 z-50 max-w-md p-4 rounded-2xl shadow-2xl transform transition-all duration-500 ${
-            notificationType === "success"
-              ? "bg-green-500 text-white"
-              : notificationType === "error"
-              ? "bg-red-500 text-white"
-              : "bg-blue-500 text-white"
-          } ${
-            showNotification
-              ? "translate-x-0 opacity-100"
-              : "translate-x-full opacity-0"
-          }`}
-          role="alert"
-          aria-live="polite"
-        >
-          <div className="flex items-start">
-            <div className="flex-shrink-0">
-              {notificationType === "success" ? (
-                <Check className="w-6 h-6 mt-0.5" />
-              ) : notificationType === "error" ? (
-                <X className="w-6 h-6 mt-0.5" />
-              ) : (
-                <AlertCircle className="w-6 h-6 mt-0.5" />
-              )}
-            </div>
-            <div className="ml-3 flex-1">
-              <span className="font-semibold text-sm leading-relaxed">
-                {notificationMessage}
-              </span>
-            </div>
-            <button
-              onClick={() => setShowNotification(false)}
-              className="ml-2 flex-shrink-0 opacity-70 hover:opacity-100 transition-opacity"
-              aria-label="Close notification"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-      )}
-
+      <NotificationBar
+  show={notification.show}
+  type={notification.type}
+  message={notification.message}
+  onClose={() => notification.setShow(false)}
+/>
 
       <div className="w-full px-6 sm:px-8 lg:px-12 py-12">
-        
-
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 xl:gap-20 items-center min-h-[600px]">
           {/* Form Section */}
           <div className="w-full max-w-md mx-auto lg:mx-0">
@@ -362,8 +80,6 @@ export default function Login() {
 
             <form onSubmit={handleSubmit} autoComplete="off">
               <div className="space-y-6">
-                
-
                 <InputField
                   label="Username"
                   name="username"

@@ -1,20 +1,10 @@
 /* eslint-disable no-unused-vars */
-import React, { useState, useRef, useEffect } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import {
-  ArrowLeft,
-  AlertCircle,
-  Mail,
-  Check,
-  X,
-  User,
-  Lock,
-  CheckCircle,
-  Eye,
-  EyeOff,
-} from "lucide-react";
+import React from "react";
+import { Mail, User, Lock, CheckCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { http } from "../../api/baseClient";
+import useSignup from "@/hooks/useSignup";
+import InputField from "@/components/ui/InputField";
+import NotificationBar from "@/components/ui/NotificationBar";
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center">
@@ -29,244 +19,25 @@ const LoadingSpinner = () => (
   </div>
 );
 
-const InputField = React.memo(function InputField({
-  label,
-  name,
-  type = "text",
-  placeholder,
-  required = false,
-  nextField,
-  icon: Icon,
-  darkMode,
-  errors,
-  formData,
-  inputRefs,
-  handleChange,
-  handleSubmit,
-}) {
-  const [showPassword, setShowPassword] = useState(false);
-  const isPassword = type === "password";
-  return (
-    <div className="mb-6 group">
-      <label
-        htmlFor={name}
-        className={`block text-sm font-semibold mb-3 transition-colors ${
-          darkMode
-            ? "text-gray-200 group-focus-within:text-blue-400"
-            : "text-gray-700 group-focus-within:text-blue-600"
-        }`}
-      >
-        {label} {required && <span className="text-red-500 ml-1">*</span>}
-      </label>
-      <div className="relative">
-        {Icon && (
-          <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10">
-            <Icon
-              className={`w-5 h-5 transition-colors ${
-                darkMode
-                  ? "text-gray-400 group-focus-within:text-blue-400"
-                  : "text-gray-500 group-focus-within:text-blue-600"
-              }`}
-            />
-          </div>
-        )}
-        <input
-          ref={inputRefs.current[name]}
-          id={name}
-          name={name}
-          type={isPassword && showPassword ? "text" : type}
-          value={formData[name]}
-          placeholder={placeholder}
-          onChange={handleChange}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              if (nextField && inputRefs.current[nextField]) {
-                inputRefs.current[nextField].current.focus();
-              } else {
-                handleSubmit(e);
-              }
-            }
-          }}
-          className={`w-full ${
-            Icon ? "pl-12" : "pl-4"
-          } ${isPassword ? "pr-12" : "pr-4"} py-4 rounded-2xl border-2 text-sm font-medium transition-all duration-300 ease-in-out outline-none ${
-            darkMode
-              ? "bg-gray-800/50 text-white border-gray-600 placeholder-gray-400 focus:bg-gray-800 focus:border-blue-500 focus:shadow-lg focus:shadow-blue-500/20"
-              : "bg-white text-gray-800 border-gray-200 placeholder-gray-500 focus:bg-blue-50/30 focus:border-blue-500 focus:shadow-lg focus:shadow-blue-500/20"
-          } ${
-            errors[name] ? "border-red-400 bg-red-50/30" : ""
-          } hover:border-gray-400`}
-          aria-invalid={errors[name] ? "true" : "false"}
-          aria-describedby={errors[name] ? `${name}-error` : undefined}
-        />
-        {isPassword && (
-          <button
-            type="button"
-            onClick={() => setShowPassword((v) => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            aria-label={showPassword ? "Hide password" : "Show password"}
-            tabIndex={-1}
-          >
-            {showPassword ? (
-              <EyeOff
-                className={`w-5 h-5 ${darkMode ? "text-gray-300" : "text-gray-600"}`}
-              />
-            ) : (
-              <Eye
-                className={`w-5 h-5 ${darkMode ? "text-gray-300" : "text-gray-600"}`}
-              />
-            )}
-          </button>
-        )}
-      </div>
-      {errors[name] && (
-        <p
-          id={`${name}-error`}
-          className="text-red-500 text-xs mt-2 flex items-center animate-pulse"
-        >
-          <AlertCircle className="w-4 h-4 mr-2" />
-          {errors[name]}
-        </p>
-      )}
-    </div>
-  );
-});
 
 export default function SignupForm() {
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    username: "",
-    email: "",
-    password: "",
-    passwordConfirm: "",
-  });
-
-  const [darkMode] = useState(() => window.matchMedia("(prefers-color-scheme: dark)").matches);
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
-  const [showNotification, setShowNotification] = useState(false);
-  const [notificationMessage, setNotificationMessage] = useState("");
-  const [notificationType, setNotificationType] = useState("success");
-  const [showEmailVerification, setShowEmailVerification] = useState(false);
-  const [userEmail, setUserEmail] = useState("");
-  const inputRefs = useRef({});
   const navigate = useNavigate();
 
-  useEffect(() => {
-    Object.keys(formData).forEach((key) => {
-      if (!inputRefs.current[key]) {
-        inputRefs.current[key] = React.createRef();
-      }
-    });
-  }, []);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const showNotificationMessage = (message, type = "success") => {
-    setNotificationMessage(message);
-    setNotificationType(type);
-    setShowNotification(true);
-    setTimeout(() => setShowNotification(false), 6000);
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-    
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = "First name is required";
-    }
-    
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = "Last name is required";
-    }
-    
-    if (!formData.username || !formData.username.trim()) {
-      newErrors.username = "Username is required";
-    }
-    
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Invalid email format";
-    }
-    
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    } else if (formData.password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters";
-    }
-    
-    if (!formData.passwordConfirm) {
-      newErrors.passwordConfirm = "Confirm your password";
-    } else if (formData.password !== formData.passwordConfirm) {
-      newErrors.passwordConfirm = "Passwords do not match";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const submitSignup = async (userData) => {
-    return await http.post("/api/auth/register/", {
-      body: userData,
-      auth: false,
-    });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-
-    setLoading(true);
-    setErrors({});
-
-    try {
-      const apiData = {
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        username: formData.username,
-        email: formData.email,
-        password: formData.password,
-      };
-
-      await submitSignup(apiData);
-
-      // Store user email and show verification screen
-      setUserEmail(formData.email);
-      setShowEmailVerification(true);
-    } catch (error) {
-      let notificationType = "error";
-      let message = error.message;
-
-      // Check for specific error patterns and customize notifications
-      if (
-        message.toLowerCase().includes("user with this email already exists")
-      ) {
-        notificationType = "info";
-        message =
-          "An account with this email already exists. Please try logging in instead.";
-      } else if (
-        message.toLowerCase().includes("already exists") ||
-        message.toLowerCase().includes("already registered")
-      ) {
-        notificationType = "info";
-        message = "You are already registered! Please login instead.";
-      }
-
-      showNotificationMessage(message, notificationType);
-      setErrors({ general: error.message });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    formData,
+    loading,
+    errors,
+    showEmailVerification,
+    userEmail,
+    darkMode,
+    inputRefs,
+    handleChange,
+    handleSubmit,
+    setShowEmailVerification,
+    notification,
+  } = useSignup();
 
   const handleConfirmEmail = () => {
-    // Redirect to login page
     navigate("/login");
   };
 
@@ -358,10 +129,7 @@ export default function SignupForm() {
                 Didn't receive the email?{" "}
                 <button
                   onClick={() =>
-                    showNotificationMessage(
-                      "Verification email resent!",
-                      "success"
-                    )
+                    notification.notify("Verification email resent!", "success", 4000)
                   }
                   className="text-blue-600 hover:text-blue-700 font-semibold hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-1 py-1 transition-all duration-200"
                 >
@@ -383,40 +151,13 @@ export default function SignupForm() {
           : "bg-gradient-to-br from-blue-50 via-white to-purple-50 text-gray-800"
       }`}
     >
-      {showNotification && (
-        <div
-          className={`fixed top-6 right-6 z-50 max-w-md p-4 rounded-2xl shadow-2xl transform transition-all duration-500 ${
-            notificationType === "success"
-              ? "bg-green-500 text-white"
-              : notificationType === "error"
-              ? "bg-red-500 text-white"
-              : "bg-blue-500 text-white"
-          } animate-bounce`}
-        >
-          <div className="flex items-start">
-            <div className="flex-shrink-0">
-              {notificationType === "success" ? (
-                <Check className="w-6 h-6 mt-0.5" />
-              ) : notificationType === "error" ? (
-                <X className="w-6 h-6 mt-0.5" />
-              ) : (
-                <AlertCircle className="w-6 h-6 mt-0.5" />
-              )}
-            </div>
-            <div className="ml-3 flex-1">
-              <span className="font-semibold text-sm leading-relaxed">
-                {notificationMessage}
-              </span>
-            </div>
-            <button
-              onClick={() => setShowNotification(false)}
-              className="ml-2 flex-shrink-0 opacity-70 hover:opacity-100 transition-opacity"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Notification */}
+      <NotificationBar
+        show={notification.show}
+        type={notification.type}
+        message={notification.message}
+        onClose={() => notification.setShow(false)}
+      />
 
       <div className="w-full px-6 sm:px-8 lg:px-12 py-12">
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 xl:gap-20 items-center">
@@ -472,7 +213,7 @@ export default function SignupForm() {
                     handleSubmit={handleSubmit}
                   />
                 </div>
-                
+
                 <InputField
                   label="Username"
                   name="username"
@@ -487,7 +228,7 @@ export default function SignupForm() {
                   handleChange={handleChange}
                   handleSubmit={handleSubmit}
                 />
-                
+
                 <InputField
                   label="Email Address"
                   name="email"
@@ -503,7 +244,7 @@ export default function SignupForm() {
                   handleChange={handleChange}
                   handleSubmit={handleSubmit}
                 />
-                
+
                 <InputField
                   label="Password"
                   name="password"
@@ -519,7 +260,7 @@ export default function SignupForm() {
                   handleChange={handleChange}
                   handleSubmit={handleSubmit}
                 />
-                
+
                 <InputField
                   label="Confirm Password"
                   name="passwordConfirm"
