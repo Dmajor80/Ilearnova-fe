@@ -1,52 +1,52 @@
 import React from "react";
 import { Route, Routes, Navigate } from "react-router-dom";
-import Pages from "./parent/Pages/Pages";
-import HomePage from "./homepage/HomePage";
-import SignupForm from "./auth/SignupForm";
+import Pages from "./features/parent/Pages/Pages";
+import HomePage from "./pages/HomePage";
+import SignupForm from "./features/auth/SignupForm";
 
 // Login Pages
-import LoginPage from "./teacher/LoginPage";
-import StudentLogin from "./student/StudentLogin";
-import ParentLogin from "./parent/Pages/ParentLogin";
-import AdminLogin from "./admin/AdminLogin";
+import LoginPage from "./features/teacher/LoginPage";
+import StudentLogin from "./features/student/StudentLogin";
+import ParentLogin from "./features/parent/Pages/ParentLogin";
+import AdminLogin from "./features/admin/AdminLogin";
 
 // Dashboards
-import StudentDashboard from "./student/StudentDashboard";
-import TeacherDashboard from "./teacher/TeacherDashboard";
+import StudentDashboard from "./features/student/StudentDashboard";
+import TeacherDashboard from "./features/teacher/TeacherDashboard";
 
 // Student Dashboard Inner Routes
-import Overview from "./student/Overview";
-// import Messages from "./student/Messages";
-import Attendance from "./student/Attendance";
-import Assignments from "./student/Assignments";
-import Timetable from "./student/Timetable";
-import Grade from "./student/Grade";
-import { CoursePage, CoursesComponent } from "./student/CoursesComponent";
-import Result from "./student/Result";
-import Exam from "./student/Exam";
-import IdCard from "./student/IdCard";
-import AdminDashboard from "./admin/AdminDashboard";
-import Dashboard from "./admin/Dashboard";
-import Users from "./admin/Users";
-import NewUser from "./admin/NewUser";
-import Report from "./admin/Report";
+import Overview from "./features/student/Overview";
+// import Messages from "./features/student/Messages";
+import Attendance from "./features/student/Attendance";
+import Assignments from "./features/student/Assignments";
+import Timetable from "./features/student/Timetable";
+import Grade from "./features/student/Grade";
+import { CoursePage, CoursesComponent } from "./features/student/CoursesComponent";
+import Result from "./features/student/Result";
+import Exam from "./features/student/Exam";
+import IdCard from "./features/student/IdCard";
+import AdminDashboard from "./features/admin/AdminDashboard";
+import Dashboard from "./features/admin/Dashboard";
+import Users from "./features/admin/Users";
+import NewUser from "./features/admin/NewUser";
+import Report from "./features/admin/Report";
 
-import SchoolAdmin from "./School-Admin/SchoolAdmin";
-import Error from "./Error";
-import Login from "./auth/Login";
-import ForgotPassword from "./auth/ForgotPassword";
-import VerifyOtp from "./auth/VerifyOtp";
-import ResetPassword from "./auth/ResetPassword";
-import RegisteredHomePage from "./registerHomepage/RegisteredHomePage";
-import VerifySuccess from "./confirm/VerifySuccess";
-import VerifyFailure from "./confirm/VerifyFailure";
-import SelectUserType from "./onboarding/SelectUserType";
-import OrganizationDetails from "./onboarding/OrganizationDetails";
-import RequireAuth from "./auth/RequireAuth";
-import PostLoginRedirect from "./auth/PostLoginRedirect";
-import OrgGate from "./auth/OrgGate";
-import RoleGate from "./auth/RoleGate";
-import Forbidden from "./errors/Forbidden";
+import SchoolAdmin from "./features/school-admin/SchoolAdmin";
+import Error from "./pages/Error";
+import Login from "./features/auth/Login";
+import ForgotPassword from "./features/auth/ForgotPassword";
+import VerifyOtp from "./features/auth/VerifyOtp";
+import ResetPassword from "./features/auth/ResetPassword";
+import RegisteredHomePage from "./features/landing/pages/registerHomepage/RegisteredHomePage";
+import VerifySuccess from "./features/auth/confirm/VerifySuccess";
+import VerifyFailure from "./features/auth/confirm/VerifyFailure";
+import SelectUserType from "./features/auth/onboarding/SelectUserType";
+import OrganizationDetails from "./features/auth/onboarding/OrganizationDetails";
+import RequireAuth from "./features/auth/RequireAuth";
+import PostLoginRedirect from "./features/auth/PostLoginRedirect";
+import OrgGate from "./features/auth/OrgGate";
+import RoleGate from "./features/auth/RoleGate";
+import Forbidden from "./pages/Forbidden";
 
 const App = () => {
   return (
