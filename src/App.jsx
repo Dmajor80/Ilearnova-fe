@@ -79,35 +79,20 @@ const App = () => {
         <Route path="/Admin-login" element={<Navigate to="/login" replace />} />
 
         <Route path="/teacher-dashboard" element={<RequireAuth><RoleGate anyOf={['teacher']}><TeacherDashboard /></RoleGate></RequireAuth>} />
-        {/* student dashboard */}
-        <Route path="/student-dashboard" element={<RequireAuth><RoleGate anyOf={['student']}><StudentDashboard /></RoleGate></RequireAuth>} />
-        <Route path="overview" element={<Overview />} />
-        <Route path="IDcard" element={<IdCard />} />
-        <Route path="attendance" element={<Attendance />} />
-        <Route path="assignment" element={<Assignments />} />
-        <Route path="timetable" element={<Timetable />} />
-        <Route path="transcript" element={<Grade />} />
-        <Route path="courses" element={<CoursesComponent />} />
-        <Route path="result" element={<Result />} />
-        <Route path="exam" element={<Exam />} />
-        <Route path="courses/:courseId" element={<CoursePage />} />
-        {/* end of student dashboard */}
-        {/* course page */}
-        {/* <Route path="/course-page" element={<CoursePage />} /> */}
-        {/* end of course page */}
-        {/* student dashboard */}
-        <Route path="/student-dashboard" element={<RequireAuth><StudentDashboard /></RequireAuth>}>
-          <Route path="/student-dashboard" element={<Overview />} />
+
+        {/* student dashboard with nested routes */}
+        <Route path="/student-dashboard" element={<RequireAuth><RoleGate anyOf={['student']}><StudentDashboard /></RoleGate></RequireAuth>}>
+          <Route index element={<Overview />} />
           <Route path="overview" element={<Overview />} />
           <Route path="IDcard" element={<IdCard />} />
           <Route path="attendance" element={<Attendance />} />
-          {/* <Route path="assignment" element={<Assignments />} /> */}
+          <Route path="assignment" element={<Assignments />} />
           <Route path="timetable" element={<Timetable />} />
           <Route path="transcript" element={<Grade />} />
           <Route path="courses" element={<CoursesComponent />} />
+          <Route path="courses/:courseId" element={<CoursePage />} />
           <Route path="result" element={<Result />} />
           <Route path="exam" element={<Exam />} />
-          <Route path="courses/:courseId" element={<CoursePage />} />
           {/* <Route path="messages" element={<Messages />} /> */}
         </Route>
         {/* end of student dashboard */}
@@ -121,6 +106,9 @@ const App = () => {
         </Route>
         {/*end of  admin section */}
         <Route path="/dashboard" element={<RequireAuth><RoleGate anyOf={['org_admin','admin']}><OrgGate><SchoolAdmin /></OrgGate></RoleGate></RequireAuth>} />
+
+        {/* Catch-all route for 404 errors */}
+        <Route path="*" element={<Error />} />
       </Routes>
       <Pages />
     </>

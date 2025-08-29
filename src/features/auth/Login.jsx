@@ -15,6 +15,8 @@ export default function Login() {
     errors,
     loginAttempts,
     darkMode,
+    isBlocked,
+    blockTimeRemaining,
     inputRefs,
     handleInputChange,
     setRememberMe,
@@ -151,10 +153,10 @@ export default function Login() {
                 {/* Login Button */}
                 <button
                   type="submit"
-                  disabled={loading || loginAttempts >= 3}
+                  disabled={loading || isBlocked}
                   className="w-full px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-cyan-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-4 focus:ring-blue-300 shadow-lg"
                 >
-                  {loading ? <LoadingSpinner /> : "Sign In"}
+                  {loading ? <LoadingSpinner /> : isBlocked ? "Account Locked" : "Sign In"}
                 </button>
 
                 {/* Divider */}
@@ -195,6 +197,41 @@ export default function Login() {
             </form>
 
             {/* Additional Links */}
+            {/* Security Status Display */}
+            {isBlocked && blockTimeRemaining > 0 && (
+              <div className={`mt-6 p-4 rounded-2xl border ${
+                darkMode
+                  ? "bg-red-900/20 border-red-800/50 text-red-300"
+                  : "bg-red-50 border-red-200 text-red-700"
+              }`}>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">!</span>
+                  </div>
+                  <span className="font-semibold">Account Temporarily Locked</span>
+                </div>
+                <p className="text-sm">
+                  Too many failed login attempts. Please wait {Math.ceil(blockTimeRemaining / 60)} minutes before trying again.
+                </p>
+                <div className="mt-2 text-xs opacity-75">
+                  Time remaining: {Math.floor(blockTimeRemaining / 60)}:{(blockTimeRemaining % 60).toString().padStart(2, '0')}
+                </div>
+              </div>
+            )}
+
+            {loginAttempts > 0 && !isBlocked && (
+              <div className={`mt-4 p-3 rounded-xl border ${
+                darkMode
+                  ? "bg-yellow-900/20 border-yellow-800/50 text-yellow-300"
+                  : "bg-yellow-50 border-yellow-200 text-yellow-700"
+              }`}>
+                <p className="text-sm">
+                  {loginAttempts} failed attempt{loginAttempts > 1 ? 's' : ''}.
+                  {5 - loginAttempts} attempt{5 - loginAttempts !== 1 ? 's' : ''} remaining before temporary lockout.
+                </p>
+              </div>
+            )}
+
             <div className="text-center mt-8 space-y-2">
               <p
                 className={`text-sm ${
