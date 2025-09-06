@@ -59,7 +59,7 @@ const Dashboard = () => {
   };
   return (
     <>
-      {/* dashboard conntainer */}
+      {/* dashboard container */}
       <div className="w-[1224px] p-3.5">
         {/* admin-nav */}
         <div className=" flex items-center justify-between">

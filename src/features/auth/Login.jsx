@@ -143,12 +143,12 @@ export default function Login() {
                 </div>
 
                 {/* Login Attempts Warning */}
-                {loginAttempts > 0 && (
+                {/* {loginAttempts > 0 && (
                   <div className="text-center text-sm text-orange-600 dark:text-orange-400">
                     {3 - loginAttempts} attempt
                     {3 - loginAttempts !== 1 ? "s" : ""} remaining
                   </div>
-                )}
+                )} */}
 
                 {/* Login Button */}
                 <button
