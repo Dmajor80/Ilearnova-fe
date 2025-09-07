@@ -126,8 +126,8 @@ const SchoolDashboardLayout = React.memo(function SchoolDashboardLayout({
           />
 
           {/* Dashboard Content */}
-          <main className="flex-1 overflow-y-auto p-6">
-            <div className="max-w-7xl mx-auto space-y-6">
+          <main className="flex-1 overflow-y-auto py-6 px-4 lg:px-4 xl:px-6">
+            <div className="max-w-screen-2xl mx-auto space-y-6">
               {/* Stats Section */}
               <section aria-label="School statistics">
                 <SchoolStatsGrid

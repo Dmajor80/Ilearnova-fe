@@ -42,3 +42,17 @@ export function formatNumber(
     return String(n);
   }
 }
+
+/**
+ * Convert a name/string to Title Case while preserving separators
+ * - Handles spaces, hyphens, and apostrophes: e.g., "o'neill-smith jr" -> "O'Neill-Smith Jr"
+ * - Leaves non-letter segments unchanged
+ */
+export function titleCase(value) {
+  const raw = String(value ?? "");
+  return raw
+    .toLowerCase()
+    .split(/(\s|-|')/)
+    .map(part => (/^[a-z]/.test(part) ? part[0].toUpperCase() + part.slice(1) : part))
+    .join("");
+}

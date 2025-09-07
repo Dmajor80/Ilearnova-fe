@@ -1,5 +1,6 @@
 import React from "react";
 import { RefreshCw, BarChart3, ChevronDown, Bell } from "lucide-react";
+import { titleCase } from "@/lib/formatters";
 
 /**
  * School dashboard header component with user info, notifications, and actions.
@@ -7,8 +8,8 @@ import { RefreshCw, BarChart3, ChevronDown, Bell } from "lucide-react";
  */
 const SchoolDashboardHeader = React.memo(function SchoolDashboardHeader({
   user,
-  schoolName = "Akademi School",
-  welcomeMessage = "Welcome back",
+  schoolName = "",
+  welcomeMessage = "",
   lastUpdated,
   onRefresh,
   onViewReports,
@@ -56,6 +57,7 @@ const SchoolDashboardHeader = React.memo(function SchoolDashboardHeader({
     }
   };
 
+  
   return (
     <header className={`bg-white shadow-sm border-b border-gray-200 ${className}`}>
       <div className="px-6 py-4">
@@ -67,7 +69,7 @@ const SchoolDashboardHeader = React.memo(function SchoolDashboardHeader({
                 {welcomeMessage}
               </p>
               <h1 className="text-xl md:text-2xl font-bold text-[#303972]">
-                {user?.displayName || "School Admin"}
+                {titleCase(user?.displayName || "School Admin")}
               </h1>
               <div className="flex items-center space-x-4 text-xs text-gray-500">
                 <span>{schoolName}</span>
