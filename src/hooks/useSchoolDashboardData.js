@@ -77,7 +77,7 @@ export default function useSchoolDashboardData() {
     }
 
     try {
-      const response = await http.get("/api/school/dashboard/metrics/", {
+      const response = await http.get("/api/admin/school/dashboard/metrics/", {
         auth: true
       });
 
@@ -123,7 +123,7 @@ export default function useSchoolDashboardData() {
     }
 
     try {
-      const response = await http.get("/api/school/dashboard/performance/", {
+      const response = await http.get("/api/admin/school/dashboard/performance/", {
         auth: true
       });
 
@@ -155,7 +155,7 @@ export default function useSchoolDashboardData() {
     }
 
     try {
-      const response = await http.get("/api/school/teachers/", {
+      const response = await http.get("/api/admin/school/teachers/", {
         auth: true,
         params: { limit: 10, include_performance: true }
       });
@@ -193,7 +193,7 @@ export default function useSchoolDashboardData() {
     }
 
     try {
-      const response = await http.get("/api/school/students/unpaid-tuition/", {
+      const response = await http.get("/api/admin/school/students/unpaid-tuition/", {
         auth: true,
         params: { limit: 10 }
       });
@@ -231,7 +231,7 @@ export default function useSchoolDashboardData() {
     }
 
     try {
-      const response = await http.get("/api/school/dashboard/activities/", {
+      const response = await http.get("/api/admin/school/dashboard/activities/", {
         auth: true,
         params: { limit: 10 }
       });

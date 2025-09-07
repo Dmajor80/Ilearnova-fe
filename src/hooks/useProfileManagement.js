@@ -79,12 +79,11 @@ export default function useProfileManagement() {
         throw new Error(`Upload failed: ${response.status}`);
       }
     } catch (err) {
-      const appError = parseError(err, { action: 'upload_organization_logo' });
-      const userMessage = getUserFriendlyMessage(appError);
-      
+      const userMessage = err.message || 'Failed to upload organization logo';
+
       setError(userMessage);
       onError?.(userMessage);
-      
+
       return { success: false, error: userMessage };
     } finally {
       setUploading(false);
@@ -158,12 +157,11 @@ export default function useProfileManagement() {
         throw new Error(`Upload failed: ${response.status}`);
       }
     } catch (err) {
-      const appError = parseError(err, { action: 'upload_profile_picture' });
-      const userMessage = getUserFriendlyMessage(appError);
-      
+      const userMessage = err.message || 'Failed to upload profile picture';
+
       setError(userMessage);
       onError?.(userMessage);
-      
+
       return { success: false, error: userMessage };
     } finally {
       setUploading(false);

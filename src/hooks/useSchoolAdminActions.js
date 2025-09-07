@@ -116,7 +116,7 @@ export default function useSchoolAdminActions() {
     closeQuickActions();
     
     try {
-      const response = await http.get("/api/school/export/students/", {
+      const response = await http.get("/api/admin/school/export/students/", {
         auth: true,
         responseType: "blob"
       });
@@ -154,7 +154,7 @@ export default function useSchoolAdminActions() {
     setActionLoading(true);
     
     try {
-      const response = await http.get("/api/school/export/teachers/", {
+      const response = await http.get("/api/admin/school/export/teachers/", {
         auth: true,
         responseType: "blob"
       });

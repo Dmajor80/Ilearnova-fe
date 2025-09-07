@@ -1,4 +1,4 @@
-import http from "@/api/baseClient";
+import { http } from "@/api/baseClient";
 
 /**
  * School Admin API functions for organization and user profile management
@@ -105,7 +105,7 @@ export const getUserProfile = async () => {
  * @returns {Promise} API response
  */
 export const getSchoolDashboardMetrics = async () => {
-  const response = await http.get('/api/school/dashboard/metrics/', {
+  const response = await http.get('/api/admin/school/dashboard/metrics/', {
     auth: true,
   });
 
@@ -118,7 +118,7 @@ export const getSchoolDashboardMetrics = async () => {
  * @returns {Promise} API response
  */
 export const getSchoolPerformanceData = async (params = {}) => {
-  const response = await http.get('/api/school/dashboard/performance/', {
+  const response = await http.get('/api/admin/school/dashboard/performance/', {
     auth: true,
     params,
   });
@@ -132,7 +132,7 @@ export const getSchoolPerformanceData = async (params = {}) => {
  * @returns {Promise} API response
  */
 export const getSchoolTeachers = async (params = {}) => {
-  const response = await http.get('/api/school/teachers/', {
+  const response = await http.get('/api/admin/school/teachers/', {
     auth: true,
     params,
   });
@@ -146,7 +146,7 @@ export const getSchoolTeachers = async (params = {}) => {
  * @returns {Promise} API response
  */
 export const getUnpaidTuition = async (params = {}) => {
-  const response = await http.get('/api/school/students/unpaid-tuition/', {
+  const response = await http.get('/api/admin/school/students/unpaid-tuition/', {
     auth: true,
     params,
   });
@@ -160,7 +160,7 @@ export const getUnpaidTuition = async (params = {}) => {
  * @returns {Promise} API response
  */
 export const getSchoolActivities = async (params = {}) => {
-  const response = await http.get('/api/school/dashboard/activities/', {
+  const response = await http.get('/api/admin/school/dashboard/activities/', {
     auth: true,
     params,
   });
@@ -182,11 +182,11 @@ export const getSchoolActivities = async (params = {}) => {
  * - GET /api/users/profile/ - Get current user profile
  * 
  * School Dashboard Data:
- * - GET /api/school/dashboard/metrics/ - School overview metrics
- * - GET /api/school/dashboard/performance/ - Performance analytics
- * - GET /api/school/teachers/ - Teachers data
- * - GET /api/school/students/unpaid-tuition/ - Unpaid tuition data
- * - GET /api/school/dashboard/activities/ - Recent activities
+ * - GET /api/admin/school/dashboard/metrics/ - School overview metrics
+ * - GET /api/admin/school/dashboard/performance/ - Performance analytics
+ * - GET /api/admin/school/teachers/ - Teachers data
+ * - GET /api/admin/school/students/unpaid-tuition/ - Unpaid tuition data
+ * - GET /api/admin/school/dashboard/activities/ - Recent activities
  * 
  * Expected API Response Structures:
  * 
