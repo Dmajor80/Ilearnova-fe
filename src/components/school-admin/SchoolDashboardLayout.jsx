@@ -179,19 +179,55 @@ const SchoolDashboardLayout = React.memo(function SchoolDashboardLayout({
                     { key: "id", label: "ID", sortable: true },
                     { key: "name", label: "Name", sortable: true },
                     { key: "class", label: "Class", sortable: true },
-                    { key: "fees", label: "Fees", sortable: true, align: "right" },
-                    { 
-                      key: "rank", 
-                      label: "Rank", 
-                      sortable: true,
-                      render: (value) => (
-                        <span className={`
+                    {
+                       key: "pending_amount",
+                       label: "Outstanding Fees",
+                       sortable: true,
+                       align: "right",
+                       render: (value, row) => {
+                        const pending = Number(value ?? 0);
+                        const total = Number(row?.total_fees ?? 0);
+                        const ratio = total > 0 ? pending / total : 0;
+                        const overHalf = ratio > 0.5;
+
+                        const badgeClass = `
                           px-2 py-1 rounded-full text-xs font-medium
-                          ${value === "First" ? "bg-yellow-100 text-yellow-800" : "bg-blue-100 text-blue-800"}
-                        `}>
-                          {value}
-                        </span>
-                      )
+                          ${overHalf ? "bg-red-100 text-red-800" : "bg-orange-100 text-orange-800"}
+                        `;
+
+                        const formatCurrency = (n) =>
+                          new Intl.NumberFormat("en-NG", {
+                            style: "currency",
+                            currency: "NGN",
+                            maximumFractionDigits: 0
+                          }).format(Number(n || 0));
+
+                        return (
+                          <span className={badgeClass}>
+                            {formatCurrency(pending)} ({Math.round(ratio * 100)}%)
+                          </span>
+                        );
+                      }
+                    },
+                    { 
+                      key: "total_fees", 
+                      label: "Total Fees", 
+                      sortable: true,
+                      align: "right",
+                      render: (value) => {
+                        const amount = Number(value ?? 0);
+                        const formatCurrency = (n) =>
+                          new Intl.NumberFormat("en-NG", {
+                            style: "currency",
+                            currency: "NGN",
+                            maximumFractionDigits: 0
+                          }).format(Number(n || 0));
+                        return (
+                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            {formatCurrency(amount)}
+                          </span>
+                        );
+                      }
                     }
                   ]}
                   loading={schoolDataLoading}

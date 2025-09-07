@@ -41,20 +41,25 @@ async function request(method, path, { body, headers, signal, auth = true } = {}
 
   const res = auth ? await authorizedFetch(url, init) : await fetch(url, init);
 
-  let data = null;
   const contentType = res.headers.get("content-type") || "";
-  if (contentType.includes("application/json")) {
-    try {
-      data = await res.json();
-    } catch {
-      data = null;
+  const isJson = contentType.includes("application/json");
+
+  try {
+    const preview = isJson ? await res.clone().json() : await res.clone().text();
+    if (isJson) {
+      console.log("url:", url);
+      console.log("response:", preview);
+    } else {
+      console.log("response:", preview);
     }
-  } else {
-    try {
-      data = await res.text();
-    } catch {
-      data = null;
-    }
+  } catch (e) {
+  }
+
+  let data = null;
+  try {
+    data = isJson ? await res.json() : await res.text();
+  } catch {
+    data = null;
   }
 
   if (!res.ok) {

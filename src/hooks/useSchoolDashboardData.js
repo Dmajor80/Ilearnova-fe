@@ -77,23 +77,20 @@ export default function useSchoolDashboardData() {
     }
 
     try {
-      const response = await http.get("/api/admin/school/dashboard/metrics/", {
+      const payload = await http.get("/api/admin/school/dashboard/metrics/", {
         auth: true
       });
+      const data = payload?.data ?? payload;
+      console.log("Metrics API response:", data);
 
-      if (response.ok) {
-        const data = await response.json();
-        setMetrics(prevMetrics => ({
-          ...prevMetrics,
-          students: { ...prevMetrics.students, value: data.total_students || "932" },
-          teachers: { ...prevMetrics.teachers, value: data.total_teachers || "754" },
-          events: { ...prevMetrics.events, value: data.upcoming_events || "40" },
-          meals: { ...prevMetrics.meals, value: data.daily_meals || "32k" }
-        }));
-        setError(null);
-      } else {
-        throw new Error(`Failed to fetch school metrics: ${response.status}`);
-      }
+      setMetrics(prevMetrics => ({
+        ...prevMetrics,
+        students: { ...prevMetrics.students, value: data.total_students || "932" },
+        teachers: { ...prevMetrics.teachers, value: data.total_teachers || "754" },
+        events: { ...prevMetrics.events, value: data.upcoming_events || "40" },
+        meals: { ...prevMetrics.meals, value: data.daily_meals || "32k" }
+      }));
+      setError(null);
     } catch (err) {
       const appError = parseError(err, { action: "fetch_school_metrics" });
       const userMessage = getUserFriendlyMessage(appError);
@@ -123,19 +120,16 @@ export default function useSchoolDashboardData() {
     }
 
     try {
-      const response = await http.get("/api/admin/school/dashboard/performance/", {
+      const payload = await http.get("/api/admin/school/dashboard/performance/", {
         auth: true
       });
+      const data = payload?.data ?? payload;
+      console.log("Performance API response:", data);
 
-      if (response.ok) {
-        const data = await response.json();
-        setSchoolData(prev => ({
-          ...prev,
-          performanceChart: data.performance_chart
-        }));
-      } else {
-        throw new Error(`Failed to fetch performance data: ${response.status}`);
-      }
+      setSchoolData(prev => ({
+        ...prev,
+        performanceChart: data.performance_chart
+      }));
     } catch (err) {
       markEndpointFailed(endpointName, "Performance data unavailable");
       console.warn("Failed to fetch performance data:", err);
@@ -155,20 +149,17 @@ export default function useSchoolDashboardData() {
     }
 
     try {
-      const response = await http.get("/api/admin/school/teachers/", {
+      const payload = await http.get("/api/admin/school/teachers/", {
         auth: true,
         params: { limit: 10, include_performance: true }
       });
+      const data = payload?.data ?? payload;
+      console.log("Teachers API response:", data);
 
-      if (response.ok) {
-        const data = await response.json();
-        setSchoolData(prev => ({
-          ...prev,
-          teachers: data.teachers || []
-        }));
-      } else {
-        throw new Error(`Failed to fetch teachers data: ${response.status}`);
-      }
+      setSchoolData(prev => ({
+        ...prev,
+        teachers: data.teachers || []
+      }));
     } catch (err) {
       markEndpointFailed(endpointName, "Teachers data unavailable");
       console.warn("Failed to fetch teachers data:", err);
@@ -193,20 +184,18 @@ export default function useSchoolDashboardData() {
     }
 
     try {
-      const response = await http.get("/api/admin/school/students/unpaid-tuition/", {
+      const payload = await http.get("/api/admin/school/students/unpaid_tuition/", {
         auth: true,
         params: { limit: 10 }
       });
+      console.log("unpaid tuition data:", payload);
 
-      if (response.ok) {
-        const data = await response.json();
-        setSchoolData(prev => ({
-          ...prev,
-          unpaidTuition: data.students || []
-        }));
-      } else {
-        throw new Error(`Failed to fetch unpaid tuition data: ${response.status}`);
-      }
+      const data = payload?.data ?? payload;
+
+      setSchoolData(prev => ({
+        ...prev,
+        unpaidTuition: data.students || []
+      }));
     } catch (err) {
       markEndpointFailed(endpointName, "Unpaid tuition data unavailable");
       console.warn("Failed to fetch unpaid tuition data:", err);
@@ -231,17 +220,14 @@ export default function useSchoolDashboardData() {
     }
 
     try {
-      const response = await http.get("/api/admin/school/dashboard/activities/", {
+      const payload = await http.get("/api/admin/school/dashboard/activities/", {
         auth: true,
         params: { limit: 10 }
       });
+      const data = payload?.data ?? payload;
+      console.log("Activities API response:", data);
 
-      if (response.ok) {
-        const data = await response.json();
-        setRecentActivities(data.activities || []);
-      } else {
-        throw new Error(`Failed to fetch activities: ${response.status}`);
-      }
+      setRecentActivities(data.activities || []);
     } catch (err) {
       markEndpointFailed(endpointName, "Activities data unavailable");
       console.warn("Failed to fetch recent activities:", err);

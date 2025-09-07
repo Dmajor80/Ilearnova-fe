@@ -146,7 +146,7 @@ export const getSchoolTeachers = async (params = {}) => {
  * @returns {Promise} API response
  */
 export const getUnpaidTuition = async (params = {}) => {
-  const response = await http.get('/api/admin/school/students/unpaid-tuition/', {
+  const response = await http.get('/api/admin/school/students/unpaid_tuition/', {
     auth: true,
     params,
   });
@@ -185,7 +185,7 @@ export const getSchoolActivities = async (params = {}) => {
  * - GET /api/admin/school/dashboard/metrics/ - School overview metrics
  * - GET /api/admin/school/dashboard/performance/ - Performance analytics
  * - GET /api/admin/school/teachers/ - Teachers data
- * - GET /api/admin/school/students/unpaid-tuition/ - Unpaid tuition data
+ * - GET /api/admin/school/students/unpaid_tuition/ - Unpaid tuition data
  * - GET /api/admin/school/dashboard/activities/ - Recent activities
  * 
  * Expected API Response Structures:
