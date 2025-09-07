@@ -55,16 +55,50 @@ export function OrganizationProvider({ children }) {
 
     function init() {
       const user = readUserDataFromStorage();
-      const userOrgs = Array.isArray(user?.organizations) ? user.organizations : [];
+
+      // Debug logging to help identify the issue
+      console.log("OrganizationContext: User data loaded:", user);
+
+      // Handle different possible API response structures
+      let userOrgs = [];
+      if (Array.isArray(user?.organizations)) {
+        userOrgs = user.organizations;
+      } else if (Array.isArray(user?.orgs)) {
+        userOrgs = user.orgs;
+      }
+
+      console.log("OrganizationContext: User organizations:", userOrgs);
+      console.log("OrganizationContext: Organizations structure:", userOrgs.map(org => ({
+        id: org?.organization?.id || org?.id,
+        name: org?.organization?.name || org?.name,
+        hasOrganization: !!org?.organization,
+        rawOrg: org
+      })));
+
       const selectedOrgId = user?.selectedOrgId || null;
 
       let initialOrgId = selectedOrgId;
       if (!initialOrgId) {
         // If exactly one org, auto-select it
         if (userOrgs.length === 1) {
-          initialOrgId = userOrgs[0]?.organization.id || null;
+          // Handle multiple possible API response structures
+          const firstOrg = userOrgs[0];
+          initialOrgId = firstOrg?.organization?.id ||
+                        firstOrg?.id ||
+                        (typeof firstOrg === 'string' ? firstOrg : null);
+          console.log("OrganizationContext: Auto-selecting organization:", initialOrgId, "from:", firstOrg);
+        } else if (userOrgs.length > 1) {
+          console.log("OrganizationContext: Multiple organizations found, user needs to select one");
+          // For now, auto-select the first one if user has multiple orgs
+          const firstOrg = userOrgs[0];
+          initialOrgId = firstOrg?.organization?.id ||
+                        firstOrg?.id ||
+                        (typeof firstOrg === 'string' ? firstOrg : null);
+          console.log("OrganizationContext: Auto-selecting first organization:", initialOrgId);
         }
       }
+
+      console.log("OrganizationContext: Final state - orgs:", userOrgs.length, "currentOrgId:", initialOrgId);
 
       if (!cancelled) {
         setOrgs(userOrgs);

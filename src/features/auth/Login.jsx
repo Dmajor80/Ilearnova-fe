@@ -141,15 +141,6 @@ export default function Login() {
                     Forgot Password?
                   </button>
                 </div>
-
-                {/* Login Attempts Warning */}
-                {/* {loginAttempts > 0 && (
-                  <div className="text-center text-sm text-orange-600 dark:text-orange-400">
-                    {3 - loginAttempts} attempt
-                    {3 - loginAttempts !== 1 ? "s" : ""} remaining
-                  </div>
-                )} */}
-
                 {/* Login Button */}
                 <button
                   type="submit"
@@ -226,7 +217,7 @@ export default function Login() {
                   : "bg-yellow-50 border-yellow-200 text-yellow-700"
               }`}>
                 <p className="text-sm">
-                  {loginAttempts} failed attempt{loginAttempts > 1 ? 's' : ''}.
+                  {loginAttempts} failed attempt{loginAttempts > 1 ? 's' : ''}. 
                   {5 - loginAttempts} attempt{5 - loginAttempts !== 1 ? 's' : ''} remaining before temporary lockout.
                 </p>
               </div>

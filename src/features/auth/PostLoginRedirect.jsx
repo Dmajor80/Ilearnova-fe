@@ -39,17 +39,22 @@ export default function PostLoginRedirect() {
 
     const user = getStoredUser();
 
+    // Debug logging
+    console.log("PostLoginRedirect: User data:", user);
+
     // If no user data, go to /home as a safe fallback (RequireAuth should already guard upstream)
     if (!user) {
+      console.log("PostLoginRedirect: No user data, redirecting to /home");
       navigate("/home", { replace: true, state: { from: location } });
       return;
     }
 
     // Support multiple possible backend flags for first-time login
-    const isFirstTime =
-      user.first_time_user === true;
+    const isFirstTime = user.first_time_user === true;
+    console.log("PostLoginRedirect: isFirstTime:", isFirstTime);
 
     if (isFirstTime) {
+      console.log("PostLoginRedirect: First time user, redirecting to /select-user-type");
       navigate("/select-user-type", { replace: true, state: { from: location } });
       return;
     }
@@ -62,13 +67,17 @@ export default function PostLoginRedirect() {
       roles = [String(user.role).toLowerCase()];
     }
 
+    console.log("PostLoginRedirect: Detected roles:", roles);
+
     // Role precedence: superadmin > org_admin/admin > teacher > student > parent
     const has = (r) => roles.includes(r);
     if (has("superadmin")) {
+      console.log("PostLoginRedirect: Superadmin role detected, redirecting to /admin-dashboard/dashboard");
       navigate("/admin-dashboard/dashboard", { replace: true });
       return;
     }
     if (has("org_admin") || has("admin")) {
+      console.log("PostLoginRedirect: Org admin role detected, redirecting to /dashboard");
       navigate("/dashboard", { replace: true });
       return;
     }
