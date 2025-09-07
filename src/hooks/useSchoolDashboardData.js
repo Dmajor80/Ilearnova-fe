@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { http } from "@/api/baseClient";
 import useNotification from "@/hooks/useNotification";
 import { parseError, getUserFriendlyMessage, getNotificationType } from "@/lib/errorHandler";
+import { formatCurrency } from "@/lib/formatters";
 
 /**
  * Hook that manages school dashboard data fetching, caching, and state management.
@@ -23,7 +24,7 @@ export default function useSchoolDashboardData() {
     students: { value: "0", label: "Students", description: "Total enrolled students", iconType: "users" },
     teachers: { value: "0", label: "Teachers", description: "Active teaching staff", iconType: "userCheck" },
     events: { value: "0", label: "Events", description: "Upcoming school events", iconType: "calendar" },
-    meals: { value: "0", label: "Meals", description: "Daily meals served", iconType: "utensils" }
+    financial: { value: "0", label: "Financial", description: "Total financial transactions", iconType: "dollarsign" }
   });
 
   // School-specific data state
@@ -83,12 +84,13 @@ export default function useSchoolDashboardData() {
       const data = payload?.data ?? payload;
       console.log("Metrics API response:", data);
 
+
       setMetrics(prevMetrics => ({
         ...prevMetrics,
-        students: { ...prevMetrics.students, value: data.total_students || "932" },
-        teachers: { ...prevMetrics.teachers, value: data.total_teachers || "754" },
-        events: { ...prevMetrics.events, value: data.upcoming_events || "40" },
-        meals: { ...prevMetrics.meals, value: data.daily_meals || "32k" }
+        students: { ...prevMetrics.students, value: String(data?.students?.total ?? prevMetrics.students.value) },
+        teachers: { ...prevMetrics.teachers, value: String(data?.teachers?.total ?? prevMetrics.teachers.value) },
+        events: { ...prevMetrics.events, value: String(data?.events?.upcoming ?? prevMetrics.events.value) },
+        financial: { ...prevMetrics.financial, value: formatCurrency(data?.financial?.total_fees_collected ?? 0) },
       }));
       setError(null);
     } catch (err) {

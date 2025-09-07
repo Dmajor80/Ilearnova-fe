@@ -5,6 +5,7 @@ import { SchoolStatsGrid } from "./SchoolStatsCard";
 import SchoolDataTable from "./SchoolDataTable";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import NotificationBar from "@/components/ui/NotificationBar";
+import { formatCurrency } from "@/lib/formatters";
 
 /**
  * Main school dashboard layout component that orchestrates all school admin sections.
@@ -147,12 +148,25 @@ const SchoolDashboardLayout = React.memo(function SchoolDashboardLayout({
                   title="Teachers"
                   data={memoizedSchoolData?.teachers || []}
                   columns={[
-                    { key: "name", label: "Name", sortable: true },
+                    { 
+                      key: "full_name", 
+                      label: "Name", 
+                      sortable: true,
+                      render: (value, row) => {
+                        const raw = String(value ?? row?.name ?? "");
+                        const title = raw
+                          .toLowerCase()
+                          .split(/(\s|-|')/)
+                          .map(part => (/^[a-z]/.test(part) ? part[0].toUpperCase() + part.slice(1) : part))
+                          .join("");
+                        return <span className="text-gray-900">{title}</span>;
+                      }
+                    },
                     { key: "subject", label: "Subject", sortable: true },
                     { key: "qualification", label: "Qualification", sortable: true },
-                    { key: "fees", label: "Fees", sortable: true, align: "right" },
+                    { key: "email", label: "Email", sortable: true, align: "right" },
                     { 
-                      key: "performance", 
+                      key: "performance_rating", 
                       label: "Performance", 
                       sortable: true,
                       render: (value) => (
@@ -177,7 +191,20 @@ const SchoolDashboardLayout = React.memo(function SchoolDashboardLayout({
                   data={memoizedSchoolData?.unpaidTuition || []}
                   columns={[
                     { key: "id", label: "ID", sortable: true },
-                    { key: "name", label: "Name", sortable: true },
+                    { 
+                      key: "full_name", 
+                      label: "Name", 
+                      sortable: true,
+                      render: (value, row) => {
+                        const raw = String(value ?? row?.name ?? "");
+                        const title = raw
+                          .toLowerCase()
+                          .split(/(\s|-|')/)
+                          .map(part => (/^[a-z]/.test(part) ? part[0].toUpperCase() + part.slice(1) : part))
+                          .join("");
+                        return <span className="text-gray-900">{title}</span>;
+                      }
+                    },
                     { key: "class", label: "Class", sortable: true },
                     {
                        key: "pending_amount",
@@ -195,12 +222,6 @@ const SchoolDashboardLayout = React.memo(function SchoolDashboardLayout({
                           ${overHalf ? "bg-red-100 text-red-800" : "bg-orange-100 text-orange-800"}
                         `;
 
-                        const formatCurrency = (n) =>
-                          new Intl.NumberFormat("en-NG", {
-                            style: "currency",
-                            currency: "NGN",
-                            maximumFractionDigits: 0
-                          }).format(Number(n || 0));
 
                         return (
                           <span className={badgeClass}>
@@ -216,12 +237,6 @@ const SchoolDashboardLayout = React.memo(function SchoolDashboardLayout({
                       align: "right",
                       render: (value) => {
                         const amount = Number(value ?? 0);
-                        const formatCurrency = (n) =>
-                          new Intl.NumberFormat("en-NG", {
-                            style: "currency",
-                            currency: "NGN",
-                            maximumFractionDigits: 0
-                          }).format(Number(n || 0));
                         return (
                           <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                             {formatCurrency(amount)}

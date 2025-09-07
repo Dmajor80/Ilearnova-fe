@@ -4,6 +4,7 @@ import {
   UserCheck, 
   Calendar, 
   Utensils,
+  DollarSign,
   TrendingUp,
   TrendingDown,
   Minus
@@ -51,7 +52,7 @@ const SchoolStatsCard = React.memo(function SchoolStatsCard({
       users: "bg-indigo-100 text-indigo-600",
       userCheck: "bg-orange-100 text-orange-600", 
       calendar: "bg-yellow-100 text-yellow-600",
-      utensils: "bg-slate-100 text-slate-600",
+      dollarsign: "bg-slate-100 text-slate-600",
       default: "bg-blue-100 text-blue-600"
     };
     return colorMap[type] || colorMap.default;
@@ -88,9 +89,9 @@ const SchoolStatsCard = React.memo(function SchoolStatsCard({
               <IconComponent className="w-4 h-4" aria-hidden="true" />
             )}
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-gray-500 text-xs">{loading ? "" : label}</p>
-            <p className="text-lg font-bold text-gray-800">
+            <p className="text-lg font-bold text-gray-800 truncate whitespace-nowrap">
               {loading ? "..." : error ? "Error" : value}
             </p>
           </div>
@@ -129,10 +130,10 @@ const SchoolStatsCard = React.memo(function SchoolStatsCard({
         </div>
         
         {/* Content */}
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           {/* Value */}
           <div className={`
-            text-2xl font-bold text-gray-800 leading-none mb-1
+            text-2xl font-bold text-gray-800 leading-none mb-1 truncate whitespace-nowrap
             ${loading ? "bg-gray-300 rounded h-8 animate-pulse" : ""}
           `}>
             {loading ? "" : error ? "Error" : value}
@@ -217,6 +218,7 @@ function getIconComponent(iconType) {
     userCheck: UserCheck,
     calendar: Calendar,
     utensils: Utensils,
+    dollarsign: DollarSign,
     default: Users
   };
   
