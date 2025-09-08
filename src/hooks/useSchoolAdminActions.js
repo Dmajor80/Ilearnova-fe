@@ -193,7 +193,7 @@ export default function useSchoolAdminActions() {
       students: "Student",
       teachers: "teacher-list",
       events: "calendar-app",
-      meals: "menu"
+      finance: "finance"
     };
 
     const route = navigationMap[metricId];

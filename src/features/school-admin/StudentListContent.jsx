@@ -10,15 +10,21 @@ import {
   X,
   Calendar,
   User,
-  MapPin,
   Users,
   ArrowLeft,
   Timer,
-  LocationEdit,
   LocationEditIcon,
+  Loader2,
+  AlertCircle,
+  RefreshCw,
 } from "lucide-react";
-import ss from "../../assets/9.jpg";
 import { PaymentHistory } from "./PaymentHistory";
+import useStudentData from "@/hooks/useStudentData";
+import ErrorBoundary from "@/components/ui/ErrorBoundary";
+import NotificationBar from "@/components/ui/NotificationBar";
+import Avatar from "@/components/ui/Avatar";
+import { formatRegistrationDate, formatStudentId } from "@/lib/formatters";
+
 
 // Student Details Component
 const StudentDetails = ({ student, onBack }) => {
@@ -51,11 +57,13 @@ const StudentDetails = ({ student, onBack }) => {
               <div className=""></div>
 
               <div className="absolute mt-[2rem]  flex flex-col items-center space-x-6">
-                <div className="w-40 h-40  rounded-full flex items-center justify-center text-4xl  ">
-                  <img
-                    src={student.avatar}
-                    alt=""
-                    className="border-10 border-b-white border-t-white border-l-white border-r-white  rounded-full z-1 p-0"
+                <div className="w-40 h-40 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
+                  <Avatar
+                    src={student.avatar || student.profile_picture}
+                    name={student.name || student.full_name}
+                    size="w-36 h-36"
+                    textSize="text-4xl"
+                    className="border-4 border-white"
                   />
                 </div>
                 <div className="absolute flex justify-center right-[-35rem] z-0 mt-[0.6rem]">
@@ -209,10 +217,35 @@ const StudentDetails = ({ student, onBack }) => {
 };
 
 export const StudentListContent = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [sortBy, setSortBy] = useState("newest");
+  // Use the student data hook
+  const {
+    loading,
+    error,
+    students,
+    totalStudents,
+    selectedStudent,
+    availableGrades,
+    gradesLoading,
+    gradesError,
+    currentPage,
+    totalPages,
+    studentsPerPage,
+    hasNextPage,
+    hasPreviousPage,
+    searchQuery,
+    selectedGrade,
+    refreshData,
+    handleSearch,
+    handleGradeFilter,
+    handlePageChange,
+    handleStudentSelect,
+    clearStudentSelection,
+    notification
+  } = useStudentData();
+
+  // Local state for UI components
   const [showModal, setShowModal] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [searchInput, setSearchInput] = useState("");
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -226,83 +259,10 @@ export const StudentListContent = () => {
     city: "",
   });
 
-  // Sample student data based on your images
-  const students = [
-    {
-      id: "ID 123456789",
-      name: "Dakota Farral",
-      date: "March 25, 2021",
-      parent: "Miranda Adila",
-      city: "Jakarta",
-      grade: "VII A",
-      avatar: ss,
-      Phone: "+123456780",
-      email: "karen123@gmail",
-    },
-    {
-      id: "ID 123456790",
-      name: "Dimitres Viga",
-      date: "March 25, 2021",
-      parent: "Salvadore Morbeau",
-      city: "Jakarta",
-      grade: "VII A",
-      avatar: ss,
-      Phone: "+123456780",
-      email: "karen123@gmail",
-    },
-    {
-      id: "ID 123456791",
-      name: "Indiana Barker",
-      date: "March 25, 2021",
-      parent: "Maria Historia",
-      city: "Jakarta",
-      grade: "VII A",
-      avatar: ss,
-      Phone: "+123456780",
-      email: "karen123@gmail",
-    },
-    {
-      id: "ID 123456792",
-      name: "Johnny Ahmad",
-      date: "March 25, 2021",
-      parent: "Danny Ahmad",
-      city: "Jakarta",
-      grade: "VII A",
-      avatar: ss,
-      Phone: "+123456780",
-      email: "karen123@gmail",
-    },
-    {
-      id: "ID 123456793",
-      name: "Jordan Nico",
-      date: "March 25, 2021",
-      parent: "Amanda Nico",
-      city: "Jakarta",
-      grade: "VII A",
-      avatar: ss,
-      Phone: "+123456780",
-      email: "karen123@gmail",
-    },
-    {
-      id: "ID 123456794",
-      name: "Karen Hope",
-      date: "March 25, 2021",
-      parent: "Justin Hope",
-      city: "Jakarta",
-      grade: "VII A",
-      avatar: ss,
-      Phone: "+123456780",
-      email: "karen123@gmail",
-    },
-  ];
-
-  const studentsPerPage = 10;
-  const totalPages = Math.ceil(students.length / studentsPerPage);
+  // Calculate display values
   const startIndex = (currentPage - 1) * studentsPerPage;
-  const currentStudents = students.slice(
-    startIndex,
-    startIndex + studentsPerPage
-  );
+  const endIndex = Math.min(startIndex + studentsPerPage, totalStudents);
+  const currentStudents = students;
 
   const handleInputChange = (e) => {
     setFormData({
@@ -311,16 +271,21 @@ export const StudentListContent = () => {
     });
   };
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
+  const handleSearchInputChange = (e) => {
+    const value = e.target.value;
+    setSearchInput(value);
+    // Debounce search to avoid too many API calls
+    setTimeout(() => {
+      handleSearch(value);
+    }, 300);
   };
 
   const handleStudentClick = (student) => {
-    setSelectedStudent(student);
+    handleStudentSelect(student);
   };
 
   const handleBackToList = () => {
-    setSelectedStudent(null);
+    clearStudentSelection();
   };
 
   const handleSubmit = (e) => {
@@ -356,36 +321,80 @@ export const StudentListContent = () => {
   }
 
   return (
-    <div className=" min-h-screen p-6">
-      {/* Header */}
-      <div className="flex justify-between items-center p-6 bg-[white] mb-10">
-        <div className="flex items-center space-x-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Search here..."
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+    <ErrorBoundary>
+      <div className="min-h-screen p-6">
+        {/* Notification */}
+        {notification.show && (
+          <NotificationBar
+            message={notification.message}
+            type={notification.type}
+            onClose={notification.hide}
+          />
+        )}
+
+        {/* Header */}
+        <div className="flex justify-between items-center p-6 bg-white mb-10 rounded-lg shadow-sm">
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search students..."
+                value={searchInput}
+                onChange={handleSearchInputChange}
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={loading}
+              />
+            </div>
+            <select
+              value={selectedGrade}
+              onChange={(e) => handleGradeFilter(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={loading || gradesLoading}
+              title={gradesError ? `Error loading grades: ${gradesError}` : "Filter by grade"}
+            >
+              <option value="">
+                {gradesLoading
+                  ? "Loading grades..."
+                  : gradesError
+                    ? "Error loading grades"
+                    : availableGrades.length === 0
+                      ? "No grades available"
+                      : "All Grades"
+                }
+              </option>
+              {!gradesLoading && !gradesError && availableGrades.length > 0 &&
+                availableGrades.map((grade) => (
+                  <option key={grade.id || grade.name} value={grade.id || grade.name}>
+                    {grade.label || grade.name || grade.id}
+                  </option>
+                ))
+              }
+              {gradesError && (
+                <option disabled>Failed to load grades</option>
+              )}
+              {!gradesLoading && !gradesError && availableGrades.length === 0 && (
+                <option disabled>No grades configured</option>
+              )}
+            </select>
+            <button
+              onClick={() => refreshData(true)}
+              disabled={loading}
+              className="p-2 text-gray-500 hover:text-gray-700 disabled:opacity-50"
+              title="Refresh data"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            </button>
           </div>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          <button
+            onClick={() => setShowModal(true)}
+            className="bg-[#4D44B5] hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors disabled:opacity-50"
+            disabled={loading}
           >
-            <option value="newest">Newest</option>
-            <option value="oldest">Oldest</option>
-            <option value="name">Name</option>
-          </select>
+            <Plus className="w-4 h-4 font-semibold" />
+            <span className="text-[13px] font-semibold">New Student</span>
+          </button>
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="bg-[#4D44B5] hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-        >
-          <Plus className="w-4 h-4 font-semibold" />
-          <span className="text-[13px] font-semibold">New Student</span>
-        </button>
-      </div>
       <div className="">
         {/* Table */}
         <div className="overflow-x-auto">
@@ -402,7 +411,7 @@ export const StudentListContent = () => {
                   ID ↕
                 </th>
                 <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider cursor-pointer hover:bg-gray-100">
-                  Date ↕
+                  Registered ↕
                 </th>
                 <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider cursor-pointer hover:bg-gray-100">
                   Parent Name ↕
@@ -421,117 +430,257 @@ export const StudentListContent = () => {
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-[white] rounded-[5px]">
-              {currentStudents.map((student, index) => (
-                <tr
-                  key={index}
-                  className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
-                  onClick={() => handleStudentClick(student)}
-                >
-                  <td className="p-4" onClick={(e) => e.stopPropagation()}>
-                    <input
-                      type="checkbox"
-                      className="rounded border-gray-300"
-                    />
-                  </td>
-                  <td className="p-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8   flex items-center justify-center text-sm">
-                        <img
-                          src={student.avatar}
-                          alt=""
-                          className="rounded-full"
-                        />
-                      </div>
-                      <span className="font-bold text-[#303972] text-[16px] font-poppins">
-                        {student.name}
-                      </span>
+            <tbody className="bg-white rounded-[5px]">
+              {loading ? (
+                <tr>
+                  <td colSpan="9" className="p-8 text-center">
+                    <div className="flex items-center justify-center space-x-2">
+                      <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
+                      <span className="text-gray-500">Loading students...</span>
                     </div>
-                  </td>
-                  <td className="p-4 text-[#4D44B5] font-bold text-[16px] font-poppins">
-                    {student.id}
-                  </td>
-                  <td className="p-4 text-[#A098AE] text-[16px] font-normal font-poppins">
-                    {student.date}
-                  </td>
-                  <td className="p-4 text-[#303972] text-[16px] font-normal font-poppins">
-                    {student.parent}
-                  </td>
-                  <td className="p-4 text-[#303972] text-[16px] font-normal font-poppins">
-                    {student.city}
-                  </td>
-                  <td className="p-4" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex space-x-2">
-                      <button className="p-2  bg-[#EBEBF9] hover:text-blue-600 rounded-full">
-                        <Phone className="w-5 h-5 text-[#A098AE]" />
-                      </button>
-                      <button className="p-2  hover:text-blue-600 bg-[#EBEBF9] rounded-full">
-                        <Mail className="w-5 h-5 text-[#A098AE]" />
-                      </button>
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${getGradeColor(
-                        student.grade
-                      )}`}
-                    >
-                      {student.grade}
-                    </span>
-                  </td>
-                  <td className="p-4" onClick={(e) => e.stopPropagation()}>
-                    <button className="p-1 text-gray-400 hover:text-gray-600">
-                      <MoreHorizontal className="w-4 h-4" />
-                    </button>
                   </td>
                 </tr>
-              ))}
+              ) : error ? (
+                <tr>
+                  <td colSpan="9" className="p-8 text-center">
+                    <div className="flex flex-col items-center space-y-2">
+                      <AlertCircle className="w-8 h-8 text-red-500" />
+                      <span className="text-gray-500">Failed to load students</span>
+                      <button
+                        onClick={() => refreshData(true)}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                      >
+                        Try Again
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ) : currentStudents.length === 0 ? (
+                <tr>
+                  <td colSpan="9" className="p-8 text-center">
+                    <div className="flex flex-col items-center space-y-3">
+                      <Users className="w-12 h-12 text-gray-400" />
+                      {searchQuery || selectedGrade ? (
+                        <>
+                          <span className="text-gray-600 font-medium">No students match your criteria</span>
+                          <div className="text-sm text-gray-500 space-y-1">
+                            {searchQuery && (
+                              <div>Search: "{searchQuery}"</div>
+                            )}
+                            {selectedGrade && (
+                              <div>Grade: {selectedGrade}</div>
+                            )}
+                          </div>
+                          <button
+                            onClick={() => {
+                              handleSearch("");
+                              handleGradeFilter("");
+                            }}
+                            className="px-4 py-2 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+                          >
+                            Clear filters
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-gray-600 font-medium">No students registered yet</span>
+                          <span className="text-sm text-gray-500">
+                            Students will appear here once they are registered in the system
+                          </span>
+                          <button
+                            onClick={() => refreshData(true)}
+                            className="px-4 py-2 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+                          >
+                            Refresh
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                currentStudents.map((student, index) => (
+                  <tr
+                    key={student.id || index}
+                    className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
+                    onClick={() => handleStudentClick(student)}
+                  >
+                    <td className="p-4" onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        className="rounded border-gray-300"
+                      />
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center space-x-3">
+                        <Avatar
+                          src={student.avatar || student.profile_picture}
+                          name={student.name || student.full_name}
+                          size="w-8 h-8"
+                          textSize="text-sm"
+                        />
+                        <span className="font-bold text-[#303972] text-[16px] font-poppins">
+                          {student.name || student.full_name}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="p-4" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => handleStudentClick(student)}
+                        className="text-[#4D44B5] font-bold text-[16px] font-poppins hover:text-[#3D34A5] hover:underline transition-colors cursor-pointer"
+                        title={`View profile for ${student.name || student.full_name} (Full ID: ${student.id || student.student_id})`}
+                      >
+                        {formatStudentId(student)}
+                      </button>
+                    </td>
+                    <td className="p-4 text-[#A098AE] text-[16px] font-normal font-poppins">
+                      <span title="Registration date">
+                        {formatRegistrationDate(student)}
+                      </span>
+                    </td>
+                    <td className="p-4 text-[#303972] text-[16px] font-normal font-poppins">
+                      {student.parent || student.parent_name || student.guardian_name}
+                    </td>
+                    <td className="p-4 text-[#303972] text-[16px] font-normal font-poppins">
+                      {student.city || student.address}
+                    </td>
+                    <td className="p-4" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex space-x-2">
+                        <button
+                          className="p-2 bg-[#EBEBF9] hover:text-blue-600 rounded-full"
+                          title="Call student"
+                        >
+                          <Phone className="w-5 h-5 text-[#A098AE]" />
+                        </button>
+                        <button
+                          className="p-2 hover:text-blue-600 bg-[#EBEBF9] rounded-full"
+                          title="Email student"
+                        >
+                          <Mail className="w-5 h-5 text-[#A098AE]" />
+                        </button>
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${getGradeColor(
+                          student.grade || student.class
+                        )}`}
+                      >
+                        {student.grade || student.class}
+                      </span>
+                    </td>
+                    <td className="p-4" onClick={(e) => e.stopPropagation()}>
+                      <button className="p-1 text-gray-400 hover:text-gray-600">
+                        <MoreHorizontal className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
 
         {/* Pagination */}
-        <div className="flex justify-between items-center p-6 border-t border-gray-200">
-          <div className="text-sm text-gray-600">
-            Showing {startIndex + 1} to{" "}
-            {Math.min(startIndex + studentsPerPage, students.length)} of{" "}
-            {students.length} entries
-          </div>
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
+        {!loading && totalStudents > 0 && (
+          <div className="flex justify-between items-center p-6 border-t border-gray-200 bg-white rounded-b-lg">
+            <div className="text-sm text-gray-600">
+              Showing {startIndex + 1} to {endIndex} of {totalStudents} entries
+            </div>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={!hasPreviousPage || loading}
+                className="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Previous page"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
 
-            {[...Array(totalPages)].map((_, index) => {
-              const page = index + 1;
-              return (
-                <button
-                  key={page}
-                  onClick={() => handlePageChange(page)}
-                  className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                    currentPage === page
-                      ? "bg-blue-600 text-white"
-                      : "text-gray-600 hover:bg-gray-100"
-                  }`}
-                >
-                  {page}
-                </button>
-              );
-            })}
+              {/* Show page numbers with ellipsis for large page counts */}
+              {totalPages <= 7 ? (
+                [...Array(totalPages)].map((_, index) => {
+                  const page = index + 1;
+                  return (
+                    <button
+                      key={page}
+                      onClick={() => handlePageChange(page)}
+                      disabled={loading}
+                      className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                        currentPage === page
+                          ? "bg-blue-600 text-white"
+                          : "text-gray-600 hover:bg-gray-100"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  );
+                })
+              ) : (
+                <>
+                  {/* First page */}
+                  <button
+                    onClick={() => handlePageChange(1)}
+                    disabled={loading}
+                    className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                      currentPage === 1
+                        ? "bg-blue-600 text-white"
+                        : "text-gray-600 hover:bg-gray-100"
+                    }`}
+                  >
+                    1
+                  </button>
 
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
+                  {currentPage > 3 && <span className="px-2 text-gray-400">...</span>}
+
+                  {/* Current page and neighbors */}
+                  {[currentPage - 1, currentPage, currentPage + 1]
+                    .filter(page => page > 1 && page < totalPages)
+                    .map(page => (
+                      <button
+                        key={page}
+                        onClick={() => handlePageChange(page)}
+                        disabled={loading}
+                        className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                          currentPage === page
+                            ? "bg-blue-600 text-white"
+                            : "text-gray-600 hover:bg-gray-100"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+
+                  {currentPage < totalPages - 2 && <span className="px-2 text-gray-400">...</span>}
+
+                  {/* Last page */}
+                  {totalPages > 1 && (
+                    <button
+                      onClick={() => handlePageChange(totalPages)}
+                      disabled={loading}
+                      className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                        currentPage === totalPages
+                          ? "bg-blue-600 text-white"
+                          : "text-gray-600 hover:bg-gray-100"
+                      }`}
+                    >
+                      {totalPages}
+                    </button>
+                  )}
+                </>
+              )}
+
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={!hasNextPage || loading}
+                className="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Next page"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Modal */}
@@ -600,6 +749,7 @@ export const StudentListContent = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </ErrorBoundary>
   );
 };

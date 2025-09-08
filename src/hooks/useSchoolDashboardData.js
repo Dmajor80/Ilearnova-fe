@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { http } from "@/api/baseClient";
 import useNotification from "@/hooks/useNotification";
 import { parseError, getUserFriendlyMessage, getNotificationType } from "@/lib/errorHandler";
+import useApiCircuitBreaker from "@/hooks/useApiCircuitBreaker";
 import { formatCurrency } from "@/lib/formatters";
 
 /**
@@ -11,13 +12,16 @@ import { formatCurrency } from "@/lib/formatters";
 export default function useSchoolDashboardData() {
   const notification = useNotification("info", 5000);
 
+  // Use unified circuit breaker
+  const circuitBreaker = useApiCircuitBreaker({
+    maxRetries: 3,
+    retryDelay: 60000, // 1 minute
+    autoReset: false
+  });
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
-
-  // Track failed endpoints to prevent repeated calls
-  const [failedEndpoints, setFailedEndpoints] = useState(new Set());
-  const [endpointErrors, setEndpointErrors] = useState({});
 
   // School metrics state
   const [metrics, setMetrics] = useState({
@@ -39,31 +43,7 @@ export default function useSchoolDashboardData() {
   // Recent activities state
   const [recentActivities, setRecentActivities] = useState([]);
 
-  /**
-   * Check if an endpoint should be called (circuit breaker pattern)
-   */
-  const shouldCallEndpoint = useCallback((endpointName) => {
-    return !failedEndpoints.has(endpointName);
-  }, [failedEndpoints]);
 
-  /**
-   * Mark an endpoint as failed to prevent future calls
-   */
-  const markEndpointFailed = useCallback((endpointName, error) => {
-    setFailedEndpoints(prev => new Set([...prev, endpointName]));
-    setEndpointErrors(prev => ({
-      ...prev,
-      [endpointName]: error
-    }));
-  }, []);
-
-  /**
-   * Reset failed endpoints (for manual retry)
-   */
-  const resetFailedEndpoints = useCallback(() => {
-    setFailedEndpoints(new Set());
-    setEndpointErrors({});
-  }, []);
 
   /**
    * Fetch school metrics from API
@@ -72,7 +52,7 @@ export default function useSchoolDashboardData() {
     const endpointName = "metrics";
 
     // Check circuit breaker
-    if (!shouldCallEndpoint(endpointName)) {
+    if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
       console.log("Skipping metrics call - endpoint marked as failed");
       return;
     }
@@ -99,7 +79,7 @@ export default function useSchoolDashboardData() {
       const notificationType = getNotificationType(appError);
 
       // Mark endpoint as failed to prevent repeated calls
-      markEndpointFailed(endpointName, userMessage);
+      circuitBreaker.markEndpointFailed(endpointName, userMessage);
 
       // Only show notification once when endpoint first fails
       notification.notify(`Metrics unavailable: ${userMessage}`, notificationType);
@@ -107,7 +87,7 @@ export default function useSchoolDashboardData() {
       // Use fallback data on error
       console.warn("Using fallback school dashboard data due to error:", err);
     }
-  }, [notification, shouldCallEndpoint, markEndpointFailed]);
+  }, [notification, circuitBreaker]);
 
   /**
    * Fetch school performance data
@@ -116,7 +96,7 @@ export default function useSchoolDashboardData() {
     const endpointName = "performance";
 
     // Check circuit breaker
-    if (!shouldCallEndpoint(endpointName)) {
+    if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
       console.log("Skipping performance call - endpoint marked as failed");
       return;
     }
@@ -133,10 +113,10 @@ export default function useSchoolDashboardData() {
         performanceChart: data.performance_chart
       }));
     } catch (err) {
-      markEndpointFailed(endpointName, "Performance data unavailable");
+      circuitBreaker.markEndpointFailed(endpointName, "Performance data unavailable");
       console.warn("Failed to fetch performance data:", err);
     }
-  }, [shouldCallEndpoint, markEndpointFailed]);
+  }, [circuitBreaker]);
 
   /**
    * Fetch teachers data
@@ -145,7 +125,7 @@ export default function useSchoolDashboardData() {
     const endpointName = "teachers";
 
     // Check circuit breaker
-    if (!shouldCallEndpoint(endpointName)) {
+    if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
       console.log("Skipping teachers call - endpoint marked as failed");
       return;
     }
@@ -163,7 +143,7 @@ export default function useSchoolDashboardData() {
         teachers: data.teachers || []
       }));
     } catch (err) {
-      markEndpointFailed(endpointName, "Teachers data unavailable");
+      circuitBreaker.markEndpointFailed(endpointName, "Teachers data unavailable");
       console.warn("Failed to fetch teachers data:", err);
       // Use fallback data
       setSchoolData(prev => ({
@@ -171,7 +151,7 @@ export default function useSchoolDashboardData() {
         teachers: getFallbackTeachersData()
       }));
     }
-  }, [shouldCallEndpoint, markEndpointFailed]);
+  }, [circuitBreaker]);
 
   /**
    * Fetch unpaid tuition data
@@ -180,7 +160,7 @@ export default function useSchoolDashboardData() {
     const endpointName = "unpaidTuition";
 
     // Check circuit breaker
-    if (!shouldCallEndpoint(endpointName)) {
+    if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
       console.log("Skipping unpaid tuition call - endpoint marked as failed");
       return;
     }
@@ -199,7 +179,7 @@ export default function useSchoolDashboardData() {
         unpaidTuition: data.students || []
       }));
     } catch (err) {
-      markEndpointFailed(endpointName, "Unpaid tuition data unavailable");
+      circuitBreaker.markEndpointFailed(endpointName, "Unpaid tuition data unavailable");
       console.warn("Failed to fetch unpaid tuition data:", err);
       // Use fallback data
       setSchoolData(prev => ({
@@ -207,7 +187,7 @@ export default function useSchoolDashboardData() {
         unpaidTuition: getFallbackUnpaidTuitionData()
       }));
     }
-  }, [shouldCallEndpoint, markEndpointFailed]);
+  }, [circuitBreaker]);
 
   /**
    * Fetch recent school activities
@@ -216,7 +196,7 @@ export default function useSchoolDashboardData() {
     const endpointName = "activities";
 
     // Check circuit breaker
-    if (!shouldCallEndpoint(endpointName)) {
+    if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
       console.log("Skipping activities call - endpoint marked as failed");
       return;
     }
@@ -231,10 +211,10 @@ export default function useSchoolDashboardData() {
 
       setRecentActivities(data.activities || []);
     } catch (err) {
-      markEndpointFailed(endpointName, "Activities data unavailable");
+      circuitBreaker.markEndpointFailed(endpointName, "Activities data unavailable");
       console.warn("Failed to fetch recent activities:", err);
     }
-  }, [shouldCallEndpoint, markEndpointFailed]);
+  }, [circuitBreaker]);
 
   /**
    * Refresh all school dashboard data (with option to reset failed endpoints)
@@ -245,26 +225,26 @@ export default function useSchoolDashboardData() {
 
     // Reset failed endpoints if requested (for manual retry)
     if (resetFailures) {
-      resetFailedEndpoints();
+      circuitBreaker.resetAllEndpoints();
     }
 
     try {
       // Only call endpoints that haven't failed (unless we're resetting)
       const promises = [];
 
-      if (resetFailures || shouldCallEndpoint("metrics")) {
+      if (resetFailures || circuitBreaker.shouldCallEndpoint("metrics")) {
         promises.push(fetchMetrics());
       }
-      if (resetFailures || shouldCallEndpoint("performance")) {
+      if (resetFailures || circuitBreaker.shouldCallEndpoint("performance")) {
         promises.push(fetchPerformanceData());
       }
-      if (resetFailures || shouldCallEndpoint("teachers")) {
+      if (resetFailures || circuitBreaker.shouldCallEndpoint("teachers")) {
         promises.push(fetchTeachersData());
       }
-      if (resetFailures || shouldCallEndpoint("unpaidTuition")) {
+      if (resetFailures || circuitBreaker.shouldCallEndpoint("unpaidTuition")) {
         promises.push(fetchUnpaidTuitionData());
       }
-      if (resetFailures || shouldCallEndpoint("activities")) {
+      if (resetFailures || circuitBreaker.shouldCallEndpoint("activities")) {
         promises.push(fetchRecentActivities());
       }
 
@@ -288,8 +268,7 @@ export default function useSchoolDashboardData() {
     fetchUnpaidTuitionData,
     fetchRecentActivities,
     notification,
-    shouldCallEndpoint,
-    resetFailedEndpoints
+    circuitBreaker
   ]);
 
   /**
@@ -306,17 +285,17 @@ export default function useSchoolDashboardData() {
     const interval = setInterval(() => {
       if (!loading) {
         // Only refresh endpoints that haven't failed
-        if (shouldCallEndpoint("metrics")) {
+        if (circuitBreaker.shouldCallEndpoint("metrics")) {
           fetchMetrics();
         }
-        if (shouldCallEndpoint("activities")) {
+        if (circuitBreaker.shouldCallEndpoint("activities")) {
           fetchRecentActivities();
         }
       }
     }, 10 * 60 * 1000); // 10 minutes
 
     return () => clearInterval(interval);
-  }, [loading, fetchMetrics, fetchRecentActivities, shouldCallEndpoint]);
+  }, [loading, fetchMetrics, fetchRecentActivities, circuitBreaker]);
 
   /**
    * Get metrics as array for easier rendering (memoized for performance)
@@ -340,16 +319,19 @@ export default function useSchoolDashboardData() {
     schoolData,
     recentActivities,
 
-    // Error handling
-    failedEndpoints,
-    endpointErrors,
+    // Error handling (from circuit breaker)
+    failedEndpoints: circuitBreaker.failedEndpoints,
+    endpointErrors: circuitBreaker.endpointErrors,
+    endpointRetries: circuitBreaker.endpointRetries,
 
     // Computed values
     metricsArray,
 
     // Actions
     refreshData,
-    resetFailedEndpoints,
+    resetFailedEndpoints: circuitBreaker.resetAllEndpoints,
+    resetEndpoint: circuitBreaker.resetEndpoint,
+    getEndpointStatus: circuitBreaker.getEndpointStatus,
 
     // Notifications
     notification

@@ -169,6 +169,88 @@ export const getSchoolActivities = async (params = {}) => {
 };
 
 /**
+ * Get school students data
+ * @param {Object} params - Query parameters (limit, search, grade, status, etc.)
+ * @returns {Promise} API response
+ */
+export const getSchoolStudents = async (params = {}) => {
+  const response = await http.get('/api/admin/school/students/', {
+    auth: true,
+    params,
+  });
+
+  return response;
+};
+
+/**
+ * Get individual student details
+ * @param {string} studentId - The student ID
+ * @returns {Promise} API response
+ */
+export const getStudentDetails = async (studentId) => {
+  const response = await http.get(`/api/admin/school/students/${studentId}/`, {
+    auth: true,
+  });
+
+  return response;
+};
+
+/**
+ * Create new student
+ * @param {Object} studentData - The student data to create
+ * @returns {Promise} API response
+ */
+export const createStudent = async (studentData) => {
+  const response = await http.post('/api/admin/school/students/', studentData, {
+    auth: true,
+  });
+
+  return response;
+};
+
+/**
+ * Update student details
+ * @param {string} studentId - The student ID
+ * @param {Object} studentData - The student data to update
+ * @returns {Promise} API response
+ */
+export const updateStudent = async (studentId, studentData) => {
+  const response = await http.put(`/api/admin/school/students/${studentId}/`, studentData, {
+    auth: true,
+  });
+
+  return response;
+};
+
+/**
+ * Delete student
+ * @param {string} studentId - The student ID
+ * @returns {Promise} API response
+ */
+export const deleteStudent = async (studentId) => {
+  const response = await http.del(`/api/admin/school/students/${studentId}/`, {
+    auth: true,
+  });
+
+  return response;
+};
+
+/**
+ * Get available grades/classes
+ * @param {Object} params - Query parameters (active_only, etc.)
+ * @returns {Promise} API response
+ * @note Organization ID is automatically injected via X-Org-Id header by the org_gate system
+ */
+export const getSchoolGrades = async (params = {}) => {
+  const response = await http.get('/api/classes/', {
+    auth: true,
+    params,
+  });
+
+  return response;
+};
+
+/**
  * API endpoints being used by the school admin dashboard:
  * 
  * Organization Management:
@@ -185,6 +267,12 @@ export const getSchoolActivities = async (params = {}) => {
  * - GET /api/admin/school/dashboard/metrics/ - School overview metrics
  * - GET /api/admin/school/dashboard/performance/ - Performance analytics
  * - GET /api/admin/school/teachers/ - Teachers data
+ * - GET /api/admin/school/students/ - Students data
+ * - GET /api/admin/school/students/{id}/ - Individual student details
+ * - POST /api/admin/school/students/ - Create new student
+ * - PUT /api/admin/school/students/{id}/ - Update student details
+ * - DELETE /api/admin/school/students/{id}/ - Delete student
+ * - GET /api/classes/ - Available grades/classes (org ID via X-Org-Id header)
  * - GET /api/admin/school/students/unpaid_tuition/ - Unpaid tuition data
  * - GET /api/admin/school/dashboard/activities/ - Recent activities
  * 
