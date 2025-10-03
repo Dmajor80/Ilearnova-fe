@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import {
   BookOpen,
   MessageCircle,
@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import { Link, Outlet } from "react-router-dom";
+import Loader from "@/components/Loader";
 
 // Main application component
 export default function AdminDashboard() {

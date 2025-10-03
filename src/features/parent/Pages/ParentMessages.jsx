@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Bell, Search, Calendar, MessageCircle, FileText, CreditCard, BarChart3, Users, Settings, ChevronLeft, ChevronRight, Phone, Video, MoreHorizontal, Send, Smile, Paperclip, Menu, X } from 'lucide-react';
 import SideMenu from '../components/SideMenu';
 import DashboardHeader from '../components/DashboardHeader';
+import { getAnnouncements } from '../../../api/announcementApi';
+import { getMessages, sendMessage as sendMessageApi, getConversations } from '../../../api/communicationApi';
 
 
 const ParentMessages = () => {
@@ -9,94 +11,18 @@ const ParentMessages = () => {
   const [selectedDate, setSelectedDate] = useState(26);
   // const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chatMessage, setChatMessage] = useState('');
-  const [chatMessages, setChatMessages] = useState([
-    {
-      id: 1,
-      sender: 'Teacher XYZ',
-      message: "Thank you! I will remind her.",
-      time: "2:00PM",
-      read: true,
-      isTeacher: true,
-      avatar: 'bg-blue-500'
-    },
-    {
-      id: 2,
-      sender: 'You',
-      message: "Good day, Mrs Daniel",
-      time: "2:01PM",
-      read: true,
-      isTeacher: false,
-      avatar: 'bg-orange-400'
-    },
-    {
-      id: 3,
-      sender: 'Teacher XYZ',
-      message: "Please ensure Priscilla completes her Math assignments by today.",
-      time: "2:02PM",
-      read: true,
-      isTeacher: true,
-      avatar: 'bg-blue-500'
-    },
-    {
-      id: 4,
-      sender: 'You',
-      message: "Good day, Teacher xyz!",
-      time: "2:03PM",
-      read: true,
-      isTeacher: false,
-      avatar: 'bg-orange-400'
-    },
-    {
-      id: 5,
-      sender: 'Teacher XYZ',
-      message: "Thank you! I will remind her.",
-      time: "2:04PM",
-      read: true,
-      isTeacher: true,
-      avatar: 'bg-blue-500'
-    }
-  ]);
+  const [isTyping, setIsTyping] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const fileInputRef = useRef(null);
+  const [currentConversation, setCurrentConversation] = useState('general');
+  const [messageReadStatus, setMessageReadStatus] = useState({});
+  const [announcements, setAnnouncements] = useState([]);
+  const [announcementsLoading, setAnnouncementsLoading] = useState(true);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [messagesLoading, setMessagesLoading] = useState(true);
+  const [conversations, setConversations] = useState([]);
 
   const chatEndRef = useRef(null);
-
-  const announcements = [
-    {
-      title: "Annual Sports Day Scheduled!",
-      description: "We are pleased to announce that our Annual Sports Day 2024. Students must register by Dec 5.",
-      date: "Posted on 23rd December, 2024",
-      type: "Event",
-      color: "bg-blue-100 text-blue-800",
-      buttonText: "Register now!",
-      buttonColor: "bg-blue-600 hover:bg-blue-700"
-    },
-    {
-      title: "Midterm Report Card Distribution",
-      description: "You can now check and view all schedules on the portal from Nov 25, 2024. Please log in to review your child's progress.",
-      date: "Posted on 23rd December, 2024",
-      type: "Academic Reminder",
-      color: "bg-green-100 text-green-800",
-      buttonText: "View Details",
-      buttonColor: "bg-green-600 hover:bg-green-700"
-    },
-    {
-      title: "Free Submission Deadline Extended",
-      description: "The deadline for Fee Submission has been extended to Nov 30, 2024. Late fees will apply after this date.",
-      date: "Posted on 23rd December, 2024",
-      type: "Finance Urgent",
-      color: "bg-red-100 text-red-800",
-      buttonText: "Pay now!",
-      buttonColor: "bg-red-600 hover:bg-red-700"
-    },
-    {
-      title: "Parent-Teacher Meeting: Save the Date!",
-      description: "Our PTA meeting on Jan 15, 2024, at 5 PM in the school auditorium. Attendance is highly encouraged.",
-      date: "Posted on 23rd December, 2024",
-      type: "Event-Parent Engagement",
-      color: "bg-purple-100 text-purple-800",
-      buttonText: "Add to calendar",
-      buttonColor: "bg-purple-600 hover:bg-purple-700"
-    }
-  ];
 
   const events = [
     { date: 22, title: "Parent-Teacher Meeting", color: "bg-yellow-100", time: "10:00 am" },
@@ -104,37 +30,86 @@ const ParentMessages = () => {
     { date: 26, title: "Parent-Teacher Meeting", color: "bg-yellow-100", time: "10:00 am" },
   ];
 
-    useEffect(() => {
+  useEffect(() => {
+    const fetchAnnouncements = async () => {
+      try {
+        const data = await getAnnouncements();
+        setAnnouncements(data);
+      } catch (error) {
+        console.error('Error fetching announcements:', error);
+      } finally {
+        setAnnouncementsLoading(false);
+      }
+    };
+
+    const fetchMessages = async () => {
+      try {
+        const data = await getMessages();
+        setChatMessages(data);
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+      } finally {
+        setMessagesLoading(false);
+      }
+    };
+
+    const fetchConversations = async () => {
+      try {
+        const data = await getConversations();
+        setConversations(data);
+      } catch (error) {
+        console.error('Error fetching conversations:', error);
+      }
+    };
+
+    fetchAnnouncements();
+    fetchMessages();
+    fetchConversations();
+  }, []);
+
+  useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatMessages]);
 
-  const sendMessage = () => {
-    if (chatMessage.trim()) {
-      const newMessage = {
-        id: chatMessages.length + 1,
-        sender: 'You',
-        message: chatMessage,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        read: true,
-        isTeacher: false,
-        avatar: 'bg-orange-400'
-      };
-      setChatMessages([...chatMessages, newMessage]);
-      setChatMessage('');
-
-      // Simulate teacher response after 2 seconds
-      setTimeout(() => {
-        const teacherResponse = {
-          id: chatMessages.length + 2,
-          sender: 'Teacher XYZ',
-          message: "Thank you for your message. I'll get back to you shortly.",
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          read: true,
-          isTeacher: true,
-          avatar: 'bg-blue-500'
+  const sendMessage = async () => {
+    if (chatMessage.trim() || selectedFile) {
+      try {
+        const messageData = {
+          message: chatMessage,
+          file: selectedFile,
+          conversationId: currentConversation
         };
-        setChatMessages(prev => [...prev, teacherResponse]);
-      }, 2000);
+
+        await sendMessageApi(messageData);
+
+        // Clear input
+        setChatMessage('');
+        setSelectedFile(null);
+
+        // Refresh messages
+        const updatedMessages = await getMessages();
+        setChatMessages(updatedMessages);
+      } catch (error) {
+        console.error('Error sending message:', error);
+        // Fallback to local state if API fails
+        let messageContent = chatMessage;
+        if (selectedFile) {
+          messageContent = `File: ${selectedFile.name}`;
+        }
+        const newMessage = {
+          id: chatMessages.length + 1,
+          sender: 'You',
+          message: messageContent,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          read: false,
+          isTeacher: false,
+          avatar: 'bg-orange-400',
+          file: selectedFile || null,
+        };
+        setChatMessages([...chatMessages, newMessage]);
+        setChatMessage('');
+        setSelectedFile(null);
+      }
     }
   };
 
@@ -275,7 +250,32 @@ const ParentMessages = () => {
               </div>
 
               <div className="p-6">
-                <h4 className="font-bold text-gray-900 mb-6 text-lg">Chat</h4>
+                <h4 className="font-bold text-gray-900 mb-4 text-lg">Chat</h4>
+
+                {/* Conversation Threads */}
+                <div className="mb-6">
+                  <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300">
+                    {conversations.map((conversation) => (
+                      <button
+                        key={conversation.id}
+                        onClick={() => setCurrentConversation(conversation.id)}
+                        className={`flex-shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                          currentConversation === conversation.id
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {conversation.title}
+                        {conversation.unreadCount > 0 && (
+                          <span className="ml-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                            {conversation.unreadCount}
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 <div className="space-y-4 max-h-80 overflow-y-auto mb-6 scrollbar-thin scrollbar-thumb-gray-300">
                   {chatMessages.map((chat) => (
                     <div key={chat.id} className={`flex items-start space-x-3 ${!chat.isTeacher ? 'flex-row-reverse space-x-reverse' : ''}`}>
@@ -298,37 +298,62 @@ const ParentMessages = () => {
                       </div>
                     </div>
                   ))}
+                  {isTyping && (
+                    <div className="flex items-start space-x-3">
+                      <div className="w-10 h-10 bg-blue-500 rounded-full flex-shrink-0 flex items-center justify-center shadow-sm">
+                        <span className="text-white font-semibold text-sm">T</span>
+                      </div>
+                      <div className="flex-1 max-w-xs">
+                        <div className="inline-block p-3 rounded-2xl bg-gray-100 text-gray-900">
+                          <div className="flex space-x-1">
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   <div ref={chatEndRef} />
                 </div>
 
                 {/* Chat Input */}
                 <div className="flex items-end space-x-3 p-4 bg-gray-50 rounded-xl">
-                  <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                    <Paperclip className="w-5 h-5" />
-                  </button>
-                
-                  <div className="flex-1">
-                    <textarea
-                      value={chatMessage}
-                      onChange={(e) => setChatMessage(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      placeholder="Type a message..."
-                      className="w-full p-3 shadow-md shadow-inset rounded-lg resize-none   text-sm"
-                      rows="1"
-                    />
-                    {/* focus:outline-none focus:border-transparent */}
-                  </div>
-                  <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                    <Smile className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={sendMessage}
-                    disabled={!chatMessage.trim()}
-                    className="p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <Send className="w-5 h-5" />
-                  </button>
+                <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors" onClick={() => fileInputRef.current.click()}>
+                  <Paperclip className="w-5 h-5" />
+                </button>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    if (e.target.files.length > 0) {
+                      setSelectedFile(e.target.files[0]);
+                    }
+                  }}
+                />
+                <div className="flex-1">
+                  <textarea
+                    value={chatMessage}
+                    onChange={(e) => setChatMessage(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Type a message..."
+                    className="w-full p-3 shadow-md shadow-inset rounded-lg resize-none   text-sm"
+                    rows="1"
+                  />
+                  {/* focus:outline-none focus:border-transparent */}
                 </div>
+                <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                  <Smile className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={sendMessage}
+                  disabled={!chatMessage.trim() && !selectedFile}
+                  className="p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <Send className="w-5 h-5" />
+                </button>
+              </div>
               </div>
             </div>
           </div>
@@ -372,20 +397,19 @@ const ParentMessages = () => {
             </div>
 
             {/* Enhanced Upcoming Events */}
-            <div className="bg-white rounded-xl shadow-md p-6 ">
-              <h3 className="font-bold text-gray-900 mb-6 text-lg">Upcoming Events</h3>
+            <div className="bg-white rounded-xl shadow-md p-4 sm:p-6">
+              <h3 className="font-bold text-gray-900 mb-4 sm:mb-6 text-lg">Upcoming Events</h3>
               <div className="flex flex-col gap-2">
                 {events.map((event, idx) => (
-                  <div key={idx} className={`flex items-center gap-3 p-3`}>
-                    <img src="/icon.png" className='h-10 w-10' loading='lazy' alt="icons" />
-                    <div className='flex-row text-left'>
-                      <span className="text-md md:text-lg text-blue-700">{event.title}</span>
-                      <div className="flex items-center mt-2 ">
-                        <li className="ml-auto text-xs text-gray-500">{`December ${event.date}`}</li>
-                        <li className="ml-auto text-xs text-gray-500">{event.time}</li>
+                  <div key={idx} className={`flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors`}>
+                    <img src="/icon.png" className='h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0' loading='lazy' alt="icons" />
+                    <div className='flex-1 min-w-0'>
+                      <span className="text-sm sm:text-md md:text-lg text-blue-700 block truncate">{event.title}</span>
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-1 sm:mt-2 gap-1">
+                        <span className="text-xs text-gray-500">{`December ${event.date}`}</span>
+                        <span className="text-xs text-gray-500">{event.time}</span>
                       </div>
                     </div>
-
                   </div>
                 ))}
               </div>

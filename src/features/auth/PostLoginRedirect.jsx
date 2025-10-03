@@ -62,17 +62,17 @@ export default function PostLoginRedirect() {
     // Normalize roles: allow either user.role (string) or user.roles (array)
     let roles = [];
     if (Array.isArray(user.roles)) {
-      roles = user.roles.map((r) => String(r.role?.code || "").toLowerCase());
+      roles = user.roles.map((r) => String(r.role?.code || r || "").toLowerCase());
     } else if (typeof user.role === "string") {
       roles = [String(user.role).toLowerCase()];
     }
 
     console.log("PostLoginRedirect: Detected roles:", roles);
 
-    // Role precedence: superadmin > org_admin/admin > teacher > student > parent
+    // Role precedence: super_admin > org_admin > teacher > student > parent > individual_learner
     const has = (r) => roles.includes(r);
-    if (has("superadmin")) {
-      console.log("PostLoginRedirect: Superadmin role detected, redirecting to /admin-dashboard/dashboard");
+    if (has("super_admin")) {
+      console.log("PostLoginRedirect: Super admin role detected, redirecting to /admin-dashboard/dashboard");
       navigate("/admin-dashboard/dashboard", { replace: true });
       return;
     }
@@ -82,16 +82,23 @@ export default function PostLoginRedirect() {
       return;
     }
     if (has("teacher")) {
+      console.log("PostLoginRedirect: Teacher role detected, redirecting to /teacher-dashboard");
       navigate("/teacher-dashboard", { replace: true });
       return;
     }
     if (has("student")) {
+      console.log("PostLoginRedirect: Student role detected, redirecting to /student-dashboard");
       navigate("/student-dashboard", { replace: true });
       return;
     }
     if (has("parent")) {
-      // Parent dashboard route not currently mounted; use /home for now
-      navigate("/home", { replace: true });
+      console.log("PostLoginRedirect: Parent role detected, redirecting to /parent-dashboard");
+      navigate("/parent-dashboard", { replace: true });
+      return;
+    }
+    if (has("individual_learner")) {
+      console.log("PostLoginRedirect: Individual learner role detected, redirecting to /individual-learner-dashboard");
+      navigate("/individual-learner-dashboard", { replace: true });
       return;
     }
 

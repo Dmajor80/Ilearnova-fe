@@ -1,10 +1,11 @@
 /* eslint-disable no-unused-vars */
-import React from "react";
-import { Mail, User, Lock, CheckCircle } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Mail, User, Lock, CheckCircle, Building, Users, GraduationCap, UserCheck, Heart, BookOpen } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import useSignup from "@/hooks/useSignup";
+import useRegister from "@/hooks/useRegister";
 import InputField from "@/components/ui/InputField";
 import NotificationBar from "@/components/ui/NotificationBar";
+import { getOrganizations } from "@/api/authApi";
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center">
@@ -20,26 +21,64 @@ const LoadingSpinner = () => (
 );
 
 
+const roleOptions = [
+  { value: "super_admin", label: "Super Admin", icon: Building, description: "Full system access" },
+  { value: "org_admin", label: "Organization Admin", icon: Users, description: "Manage your organization" },
+  { value: "teacher", label: "Teacher", icon: GraduationCap, description: "Teach and manage students" },
+  { value: "student", label: "Student", icon: UserCheck, description: "Learn and participate" },
+  { value: "parent", label: "Parent", icon: Heart, description: "Monitor your child's progress" },
+  { value: "individual_learner", label: "Individual Learner", icon: BookOpen, description: "Self-paced learning" },
+];
+
 export default function SignupForm() {
   const navigate = useNavigate();
+  const [showEmailVerification, setShowEmailVerification] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+  const [organizations, setOrganizations] = useState([]);
+  const [organizationsLoading, setOrganizationsLoading] = useState(false);
 
   const {
     formData,
     loading,
     errors,
-    showEmailVerification,
-    userEmail,
     darkMode,
-    inputRefs,
-    handleChange,
+    handleInputChange,
     handleSubmit,
-    setShowEmailVerification,
     notification,
-  } = useSignup();
+  } = useRegister({
+    onSuccess: (response) => {
+      setUserEmail(response.user?.email || formData.email);
+      setShowEmailVerification(true);
+
+      // If email verification is not required, redirect to post-login immediately
+      if (!response.email_verification_required) {
+        // Delay a bit to show success notification
+        setTimeout(() => {
+          window.location.href = "/post-login";
+        }, 1000);
+      }
+    },
+  });
 
   const handleConfirmEmail = () => {
     navigate("/login");
   };
+
+  useEffect(() => {
+    const fetchOrganizations = async () => {
+      setOrganizationsLoading(true);
+      try {
+        const response = await getOrganizations();
+        setOrganizations(response.data || []);
+      } catch (error) {
+        console.error("Failed to fetch organizations:", error);
+      } finally {
+        setOrganizationsLoading(false);
+      }
+    };
+
+    fetchOrganizations();
+  }, []);
 
   if (showEmailVerification) {
     return (
@@ -183,34 +222,65 @@ export default function SignupForm() {
               }`}
             >
               <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Role Selection */}
+                <div>
+                  <label className={`block text-sm font-medium mb-3 ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                    Select Your Role
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {roleOptions.map((role) => {
+                      const IconComponent = role.icon;
+                      return (
+                        <button
+                          key={role.value}
+                          type="button"
+                          onClick={() => handleInputChange("role", role.value)}
+                          className={`p-4 rounded-xl border-2 transition-all duration-200 text-left ${
+                            formData.role === role.value
+                              ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                              : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <IconComponent className={`w-5 h-5 ${formData.role === role.value ? "text-blue-600" : "text-gray-500"}`} />
+                            <div>
+                              <div className={`font-medium ${formData.role === role.value ? "text-blue-600" : ""}`}>
+                                {role.label}
+                              </div>
+                              <div className="text-xs text-gray-500">{role.description}</div>
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {errors.role && (
+                    <p className="mt-1 text-sm text-red-600">{errors.role}</p>
+                  )}
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <InputField
                     label="First Name"
-                    name="firstName"
+                    name="first_name"
                     placeholder="Enter your first name"
                     required
-                    nextField="lastName"
                     icon={User}
                     darkMode={darkMode}
                     errors={errors}
                     formData={formData}
-                    inputRefs={inputRefs}
-                    handleChange={handleChange}
-                    handleSubmit={handleSubmit}
+                    handleChange={handleInputChange}
                   />
                   <InputField
                     label="Last Name"
-                    name="lastName"
+                    name="last_name"
                     placeholder="Enter your last name"
                     required
-                    nextField="username"
                     icon={User}
                     darkMode={darkMode}
                     errors={errors}
                     formData={formData}
-                    inputRefs={inputRefs}
-                    handleChange={handleChange}
-                    handleSubmit={handleSubmit}
+                    handleChange={handleInputChange}
                   />
                 </div>
 
@@ -219,14 +289,11 @@ export default function SignupForm() {
                   name="username"
                   placeholder="Choose a username"
                   required
-                  nextField="email"
                   icon={User}
                   darkMode={darkMode}
                   errors={errors}
                   formData={formData}
-                  inputRefs={inputRefs}
-                  handleChange={handleChange}
-                  handleSubmit={handleSubmit}
+                  handleChange={handleInputChange}
                 />
 
                 <InputField
@@ -235,15 +302,79 @@ export default function SignupForm() {
                   type="email"
                   placeholder="Enter your email"
                   required
-                  nextField="password"
                   icon={Mail}
                   darkMode={darkMode}
                   errors={errors}
                   formData={formData}
-                  inputRefs={inputRefs}
-                  handleChange={handleChange}
-                  handleSubmit={handleSubmit}
+                  handleChange={handleInputChange}
                 />
+
+                {/* Organization Name for Super Admin and Org Admin */}
+                {["super_admin", "org_admin"].includes(formData.role) && (
+                  <InputField
+                    label="Organization Name"
+                    name="organization_name"
+                    placeholder="Enter organization name"
+                    required
+                    icon={Building}
+                    darkMode={darkMode}
+                    errors={errors}
+                    formData={formData}
+                    handleChange={handleInputChange}
+                  />
+                )}
+
+                {/* Organization Selection for Teacher, Student, Parent */}
+                {["teacher", "student", "parent"].includes(formData.role) && (
+                  <div>
+                    <label className={`block text-sm font-medium mb-3 ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                      Select Organization
+                    </label>
+                    <div className="relative">
+                      <select
+                        name="organization_id"
+                        value={formData.organization_id || ""}
+                        onChange={(e) => handleInputChange("organization_id", e.target.value)}
+                        required
+                        disabled={organizationsLoading}
+                        className={`w-full px-4 py-3 pl-12 pr-4 rounded-xl border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                          darkMode
+                            ? "bg-gray-800 border-gray-600 text-gray-100 placeholder-gray-400"
+                            : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
+                        } ${errors.organization_id ? "border-red-500" : "focus:border-blue-500"}`}
+                      >
+                        <option value="">
+                          {organizationsLoading ? "Loading organizations..." : "Select an organization"}
+                        </option>
+                        {organizations.map((org) => (
+                          <option key={org.id} value={org.id}>
+                            {org.name} {org.city && `(${org.city})`}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <Building className={`w-5 h-5 ${darkMode ? "text-gray-400" : "text-gray-500"}`} />
+                      </div>
+                    </div>
+                    {errors.organization_id && (
+                      <p className="mt-1 text-sm text-red-600">{errors.organization_id}</p>
+                    )}
+                  </div>
+                )}
+
+                {/* Phone for roles that require it */}
+                {["teacher", "student", "parent", "individual_learner"].includes(formData.role) && (
+                  <InputField
+                    label="Phone Number"
+                    name="phone"
+                    placeholder="Enter your phone number"
+                    icon={User}
+                    darkMode={darkMode}
+                    errors={errors}
+                    formData={formData}
+                    handleChange={handleInputChange}
+                  />
+                )}
 
                 <InputField
                   label="Password"
@@ -251,19 +382,16 @@ export default function SignupForm() {
                   type="password"
                   placeholder="Minimum 8 characters"
                   required
-                  nextField="passwordConfirm"
                   icon={Lock}
                   darkMode={darkMode}
                   errors={errors}
                   formData={formData}
-                  inputRefs={inputRefs}
-                  handleChange={handleChange}
-                  handleSubmit={handleSubmit}
+                  handleChange={handleInputChange}
                 />
 
                 <InputField
                   label="Confirm Password"
-                  name="passwordConfirm"
+                  name="password_confirmation"
                   type="password"
                   placeholder="Confirm your password"
                   required
@@ -271,9 +399,7 @@ export default function SignupForm() {
                   darkMode={darkMode}
                   errors={errors}
                   formData={formData}
-                  inputRefs={inputRefs}
-                  handleChange={handleChange}
-                  handleSubmit={handleSubmit}
+                  handleChange={handleInputChange}
                 />
 
                 <button
