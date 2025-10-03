@@ -241,7 +241,7 @@ export default function useLogin({ onSuccess } = {}) {
 
   const submitLogin = useCallback(
     withRetry(async (userData) => {
-      return await http.post("/api/auth/login/", {
+      return await http.post("/api/auth/login", {
         body: userData,
         auth: false,
       });

@@ -11,6 +11,8 @@ import {
   CreditCard,
   Menu,
   X,
+  Users,
+  Video,
 } from "lucide-react";
 
 import { Link, Outlet } from "react-router-dom";
@@ -76,6 +78,20 @@ export default function StudentDashboard() {
       icon: <BookOpen size={20} />,
       label: "Exam",
       air: "exam",
+    },
+    {
+      id: "forums",
+      icon: <MessageCircle size={20} />,
+      label: "Forums",
+      air: "/forums",
+      external: true,
+    },
+    {
+      id: "video-calls",
+      icon: <Video size={20} />,
+      label: "Video Calls",
+      air: "/video-calls",
+      external: true,
     },
   ];
 

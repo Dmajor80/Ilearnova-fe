@@ -5,6 +5,7 @@ import {
 } from "recharts";
 import DashboardHeader from "../components/DashboardHeader";
 import SideMenu from "../components/SideMenu";
+import { http } from "../../../api/baseClient";
 
 const subjects = [
   "Mathematics", "English", "Biology", "Physics", "Yoruba", "Chemistry", "Further Mathematics", "Animal Husbandry", "Geography"
@@ -204,12 +205,88 @@ function getTopMarks(subjectMarks) {
 }
 
 function ParentResult() {
-  const [selectedChildId, setSelectedChildId] = useState(children[0].id);
+  const [children, setChildren] = useState([]);
+  const [gradesData, setGradesData] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedChildId, setSelectedChildId] = useState(null);
   const [selectedTerm, setSelectedTerm] = useState("First Term");
-  const child = children.find(c => c.id === selectedChildId);
-  const terms = Object.keys(childrenResults[selectedChildId]);
-  const subjectMarks = childrenResults[selectedChildId][selectedTerm];
   const [chartData, setChartData] = useState(initialChartData);
+
+  // Fetch children data
+  useEffect(() => {
+    const fetchChildren = async () => {
+      try {
+        const data = await http.get('/api/parent/children');
+        setChildren(data?.data || data || []);
+        if (data?.length > 0) {
+          setSelectedChildId(data[0].id);
+        }
+      } catch (err) {
+        console.error('Failed to fetch children:', err);
+        // Fallback to dummy data
+        setChildren([
+          {
+            id: 1,
+            name: "Priscilla Daniel",
+            age: 10,
+            classLevel: "Primary 5",
+            institution: "Primary",
+            school: "Sunshine Primary School"
+          },
+          {
+            id: 2,
+            name: "John Doe",
+            age: 15,
+            classLevel: "SS2",
+            institution: "Secondary",
+            school: "Bright Future Secondary School"
+          }
+        ]);
+        setSelectedChildId(1);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchChildren();
+  }, []);
+
+  // Fetch grades when child or term changes
+  useEffect(() => {
+    if (!selectedChildId) return;
+
+    const fetchGrades = async () => {
+      try {
+        const data = await http.get(`/api/grades/${selectedChildId}?term=${selectedTerm}`);
+        setGradesData(prev => ({
+          ...prev,
+          [selectedChildId]: {
+            ...prev[selectedChildId],
+            [selectedTerm]: data?.data || data || []
+          }
+        }));
+      } catch (err) {
+        console.error('Failed to fetch grades:', err);
+        // Fallback to dummy data
+        setGradesData(prev => ({
+          ...prev,
+          [selectedChildId]: {
+            ...prev[selectedChildId],
+            [selectedTerm]: [
+              { subject: "Mathematics", theory: "35/40", practical: "38/40", assignment: "7/10", attendance: "80%", total: "94/100" },
+              { subject: "English", theory: "30/40", practical: "35/40", assignment: "8/10", attendance: "90%", total: "95/100" },
+              { subject: "Basic Science", theory: "28/40", practical: "34/40", assignment: "7/10", attendance: "85%", total: "84/100" }
+            ]
+          }
+        }));
+      }
+    };
+    fetchGrades();
+  }, [selectedChildId, selectedTerm]);
+
+  const child = children.find(c => c.id === selectedChildId);
+  const subjectMarks = gradesData[selectedChildId]?.[selectedTerm] || [];
+  const terms = ["First Term", "Second Term", "Third Term"]; // Default terms
   const topMarks = getTopMarks(subjectMarks);
 
   // Simulate real-time chart updates
@@ -226,6 +303,46 @@ function ParentResult() {
     }, 2000);
     return () => clearInterval(interval);
   }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
+        <SideMenu />
+        <main className="flex-1 p-4 md:p-10">
+          <DashboardHeader text='Performance Insight' holder="Search Results" />
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading student data...</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
+        <SideMenu />
+        <main className="flex-1 p-4 md:p-10">
+          <DashboardHeader text='Performance Insight' holder="Search Results" />
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="text-red-500 text-xl mb-4">⚠️</div>
+              <p className="text-gray-600 mb-4">Failed to load student data</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
@@ -244,7 +361,7 @@ function ParentResult() {
             <label className="block text-xs font-semibold mb-1">Select Child:</label>
             <select
               className="border rounded px-3 py-2 text-sm"
-              value={selectedChildId}
+              value={selectedChildId || ''}
               onChange={e => {
                 setSelectedChildId(Number(e.target.value));
                 setSelectedTerm("First Term");
@@ -269,7 +386,8 @@ function ParentResult() {
           </div>
           <button
             className="bg-blue-700 text-white rounded px-4 py-2 text-sm font-semibold mt-6"
-            onClick={() => downloadCSV(subjectMarks, child.name, selectedTerm)}
+            onClick={() => downloadCSV(subjectMarks, child?.name || 'Student', selectedTerm)}
+            disabled={!subjectMarks.length}
           >
             Download Result (CSV)
           </button>

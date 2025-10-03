@@ -8,6 +8,49 @@ import useLogin from "@/hooks/useLogin";
 export default function Login() {
   const navigate = useNavigate();
 
+  // Role-based redirection logic
+  const getRoleBasedRedirect = (user) => {
+    if (!user) return "/home";
+
+    // Support multiple possible backend flags for first-time login
+    const isFirstTime = user.first_time_user === true;
+    if (isFirstTime) {
+      return "/select-user-type";
+    }
+
+    // Normalize roles: allow either user.role (string) or user.roles (array)
+    let roles = [];
+    if (Array.isArray(user.roles)) {
+      roles = user.roles.map((r) => String(r.role?.code || r || "").toLowerCase());
+    } else if (typeof user.role === "string") {
+      roles = [String(user.role).toLowerCase()];
+    }
+
+    // Role precedence: super_admin > org_admin > teacher > student > parent > individual_learner
+    const has = (r) => roles.includes(r);
+    if (has("super_admin")) {
+      return "/admin-dashboard/dashboard";
+    }
+    if (has("org_admin") || has("admin")) {
+      return "/dashboard";
+    }
+    if (has("teacher")) {
+      return "/teacher-dashboard";
+    }
+    if (has("student")) {
+      return "/student-dashboard";
+    }
+    if (has("parent")) {
+      return "/parent-dashboard";
+    }
+    if (has("individual_learner")) {
+      return "/individual-learner-dashboard";
+    }
+
+    // Default fallback
+    return "/home";
+  };
+
   const {
     formData,
     rememberMe,
@@ -23,7 +66,10 @@ export default function Login() {
     handleSubmit,
     notification,
   } = useLogin({
-    onSuccess: () => navigate("/post-login", { replace: true }),
+    onSuccess: (response) => {
+      const redirectPath = getRoleBasedRedirect(response.user);
+      navigate(redirectPath, { replace: true });
+    },
   });
 
   const handleToSignUp = () => {

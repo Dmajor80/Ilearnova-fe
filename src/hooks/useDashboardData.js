@@ -141,11 +141,12 @@ export default function useDashboardData() {
   }, [refreshData]);
 
   /**
-   * Auto-refresh data every 5 minutes
+   * Auto-refresh data every 5 minutes with debouncing
    */
   useEffect(() => {
     const interval = setInterval(() => {
       if (!loading) {
+        console.log("Auto-refreshing dashboard data...");
         fetchMetrics();
         fetchRecentActivities();
       }

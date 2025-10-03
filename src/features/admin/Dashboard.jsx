@@ -1,14 +1,16 @@
-import React from "react";
+import React, { Suspense } from "react";
 import DashboardLayout from "@/components/admin/DashboardLayout";
 import DashboardErrorBoundary from "@/components/admin/DashboardErrorBoundary";
 import useDashboardData from "@/hooks/useDashboardData";
 import useDashboardActions from "@/hooks/useDashboardActions";
 import useAdminUser from "@/hooks/useAdminUser";
+import Loader from "@/components/Loader";
 
 /**
  * Modern admin dashboard component following established patterns.
  * Uses custom hooks for state management and composed components for UI.
  */
+
 const Dashboard = React.memo(function Dashboard() {
   // Custom hooks for data and state management
   const {
@@ -51,54 +53,56 @@ const Dashboard = React.memo(function Dashboard() {
   };
 
   return (
-    <DashboardErrorBoundary
-      onError={(error, errorInfo) => {
-        console.error("Dashboard error:", error, errorInfo);
-      }}
-      onRetry={refreshData}
-    >
-      <DashboardLayout
-        // User data
-        user={{ displayName, ...user }}
-        welcomeMessage={welcomeMessage}
-        lastUpdated={lastUpdated}
+    <Suspense fallback={<Loader />}>
+      <DashboardErrorBoundary
+        onError={(error, errorInfo) => {
+          console.error("Dashboard error:", error, errorInfo);
+        }}
+        onRetry={refreshData}
+      >
+        <DashboardLayout
+          // User data
+          user={{ displayName, ...user }}
+          welcomeMessage={welcomeMessage}
+          lastUpdated={lastUpdated}
 
-        // Metrics data
-        metrics={metricsArray}
-        metricsLoading={dataLoading}
-        metricsError={dataError}
+          // Metrics data
+          metrics={metricsArray}
+          metricsLoading={dataLoading}
+          metricsError={dataError}
 
-        // Charts data
-        chartData={chartData}
-        chartsLoading={dataLoading}
-        chartsError={dataError}
+          // Charts data
+          chartData={chartData}
+          chartsLoading={dataLoading}
+          chartsError={dataError}
 
-        // Actions
-        onRefresh={refreshData}
-        onViewReports={handleViewReports}
-        onMetricClick={handleMetricClick}
-        onRetryMetrics={handleRetryMetrics}
-        onRetryCharts={handleRetryCharts}
+          // Actions
+          onRefresh={refreshData}
+          onViewReports={handleViewReports}
+          onMetricClick={handleMetricClick}
+          onRetryMetrics={handleRetryMetrics}
+          onRetryCharts={handleRetryCharts}
 
-        // Quick actions
-        quickActions={quickActions}
-        quickActionsOpen={quickActionsOpen}
-        onToggleQuickActions={toggleQuickActions}
-        onCloseQuickActions={closeQuickActions}
+          // Quick actions
+          quickActions={quickActions}
+          quickActionsOpen={quickActionsOpen}
+          onToggleQuickActions={toggleQuickActions}
+          onCloseQuickActions={closeQuickActions}
 
-        // Loading states
-        refreshLoading={dataLoading}
-        actionLoading={actionLoading}
+          // Loading states
+          refreshLoading={dataLoading}
+          actionLoading={actionLoading}
 
-        // Notifications
-        notification={notification}
+          // Notifications
+          notification={notification}
 
-        // Layout options
-        showCharts={true}
-        maxWidth="max-w-7xl"
-        className="min-h-screen bg-gray-50"
-      />
-    </DashboardErrorBoundary>
+          // Layout options
+          showCharts={true}
+          maxWidth="max-w-7xl"
+          className="min-h-screen bg-gray-50"
+        />
+      </DashboardErrorBoundary>
+    </Suspense>
   );
 });
 
