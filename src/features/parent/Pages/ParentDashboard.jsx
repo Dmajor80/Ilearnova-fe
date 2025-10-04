@@ -1,254 +1,311 @@
-import { useState } from "react";
-import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css";
-import { PieGraph, BarGraph } from "../components/Charts"
-import DashboardHeader from "../components/DashboardHeader";
+import React, { useState, useEffect } from "react";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-  PieChart,
-  Pie,
-  Label,
-  CartesianGrid,
-  Legend
-} from "recharts";
-import SideMenu from "../components/SideMenu";
-import { useNavigate } from "react-router-dom";
+  User,
+  BookOpen,
+  Calendar,
+  FileText,
+  Clock,
+  Award,
+  ChevronRight,
+  Star,
+  ClipboardList,
+  TrendingUp,
+  BarChart3,
+  FileBarChart,
+  Menu,
+  X,
+  Users,
+  AlertTriangle,
+  CheckCircle,
+} from "lucide-react";
+import QuickStatsCard from "@/components/dashboard/QuickStatsCard";
+import RecentActivityFeed from "@/components/dashboard/RecentActivityFeed";
+import StudentAlertsPanel from "@/components/dashboard/StudentAlertsPanel";
+import QuickActionsGrid from "@/components/dashboard/QuickActionsGrid";
+import { getParentDashboard, getEnhancedParentDashboard } from "@/api/dashboardApi";
 
-const data = [
-  { day: 'Mon', minutes: 50 },
-  { day: 'Tue', minutes: 60 },
-  { day: 'Wed', minutes: 40 },
-  { day: 'Thur', minutes: 50 },
-  { day: 'Frid', minutes: 60 },
-  { day: 'Sat', minutes: 40 },
-];
+// Main application component
+export default function ParentDashboard() {
+  const [activeTab, setActiveTab] = useState("dashboard");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [parentId, setParentId] = useState(null);
 
-const events = [
-  { date: 22, title: "Parent-Teacher Meeting", color: "bg-yellow-100", time: "10:00 am" },
-  { date: 22, title: "Parent-Teacher Meeting", color: "bg-yellow-100", time: "10:00 am" },
-  { date: 26, title: "Parent-Teacher Meeting", color: "bg-yellow-100", time: "10:00 am" },
-];
+  useEffect(() => {
+    // Get parent ID from user data
+    const getParentId = () => {
+      try {
+        const raw = localStorage.getItem("user_data") ||
+                    sessionStorage.getItem("user_data");
+        const user = raw ? JSON.parse(raw) : null;
+        return user?.id;
+      } catch {
+        return null;
+      }
+    };
 
+    const id = getParentId();
+    setParentId(id);
 
-const days = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
-const dates = Array.from({ length: 31 }, (_, i) => i + 1);
-const eventDates = [22, 25, 26];
+    async function fetchDashboard() {
+      if (!id) return;
 
-// Dummy children data grouped by institution
-const children = [
-  {
-    id: 1,
-    name: "Priscilla Daniel",
-    age: 10,
-    classLevel: "Primary 5",
-    institution: "Primary",
-    school: "Sunshine Primary School"
-  },
-  {
-    id: 2,
-    name: "John Doe",
-    age: 15,
-    classLevel: "SS2",
-    institution: "Secondary",
-    school: "Bright Future Secondary School"
-  },
-  {
-    id: 3,
-    name: "Mary Johnson",
-    age: 19,
-    classLevel: "ND2",
-    institution: "Polytechnic",
-    school: "Federal Polytechnic, Lagos"
-  },
-  {
-    id: 4,
-    name: "Samuel Lee",
-    age: 22,
-    classLevel: "300 Level",
-    institution: "University",
-    school: "University of Ibadan"
-  }
-];
+      setLoading(true);
+      try {
+        const response = await getEnhancedParentDashboard(id);
+        setDashboardData(response.data);
+      } catch (error) {
+        console.error("Failed to fetch enhanced parent dashboard:", error);
+        // Fallback to basic dashboard
+        try {
+          const basicResponse = await getParentDashboard(id);
+          setDashboardData(basicResponse.data);
+        } catch (basicError) {
+          console.error("Failed to fetch basic parent dashboard:", basicError);
+        }
+      } finally {
+        setLoading(false);
+      }
+    }
 
-function ParentDashboard() {
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const navigate = useNavigate();
+    fetchDashboard();
+  }, []);
 
-  // Group children by institution
-  const groupedChildren = {
-    Primary: children.filter(child => child.institution === "Primary"),
-    Secondary: children.filter(child => child.institution === "Secondary"),
-    Polytechnic: children.filter(child => child.institution === "Polytechnic"),
-    University: children.filter(child => child.institution === "University"),
-  };
+  // Navigation links data
+  const navLinks = [
+    { id: "dashboard", icon: <ClipboardList size={20} />, label: "Dashboard" },
+    { id: "children", icon: <Users size={20} />, label: "My Children" },
+    { id: "attendance", icon: <Calendar size={20} />, label: "Attendance" },
+    { id: "grades", icon: <Star size={20} />, label: "Grades & Results" },
+    { id: "messages", icon: <FileText size={20} />, label: "Messages" },
+    { id: "fees", icon: <TrendingUp size={20} />, label: "Fees & Payments" },
+    { id: "timetable", icon: <Clock size={20} />, label: "Timetable" },
+    { id: "reports", icon: <BarChart3 size={20} />, label: "Reports" },
+  ];
 
+  // side bar
   return (
-    <div className="flex min-h-screen gap-2 bg-[#f5f8fe]">
-      {/* Sidebar */}
-      <SideMenu />
+    <div className="flex min-h-screen bg-gray-50">
+      {/* Mobile overlay */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col p-2">
-        {/* Topbar */}
-        <DashboardHeader holder="Search" text="Dashboard" />
-
-        {/* Children Details Section */}
-        <section className="w-full mt-20 px-2 md:px-0 mb-8">
-          <div className="bg-white rounded-xl shadow p-6 flex flex-col w-full">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800">Your Children</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {Object.entries(groupedChildren).map(([institution, kids]) => (
-                <div key={institution} className="mb-6">
-                  <h3 className="text-lg font-bold text-blue-700 mb-2">{institution} School</h3>
-                  {kids.length === 0 ? (
-                    <div className="text-gray-500 text-sm mb-2">No child in this category.</div>
-                  ) : (
-                    <ul className="space-y-3">
-                      {kids.map(child => (
-                        <li key={child.id} className="p-4 bg-blue-50 rounded-lg flex flex-col gap-2">
-                          <div className="flex flex-col gap-1">
-                            <span className="font-semibold text-[#1736a4] text-base">{child.name}</span>
-                            <span className="text-xs text-gray-500">{child.classLevel}</span>
-                            <span className="text-sm text-gray-700">Age: <span className="font-medium">{child.age}</span></span>
-                            <span className="text-sm text-gray-700">School: <span className="font-medium">{child.school}</span></span>
-                          </div>
-                          <button
-                            className="mt-2 px-4 py-2 lg:cursor-pointer bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm font-medium w-fit"
-                            onClick={() => navigate(`/parent-attendance/${child.id}`, { state: { child } })}
-                          >
-                            View Performance
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              ))}
+      <aside>
+        {/* Sidebar */}
+        <div
+          className={`
+          w-16 md:w-48 h-[100%] bg-white border-r border-gray-200 pt-4
+          fixed md:static inset-y-0 left-0 z-50
+          transition-all duration-300 ease-in-out
+          ${isMobileMenuOpen ? "w-48" : "w-16"}
+        `}
+        >
+          <div className="px-4 pb-6 border-b border-gray-200 relative">
+            <h1
+              className={`
+              font-bold text-[26px] text-blue-900 text-center ml-[-1rem] transition-all duration-300
+              ${isMobileMenuOpen ? "block" : "hidden md:block"}
+            `}
+            >
+              ILEARNOVA
+            </h1>
+            <div
+              className={`
+              font-bold text-blue-900 text-center transition-all duration-300
+              ${isMobileMenuOpen ? "hidden" : "block md:hidden"}
+            `}
+            >
+              <span className="text-xl text-white">IL</span>
             </div>
-          </div>
-        </section>
 
-        {/* Main Dashboard Widgets */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-10 px-2 md:px-0">
-          {/* Score Chart */}
-          <div className="w-full max-w-5xl mx-auto p-4 md:p-6 lg:p-8 bg-white rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800">Scores</h2>
-            <BarGraph />
-           
+            {/* Mobile menu toggle */}
+            <button
+              className="absolute top-0 right-4 md:hidden p-1 text-blue-900 hover:bg-blue-50 rounded"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              {isMobileMenuOpen ? <X size={30} /> : <Menu size={20} />}
+            </button>
           </div>
 
-          {/* Upcoming Classes */}
-          <div className="bg-white rounded-xl shadow p-6 min-h-[320px] flex flex-col">
-            <h3 className="text-lg font-semibold mb-2">Upcoming Classes</h3>
-            <div className="text-sm text-gray-600 mb-2">October 2024</div>
-            <div className="grid grid-cols-7 gap-2 text-center text-sm">
-              {days.map((day) => (
-                <div key={day} className="font-medium text-gray-500">{day}</div>
-              ))}
-              {Array.from({ length: 1 }, (_, i) => <div key={`spacer-${i}`} />)}
-              {dates.map((date) => (
-                <div
-                  key={date}
-                  className={`p-1 rounded-full ${eventDates.includes(date) ? 'bg-blue-600 text-white font-bold' : 'text-gray-800'
-                    }`}
+          <nav className="mt-4">
+            {navLinks.map((link) => (
+              <div key={link.id} className="relative group">
+                <button
+                  className={`flex items-center px-4 py-3 w-full text-left transition-all duration-200 ${
+                    activeTab === link.id
+                      ? "text-blue-600 bg-blue-50"
+                      : "text-gray-600 hover:text-blue-600 hover:bg-gray-50"
+                  }`}
+                  onClick={() => {
+                    setActiveTab(link.id);
+                    setIsMobileMenuOpen(false);
+                  }}
                 >
-                  {date}
+                  <span className="mr-3 flex-shrink-0">{link.icon}</span>
+                  <span
+                    className={`
+                    transition-all duration-300
+                    ${isMobileMenuOpen ? "block" : "hidden md:block"}
+                  `}
+                  >
+                    {link.label}
+                  </span>
+                </button>
+
+                {/* Tooltip for mobile/collapsed state */}
+                <div
+                  className={`
+                  absolute left-full top-1/2 transform -translate-y-1/2 ml-2
+                  bg-gray-800 text-white text-sm px-2 py-1 rounded whitespace-nowrap
+                  opacity-0 pointer-events-none transition-opacity duration-200
+                  group-hover:opacity-100 z-50
+                  ${isMobileMenuOpen ? "hidden" : "block md:hidden"}
+                `}
+                >
+                  {link.label}
+                  <div
+                    className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1
+                                 border-4 border-transparent border-r-gray-800"
+                  ></div>
                 </div>
-              ))}
-            </div>
-            {/* Events */}
-            <div className="flex flex-col gap-2">
-              {events.map((event, idx) => (
-                <div key={idx} className={`flex items-center gap-3 p-3`}>
-                  <img src="/icon.png" className='h-10 w-10' loading='lazy' alt="icons" />
-                  <div className='flex-row text-left'>
-                    <span className="text-md md:text-lg text-blue-700">{event.title}</span>
-                    <div className="flex items-center mt-2 ">
-                      <li className="ml-auto text-xs text-gray-500">{`December ${event.date}`}</li>
-                      <li className="ml-auto text-xs text-gray-500">{event.time}</li>
-                    </div>
-                  </div>
-
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Lower Widgets */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6 px-2 md:px-0 mb-8">
-          {/* Weekly Learning Goal */}
-          <div className="bg-white rounded-xl shadow p-6 flex flex-col md:flex-row items-center gap-6">
-            <div className="flex flex-col items-center justify-center w-full md:w-1/2">
-              {/* Recharts Pie Chart as Circular Progress */}
-              <PieGraph />
-              <div className="text-xs text-gray-500 mt-2">Courses</div>
-            </div>
-            <div className="w-full max-w-2xl mx-auto p-4 md:p-6 lg:p-8 bg-white rounded-lg shadow-md">
-              <h2 className="text-xl font-semibold mb-2 text-gray-800">Your weekly learning goal</h2>
-
-              <div className="w-full h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={data}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="day" tick={{ fontSize: 12 }} />
-                    <YAxis hide domain={[0, 70]} />
-                    <Tooltip formatter={(value) => `${value} mins`} />
-                    <Bar dataKey="minutes" fill="#4ade80" radius={[6, 6, 0, 0]} barSize={32} />
-                  </BarChart>
-                </ResponsiveContainer>
               </div>
+            ))}
+          </nav>
+        </div>
+      </aside>
 
-              <div className="mt-4 flex justify-between items-center text-sm">
-                <span className="text-black font-medium text-lg">100/<span className="text-gray-500">300mins</span></span>
-                <span className="text-red-600 font-medium">-40% from previous week</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Student Attendance Calendar with react-calendar */}
-
-          <div className="bg-white rounded-xl border-none shadow p-6 flex flex-col">
-            <div className="bg-white rounded-xl shadow p-6 flex flex-col">
-              <div className="font-semibold text-gray-700 mb-2">
-                Student Attendance
-              </div>
-              <div className="text-xs text-gray-500 mb-4">
-                {selectedDate.toLocaleString("default", {
-                  month: "long",
-                  year: "numeric",
-                })}
-              </div>
-              <Calendar
-                onChange={setSelectedDate}
-                value={selectedDate}
-                calendarType="hebrew"
-                className="border-none w-full [&_.react-calendar__tile--active]:bg-blue-700 [&_.react-calendar__tile--active]:text-white [&_.react-calendar__tile--now]:bg-blue-100"
-                tileClassName={({ date, view }) => {
-                  // Example: mark 22nd and 23rd as absent
-                  if (
-                    view === "month" &&
-                    [22, 23].includes(date.getDate()) &&
-                    date.getMonth() === selectedDate.getMonth()
-                  ) {
-                    return "bg-red-500 text-white font-bold rounded-full";
-                  }
-                  return "rounded-full";
-                }}
+      {/* Main content area */}
+      <div className="ml-16 md:ml-0 flex-1 p-4">
+        {loading && <p>Loading dashboard data...</p>}
+        {!loading && activeTab === "dashboard" && dashboardData && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <QuickStatsCard
+                title="My Children"
+                value={dashboardData.quick_stats?.children_count || 0}
+                icon="users"
+                color="blue"
+              />
+              <QuickStatsCard
+                title="Attendance Rate"
+                value={`${dashboardData.quick_stats?.attendance_rate || 0}%`}
+                icon="calendar"
+                color="green"
+              />
+              <QuickStatsCard
+                title="Pending Fees"
+                value={`₦${dashboardData.quick_stats?.pending_fees || 0}`}
+                icon="alert"
+                color="red"
+              />
+              <QuickStatsCard
+                title="Unread Messages"
+                value={dashboardData.quick_stats?.unread_messages || 0}
+                icon="check"
+                color="yellow"
+              />
+              <QuickStatsCard
+                title="Upcoming Events"
+                value={dashboardData.quick_stats?.upcoming_events || 0}
+                icon="calendar"
+                color="purple"
+              />
+              <QuickStatsCard
+                title="Average Grade"
+                value={dashboardData.quick_stats?.average_grade || "N/A"}
+                icon="book"
+                color="blue"
               />
             </div>
-          </div>
-        </section>
-      </main>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+              <RecentActivityFeed activities={dashboardData.recent_activity || []} />
+              <StudentAlertsPanel alerts={dashboardData.student_alerts || []} />
+            </div>
+
+            <div className="mt-6">
+              <QuickActionsGrid actions={dashboardData.quick_actions || []} />
+            </div>
+          </>
+        )}
+
+        {activeTab === "children" && <ChildrenComponent />}
+        {activeTab === "attendance" && <AttendanceComponent />}
+        {activeTab === "grades" && <GradesComponent />}
+        {activeTab === "messages" && <MessagesComponent />}
+        {activeTab === "fees" && <FeesComponent />}
+        {activeTab === "timetable" && <TimetableComponent />}
+        {activeTab === "reports" && <ReportsComponent />}
+      </div>
     </div>
   );
 }
 
+// Placeholder components for other tabs
+function ChildrenComponent() {
+  return (
+    <div className="p-4 bg-white rounded shadow">
+      <h2 className="text-xl font-bold mb-4">My Children</h2>
+      <p className="text-gray-600">View and manage your children's information.</p>
+    </div>
+  );
+}
 
-export default ParentDashboard;
+function AttendanceComponent() {
+  return (
+    <div className="p-4 bg-white rounded shadow">
+      <h2 className="text-xl font-bold mb-4">Attendance Records</h2>
+      <p className="text-gray-600">Monitor your children's attendance.</p>
+    </div>
+  );
+}
+
+function GradesComponent() {
+  return (
+    <div className="p-4 bg-white rounded shadow">
+      <h2 className="text-xl font-bold mb-4">Grades & Results</h2>
+      <p className="text-gray-600">View your children's academic performance.</p>
+    </div>
+  );
+}
+
+function MessagesComponent() {
+  return (
+    <div className="p-4 bg-white rounded shadow">
+      <h2 className="text-xl font-bold mb-4">Messages</h2>
+      <p className="text-gray-600">Communicate with teachers and school staff.</p>
+    </div>
+  );
+}
+
+function FeesComponent() {
+  return (
+    <div className="p-4 bg-white rounded shadow">
+      <h2 className="text-xl font-bold mb-4">Fees & Payments</h2>
+      <p className="text-gray-600">Manage school fees and payments.</p>
+    </div>
+  );
+}
+
+function TimetableComponent() {
+  return (
+    <div className="p-4 bg-white rounded shadow">
+      <h2 className="text-xl font-bold mb-4">Timetable</h2>
+      <p className="text-gray-600">View class schedules and events.</p>
+    </div>
+  );
+}
+
+function ReportsComponent() {
+  return (
+    <div className="p-4 bg-white rounded shadow">
+      <h2 className="text-xl font-bold mb-4">Reports</h2>
+      <p className="text-gray-600">Access detailed reports and analytics.</p>
+    </div>
+  );
+}

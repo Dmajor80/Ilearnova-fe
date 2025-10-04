@@ -275,18 +275,24 @@ export default function useLogin({ onSuccess } = {}) {
 
         // Store tokens and user
         const storage = rememberMe ? window.localStorage : window.sessionStorage;
-        const access = response.access || response.token || response.access_token;
-        const refresh = response.refresh;
+        const access = response.data?.token || response.access || response.token || response.access_token;
+        const refresh = response.data?.refresh_token || response.refresh;
         setTokens({ access, refresh }, storage);
 
-        if (response.user) {
-          storage?.setItem("user_data", JSON.stringify(response.user));
-          if (response.user.username || response.user.email) {
+        console.log("useLogin: Login response:", response);
+        console.log("useLogin: User data from response:", response.data?.user);
+
+        if (response.data?.user) {
+          console.log("useLogin: Storing user data in storage:", response.data.user);
+          storage?.setItem("user_data", JSON.stringify(response.data.user));
+          if (response.data.user.username || response.data.user.email) {
             storage?.setItem(
               "prefill_username",
-              response.user.username || response.user.email
+              response.data.user.username || response.data.user.email
             );
           }
+        } else {
+          console.warn("useLogin: No user data in login response!");
         }
 
         clearFailedAttempts();

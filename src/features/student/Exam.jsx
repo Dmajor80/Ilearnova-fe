@@ -8,6 +8,7 @@ import {
   AlertCircle,
   ArrowRight,
 } from "lucide-react";
+import { getStudentExams } from "../../api/dashboardApi";
 
 const Exam = () => {
   const [currentView, setCurrentView] = useState("dashboard");
@@ -16,6 +17,30 @@ const Exam = () => {
   const [answers, setAnswers] = useState({});
   const [examStartTime, setExamStartTime] = useState(null);
   const [examResults, setExamResults] = useState(null);
+
+  // API state
+  const [examData, setExamData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch exam data on component mount
+  useEffect(() => {
+    const fetchExamData = async () => {
+      try {
+        setLoading(true);
+        const response = await getStudentExams();
+        setExamData(response.data || []);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching exam data:', err);
+        setError('Failed to load exam data. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchExamData();
+  }, []);
 
   // Timer effect
   useEffect(() => {
@@ -164,53 +189,29 @@ const Exam = () => {
     setCurrentView("results");
   };
 
-  const completedTasks = [
-    {
-      title: "Mathematics First Exam",
-      description: "Description here: Scheduled on May 5, 2024",
-      date: "Date: May 05, 2024",
-      actions: ["View Results", "Reschedule"],
-    },
-    {
-      title: "English Continuous Assessment",
-      description: "Description here: Scheduled on May 7, 2024",
-      date: "Date: May 07, 2024",
-      actions: ["View Results", "Retake"],
-    },
-    {
-      title: "Science Weekly Quiz",
-      description: "Description here: Scheduled on May 10, 2024",
-      date: "Date: May 10, 2024",
+  // Transform API data to match UI format
+  const completedTasks = examData
+    .filter(exam => exam.graded_at) // Only show graded exams
+    .map(exam => ({
+      title: exam.exam?.name || 'Exam',
+      description: `Course: ${exam.exam?.course?.name || 'N/A'} | Class: ${exam.exam?.class?.name || 'N/A'}`,
+      date: `Graded: ${new Date(exam.graded_at).toLocaleDateString()}`,
       actions: ["View Results"],
-    },
-  ];
+      score: exam.score,
+      examId: exam.id
+    }));
 
-  const activeTasks = [
-    {
-      title: "Mathematics Continuous Assessment",
-      description: "Status: In progress",
-      date: "Due: May 15, 2024",
-      time: "Time: 10:00 AM - 12:00 PM",
+  const activeTasks = examData
+    .filter(exam => !exam.graded_at) // Show ungraded exams as active
+    .map(exam => ({
+      title: exam.exam?.name || 'Exam',
+      description: `Course: ${exam.exam?.course?.name || 'N/A'} | Class: ${exam.exam?.class?.name || 'N/A'}`,
+      date: `Due: ${exam.exam?.scheduled_date ? new Date(exam.exam.scheduled_date).toLocaleDateString() : 'TBD'}`,
+      time: exam.exam?.scheduled_time || 'TBD',
       action: "Start Work",
       canStart: true,
-    },
-    {
-      title: "Physics Weekly Quiz",
-      description: "Status: Not started",
-      date: "Due: May 18, 2024",
-      time: "Time: 2:00 PM - 3:30 PM",
-      action: "View Details",
-      canStart: false,
-    },
-    {
-      title: "History Midterm Test",
-      description: "Status: Pending",
-      date: "Due: May 20, 2024",
-      time: "Time: 9:00 AM - 11:00 AM",
-      action: "Request Reschedule",
-      canStart: false,
-    },
-  ];
+      examId: exam.id
+    }));
 
   const handleButtonClick = (task) => {
     if (task.canStart && task.action === "Start Work") {
@@ -590,6 +591,43 @@ const Exam = () => {
   }
 
   // Dashboard View
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <span className="ml-3 text-gray-600">Loading exam data...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <div className="flex items-center">
+              <XCircle className="w-6 h-6 text-red-600 mr-3" />
+              <div>
+                <h3 className="text-lg font-medium text-red-800">Error Loading Data</h3>
+                <p className="text-red-600 mt-1">{error}</p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="mt-3 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-medium"
+                >
+                  Try Again
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen  bg-gray-50 p-6">
       <div className="max-w-4xl mx-auto">
@@ -612,72 +650,89 @@ const Exam = () => {
         {/* Completed Section */}
         <div className="mb-8">
           <h2 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
-            Completed
+            Completed ({completedTasks.length})
           </h2>
 
-          <div className="space-y-4">
-            {completedTasks.map((task, index) => (
-              <div
-                key={index}
-                className="flex flex-col md:flex-row lg:flex-row justify-between items-start py-3 border-b border-gray-100 last:border-b-0 "
-              >
-                <div className="flex-1">
-                  <h3 className="font-medium text-gray-800 mb-1">
-                    {task.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-1">
-                    {task.description}
-                  </p>
-                  <p className="text-sm text-gray-500">{task.date}</p>
+          {completedTasks.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              No completed exams yet.
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {completedTasks.map((task, index) => (
+                <div
+                  key={task.examId || index}
+                  className="flex flex-col md:flex-row lg:flex-row justify-between items-start py-3 border-b border-gray-100 last:border-b-0 "
+                >
+                  <div className="flex-1">
+                    <h3 className="font-medium text-gray-800 mb-1">
+                      {task.title}
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-1">
+                      {task.description}
+                    </p>
+                    <p className="text-sm text-gray-500">{task.date}</p>
+                    {task.score && (
+                      <p className="text-sm text-green-600 font-medium">
+                        Score: {task.score}%
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex gap-2 ml-4 mt-3.5">
+                    {task.actions.map((action, actionIndex) => (
+                      <button
+                        key={actionIndex}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-[8px] lg:text-[14px] font-medium"
+                      >
+                        {action}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <div className="flex gap-2 ml-4 mt-3.5">
-                  {task.actions.map((action, actionIndex) => (
-                    <button
-                      key={actionIndex}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-[8px] lg:text-[14px] font-medium"
-                    >
-                      {action}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Active Task Section */}
         <div>
           <h2 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
-            Active Task
+            Active Tasks ({activeTasks.length})
           </h2>
 
-          <div className="space-y-4">
-            {activeTasks.map((task, index) => (
-              <div
-                key={index}
-                className="flex flex-col md:flex-row  lg:flex-row justify-between items-start py-3 border-b border-gray-100 last:border-b-0"
-              >
-                <div className="flex-1">
-                  <h3 className="font-medium text-gray-800 mb-1">
-                    {task.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-1">
-                    {task.description}
-                  </p>
-                  <p className="text-sm text-gray-500 mb-1">{task.date}</p>
-                  <p className="text-sm text-gray-500">{task.time}</p>
+          {activeTasks.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              No active exams available.
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {activeTasks.map((task, index) => (
+                <div
+                  key={task.examId || index}
+                  className="flex flex-col md:flex-row  lg:flex-row justify-between items-start py-3 border-b border-gray-100 last:border-b-0"
+                >
+                  <div className="flex-1">
+                    <h3 className="font-medium text-gray-800 mb-1">
+                      {task.title}
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-1">
+                      {task.description}
+                    </p>
+                    <p className="text-sm text-gray-500 mb-1">{task.date}</p>
+                    <p className="text-sm text-gray-500">{task.time}</p>
+                  </div>
+                  <div className="ml-4">
+                    <button
+                      onClick={() => handleButtonClick(task)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium mt-[1rem]"
+                    >
+                      {task.action}
+                    </button>
+                  </div>
                 </div>
-                <div className="ml-4">
-                  <button
-                    onClick={() => handleButtonClick(task)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium mt-[1rem]"
-                  >
-                    {task.action}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -11,10 +11,11 @@ import { getTokens } from "../../api/auth";
  *
  * This is a minimal first implementation that maps to existing routes:
  * - superadmin → /admin-dashboard/dashboard (current src/admin/*)
- * - org_admin/admin → /dashboard (current src/School-Admin/*)
+ * - org_admin/admin → /organization-dashboard (current src/organization/*)
  * - teacher → /teacher-dashboard
  * - student → /student-dashboard
- * - parent → /home (until a parent dashboard route is mounted)
+ * - parent → /parent-dashboard
+ * - individual_learner → /individual-learner-dashboard
  * Fallback → /home
  */
 export default function PostLoginRedirect() {
@@ -62,8 +63,13 @@ export default function PostLoginRedirect() {
     // Normalize roles: allow either user.role (string) or user.roles (array)
     let roles = [];
     if (Array.isArray(user.roles)) {
-      roles = user.roles.map((r) => String(r.role?.code || r || "").toLowerCase());
+      roles = user.roles.map((r) => {
+        const roleCode = r.role?.code || r || "";
+        console.log("PostLoginRedirect: Role raw value:", r, "Normalized:", roleCode.toLowerCase());
+        return String(roleCode).toLowerCase();
+      });
     } else if (typeof user.role === "string") {
+      console.log("PostLoginRedirect: Single role string:", user.role);
       roles = [String(user.role).toLowerCase()];
     }
 
@@ -77,8 +83,8 @@ export default function PostLoginRedirect() {
       return;
     }
     if (has("org_admin") || has("admin")) {
-      console.log("PostLoginRedirect: Org admin role detected, redirecting to /dashboard");
-      navigate("/dashboard", { replace: true });
+      console.log("PostLoginRedirect: Org admin role detected, redirecting to /organization-dashboard");
+      navigate("/organization-dashboard", { replace: true });
       return;
     }
     if (has("teacher")) {
