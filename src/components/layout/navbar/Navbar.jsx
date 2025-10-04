@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Menu, X, User, LogOut, Settings, UserCircle, Sparkles, GraduationCap } from "lucide-react";
 import { createPortal } from "react-dom";
+import { useNavigate } from "react-router-dom";
 import { CDN_BASE_URL, LOGO_URL } from "../../../api/config";
 import { http } from "../../../api/baseClient";
 import { clearAuth } from "../../../api/auth";
 
 const Navbar = () => {
+  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -18,7 +20,7 @@ const Navbar = () => {
     const ac = new AbortController();
     const checkAuthStatus = async () => {
       try {
-        const userData = await http.get("/api/auth/profile/", { signal: ac.signal });
+        const userData = await http.get("/api/auth/me", { signal: ac.signal });
         setUser(userData);
         setIsAuthenticated(true);
       } catch (error) {
@@ -330,7 +332,10 @@ const Navbar = () => {
                     <div className="border-t border-gray-200/50 py-2">
                       <button
                         className="flex items-center w-full px-6 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
-                        onClick={() => setIsUserMenuOpen(false)}
+                        onClick={() => {
+                          setIsUserMenuOpen(false);
+                          navigate('/profile');
+                        }}
                       >
                         <UserCircle className="mr-3 h-4 w-4" />
                         Edit Profile
@@ -476,7 +481,10 @@ const Navbar = () => {
                 <div className="space-y-2">
                   <button
                     className="flex items-center w-full px-4 py-3 text-sm text-white hover:bg-white/10 rounded-xl transition-all duration-200"
-                    onClick={() => setIsMobileMenuOpen(false)}
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      navigate('/profile');
+                    }}
                   >
                     <UserCircle className="mr-3 h-5 w-5" />
                     Edit Profile

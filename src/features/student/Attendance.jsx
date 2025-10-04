@@ -10,24 +10,51 @@ import {
   Legend,
 } from "recharts";
 import { Calendar, ChevronDown, Download, Filter } from "lucide-react";
+import { getStudentAttendance } from "../../api/dashboardApi";
 
 // WeeklyAttendanceChart Component
 function WeeklyAttendanceChart() {
   const [animate, setAnimate] = useState(true);
+  const [attendanceData, setAttendanceData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Data based on the chart in the image
-  const attendanceData = [
-    { name: "Maths", score: 80, color: "#4ade80" }, // green
-    { name: "Eng", score: 85, color: "#4ade80" }, // green
-    { name: "Sci", score: 62, color: "#facc15" }, // yellow
-    { name: "Phy", score: 70, color: "#facc15" }, // yellow
-    { name: "Chem", score: 83, color: "#4ade80" }, // green
-    { name: "Bio", score: 67, color: "#facc15" }, // yellow
-    { name: "Geo", score: 48, color: "#f87171" }, // red
-    { name: "Hist", score: 50, color: "#f87171" }, // red
-    { name: "Econ", score: 90, color: "#4ade80" }, // green
-    { name: "Stat", score: 77, color: "#4ade80" }, // green
-  ];
+  useEffect(() => {
+    const fetchAttendanceData = async () => {
+      try {
+        setLoading(true);
+        const response = await getStudentAttendance();
+        // Transform the data to match the expected format
+        const transformedData = response.data?.weeklyAttendance?.map(item => ({
+          name: item.subject?.name || item.subject,
+          score: item.percentage || item.score,
+          color: item.percentage >= 80 ? "#4ade80" : item.percentage >= 70 ? "#facc15" : "#f87171"
+        })) || [];
+        setAttendanceData(transformedData);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching attendance data:", err);
+        setError("Failed to load attendance data");
+        // Fallback to sample data if API fails
+        setAttendanceData([
+          { name: "Maths", score: 80, color: "#4ade80" },
+          { name: "Eng", score: 85, color: "#4ade80" },
+          { name: "Sci", score: 62, color: "#facc15" },
+          { name: "Phy", score: 70, color: "#facc15" },
+          { name: "Chem", score: 83, color: "#4ade80" },
+          { name: "Bio", score: 67, color: "#facc15" },
+          { name: "Geo", score: 48, color: "#f87171" },
+          { name: "Hist", score: 50, color: "#f87171" },
+          { name: "Econ", score: 90, color: "#4ade80" },
+          { name: "Stat", score: 77, color: "#4ade80" },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAttendanceData();
+  }, []);
 
   useEffect(() => {
     // Disable animation after initial render
@@ -125,21 +152,109 @@ function WeeklyAttendanceChart() {
   );
 }
 
-// Sample monthly data
-const monthlyData = [
-  { name: "Jan", percentage: 90, color: "bg-green-500" },
-  { name: "Feb", percentage: 85, color: "bg-green-500" },
-  { name: "Mar", percentage: 75, color: "bg-yellow-500" },
-  { name: "Apr", percentage: 72, color: "bg-yellow-500" },
-  { name: "May", percentage: 88, color: "bg-green-500" },
-  { name: "Jun", percentage: 65, color: "bg-yellow-500" },
-  { name: "Jul", percentage: 55, color: "bg-red-500" },
-  { name: "Aug", percentage: 52, color: "bg-red-500" },
-  { name: "Sep", percentage: 82, color: "bg-green-500" },
-  { name: "Oct", percentage: 78, color: "bg-yellow-500" },
-  { name: "Nov", percentage: 85, color: "bg-green-500" },
-  { name: "Dec", percentage: 90, color: "bg-green-500" },
-];
+// Monthly Attendance Chart Component
+function MonthlyAttendanceChart() {
+  const [monthlyData, setMonthlyData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchMonthlyData = async () => {
+      try {
+        setLoading(true);
+        const response = await getStudentAttendance();
+        // Transform the data to match the expected format
+        const transformedData = response.data?.monthlyAttendance?.map(item => ({
+          name: item.month,
+          percentage: item.percentage
+        })) || [];
+        setMonthlyData(transformedData);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching monthly attendance data:", err);
+        setError("Failed to load monthly attendance data");
+        // Fallback to sample data if API fails
+        setMonthlyData([
+          { name: "Jan", percentage: 90 },
+          { name: "Feb", percentage: 85 },
+          { name: "Mar", percentage: 75 },
+          { name: "Apr", percentage: 72 },
+          { name: "May", percentage: 88 },
+          { name: "Jun", percentage: 65 },
+          { name: "Jul", percentage: 55 },
+          { name: "Aug", percentage: 52 },
+          { name: "Sep", percentage: 82 },
+          { name: "Oct", percentage: 78 },
+          { name: "Nov", percentage: 85 },
+          { name: "Dec", percentage: 90 },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMonthlyData();
+  }, []);
+
+  return (
+    <Card className="mt-6 lg:mt-0">
+      <h2 className="font-bold mb-4 text-lg sm:text-xl">Percentage</h2>
+      <div className="h-[300px] sm:h-[400px] lg:h-[579px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart
+            data={monthlyData}
+            margin={{ top: 5, right: 10, left: -20, bottom: 5 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+            <XAxis dataKey="name" axisLine={false} tickLine={false} />
+            <YAxis axisLine={false} tickLine={false} />
+            <Tooltip />
+            <Legend />
+            <Bar
+              dataKey="percentage"
+              name="Month"
+              radius={[4, 4, 0, 0]}
+              animationDuration={2000}
+            >
+              {monthlyData.map((entry, index) => (
+                <cell
+                  key={`cell-${index}`}
+                  fill={
+                    entry.percentage >= 80
+                      ? "#4ade80"
+                      : entry.percentage >= 70
+                      ? "#facc15"
+                      : "#f87171"
+                  }
+                />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+      <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mt-2">
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+          <span className="text-xs sm:text-sm text-gray-600">
+            Above 80%
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+          <span className="text-xs sm:text-sm text-gray-600">
+            70%-80%
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+          <span className="text-xs sm:text-sm text-gray-600">
+            Below 70%
+          </span>
+        </div>
+      </div>
+    </Card>
+  );
+}
 
 // Card component
 const Card = ({ children, className = "" }) => {
@@ -232,62 +347,7 @@ export default function Attendance() {
           </div>
 
           {/* Monthly Chart */}
-          <Card className="mt-6 lg:mt-0">
-            <h2 className="font-bold mb-4 text-lg sm:text-xl">Percentage</h2>
-            <div className="h-[300px] sm:h-[400px] lg:h-[579px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={monthlyData}
-                  margin={{ top: 5, right: 10, left: -20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} />
-                  <YAxis axisLine={false} tickLine={false} />
-                  <Tooltip />
-                  <Legend />
-                  <Bar
-                    dataKey="percentage"
-                    name="Month"
-                    radius={[4, 4, 0, 0]}
-                    animationDuration={animate ? 2000 : 0}
-                  >
-                    {monthlyData.map((entry, index) => (
-                      <cell
-                        key={`cell-${index}`}
-                        fill={
-                          entry.percentage >= 80
-                            ? "#4ade80"
-                            : entry.percentage >= 70
-                            ? "#facc15"
-                            : "#f87171"
-                        }
-                      />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mt-2">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span className="text-xs sm:text-sm text-gray-600">
-                  Above 80%
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                <span className="text-xs sm:text-sm text-gray-600">
-                  70%-80%
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                <span className="text-xs sm:text-sm text-gray-600">
-                  Below 70%
-                </span>
-              </div>
-            </div>
-          </Card>
+          <MonthlyAttendanceChart />
         </div>
       </div>
     </div>

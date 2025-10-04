@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useOrganization } from "../../context/OrganizationContext";
+import { getTokens } from "../../api/auth";
 
 /**
  * OrgGate
@@ -16,6 +17,32 @@ export default function OrgGate({ children }) {
   const { loading, orgs, currentOrgId, setCurrentOrgId } = useOrganization();
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Helper to get user role
+  const getUserRole = () => {
+    try {
+      const { store } = getTokens();
+      const raw = store?.getItem("user_data") ||
+                  window.localStorage.getItem("user_data") ||
+                  window.sessionStorage.getItem("user_data");
+      const user = raw ? JSON.parse(raw) : null;
+      if (user) {
+        let roles = [];
+        if (Array.isArray(user.roles)) {
+          roles = user.roles.map((r) => String(r.role?.code || r || "").toLowerCase());
+        } else if (typeof user.role === "string") {
+          roles = [String(user.role).toLowerCase()];
+        }
+        return roles;
+      }
+      return [];
+    } catch {
+      return [];
+    }
+  };
+
+  const userRoles = getUserRole();
+  const isOrgAdmin = userRoles.includes("org_admin") || userRoles.includes("admin");
 
   useEffect(() => {
     if (!loading && !currentOrgId && Array.isArray(orgs) && orgs.length === 1) {
@@ -52,7 +79,8 @@ export default function OrgGate({ children }) {
   console.log("OrgGate: loading:", loading, "orgs:", orgs, "orgs.length:", orgs?.length, "currentOrgId:", currentOrgId);
 
   // No organizations at all -> send user to onboarding to create/link one.
-  if (!loading && Array.isArray(orgs) && orgs.length === 0) {
+  // But allow org_admin users to access dashboard even without organizations
+  if (!loading && Array.isArray(orgs) && orgs.length === 0 && !isOrgAdmin) {
     console.log("OrgGate: No organizations found, redirecting to organization-details");
     return <Navigate to="/organization-details" state={{ from: location }} replace />;
   }

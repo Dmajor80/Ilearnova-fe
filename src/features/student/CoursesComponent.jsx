@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -14,7 +14,9 @@ import {
   ChevronLeft,
   ChevronRight,
   MessageCircle,
+  Loader2,
 } from "lucide-react";
+import { getStudentCourses } from "../../api/dashboardApi";
 
 
 // Simple arrow icon component
@@ -43,7 +45,6 @@ function StudentDashboard() {
 }
 
 // Course card component with navigation
-// Course card component with navigation
 function CourseCard({ course }) {
   const navigate = useNavigate();
 
@@ -52,11 +53,11 @@ function CourseCard({ course }) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
       <div className="relative">
         <img
-          src={course.image}
-          alt={course.title}
+          src="/api/placeholder/320/200"
+          alt={course.name}
           className="w-full h-48 object-cover"
         />
         <button
@@ -67,38 +68,92 @@ function CourseCard({ course }) {
         </button>
       </div>
       <div className="p-4">
-        <h3 className="font-medium text-sm mb-2">{course.title}</h3>
+        <h3 className="font-medium text-sm mb-2">{course.name}</h3>
         <div className="flex items-center mb-2">
           <img
             src="/api/placeholder/32/32"
-            alt={course.teacher}
+            alt={course.teacher?.name || 'Teacher'}
             className="w-8 h-8 rounded-full mr-2"
           />
           <div>
-            <p className="text-sm font-medium">{course.teacher}</p>
+            <p className="text-sm font-medium">{course.teacher?.name || 'Unknown Teacher'}</p>
             <p className="text-xs text-gray-500">
-              {course.lessons} Lessons - {course.themes} Key Themes
+              {course.subject?.name || 'Subject'} - {course.class?.name || 'Class'}
             </p>
           </div>
         </div>
         <div className="flex justify-between items-center text-xs mt-2">
-          <span>Date Started: {course.dateStarted}</span>
-          <span className="font-medium text-blue-600">{course.progress}%</span>
+          <span>Code: {course.code || 'N/A'}</span>
+          <span className={`font-medium px-2 py-1 rounded-full text-xs ${
+            course.status === 'active' ? 'bg-green-100 text-green-800' :
+            course.status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
+            'bg-gray-100 text-gray-800'
+          }`}>
+            {course.status || 'Unknown'}
+          </span>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-1 mt-1">
-          <div
-            className="bg-blue-600 h-1 rounded-full"
-            style={{ width: `${course.progress}%` }}
-          ></div>
-        </div>
+        {course.start_date && (
+          <div className="text-xs text-gray-500 mt-1">
+            Started: {new Date(course.start_date).toLocaleDateString()}
+          </div>
+        )}
       </div>
     </div>
   );
 }
+
 // Main courses component
 export function CoursesComponent({ courses }) {
-  const coursesToDisplay =
-    courses && courses.length > 0 ? courses : sampleCourses;
+  const [coursesData, setCoursesData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        setLoading(true);
+        const response = await getStudentCourses();
+        setCoursesData(response.data || []);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching courses:', err);
+        setError('Failed to load courses. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, []);
+
+  const coursesToDisplay = courses && courses.length > 0 ? courses : coursesData;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
+          <p className="text-gray-600">Loading your courses...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && coursesData.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -339,66 +394,4 @@ export function CoursePage() {
   );
 }
 
-// Sample courses data
-const sampleCourses = [
-  {
-    id: 1,
-    title: "Introduction to Physics",
-    teacher: "Teacher A",
-    lessons: 15,
-    themes: 3,
-    dateStarted: "10/01/2024",
-    progress: 40,
-    image: "/api/placeholder/320/200",
-  },
-  {
-    id: 2,
-    title: "Introduction to Chemistry",
-    teacher: "Teacher B",
-    lessons: 20,
-    themes: 4,
-    dateStarted: "01/03/2024",
-    progress: 50,
-    image: "/api/placeholder/320/200",
-  },
-  {
-    id: 3,
-    title: "Use Of English",
-    teacher: "Teacher C",
-    lessons: 30,
-    themes: 5,
-    dateStarted: "01/01/2024",
-    progress: 40,
-    image: "/api/placeholder/320/200",
-  },
-  {
-    id: 4,
-    title: "Advanced Mathematics",
-    teacher: "Teacher D",
-    lessons: 25,
-    themes: 6,
-    dateStarted: "15/02/2024",
-    progress: 60,
-    image: "/api/placeholder/320/200",
-  },
-  {
-    id: 5,
-    title: "Biology Fundamentals",
-    teacher: "Teacher E",
-    lessons: 18,
-    themes: 4,
-    dateStarted: "05/03/2024",
-    progress: 30,
-    image: "/api/placeholder/320/200",
-  },
-  {
-    id: 6,
-    title: "World History",
-    teacher: "Teacher F",
-    lessons: 22,
-    themes: 7,
-    dateStarted: "20/01/2024",
-    progress: 75,
-    image: "/api/placeholder/320/200",
-  },
-];
+

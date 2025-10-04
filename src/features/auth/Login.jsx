@@ -51,6 +51,8 @@ export default function Login() {
     return "/home";
   };
 
+  console.log("Login: Component rendered, useLogin hook initialized");
+
   const {
     formData,
     rememberMe,
@@ -67,10 +69,17 @@ export default function Login() {
     notification,
   } = useLogin({
     onSuccess: (response) => {
-      const redirectPath = getRoleBasedRedirect(response.user);
-      navigate(redirectPath, { replace: true });
+      console.log("Login: onSuccess called with response:", response);
+      console.log("Login: Navigating to /post-login for role-based redirection");
+      // Navigate to post-login redirector for consistent role-based redirection
+      navigate("/post-login", { replace: true });
     },
   });
+
+  const handleFormSubmit = (e) => {
+    console.log("Login: Form submit triggered");
+    handleSubmit(e);
+  };
 
   const handleToSignUp = () => {
     navigate("/signup");
@@ -126,7 +135,7 @@ export default function Login() {
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} autoComplete="off">
+            <form onSubmit={handleFormSubmit} autoComplete="off">
               <div className="space-y-6">
                 <InputField
                   label="Username"

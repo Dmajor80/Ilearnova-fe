@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-
+import { getStudentDashboard } from "@/api/dashboardApi";
 import {
   Bell,
   Calendar,
@@ -27,25 +27,49 @@ import chemistry from "../../assets/chemistry.png";
 import LiveCalendar from "./LiveCalendar";
 import StudentsTable from "./StudentsTable";
 const Overview = () => {
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [progress, setProgress] = useState(0);
   const chartRef = useRef(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      // Animate progress to 67%
-      let startProgress = 0;
-      const interval = setInterval(() => {
-        if (startProgress >= 67) {
-          clearInterval(interval);
-        } else {
-          startProgress += 1;
-          setProgress(startProgress);
-        }
-      }, 20);
-    }, 500);
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        const response = await getStudentDashboard();
+        setDashboardData(response.data);
+        setError(null);
+      } catch (err) {
+        console.error('Failed to fetch student dashboard:', err);
+        setError('Failed to load dashboard data');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return () => clearTimeout(timer);
+    fetchDashboardData();
   }, []);
+
+  useEffect(() => {
+    if (dashboardData) {
+      const timer = setTimeout(() => {
+        // Animate progress to attendance percentage
+        let startProgress = 0;
+        const targetProgress = dashboardData.attendance_stats?.percentage || 0;
+        const interval = setInterval(() => {
+          if (startProgress >= targetProgress) {
+            clearInterval(interval);
+          } else {
+            startProgress += 1;
+            setProgress(startProgress);
+          }
+        }, 20);
+      }, 500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [dashboardData]);
 
   // Sample data
   const chartData = [35, 42, 55, 60, 48, 72];
@@ -131,7 +155,7 @@ const Overview = () => {
         >
           <div className="flex justify-between items-center">
             <h2 className="text-[20px] sm:text-[22px] md:text-[25px] lg:text-[35px]  text-[#3737df] font-normal ">
-              24
+              {dashboardData?.quick_stats?.courses_completed || 0}
             </h2>
             <div className="p-2 bg-blue-100 rounded-lg">
               <img src={completed} alt="" />
@@ -146,7 +170,7 @@ const Overview = () => {
         >
           <div className="flex justify-between items-center">
             <h2 className="text-[20px] sm:text-[22px] md:text-[25px] lg:text-[35px] text-[#3737df] font-normal ">
-              24
+              {dashboardData?.quick_stats?.courses_in_progress || 0}
             </h2>
             <div className="p-2 bg-blue-100 rounded-lg">
               <img src={pro} alt="" />
@@ -161,7 +185,7 @@ const Overview = () => {
         >
           <div className="flex justify-between items-center">
             <h2 className="text-[20px] sm:text-[22px] md:text-[25px] lg:text-[35px] text-[#3737df] font-normal ">
-              24
+              {dashboardData?.quick_stats?.pending_assignments || 0}
             </h2>
             <div className="p-2 bg-blue-100 rounded-lg">
               <img src={assignment} alt="" />
@@ -184,7 +208,7 @@ const Overview = () => {
               </p>
             </div>
 
-            {taskData.map((task, index) => (
+            {dashboardData?.courses_in_progress?.map((course, index) => (
               <div key={index} className="  mb-3 bg-gray-50 p-3 rounded-lg">
                 <div className="flex items-center gap-[5px] ">
                   <div>
@@ -197,25 +221,25 @@ const Overview = () => {
                           className="lg:text-[14px] font-medium"
                           style={{ color: "rgba(51, 51, 51, 1)" }}
                         >
-                          {task.name}
+                          {course.name}
                         </h4>
                         <h4
                           className="text-[12px] font-normal "
                           style={{ color: "rgba(90, 100, 125, 1)" }}
                         >
-                          {task.time}
+                          {course.lessons_count} Lessons - {course.duration}
                         </h4>
                       </div>
-                      <span className={`text-${task.color}-600 text-sm`}>
-                        {task.completion}
+                      <span className={`text-blue-600 text-sm`}>
+                        {course.progress_percentage}%
                         <img src={mask} alt="" />
                       </span>
                     </div>
                     <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                       <div
-                        className={`h-full bg-${task.color}-500 rounded-full`}
+                        className="h-full bg-blue-500 rounded-full"
                         style={{
-                          width: task.completion,
+                          width: `${course.progress_percentage}%`,
                           animation: `growWidth 1s ease-out ${
                             0.7 + index * 0.2
                           }s forwards`,
@@ -227,7 +251,11 @@ const Overview = () => {
                   </div>
                 </div>
               </div>
-            ))}
+            )) || (
+              <div className="text-center text-gray-500 py-4">
+                No courses in progress
+              </div>
+            )}
           </div>
           {/* notification */}
           <div className="bg-white p-4 rounded-xl shadow-sm">
@@ -581,6 +609,115 @@ const Overview = () => {
           </div>
         </div>
       </div>
+
+      {/* Transcript Section */}
+      {dashboardData?.transcript && (
+        <div className="bg-white p-6 rounded-xl shadow-sm mb-6" style={fadeInUp(0.9)}>
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-[18px] lg:text-[20px] font-semibold text-gray-800">
+              Academic Transcript
+            </h3>
+            <div className="text-sm text-gray-500">
+              Last updated: {dashboardData.transcript.last_updated}
+            </div>
+          </div>
+
+          {/* GPA Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <div className="text-2xl font-bold text-blue-600">
+                {dashboardData.transcript.overall_gpa}
+              </div>
+              <div className="text-sm text-gray-600">Overall GPA</div>
+            </div>
+            <div className="bg-green-50 p-4 rounded-lg">
+              <div className="text-2xl font-bold text-green-600">
+                {dashboardData.transcript.total_subjects}
+              </div>
+              <div className="text-sm text-gray-600">Total Subjects</div>
+            </div>
+            <div className="bg-purple-50 p-4 rounded-lg">
+              <div className="text-2xl font-bold text-purple-600">
+                {dashboardData.transcript.recent_grades?.length || 0}
+              </div>
+              <div className="text-sm text-gray-600">Recent Grades</div>
+            </div>
+          </div>
+
+          {/* Subject Averages */}
+          <div className="mb-6">
+            <h4 className="text-lg font-medium text-gray-800 mb-4">Subject Performance</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {dashboardData.transcript.subject_averages?.map((subject, index) => (
+                <div key={index} className="bg-gray-50 p-4 rounded-lg">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <h5 className="font-medium text-gray-800">{subject.subject}</h5>
+                      <p className="text-sm text-gray-600">{subject.academic_year}</p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-blue-600">
+                        {subject.average_score}
+                      </div>
+                      <div className="text-xs text-gray-500">Average</div>
+                    </div>
+                  </div>
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>{subject.total_grades} grades</span>
+                    <span>Latest: {subject.latest_grade}</span>
+                  </div>
+                  <div className="mt-2 bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-blue-500 h-2 rounded-full"
+                      style={{ width: `${(subject.average_score / 100) * 100}%` }}
+                    ></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Recent Grades */}
+          <div>
+            <h4 className="text-lg font-medium text-gray-800 mb-4">Recent Grades</h4>
+            <div className="space-y-3">
+              {dashboardData.transcript.recent_grades?.map((grade, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
+                      grade.grade === 'A' ? 'bg-green-500' :
+                      grade.grade === 'B' ? 'bg-blue-500' :
+                      grade.grade === 'C' ? 'bg-yellow-500' :
+                      grade.grade === 'D' ? 'bg-orange-500' : 'bg-red-500'
+                    }`}>
+                      {grade.grade}
+                    </div>
+                    <div>
+                      <div className="font-medium text-gray-800">{grade.subject}</div>
+                      <div className="text-sm text-gray-600">
+                        {grade.teacher} • {grade.type} • {grade.date}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-lg font-bold text-gray-800">{grade.score}</div>
+                    <div className="text-sm text-gray-500">Score</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Generate Transcript Button */}
+          {dashboardData.transcript.can_generate_transcript && (
+            <div className="mt-6 text-center">
+              <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                Generate Full Transcript
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Team Performance */}
       <StudentsTable />
