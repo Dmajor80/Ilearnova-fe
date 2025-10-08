@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { getStudentDashboard } from "@/api/dashboardApi";
+import Profile from "../auth/Profile";
 import {
   Bell,
   Calendar,
@@ -31,6 +32,7 @@ const Overview = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [progress, setProgress] = useState(0);
+  const [showProfile, setShowProfile] = useState(false);
   const chartRef = useRef(null);
 
   useEffect(() => {
@@ -145,7 +147,34 @@ const Overview = () => {
             Overview
           </h1>
         </div>
+        <button
+          onClick={() => setShowProfile(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          <User size={16} />
+          <span className="text-sm font-medium">Profile</span>
+        </button>
       </div>
+
+      {/* Profile Modal */}
+      {showProfile && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center p-4 border-b">
+              <h2 className="text-xl font-semibold">Profile</h2>
+              <button
+                onClick={() => setShowProfile(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="p-4">
+              <Profile />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">

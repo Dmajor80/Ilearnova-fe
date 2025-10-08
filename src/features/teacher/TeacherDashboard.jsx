@@ -14,7 +14,9 @@ import {
   FileBarChart,
   Menu,
   X,
+  User,
 } from "lucide-react";
+import Profile from "../auth/Profile";
 import Messages from "./Messages";
 import Attendance from "./Attendance";
 import Assignments from "./Assignments";
@@ -72,6 +74,7 @@ export default function TeacherDashboard() {
     { id: "grade", icon: <Star size={20} />, label: "Grade" },
     { id: "analytics", icon: <BarChart3 size={20} />, label: "Analytics" },
     { id: "transcripts", icon: <FileBarChart size={20} />, label: "Transcripts" },
+    { id: "profile", icon: <User size={20} />, label: "Profile" },
   ];
 
   // Mock course data
@@ -242,6 +245,7 @@ export default function TeacherDashboard() {
         {activeTab === "resources" && <ResourcesComponent />}
         {activeTab === "analytics" && <AnalyticsComponent />}
         {activeTab === "transcripts" && <TranscriptsComponent />}
+        {activeTab === "profile" && <ProfileComponent />}
       </div>
     </div>
   );
@@ -336,6 +340,14 @@ function TranscriptsComponent() {
   return (
     <div className="p-4 bg-white rounded shadow">
       <TranscriptViewer />
+    </div>
+  );
+}
+
+function ProfileComponent() {
+  return (
+    <div className="p-4 bg-white rounded shadow">
+      <Profile />
     </div>
   );
 }

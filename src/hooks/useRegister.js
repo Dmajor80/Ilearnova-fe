@@ -146,12 +146,14 @@ export default function useRegister({ onSuccess } = {}) {
         }
 
         // Store tokens if provided (for immediate login)
-        if (response.token) {
+        const access = response.data?.token || response.token || response.access || response.access_token;
+        if (access) {
           const storage = window.localStorage; // Always use localStorage for new registrations
-          setTokens({ access: response.token, refresh: null }, storage);
+          setTokens({ access, refresh: null }, storage);
 
-          if (response.user) {
-            storage.setItem("user_data", JSON.stringify(response.user));
+          const user = response.data?.user || response.user;
+          if (user) {
+            storage.setItem("user_data", JSON.stringify(user));
           }
         }
 

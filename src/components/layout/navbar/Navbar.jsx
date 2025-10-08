@@ -171,7 +171,13 @@ const Navbar = () => {
                 src={LOGO_URL}
                 alt="School Portal"
               />
+              {user?.organization?.name && (
+                <span className="ml-3 text-lg font-semibold text-white hidden sm:block">
+                  {user.organization.name}
+                </span>
+              )}
             </div>
+
 
             {/* Desktop navigation links */}
             <div className="hidden sm:ml-8 sm:block">

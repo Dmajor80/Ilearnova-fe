@@ -95,3 +95,8 @@ export const getAdminActivities = async () => {
 export const getAdminCharts = async () => {
   return await http.get("/api/admin/dashboard/charts", { auth: true });
 };
+
+// Organization Dashboard
+export const getEnhancedOrganizationDashboard = async () => {
+  return await http.get("/api/dashboard/organization/enhanced", { auth: true });
+};

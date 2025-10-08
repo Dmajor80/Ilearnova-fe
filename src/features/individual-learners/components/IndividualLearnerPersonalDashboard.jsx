@@ -19,6 +19,7 @@ import QuickStatsCard from "@/components/dashboard/QuickStatsCard";
 import RecentActivityFeed from "@/components/dashboard/RecentActivityFeed";
 import StudentAlertsPanel from "@/components/dashboard/StudentAlertsPanel";
 import QuickActionsGrid from "@/components/dashboard/QuickActionsGrid";
+import Profile from "../../auth/Profile";
 import { getIndividualLearnerDashboard } from "@/api/dashboardApi";
 
 // Main application component
@@ -54,6 +55,7 @@ export default function IndividualLearnerPersonalDashboard() {
     { id: "resources", icon: <Book size={20} />, label: "Resources" },
     { id: "goals", icon: <Target size={20} />, label: "Goals" },
     { id: "reports", icon: <FileText size={20} />, label: "Reports" },
+    { id: "profile", icon: <User size={20} />, label: "Profile" },
   ];
 
   return (
@@ -212,6 +214,7 @@ export default function IndividualLearnerPersonalDashboard() {
         {activeTab === "resources" && <ResourcesComponent />}
         {activeTab === "goals" && <GoalsComponent />}
         {activeTab === "reports" && <ReportsComponent />}
+        {activeTab === "profile" && <Profile />}
       </div>
     </div>
   );
