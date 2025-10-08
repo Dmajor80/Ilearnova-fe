@@ -25,17 +25,18 @@ const Profile = () => {
 
   useEffect(() => {
     if (user) {
+      const profile = user.profile || {};
       setFormData({
-        first_name: user.first_name || "",
-        last_name: user.last_name || "",
+        first_name: profile.first_name || user.first_name || "",
+        last_name: profile.last_name || user.last_name || "",
         email: user.email || "",
-        phone: user.phone || "",
-        date_of_birth: user.date_of_birth || "",
-        gender: user.gender || "",
-        address: user.address || "",
-        city: user.city || "",
-        state: user.state || "",
-        country: user.country || "",
+        phone: profile.phone || user.phone || "",
+        date_of_birth: profile.date_of_birth || user.date_of_birth || "",
+        gender: profile.gender || user.gender || "",
+        address: profile.address || user.address || "",
+        city: profile.city || user.city || "",
+        state: profile.state || user.state || "",
+        country: profile.country || user.country || "",
       });
     }
   }, [user]);
@@ -51,16 +52,23 @@ const Profile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setUpdating(true);
+    console.log("Profile: Starting profile update with data:", formData);
 
     try {
       const response = await http.put("/api/auth/profile", {
         body: formData
       });
+      console.log("Profile: Update response:", response);
 
       notification.notify("Profile updated successfully!", "success", 3000);
+      console.log("Profile: Profile update successful, calling refreshUser");
       // Refresh user data in context
       if (refreshUser) {
+        console.log("Profile: refreshUser function available, calling it");
         await refreshUser();
+        console.log("Profile: refreshUser completed");
+      } else {
+        console.log("Profile: refreshUser function not available");
       }
     } catch (error) {
       console.error("Profile update error:", error);
@@ -74,17 +82,18 @@ const Profile = () => {
   const handleCancel = () => {
     // Reset form to original user data
     if (user) {
+      const profile = user.profile || {};
       setFormData({
-        first_name: user.first_name || "",
-        last_name: user.last_name || "",
+        first_name: profile.first_name || user.first_name || "",
+        last_name: profile.last_name || user.last_name || "",
         email: user.email || "",
-        phone: user.phone || "",
-        date_of_birth: user.date_of_birth || "",
-        gender: user.gender || "",
-        address: user.address || "",
-        city: user.city || "",
-        state: user.state || "",
-        country: user.country || "",
+        phone: profile.phone || user.phone || "",
+        date_of_birth: profile.date_of_birth || user.date_of_birth || "",
+        gender: profile.gender || user.gender || "",
+        address: profile.address || user.address || "",
+        city: profile.city || user.city || "",
+        state: profile.state || user.state || "",
+        country: profile.country || user.country || "",
       });
     }
   };
@@ -98,6 +107,7 @@ const Profile = () => {
   }
 
   if (!user) {
+    console.error("Profile component: No user data available to load profile.");
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -134,9 +144,9 @@ const Profile = () => {
               </div>
               <div className="text-white">
                 <h1 className="text-2xl font-bold">
-                  {user.first_name} {user.last_name}
+                  {formData.first_name} {formData.last_name}
                 </h1>
-                <p className="text-blue-100">{user.email}</p>
+                <p className="text-blue-100">{formData.email}</p>
                 <p className="text-sm text-blue-100 mt-1">
                   Role: {user.role || "User"} • Joined: {new Date(user.created_at).toLocaleDateString()}
                 </p>

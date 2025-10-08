@@ -1,4 +1,4 @@
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect, useRef } from "react";
 import {
   BookOpen,
   MessageCircle,
@@ -14,15 +14,52 @@ import {
   User,
   Settings,
   Wallet,
+  LogOut,
+  ChevronDown,
 } from "lucide-react";
 
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import Loader from "@/components/Loader";
+import { logout } from "@/api/authApi";
+import { clearAuth } from "@/api/auth";
 
 // Main application component
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("courses");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const navigate = useNavigate();
+  const dropdownRef = useRef(null);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      clearAuth();
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      // Even if API call fails, clear local auth and redirect
+      clearAuth();
+      navigate("/login");
+    }
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+
+    if (isProfileDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isProfileDropdownOpen]);
 
   // Navigation links data
   const navLinks = [
@@ -201,11 +238,48 @@ export default function AdminDashboard() {
                 />
               </svg>
             </div>
-            <img
-              src="/api/placeholder/32/32"
-              alt="User"
-              className="w-8 h-8 rounded-full"
-            />
+            {/* Profile dropdown */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                className="flex items-center space-x-2 focus:outline-none"
+                aria-haspopup="true"
+                aria-expanded={isProfileDropdownOpen}
+              >
+                <img
+                  src="/api/placeholder/32/32"
+                  alt="User"
+                  className="w-8 h-8 rounded-full object-cover border-2 border-blue-600"
+                />
+                <ChevronDown className="w-4 h-4 text-gray-600" />
+              </button>
+
+              {/* Dropdown menu */}
+              {isProfileDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-20 border border-gray-200">
+                  <button
+                    onClick={() => {
+                      setIsProfileDropdownOpen(false);
+                      navigate("/profile");
+                    }}
+                    className="flex items-center w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
+                  >
+                    <User className="w-4 h-4 mr-3" />
+                    Edit Profile
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsProfileDropdownOpen(false);
+                      handleLogout();
+                    }}
+                    className="flex items-center w-full text-left px-4 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
+                  >
+                    <LogOut className="w-4 h-4 mr-3" />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

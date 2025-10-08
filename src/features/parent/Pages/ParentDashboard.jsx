@@ -18,6 +18,7 @@ import {
   AlertTriangle,
   CheckCircle,
 } from "lucide-react";
+import Profile from "../../auth/Profile";
 import QuickStatsCard from "@/components/dashboard/QuickStatsCard";
 import RecentActivityFeed from "@/components/dashboard/RecentActivityFeed";
 import StudentAlertsPanel from "@/components/dashboard/StudentAlertsPanel";
@@ -82,6 +83,7 @@ export default function ParentDashboard() {
     { id: "fees", icon: <TrendingUp size={20} />, label: "Fees & Payments" },
     { id: "timetable", icon: <Clock size={20} />, label: "Timetable" },
     { id: "reports", icon: <BarChart3 size={20} />, label: "Reports" },
+    { id: "profile", icon: <User size={20} />, label: "Profile" },
   ];
 
   // side bar
@@ -241,6 +243,7 @@ export default function ParentDashboard() {
         {activeTab === "fees" && <FeesComponent />}
         {activeTab === "timetable" && <TimetableComponent />}
         {activeTab === "reports" && <ReportsComponent />}
+        {activeTab === "profile" && <ProfileComponent />}
       </div>
     </div>
   );
@@ -306,6 +309,14 @@ function ReportsComponent() {
     <div className="p-4 bg-white rounded shadow">
       <h2 className="text-xl font-bold mb-4">Reports</h2>
       <p className="text-gray-600">Access detailed reports and analytics.</p>
+    </div>
+  );
+}
+
+function ProfileComponent() {
+  return (
+    <div className="p-4 bg-white rounded shadow">
+      <Profile />
     </div>
   );
 }
