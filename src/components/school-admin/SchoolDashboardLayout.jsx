@@ -126,7 +126,7 @@ const SchoolDashboardLayout = React.memo(function SchoolDashboardLayout({
           />
 
           {/* Dashboard Content */}
-          <main className="flex-1 overflow-y-auto py-6 px-4 lg:px-4 xl:px-6">
+          <main className="flex-1 overflow-y-auto py-4 px-4 md:py-6 md:px-6">
             <div className="max-w-screen-2xl mx-auto space-y-6">
               {/* Stats Section */}
               <section aria-label="School statistics">
@@ -255,7 +255,7 @@ const SchoolDashboardLayout = React.memo(function SchoolDashboardLayout({
               {/* Charts Section */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Performance Chart Placeholder */}
-                <div className="bg-white rounded-lg shadow-lg p-6">
+                <div className="bg-white rounded-lg shadow-lg p-4 md:p-6">
                   <h3 className="text-lg font-bold text-[#303972] mb-4">School Performance</h3>
                   <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
                     <div className="text-center text-gray-500">
@@ -270,7 +270,7 @@ const SchoolDashboardLayout = React.memo(function SchoolDashboardLayout({
                 </div>
 
                 {/* Overview Chart Placeholder */}
-                <div className="bg-white rounded-lg shadow-lg p-6">
+                <div className="bg-white rounded-lg shadow-lg p-4 md:p-6">
                   <h3 className="text-lg font-bold text-[#303972] mb-4">School Overview</h3>
                   <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
                     <div className="text-center text-gray-500">

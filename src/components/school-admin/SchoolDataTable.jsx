@@ -108,7 +108,7 @@ const SchoolDataTable = React.memo(function SchoolDataTable({
   if (error) {
     return (
       <div className={`bg-white rounded-lg shadow-lg overflow-hidden ${className}`}>
-        <div className="p-8 text-center">
+        <div className="p-4 md:p-8 text-center">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
@@ -125,7 +125,7 @@ const SchoolDataTable = React.memo(function SchoolDataTable({
     <div className={`bg-white rounded-lg shadow-lg overflow-hidden ${className}`}>
       {/* Header */}
       {title && (
-        <div className="p-4 border-b border-gray-200">
+        <div className="p-4 md:p-6 border-b border-gray-200">
           <h3 className="text-lg font-bold text-[#303972]">{title}</h3>
         </div>
       )}
@@ -139,10 +139,11 @@ const SchoolDataTable = React.memo(function SchoolDataTable({
                 <th
                   key={column.key}
                   className={`
-                    px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider
-                    ${sortable && column.sortable !== false ? "cursor-pointer hover:bg-gray-100" : ""}
+                    px-3 py-2 sm:px-4 sm:py-3 text-left text-xs sm:text-sm font-semibold text-[#4D44B5] uppercase tracking-wider
+                    ${sortable && column.sortable !== false ? "cursor-pointer hover:bg-gray-50" : ""}
                     ${column.align === "center" ? "text-center" : ""}
                     ${column.align === "right" ? "text-right" : ""}
+                    ${column.className || ""}
                   `}
                   onClick={() => column.sortable !== false && handleSort(column.key)}
                   role="columnheader"
@@ -162,7 +163,7 @@ const SchoolDataTable = React.memo(function SchoolDataTable({
                 </th>
               ))}
               {actions.length > 0 && (
-                <th className="px-6 py-3 text-right text-xs font-semibold text-[#4D44B5] uppercase tracking-wider">
+                <th className="px-3 py-2 sm:px-4 sm:py-3 text-right text-xs sm:text-sm font-semibold text-[#4D44B5] uppercase tracking-wider">
                   Actions
                 </th>
               )}
@@ -186,10 +187,11 @@ const SchoolDataTable = React.memo(function SchoolDataTable({
                   <td
                     key={column.key}
                     className={`
-                      px-6 py-4 whitespace-nowrap text-sm
+                      px-3 py-3 sm:px-4 sm:py-4 whitespace-nowrap text-xs sm:text-sm
                       ${column.align === "center" ? "text-center" : ""}
                       ${column.align === "right" ? "text-right" : ""}
                       ${index === 0 ? "font-medium text-gray-900" : "text-gray-500"}
+                      ${column.className || ""}
                     `}
                     role="cell"
                   >
@@ -197,14 +199,14 @@ const SchoolDataTable = React.memo(function SchoolDataTable({
                   </td>
                 ))}
                 {actions.length > 0 && (
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <td className="px-3 py-3 sm:px-4 sm:py-4 whitespace-nowrap text-right text-xs sm:text-sm font-medium">
                     <div className="relative">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           onAction && onAction(row, index);
                         }}
-                        className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100"
+                        className="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100 transition-colors"
                         aria-label={`Actions for ${row.name || `row ${index + 1}`}`}
                       >
                         <MoreHorizontal className="w-4 h-4" />
@@ -220,32 +222,32 @@ const SchoolDataTable = React.memo(function SchoolDataTable({
 
       {/* Pagination */}
       {showPagination && totalPages > 1 && (
-        <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-          <div className="text-sm text-gray-700">
+        <div className="px-3 py-3 sm:px-4 sm:py-4 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-0">
+          <div className="text-xs sm:text-sm text-gray-700 text-center sm:text-left">
             Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, data.length)} of {data.length} results
           </div>
           
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1 sm:space-x-2">
             <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="p-2 rounded-lg border border-gray-300 text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-1.5 sm:p-2 rounded-lg border border-gray-300 text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               aria-label="Previous page"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4" />
             </button>
             
-            <span className="text-sm text-gray-700">
+            <span className="text-xs sm:text-sm text-gray-700">
               Page {currentPage} of {totalPages}
             </span>
             
             <button
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
-              className="p-2 rounded-lg border border-gray-300 text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-1.5 sm:p-2 rounded-lg border border-gray-300 text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               aria-label="Next page"
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
             </button>
           </div>
         </div>

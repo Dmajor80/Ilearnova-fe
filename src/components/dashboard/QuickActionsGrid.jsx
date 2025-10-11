@@ -61,12 +61,12 @@ const QuickActionsGrid = ({ actions }) => {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4">
       {actions.map((action, index) => (
         <a
           key={index}
           href={action.route}
-          className={`relative flex flex-col items-center justify-center p-4 rounded-lg shadow hover:shadow-md transition-colors duration-200 text-white ${getColorClasses(action.color)}`}
+          className={`relative flex flex-col items-center justify-center p-2 sm:p-4 rounded-lg shadow hover:shadow-md transition-colors duration-200 text-white ${getColorClasses(action.color)}`}
         >
           <div className="mb-2">
             {getActionIcon(action.icon)}

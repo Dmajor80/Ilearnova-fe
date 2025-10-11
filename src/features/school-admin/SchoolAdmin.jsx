@@ -29,6 +29,17 @@ const SchoolAdmin = React.memo(function SchoolAdmin() {
     notification: actionNotification
   } = useSchoolAdminActions();
 
+  // Mobile sidebar state
+  const [mobileSidebarOpen, setMobileSidebarOpen] = React.useState(false);
+
+  const toggleMobileSidebar = React.useCallback(() => {
+    setMobileSidebarOpen(prev => !prev);
+  }, []);
+
+  const closeMobileSidebar = React.useCallback(() => {
+    setMobileSidebarOpen(false);
+  }, []);
+
   const {
     user,
     schoolName,
@@ -230,13 +241,30 @@ const SchoolAdmin = React.memo(function SchoolAdmin() {
       schoolName={schoolName}
     >
       <div className="min-h-screen bg-gray-50 flex">
-        {/* Fixed Sidebar */}
-        <div className="w-64 flex-shrink-0 fixed left-0 top-0 h-screen z-10">
+        {/* Mobile Overlay */}
+        {mobileSidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+            onClick={closeMobileSidebar}
+            aria-hidden="true"
+          />
+        )}
+
+        {/* Sidebar */}
+        <div className={`
+          fixed left-0 top-0 h-screen z-50 transition-transform duration-300 ease-in-out
+          w-64 flex-shrink-0
+          ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          md:translate-x-0 md:static md:z-auto
+        `}>
           <SchoolSidebar
             activeRoute={activeRoute}
             expandedItems={expandedItems}
             sidebarItems={sidebarItems}
-            onNavigate={handleNavigation}
+            onNavigate={(route) => {
+              handleNavigation(route);
+              closeMobileSidebar();
+            }}
             onToggleExpanded={toggleExpanded}
             schoolName={schoolName}
             organizationLogo={organizationLogo}
@@ -247,8 +275,21 @@ const SchoolAdmin = React.memo(function SchoolAdmin() {
           />
         </div>
 
-        {/* Main Content with left margin to account for fixed sidebar */}
-        <div className="flex-1 ml-64 overflow-y-auto">
+        {/* Main Content */}
+        <div className="flex-1 md:ml-64 overflow-y-auto min-h-screen">
+          {/* Mobile Header with Menu Button */}
+          <div className="md:hidden bg-white shadow-sm border-b border-gray-200 px-4 py-3">
+            <button
+              onClick={toggleMobileSidebar}
+              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              aria-label="Toggle navigation menu"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
+
           {renderContent()}
         </div>
       </div>

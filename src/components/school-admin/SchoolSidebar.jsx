@@ -120,7 +120,7 @@ const SchoolSidebar = React.memo(function SchoolSidebar({
               {organizationInitials}
             </span>
           </button>
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 hidden md:block">
             <h2 className="font-bold text-gray-900 text-lg leading-tight truncate">
               {schoolName}
             </h2>
@@ -153,10 +153,10 @@ const SchoolSidebar = React.memo(function SchoolSidebar({
                 aria-label={item.label}
               >
                 <div className="flex items-center">
-                  <span className="mr-3" aria-hidden="true">
+                  <span className="mr-3 flex-shrink-0" aria-hidden="true">
                     {getIcon(item.icon)}
                   </span>
-                  <span className="font-medium">{item.label}</span>
+                  <span className="font-medium hidden md:inline truncate">{item.label}</span>
                 </div>
                 
                 {item.hasSubmenu && (
@@ -195,10 +195,10 @@ const SchoolSidebar = React.memo(function SchoolSidebar({
                         role="menuitem"
                         aria-label={submenuItem.label}
                       >
-                        <span className="mr-2" aria-hidden="true">
+                        <span className="mr-2 flex-shrink-0" aria-hidden="true">
                           {getIcon(submenuItem.icon)}
                         </span>
-                        <span>{submenuItem.label}</span>
+                        <span className="hidden md:inline">{submenuItem.label}</span>
                       </button>
                     </li>
                   ))}
