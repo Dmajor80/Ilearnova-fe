@@ -6,13 +6,13 @@ const ClassPerformanceOverview = ({ classPerformance }) => {
   }
 
   return (
-    <div className="p-4 bg-white rounded shadow space-y-4">
-      <h2 className="text-lg font-semibold mb-2">Class Performance Overview</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="p-2 sm:p-4 bg-white rounded shadow space-y-2 sm:space-y-4">
+      <h2 className="text-base sm:text-lg md:text-xl font-semibold mb-2">Class Performance Overview</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
         {classPerformance.map((cls) => (
           <div
             key={cls.class_id}
-            className="border rounded p-3 bg-gray-50 shadow-sm"
+            className="border rounded p-2 sm:p-3 bg-gray-50 shadow-sm"
           >
             <h3 className="font-semibold text-blue-700">{cls.class_name}</h3>
             <p>Academic Year: {cls.academic_year}</p>

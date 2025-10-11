@@ -13,13 +13,13 @@ const StudentAlertsPanel = ({ alerts }) => {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2 sm:space-y-3">
       {alerts.map((alert, index) => (
         <div
           key={index}
-          className={`flex items-center gap-3 p-3 rounded border ${severityColors[alert.severity] || 'bg-gray-100 text-gray-700'}`}
+          className={`flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded border ${severityColors[alert.severity] || 'bg-gray-100 text-gray-700'}`}
         >
-          <AlertTriangle className="w-6 h-6 flex-shrink-0" />
+          <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
           <div>
             <p className="font-semibold text-sm">{alert.student?.user?.first_name || alert.student?.name || 'Student'}</p>
             <p className="text-xs">{alert.message}</p>

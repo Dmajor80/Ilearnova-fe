@@ -6,12 +6,12 @@ const ClassRosters = ({ classRosters }) => {
   }
 
   return (
-    <div className="p-4 bg-white rounded shadow space-y-4">
-      <h2 className="text-lg font-semibold mb-2">Class Rosters</h2>
+    <div className="p-2 sm:p-4 bg-white rounded shadow space-y-2 sm:space-y-4">
+      <h2 className="text-base sm:text-lg md:text-xl font-semibold mb-2">Class Rosters</h2>
       {classRosters.map((cls) => (
         <div
           key={cls.class_id}
-          className="border rounded p-3 bg-gray-50 shadow-sm mb-3"
+          className="border rounded p-2 sm:p-3 bg-gray-50 shadow-sm mb-2 sm:mb-3"
         >
           <h3 className="font-semibold text-blue-700">{cls.class_name}</h3>
           <p>Academic Year: {cls.academic_year}</p>

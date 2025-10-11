@@ -94,27 +94,27 @@ const AppContent = () => {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/home" element={<RegisteredHomePage />} />
-      {/* Authentication Routes */}
+      {/* Authentication Routes - Temporarily disabled for development */}
       <Route path="/new-login" element={<Navigate to="/login" replace />} />
-      <Route path="/signup" element={<RedirectIfAuthenticated><SignupForm /></RedirectIfAuthenticated>} />
+      <Route path="/signup" element={<SignupForm />} />
       <Route path="/verify-success" element={<VerifySuccess />} />
       <Route path="/verify-failure" element={<VerifyFailure />} />
-      <Route path="/login" element={<RedirectIfAuthenticated><Login /></RedirectIfAuthenticated>} />
+      <Route path="/login" element={<Login />} />
       <Route path="/post-login" element={<PostLoginRedirect />} />
-      <Route path="/forgot-password" element={<RedirectIfAuthenticated><ForgotPassword /></RedirectIfAuthenticated>} />
-      <Route path="/verify-otp" element={<RedirectIfAuthenticated><VerifyOtp /></RedirectIfAuthenticated>} />
-      <Route path="/reset-password" element={<RedirectIfAuthenticated><ResetPassword /></RedirectIfAuthenticated>} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/verify-otp" element={<VerifyOtp />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/forbidden" element={<Forbidden />} />
-      <Route path="/select-user-type" element={<RedirectIfAuthenticated><SelectUserType /></RedirectIfAuthenticated>} />
-      <Route path="/organization-details" element={<RedirectIfAuthenticated><OrganizationDetails /></RedirectIfAuthenticated>} />
+      <Route path="/select-user-type" element={<SelectUserType />} />
+      <Route path="/organization-details" element={<OrganizationDetails />} />
       {/* Legacy Login Routes */}
       <Route path="/student-login" element={<Navigate to="/login" replace />} />
       <Route path="/parent-login" element={<Navigate to="/login" replace />} />
       <Route path="/Admin-login" element={<Navigate to="/login" replace />} />
-      {/* Protected Routes - Require Authentication */}
+      {/* Dashboard Routes - Authentication temporarily disabled for development */}
       <Route path="/profile" element={<Profile />} />
       <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
-      {/* Student Dashboard with nested routes */} 
+      {/* Student Dashboard with nested routes */}
       <Route path="/student-dashboard" element={<StudentDashboard />}>
         <Route index element={<Overview />} />
         <Route path="overview" element={<Overview />} />
@@ -137,10 +137,10 @@ const AppContent = () => {
         <Route path="reports" element={<Report />} />
         <Route path="*" element={<Error />} />
       </Route>
-      {/* School Admin Dashboard */}
-      <Route path="/dashboard" element={<OrgGate><SchoolAdmin /></OrgGate>} />
-      {/* Organization Dashboard */}
-      <Route path="/organization-dashboard" element={<OrgGate><OrganizationDashboard /></OrgGate>} />
+      {/* School Admin Dashboard - Authentication temporarily disabled */}
+      <Route path="/dashboard" element={<SchoolAdmin />} />
+      {/* Organization Dashboard - Authentication temporarily disabled */}
+      <Route path="/organization-dashboard" element={<OrganizationDashboard />} />
       {/* Parent Dashboard */}
       <Route path="/parent-dashboard" element={<ParentDashboard />} />
       {/* Individual Learner Dashboard */}

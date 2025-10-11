@@ -37,11 +37,11 @@ const RecentActivityFeed = ({ activities }) => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2 sm:space-y-4">
       {activities.map((activity, index) => (
         <div
           key={index}
-          className={`flex items-start gap-3 p-3 rounded shadow-sm border ${getPriorityColor(activity.priority)}`}
+          className={`flex items-start gap-2 sm:gap-3 p-2 sm:p-3 rounded shadow-sm border ${getPriorityColor(activity.priority)}`}
         >
           <div className="flex-shrink-0 text-blue-600">
             {getActivityIcon(activity.icon)}
