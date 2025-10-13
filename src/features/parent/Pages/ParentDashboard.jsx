@@ -1,32 +1,25 @@
 import React, { useState, useEffect } from "react";
-import {
-  User,
-  BookOpen,
-  Calendar,
-  FileText,
-  Clock,
-  Award,
-  ChevronRight,
-  Star,
-  ClipboardList,
-  TrendingUp,
-  BarChart3,
-  FileBarChart,
-  Menu,
-  X,
-  Users,
-  AlertTriangle,
-  CheckCircle,
-} from "lucide-react";
+import { useLocation } from "react-router-dom";
+import { Users } from "lucide-react";
 import Profile from "../../auth/Profile";
 import QuickStatsCard from "@/components/dashboard/QuickStatsCard";
 import RecentActivityFeed from "@/components/dashboard/RecentActivityFeed";
 import StudentAlertsPanel from "@/components/dashboard/StudentAlertsPanel";
 import QuickActionsGrid from "@/components/dashboard/QuickActionsGrid";
 import { getParentDashboard, getEnhancedParentDashboard } from "@/api/dashboardApi";
+import ParentAttendance from "./ParentAttendance";
+import ParentMessages from "./ParentMessages";
+import ParentPayment from "./ParentPayment";
+import ParentResult from "./ParentResult";
+import ParentTimetable from "./ParentTimetable";
+import ParentTranscript from "./ParentTranscript";
+import ParentSidebar from "../components/ParentSidebar";
+import ParentHeader from "../components/ParentHeader";
+import Announcement from "./Announcement";
 
 // Main application component
 export default function ParentDashboard() {
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [dashboardData, setDashboardData] = useState(null);
@@ -73,250 +66,163 @@ export default function ParentDashboard() {
     fetchDashboard();
   }, []);
 
-  // Navigation links data
-  const navLinks = [
-    { id: "dashboard", icon: <ClipboardList size={20} />, label: "Dashboard" },
-    { id: "children", icon: <Users size={20} />, label: "My Children" },
-    { id: "attendance", icon: <Calendar size={20} />, label: "Attendance" },
-    { id: "grades", icon: <Star size={20} />, label: "Grades & Results" },
-    { id: "messages", icon: <FileText size={20} />, label: "Messages" },
-    { id: "fees", icon: <TrendingUp size={20} />, label: "Fees & Payments" },
-    { id: "timetable", icon: <Clock size={20} />, label: "Timetable" },
-    { id: "reports", icon: <BarChart3 size={20} />, label: "Reports" },
-    { id: "profile", icon: <User size={20} />, label: "Profile" },
-  ];
+  // Check if navigated from attendance page with activeTab state
+  useEffect(() => {
+    if (location.state?.activeTab) {
+      setActiveTab(location.state.activeTab);
+    }
+  }, [location]);
 
-  // side bar
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* Mobile overlay */}
-      {isMobileMenuOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
+      <ParentSidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        isMobileMenuOpen={isMobileMenuOpen}
+        setIsMobileMenuOpen={setIsMobileMenuOpen}
+      />
+
+      <div className="flex-1 md:ml-64">
+        <ParentHeader
+          activeTab={activeTab}
+          setIsMobileMenuOpen={setIsMobileMenuOpen}
+          dashboardData={dashboardData}
         />
-      )}
 
-      <aside>
-        {/* Sidebar */}
-        <div
-          className={`
-          w-16 md:w-48 h-[100%] bg-white border-r border-gray-200 pt-4
-          fixed md:static inset-y-0 left-0 z-50
-          transition-all duration-300 ease-in-out
-          ${isMobileMenuOpen ? "w-48" : "w-16"}
-        `}
-        >
-          <div className="px-4 pb-6 border-b border-gray-200 relative">
-            <h1
-              className={`
-              font-bold text-[26px] text-blue-900 text-center ml-[-1rem] transition-all duration-300
-              ${isMobileMenuOpen ? "block" : "hidden md:block"}
-            `}
-            >
-              ILEARNOVA
-            </h1>
-            <div
-              className={`
-              font-bold text-blue-900 text-center transition-all duration-300
-              ${isMobileMenuOpen ? "hidden" : "block md:hidden"}
-            `}
-            >
-              <span className="text-xl text-white">IL</span>
-            </div>
-
-            {/* Mobile menu toggle */}
-            <button
-              className="absolute top-0 right-4 md:hidden p-1 text-blue-900 hover:bg-blue-50 rounded"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              {isMobileMenuOpen ? <X size={30} /> : <Menu size={20} />}
-            </button>
-          </div>
-
-          <nav className="mt-4">
-            {navLinks.map((link) => (
-              <div key={link.id} className="relative group">
-                <button
-                  className={`flex items-center px-4 py-3 w-full text-left transition-all duration-200 ${
-                    activeTab === link.id
-                      ? "text-blue-600 bg-blue-50"
-                      : "text-gray-600 hover:text-blue-600 hover:bg-gray-50"
-                  }`}
-                  onClick={() => {
-                    setActiveTab(link.id);
-                    setIsMobileMenuOpen(false);
-                  }}
-                >
-                  <span className="mr-3 flex-shrink-0">{link.icon}</span>
-                  <span
-                    className={`
-                    transition-all duration-300
-                    ${isMobileMenuOpen ? "block" : "hidden md:block"}
-                  `}
-                  >
-                    {link.label}
-                  </span>
-                </button>
-
-                {/* Tooltip for mobile/collapsed state */}
-                <div
-                  className={`
-                  absolute left-full top-1/2 transform -translate-y-1/2 ml-2
-                  bg-gray-800 text-white text-sm px-2 py-1 rounded whitespace-nowrap
-                  opacity-0 pointer-events-none transition-opacity duration-200
-                  group-hover:opacity-100 z-50
-                  ${isMobileMenuOpen ? "hidden" : "block md:hidden"}
-                `}
-                >
-                  {link.label}
-                  <div
-                    className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1
-                                 border-4 border-transparent border-r-gray-800"
-                  ></div>
+        {/* Main Content Area */}
+        <div className="m-4 md:m-6 mt-0">
+          {activeTab === "dashboard" && (
+            <div className="space-y-6">
+              {/* Welcome Section */}
+              <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-xl shadow-lg p-8">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-3xl font-bold mb-2">
+                      Welcome back, {dashboardData?.user?.first_name || 'Parent'}!
+                    </h2>
+                    <p className="text-blue-100 text-lg">
+                      Here's an overview of your children's academic progress and activities.
+                    </p>
+                  </div>
+                  <div className="hidden md:block">
+                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                      <Users className="w-8 h-8 text-white" />
+                    </div>
+                  </div>
                 </div>
               </div>
-            ))}
-          </nav>
+
+              {/* Dashboard Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Left Column - Stats and Activity */}
+                <div className="lg:col-span-2 space-y-8">
+                  <div className="bg-white rounded-xl shadow-lg p-6">
+                    <h3 className="text-xl font-semibold text-gray-800 mb-4">Performance Overview</h3>
+                    <QuickStatsCard />
+                  </div>
+                  <div className="bg-white rounded-xl shadow-lg p-6">
+                    <h3 className="text-xl font-semibold text-gray-800 mb-4">Recent Activity</h3>
+                    <RecentActivityFeed />
+                  </div>
+                </div>
+
+                {/* Right Column - Alerts and Actions */}
+                <div className="space-y-8">
+                  <div className="bg-white rounded-xl shadow-lg p-6">
+                    <h3 className="text-xl font-semibold text-gray-800 mb-4">Alerts & Notifications</h3>
+                    <StudentAlertsPanel />
+                  </div>
+                  <div className="bg-white rounded-xl shadow-lg p-6">
+                    <h3 className="text-xl font-semibold text-gray-800 mb-4">Quick Actions</h3>
+                    <QuickActionsGrid />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          {activeTab === "announcement" && <Announcement />}
+          {activeTab === "attendance" && <ParentAttendance />}
+          {activeTab === "grades" && <ParentResult />}
+          {activeTab === "messages" && <ParentMessages />}
+          {activeTab === "fees" && <ParentPayment />}
+          {activeTab === "timetable" && <ParentTimetable />}
+          {activeTab === "reports" && <ParentTranscript />}
         </div>
-      </aside>
 
-      {/* Main content area */}
-      <div className="ml-16 md:ml-0 flex-1 p-4">
-        {loading && <p>Loading dashboard data...</p>}
-        {!loading && activeTab === "dashboard" && dashboardData && (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <QuickStatsCard
-                title="My Children"
-                value={dashboardData.quick_stats?.children_count || 0}
-                icon="users"
-                color="blue"
-              />
-              <QuickStatsCard
-                title="Attendance Rate"
-                value={`${dashboardData.quick_stats?.attendance_rate || 0}%`}
-                icon="calendar"
-                color="green"
-              />
-              <QuickStatsCard
-                title="Pending Fees"
-                value={`₦${dashboardData.quick_stats?.pending_fees || 0}`}
-                icon="alert"
-                color="red"
-              />
-              <QuickStatsCard
-                title="Unread Messages"
-                value={dashboardData.quick_stats?.unread_messages || 0}
-                icon="check"
-                color="yellow"
-              />
-              <QuickStatsCard
-                title="Upcoming Events"
-                value={dashboardData.quick_stats?.upcoming_events || 0}
-                icon="calendar"
-                color="purple"
-              />
-              <QuickStatsCard
-                title="Average Grade"
-                value={dashboardData.quick_stats?.average_grade || "N/A"}
-                icon="book"
-                color="blue"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-              <RecentActivityFeed activities={dashboardData.recent_activity || []} />
-              <StudentAlertsPanel alerts={dashboardData.student_alerts || []} />
-            </div>
-
-            <div className="mt-6">
-              <QuickActionsGrid actions={dashboardData.quick_actions || []} />
-            </div>
-          </>
-        )}
-
-        {activeTab === "children" && <ChildrenComponent />}
-        {activeTab === "attendance" && <AttendanceComponent />}
-        {activeTab === "grades" && <GradesComponent />}
-        {activeTab === "messages" && <MessagesComponent />}
-        {activeTab === "fees" && <FeesComponent />}
-        {activeTab === "timetable" && <TimetableComponent />}
-        {activeTab === "reports" && <ReportsComponent />}
-        {activeTab === "profile" && <ProfileComponent />}
       </div>
     </div>
   );
 }
 
-// Placeholder components for other tabs
+// Children component with list of children
 function ChildrenComponent() {
-  return (
-    <div className="p-4 bg-white rounded shadow">
-      <h2 className="text-xl font-bold mb-4">My Children</h2>
-      <p className="text-gray-600">View and manage your children's information.</p>
-    </div>
-  );
-}
+  const children = [
+    {
+      id: 1,
+      name: "Priscilla Daniel",
+      age: 10,
+      classLevel: "Primary 5",
+      institution: "Primary",
+      school: "Sunshine Primary School"
+    },
+    {
+      id: 2,
+      name: "John Doe",
+      age: 15,
+      classLevel: "SS2",
+      institution: "Secondary",
+      school: "Bright Future Secondary School"
+    },
+    {
+      id: 3,
+      name: "Mary Johnson",
+      age: 19,
+      classLevel: "ND2",
+      institution: "Polytechnic",
+      school: "Federal Polytechnic, Lagos"
+    },
+    {
+      id: 4,
+      name: "Samuel Lee",
+      age: 22,
+      classLevel: "300 Level",
+      institution: "University",
+      school: "University of Ibadan"
+    }
+  ];
 
-function AttendanceComponent() {
   return (
-    <div className="p-4 bg-white rounded shadow">
-      <h2 className="text-xl font-bold mb-4">Attendance Records</h2>
-      <p className="text-gray-600">Monitor your children's attendance.</p>
-    </div>
-  );
-}
-
-function GradesComponent() {
-  return (
-    <div className="p-4 bg-white rounded shadow">
-      <h2 className="text-xl font-bold mb-4">Grades & Results</h2>
-      <p className="text-gray-600">View your children's academic performance.</p>
-    </div>
-  );
-}
-
-function MessagesComponent() {
-  return (
-    <div className="p-4 bg-white rounded shadow">
-      <h2 className="text-xl font-bold mb-4">Messages</h2>
-      <p className="text-gray-600">Communicate with teachers and school staff.</p>
-    </div>
-  );
-}
-
-function FeesComponent() {
-  return (
-    <div className="p-4 bg-white rounded shadow">
-      <h2 className="text-xl font-bold mb-4">Fees & Payments</h2>
-      <p className="text-gray-600">Manage school fees and payments.</p>
-    </div>
-  );
-}
-
-function TimetableComponent() {
-  return (
-    <div className="p-4 bg-white rounded shadow">
-      <h2 className="text-xl font-bold mb-4">Timetable</h2>
-      <p className="text-gray-600">View class schedules and events.</p>
-    </div>
-  );
-}
-
-function ReportsComponent() {
-  return (
-    <div className="p-4 bg-white rounded shadow">
-      <h2 className="text-xl font-bold mb-4">Reports</h2>
-      <p className="text-gray-600">Access detailed reports and analytics.</p>
-    </div>
-  );
-}
-
-function ProfileComponent() {
-  return (
-    <div className="p-4 bg-white rounded shadow">
-      <Profile />
+    <div className="bg-white rounded-xl shadow p-6">
+      <h2 className="text-2xl font-bold mb-6 text-gray-800">My Children</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {children.map((child) => (
+          <div key={child.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+            <div className="flex items-center space-x-4 mb-4">
+              <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-lg">{child.name.charAt(0)}</span>
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg text-gray-800">{child.name}</h3>
+                <p className="text-gray-600">{child.classLevel}</p>
+              </div>
+            </div>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Age:</span>
+                <span className="font-medium">{child.age} years</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Institution:</span>
+                <span className="font-medium">{child.institution}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">School:</span>
+                <span className="font-medium">{child.school}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

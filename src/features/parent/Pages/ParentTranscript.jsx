@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import DashboardHeader from "../components/DashboardHeader";
-import SideMenu from "../components/SideMenu";
+
 
 
 // Dummy transcript data for 6 grades and 3 terms
@@ -228,9 +228,9 @@ export default function ParentTranscript() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
-      <SideMenu />
-      <div className="flex-1 p-4 md:p-10">
+    <div className="min-h-screen bg-gray-50">
+      
+      <div className="p-4 md:p-10">
         {/* Header */}
         <DashboardHeader holder="Transcripts" text="Transcript" />
         {/* Grade and Term Selectors */}

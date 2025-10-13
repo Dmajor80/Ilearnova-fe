@@ -4,7 +4,6 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine,
 } from "recharts";
 import DashboardHeader from "../components/DashboardHeader";
-import SideMenu from "../components/SideMenu";
 import { http } from "../../../api/baseClient";
 
 const subjects = [
@@ -307,7 +306,6 @@ function ParentResult() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
-        <SideMenu />
         <main className="flex-1 p-4 md:p-10">
           <DashboardHeader text='Performance Insight' holder="Search Results" />
           <div className="flex items-center justify-center min-h-[400px]">
@@ -324,7 +322,6 @@ function ParentResult() {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
-        <SideMenu />
         <main className="flex-1 p-4 md:p-10">
           <DashboardHeader text='Performance Insight' holder="Search Results" />
           <div className="flex items-center justify-center min-h-[400px]">
@@ -345,13 +342,9 @@ function ParentResult() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
-      {/* Sidebar */}
-
-      <SideMenu />
-
+    <div className="min-h-screen bg-gray-50">
       {/* Main Content */}
-      <main className="flex-1 p-4 md:p-10">
+      <main className="p-4 md:p-10">
         {/* Header */}
 
         <DashboardHeader text='Performance Insight' holder="Search Results" />
