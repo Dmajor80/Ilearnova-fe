@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { getStudentDashboard } from "@/api/dashboardApi";
 import Profile from "../auth/Profile";
+import { useNavigate } from "react-router-dom";
+import { logout } from "@/api/authApi";
+import { clearAuth } from "@/api/auth";
 import {
   Bell,
   Calendar,
@@ -18,6 +21,8 @@ import {
   BarChart2,
   Percent,
   ChevronRight,
+  Menu,
+  LogOut,
 } from "lucide-react";
 import completed from "../../assets/completed.png";
 import pro from "../../assets/progress (2).png";
@@ -33,6 +38,10 @@ const Overview = () => {
   const [error, setError] = useState(null);
   const [progress, setProgress] = useState(0);
   const [showProfile, setShowProfile] = useState(false);
+  const navigate = useNavigate();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
   const chartRef = useRef(null);
 
   useEffect(() => {
@@ -72,6 +81,36 @@ const Overview = () => {
       return () => clearTimeout(timer);
     }
   }, [dashboardData]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+
+    if (isProfileDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isProfileDropdownOpen]);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      clearAuth();
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      // Even if API call fails, clear local auth and redirect
+      clearAuth();
+      navigate("/login");
+    }
+  };
 
   // Sample data
   const chartData = [35, 42, 55, 60, 48, 72];
@@ -136,25 +175,8 @@ const Overview = () => {
   };
 
   return (
-    <div className=" w-[270px]  sm:w-[300px]  md:w-[500px] lg:w-[1200px] bg-gray-50 min-h-screen p-6">
-      {/* Header */}
-      <div
-        className="flex justify-between items-center mb-6"
-        style={fadeInUp(0.1)}
-      >
-        <div className="flex items-center">
-          <h1 className="text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px] font-medium text-[rgba(51, 51, 51, 1)]">
-            Overview
-          </h1>
-        </div>
-        <button
-          onClick={() => setShowProfile(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <User size={16} />
-          <span className="text-sm font-medium">Profile</span>
-        </button>
-      </div>
+    <div className="w-full min-h-screen bg-gray-50 p-4 sm:p-6">
+
 
       {/* Profile Modal */}
       {showProfile && (
@@ -414,7 +436,7 @@ const Overview = () => {
           {/* end of calender */}
 
           {/* class */}
-          <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] max-w-[500px] sm:w-[350px] max-h-[400px] h-[200px] lg:h-[100px]">
+          <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] w-full h-auto">
             <div className="flex flex-col lg:flex-row items-center gap-[2rem] w-fit">
               <img src={chemistry} alt="" />
               <div>
@@ -436,7 +458,7 @@ const Overview = () => {
           {/* end of class */}
 
           {/* class */}
-          <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] max-w-[500px] sm:w-[350px] max-h-[400px] h-[200px] lg:h-[100px]">
+          <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] w-full h-auto">
             <div className="flex flex-col lg:flex-row items-center gap-[2rem] w-fit">
               <img src={chemistry} alt="" />
               <div>
@@ -458,7 +480,7 @@ const Overview = () => {
           {/* end of class */}
 
           {/* class */}
-          <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] max-w-[500px] sm:w-[350px] max-h-[400px] h-[200px] lg:h-[100px]">
+          <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] w-full h-auto">
             <div className="flex flex-col lg:flex-row items-center gap-[2rem] w-fit">
               <img src={chemistry} alt="" />
               <div>
@@ -480,7 +502,7 @@ const Overview = () => {
           {/* end of class */}
 
           {/* certification */}
-          <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] max-w-[500px] sm:w-[350px] ">
+          <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] w-full">
             <div className="flex items-center justify-between">
               <p className="text-[12px] sm:lg:text-[14px] md:text-[16px] lg:text-[18px] font-medium">
                 Certification
@@ -493,7 +515,7 @@ const Overview = () => {
               </p>
             </div>
             {/* class */}
-            <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] max-w-[500px] sm:w-[300px] max-h-[400px] h-[200px] lg:h-[100px]">
+            <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] w-full h-auto">
               <div className="flex flex-col lg:flex-row items-center gap-[2rem] w-fit">
                 <img src={chemistry} alt="" />
                 <div>
@@ -514,7 +536,7 @@ const Overview = () => {
             </div>
             {/* end of class */}
             {/* class */}
-            <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] max-w-[500px] sm:w-[300px] max-h-[400px] h-[200px] lg:h-[100px]">
+            <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] w-full h-auto">
               <div className="flex flex-col lg:flex-row items-center gap-[2rem] w-fit">
                 <img src={chemistry} alt="" />
                 <div>
@@ -535,7 +557,7 @@ const Overview = () => {
             </div>
             {/* end of class */}
             {/* class */}
-            <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] max-w-[500px] sm:w-[300px] max-h-[400px] h-[200px] lg:h-[100px]">
+            <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] w-full h-auto">
               <div className="flex flex-col lg:flex-row items-center gap-[2rem] w-fit">
                 <img src={chemistry} alt="" />
                 <div>

@@ -809,7 +809,10 @@ const OrganizationDashboard = () => {
       }`}>
         <div className="p-3 sm:p-4 md:p-6">
           <div className="flex justify-between items-center mb-3 sm:mb-4 md:mb-6">
-            <h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-800">ILEARNOVA</h2>
+            <h2 className={`
+              font-bold text-[26px] text-blue-900 text-center ml-[1rem] transition-all duration-300
+              ${isSidebarOpen ? "block" : "hidden md:block"}
+            `}>ILEARNOVA</h2>
             <button
               onClick={() => setIsSidebarOpen(false)}
               className="md:hidden p-2 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
@@ -845,7 +848,6 @@ const OrganizationDashboard = () => {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 md:ml-64">
         {/* Header Section */}
         <div className="bg-white rounded-lg shadow-sm p-4 md:p-6 m-4 md:m-6 mb-0">

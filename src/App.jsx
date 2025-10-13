@@ -33,6 +33,7 @@ import StudentDashboard from "@/features/student/StudentDashboard";
 import OrganizationDashboard from "@/features/organization/OrganizationDashboard";
 /* Removed duplicate imports of ParentDashboard and IndividualLearnerPersonalDashboard */
 import ParentDashboard from "@/features/parent/Pages/ParentDashboard";
+import ParentAttendance from "@/features/parent/Pages/ParentAttendance";
 import IndividualLearnerPersonalDashboard from "@/features/individual-learners/components/IndividualLearnerPersonalDashboard";
 
 // Remove duplicate imports of ParentDashboard and IndividualLearnerPersonalDashboard if any
@@ -143,6 +144,9 @@ const AppContent = () => {
       <Route path="/organization-dashboard" element={<OrganizationDashboard />} />
       {/* Parent Dashboard */}
       <Route path="/parent-dashboard" element={<ParentDashboard />} />
+      {/* Parent Attendance */}
+      <Route path="/parent-attendance" element={<ParentAttendance />} />
+      <Route path="/parent-attendance/:id" element={<ParentAttendance />} />
       {/* Individual Learner Dashboard */}
       <Route path="/individual-learner-dashboard" element={<IndividualLearnerPersonalDashboard />} />
       {/* New Features - Test Routes */}

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom"; // Add this import
-import SideMenu from "../components/SideMenu";
 import DashboardHeader from "../components/DashboardHeader";
 
 
@@ -107,12 +106,9 @@ function ParentPayment() {
 
 
     return (
-        <div className="min-h-screen bg-[#f5f8fe] flex flex-col md:flex-row">
-            {/* Sidebar */}
-
-            <SideMenu />
+        <div className="min-h-screen bg-[#f5f8fe]">
             {/* Main Content */}
-            <main className="flex-1 p-4 md:p-8">
+            <main className="p-4 md:p-8">
                 {/* Header */}
 
                 <DashboardHeader text="Parent Payment" holder="Search by Transaction ID" />
