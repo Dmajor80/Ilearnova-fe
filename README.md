@@ -1,6 +1,5 @@
 # iLearnova Frontend
 
-
 A React + Vite frontend for a multi‑role school management platform. The app implements authentication with refresh tokens, role‑based routing, and organization‑aware access control, with a modern UI using Tailwind CSS and MUI.
 
 ## Tech Stack
