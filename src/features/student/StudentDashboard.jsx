@@ -20,18 +20,19 @@ import {
   LogOut,
 } from "lucide-react";
 
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { logout } from "@/api/authApi";
 import { clearAuth } from "@/api/auth";
 
 // Main application component
 export default function StudentDashboard() {
-  const [activeTab, setActiveTab] = useState("courses");
+  const [activeTab, setActiveTab] = useState("overview");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Mock dashboard data - replace with actual API call
   const [dashboardData, setDashboardData] = useState({
@@ -113,6 +114,15 @@ export default function StudentDashboard() {
     },
   ];
 
+  // Sync activeTab with current route
+  useEffect(() => {
+    const currentPath = location.pathname.split('/').pop();
+    const matchingLink = navLinks.find(link => link.air === currentPath);
+    if (matchingLink) {
+      setActiveTab(matchingLink.id);
+    }
+  }, [location.pathname]);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -147,60 +157,80 @@ export default function StudentDashboard() {
 
   // side bar
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       {/* Mobile overlay */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          className="fixed inset-0 bg-black bg-opacity-60 z-40 md:hidden backdrop-blur-sm"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out md:translate-x-0 ${
+      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-2xl transform transition-all duration-300 ease-in-out md:translate-x-0 border-r border-slate-200 ${
         isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
-        <div className="p-3 sm:p-4 md:p-6">
-          <div className="flex justify-between items-center mb-3 sm:mb-4 md:mb-6">
-            <h2 className={`
-              font-bold text-[26px] text-blue-900 text-center ml-[1rem] transition-all duration-300
-              ${isMobileMenuOpen ? "block" : "hidden md:block"}
-            `}>ILEARNOVA</h2>
+        <div className="p-4 md:p-6 bg-gradient-to-b from-white via-slate-50 to-blue-50 h-full">
+          <div className="flex justify-between items-center mb-6 md:mb-8">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                <span className="text-white font-bold text-lg">I</span>
+              </div>
+              <h2 className={`
+                font-bold text-2xl bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent transition-all duration-300
+                ${isMobileMenuOpen ? "block" : "hidden md:block"}
+              `}>LEARNOVA</h2>
+            </div>
             <button
               onClick={() => setIsMobileMenuOpen(false)}
-              className="md:hidden p-2 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+              className="md:hidden p-2 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:bg-slate-50 border border-slate-200"
             >
-              <X className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+              <X className="w-5 h-5 text-slate-600" />
             </button>
           </div>
-          <nav className="space-y-2">
+          <nav className="space-y-1">
             {navLinks.map((link) => (
-              <button
-                key={link.id}
-                onClick={() => {
-                  setActiveTab(link.id);
-                  if (window.innerWidth < 768) {
-                    setIsMobileMenuOpen(false); // Close sidebar on mobile after selection
-                  }
-                }}
-                className={`w-full flex items-center px-2 py-2 sm:px-3 sm:py-2 md:px-4 md:py-3 text-left rounded-lg transition-colors min-h-[48px] ${
-                  activeTab === link.id
-                    ? "bg-blue-100 text-blue-700 border-r-4 border-blue-700"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-                title={link.label}
-              >
-                <span className="mr-3 flex-shrink-0">{link.icon}</span>
+              <div key={link.id} className="relative group">
                 <Link
                   to={link.air}
+                  onClick={() => {
+                    setActiveTab(link.id);
+                    if (window.innerWidth < 768) {
+                      setIsMobileMenuOpen(false);
+                    }
+                  }}
+                  className={`w-full flex items-center px-4 py-3 text-left rounded-xl transition-all duration-200 min-h-[48px] group ${
+                    activeTab === link.id
+                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg transform scale-[1.02] border border-blue-500"
+                      : "text-slate-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-700 hover:shadow-md border border-transparent hover:border-blue-200"
+                  }`}
+                  title={link.label}
+                >
+                  <span className={`mr-4 flex-shrink-0 transition-colors duration-200 ${
+                    activeTab === link.id ? "text-white" : "text-slate-500 group-hover:text-blue-600"
+                  }`}>{link.icon}</span>
+                  <span className={`
+                    transition-all duration-300 font-medium
+                    ${isMobileMenuOpen ? "block" : "hidden md:block"}
+                  `}>
+                    {link.label}
+                  </span>
+                </Link>
+
+                {/* Tooltip for collapsed state */}
+                <div
                   className={`
-                  transition-all duration-300
-                  ${isMobileMenuOpen ? "block" : "hidden md:block"}
+                  absolute left-full top-1/2 transform -translate-y-1/2 ml-3
+                  bg-slate-900 text-white text-sm px-3 py-2 rounded-lg whitespace-nowrap shadow-lg
+                  opacity-0 pointer-events-none transition-opacity duration-200 z-50
+                  group-hover:opacity-100
+                  ${isMobileMenuOpen ? "hidden" : "block md:hidden"}
                 `}
                 >
-                  <span>{link.label}</span>
-                </Link>
-              </button>
+                  {link.label}
+                  <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 border-4 border-transparent border-r-slate-900"></div>
+                </div>
+              </div>
             ))}
           </nav>
         </div>
@@ -208,67 +238,69 @@ export default function StudentDashboard() {
 
       <div className="flex-1 md:ml-64 min-h-screen">
         {/* Header Section */}
-        <div className="bg-white rounded-lg shadow-sm p-4 md:p-6 m-4 md:m-6 mb-0">
+        <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 m-4 md:m-6 mb-0 border border-slate-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4 md:space-x-6">
               <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="p-2 bg-white rounded-lg shadow hover:shadow-md transition-shadow md:hidden"
+                className="p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 md:hidden border border-slate-200"
               >
-                <Menu className="w-5 h-5 text-gray-600" />
+                <Menu className="w-5 h-5 text-slate-600" />
               </button>
               <div>
-                <p className="text-gray-500 text-sm mb-1">Dashboard / Student</p>
-                <h1 className="text-xl md:text-2xl font-bold text-gray-800 capitalize">
+                <p className="text-slate-500 text-sm mb-2 font-medium">Dashboard / Student</p>
+                <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent capitalize">
                   {navLinks.find(link => link.id === activeTab)?.label}
                 </h1>
               </div>
             </div>
-            <div className="flex items-center space-x-2 md:space-x-4">
-              <button className="p-2 bg-white rounded-lg shadow hover:shadow-md transition-shadow">
-                <Bell className="w-5 h-5 text-gray-600" />
+            <div className="flex items-center space-x-3 md:space-x-4">
+              <button className="p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 border border-slate-200 group relative">
+                <Bell className="w-5 h-5 text-slate-600 group-hover:text-blue-600 transition-colors" />
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-white"></span>
               </button>
-              <button className="p-2 bg-white rounded-lg shadow hover:shadow-md transition-shadow">
-                <Settings className="w-5 h-5 text-gray-600" />
+              <button className="p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 border border-slate-200 group">
+                <Settings className="w-5 h-5 text-slate-600 group-hover:text-blue-600 transition-colors" />
               </button>
 
               {/* Profile dropdown */}
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                  className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex items-center space-x-3 p-2 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 border border-slate-200"
                   aria-haspopup="true"
                   aria-expanded={isProfileDropdownOpen}
                 >
                   <img
                     src={dashboardData?.user?.profile_pic || "/default-profile.png"}
                     alt="Profile"
-                    className="w-8 h-8 rounded-full object-cover border-2 border-blue-600"
+                    className="w-10 h-10 rounded-full object-cover border-2 border-gradient-to-r from-blue-500 to-indigo-500 shadow-md"
                   />
-                  <ChevronDown className="w-4 h-4 text-gray-600" />
+                  <ChevronDown className="w-4 h-4 text-slate-600" />
                 </button>
                 {/* Dropdown menu */}
                 {isProfileDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-20 border border-gray-200">
+                  <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-xl py-3 z-20 border border-slate-200 animate-in slide-in-from-top-2 duration-200">
                     <button
                       onClick={() => {
                         navigate("/profile");
                         setIsProfileDropdownOpen(false);
                       }}
-                      className="flex items-center w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
+                      className="flex items-center w-full text-left px-4 py-3 text-slate-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-200 rounded-lg mx-2"
                     >
-                      <User className="w-4 h-4 mr-3" />
-                      Edit Profile
+                      <User className="w-5 h-5 mr-3 text-blue-600" />
+                      <span className="font-medium">Edit Profile</span>
                     </button>
+                    <div className="border-t border-slate-200 my-2"></div>
                     <button
                       onClick={() => {
                         handleLogout();
                         setIsProfileDropdownOpen(false);
                       }}
-                      className="flex items-center w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 transition-colors"
+                      className="flex items-center w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 transition-all duration-200 rounded-lg mx-2"
                     >
-                      <LogOut className="w-4 h-4 mr-3" />
-                      Logout
+                      <LogOut className="w-5 h-5 mr-3" />
+                      <span className="font-medium">Logout</span>
                     </button>
                   </div>
                 )}

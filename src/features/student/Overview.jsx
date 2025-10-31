@@ -175,23 +175,37 @@ const Overview = () => {
   };
 
   return (
-    <div className="w-full min-h-screen bg-gray-50 p-4 sm:p-6">
+    <div className="w-full min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6 md:p-8">
+      {/* Welcome Banner */}
+      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-8 mb-8 text-white shadow-2xl">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl md:text-4xl font-bold mb-2">Welcome back, Student! 👋</h2>
+            <p className="text-blue-100 text-lg">Ready to continue your learning journey? Let's explore what's new today.</p>
+          </div>
+          <div className="hidden md:block">
+            <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+              <span className="text-4xl">🎓</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
 
       {/* Profile Modal */}
       {showProfile && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center p-4 border-b">
-              <h2 className="text-xl font-semibold">Profile</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto border border-slate-200">
+            <div className="flex justify-between items-center p-6 border-b border-slate-200">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">Profile</h2>
               <button
                 onClick={() => setShowProfile(false)}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-slate-500 hover:text-slate-700 p-2 hover:bg-slate-100 rounded-lg transition-colors"
               >
                 ✕
               </button>
             </div>
-            <div className="p-4">
+            <div className="p-6">
               <Profile />
             </div>
           </div>
@@ -199,96 +213,104 @@ const Overview = () => {
       )}
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <div
-          className="bg-white p-4 rounded-xl shadow-sm h-[143px] "
+          className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-200 hover:scale-[1.02] cursor-pointer"
           style={fadeInUp(0.2)}
         >
-          <div className="flex justify-between items-center">
-            <h2 className="text-[20px] sm:text-[22px] md:text-[25px] lg:text-[35px]  text-[#3737df] font-normal ">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               {dashboardData?.quick_stats?.courses_completed || 0}
             </h2>
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <img src={completed} alt="" />
+            <div className="p-3 bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl shadow-md">
+              <img src={completed} alt="Completed courses" className="w-6 h-6" />
             </div>
           </div>
-          <p className="lg:text-[14px] font-medium">Courses Completed</p>
+          <p className="text-slate-600 font-semibold text-lg">Courses Completed</p>
+          <div className="mt-3 w-full bg-slate-200 rounded-full h-1">
+            <div className="bg-gradient-to-r from-green-500 to-emerald-500 h-1 rounded-full" style={{ width: '100%' }}></div>
+          </div>
         </div>
 
         <div
-          className="bg-white p-4 rounded-xl shadow-sm h-[143px]"
-          style={fadeInUp(0.2)}
+          className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-200 hover:scale-[1.02] cursor-pointer"
+          style={fadeInUp(0.3)}
         >
-          <div className="flex justify-between items-center">
-            <h2 className="text-[20px] sm:text-[22px] md:text-[25px] lg:text-[35px] text-[#3737df] font-normal ">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               {dashboardData?.quick_stats?.courses_in_progress || 0}
             </h2>
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <img src={pro} alt="" />
+            <div className="p-3 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl shadow-md">
+              <img src={pro} alt="Courses in progress" className="w-6 h-6" />
             </div>
           </div>
-          <p className="text-[12px]  font-medium">Courses Progress</p>
+          <p className="text-slate-600 font-semibold text-lg">Courses In Progress</p>
+          <div className="mt-3 w-full bg-slate-200 rounded-full h-1">
+            <div className="bg-gradient-to-r from-blue-500 to-indigo-500 h-1 rounded-full" style={{ width: '75%' }}></div>
+          </div>
         </div>
 
         <div
-          className="bg-white p-4 rounded-xl shadow-sm h-[143px]"
-          style={fadeInUp(0.2)}
+          className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-200 hover:scale-[1.02] cursor-pointer"
+          style={fadeInUp(0.4)}
         >
-          <div className="flex justify-between items-center">
-            <h2 className="text-[20px] sm:text-[22px] md:text-[25px] lg:text-[35px] text-[#3737df] font-normal ">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               {dashboardData?.quick_stats?.pending_assignments || 0}
             </h2>
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <img src={assignment} alt="" />
+            <div className="p-3 bg-gradient-to-r from-orange-100 to-red-100 rounded-xl shadow-md">
+              <img src={assignment} alt="Pending assignments" className="w-6 h-6" />
             </div>
           </div>
-          <p className="lg:text-[14px] font-medium">Pending Assignment</p>
+          <p className="text-slate-600 font-semibold text-lg">Pending Assignments</p>
+          <div className="mt-3 w-full bg-slate-200 rounded-full h-1">
+            <div className="bg-gradient-to-r from-orange-500 to-red-500 h-1 rounded-full" style={{ width: '60%' }}></div>
+          </div>
         </div>
       </div>
 
       {/* Calendar and Activities */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
         <div className="col-span-2" style={fadeInUp(0.6)}>
-          <div className="bg-white p-4 rounded-xl shadow-sm mb-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="  text-[12px] sm:text-[14px]  md:text-[16px] lg:text-[18px] font-medium text-[rgba(51, 51, 51, 1)]">
-                Courses In progress
+          <div className="bg-white p-6 rounded-xl shadow-lg mb-6 border border-slate-200">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                Courses In Progress
               </h3>
-              <p className="text-[12px] sm:text-[14px]  md:text-[16px] lg:text-[18px] text-[#484894] font-normal">
-                View All
-              </p>
+              <button className="text-blue-600 hover:text-blue-700 font-semibold text-lg transition-colors hover:scale-105">
+                View All →
+              </button>
             </div>
 
             {dashboardData?.courses_in_progress?.map((course, index) => (
-              <div key={index} className="  mb-3 bg-gray-50 p-3 rounded-lg">
-                <div className="flex items-center gap-[5px] ">
-                  <div>
-                    <img src={completed} alt="" />
+              <div key={index} className="mb-4 bg-gradient-to-r from-slate-50 to-blue-50 p-4 rounded-xl border border-slate-200 hover:shadow-md transition-all duration-200 hover:scale-[1.01]">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl shadow-md">
+                    <img src={completed} alt="Course icon" className="w-6 h-6" />
                   </div>
-                  <div className="w-full">
-                    <div className="flex justify-between items-center mb-2">
-                      <div className="">
-                        <h4
-                          className="lg:text-[14px] font-medium"
-                          style={{ color: "rgba(51, 51, 51, 1)" }}
-                        >
+                  <div className="flex-1">
+                    <div className="flex justify-between items-center mb-3">
+                      <div>
+                        <h4 className="text-lg font-bold text-slate-800 mb-1">
                           {course.name}
                         </h4>
-                        <h4
-                          className="text-[12px] font-normal "
-                          style={{ color: "rgba(90, 100, 125, 1)" }}
-                        >
-                          {course.lessons_count} Lessons - {course.duration}
-                        </h4>
+                        <p className="text-slate-600 font-medium">
+                          {course.lessons_count} Lessons • {course.duration}
+                        </p>
                       </div>
-                      <span className={`text-blue-600 text-sm`}>
-                        {course.progress_percentage}%
-                        <img src={mask} alt="" />
-                      </span>
+                      <div className="text-right">
+                        <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                          {course.progress_percentage}%
+                        </span>
+                        <div className="flex items-center gap-1 mt-1">
+                          <img src={mask} alt="Progress" className="w-4 h-4" />
+                          <span className="text-sm text-slate-500">Complete</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="h-3 bg-slate-200 rounded-full overflow-hidden shadow-inner">
                       <div
-                        className="h-full bg-blue-500 rounded-full"
+                        className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full shadow-sm"
                         style={{
                           width: `${course.progress_percentage}%`,
                           animation: `growWidth 1s ease-out ${
@@ -303,128 +325,87 @@ const Overview = () => {
                 </div>
               </div>
             )) || (
-              <div className="text-center text-gray-500 py-4">
-                No courses in progress
+              <div className="text-center text-slate-500 py-8">
+                <div className="text-4xl mb-2">📚</div>
+                <p className="text-lg font-medium">No courses in progress</p>
+                <p className="text-sm">Start learning to see your progress here!</p>
               </div>
             )}
           </div>
           {/* notification */}
-          <div className="bg-white p-4 rounded-xl shadow-sm">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-[12px] sm:lg:text-[14px] md:text-[16px] lg:text-[18px] text-[#333]">
-                Notification
+          <div className="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                Notifications
               </h3>
-              <button className="text-blue-600 text-[16px] font-normal flex items-center">
-                View All
+              <button className="text-blue-600 hover:text-blue-700 font-semibold text-lg transition-colors hover:scale-105">
+                View All →
               </button>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-4">
               {/* notification1 */}
-              <div
-                className=" mb-7"
-                style={{ backgroundColor: "rgba(245, 248, 254, 1)" }}
-              >
-                <div className="flex items-center gap-[5px]">
-                  <img src={bell} alt="" />
-                  <div>
-                    <p
-                      className="lg:text-[14px] font-medium"
-                      style={{ color: "rgba(51, 51, 51, 1)" }}
-                    >
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-100 hover:shadow-md transition-all duration-200 hover:scale-[1.01]">
+                <div className="flex items-start gap-4">
+                  <div className="p-2 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-lg shadow-md">
+                    <img src={bell} alt="Notification bell" className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-lg font-bold text-slate-800 mb-2">
                       Assignment Due Soon
                     </p>
-                    <p
-                      className="text-[12px] font-normal "
-                      style={{ color: "rgba(90, 100, 125, 1)" }}
-                    >
-                      Your Math assignment on ‘Linear Equations’ is due
-                      tomorrow, Nov 19, 2024. Don’t forget to submit it on time!
+                    <p className="text-slate-600 font-medium leading-relaxed">
+                      Your Math assignment on 'Linear Equations' is due tomorrow, Nov 19, 2024. Don't forget to submit it on time!
                     </p>
+                    <button className="mt-4 w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold py-3 px-4 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg">
+                      View Assignment
+                    </button>
                   </div>
                 </div>
-                {/* notification button */}
-                <button
-                  className="text-[12px] sm:lg:text-[14px] md:text-[16px] lg:text-[18px] font-medium w-full rounded-[5px] h-[25px] lg:h-\[42px\] mt-[1rem] "
-                  style={{
-                    backgroundColor: "rgba(18, 40, 164, 1)",
-                    color: "rgba(255, 255, 255, 1)",
-                  }}
-                >
-                  View Assignment
-                </button>
               </div>
-              {/* end of  notification1 */}
-              {/* notification1 */}
-              <div
-                className=""
-                style={{ backgroundColor: "rgba(245, 248, 254, 1)" }}
-              >
-                <div className="flex items-center gap-[5px]">
-                  <img src={bell} alt="" />
-                  <div>
-                    <p
-                      className="lg:text-[14px] font-medium"
-                      style={{ color: "rgba(51, 51, 51, 1)" }}
-                    >
+              {/* end of notification1 */}
+
+              {/* notification2 */}
+              <div className="bg-gradient-to-r from-orange-50 to-red-50 p-4 rounded-xl border border-orange-100 hover:shadow-md transition-all duration-200 hover:scale-[1.01]">
+                <div className="flex items-start gap-4">
+                  <div className="p-2 bg-gradient-to-r from-orange-100 to-red-100 rounded-lg shadow-md">
+                    <img src={bell} alt="Notification bell" className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-lg font-bold text-slate-800 mb-2">
                       Assignment Due Soon
                     </p>
-                    <p
-                      className="text-[12px] font-normal "
-                      style={{ color: "rgba(90, 100, 125, 1)" }}
-                    >
-                      Your Math assignment on ‘Linear Equations’ is due
-                      tomorrow, Nov 19, 2024. Don’t forget to submit it on time!
+                    <p className="text-slate-600 font-medium leading-relaxed">
+                      Your Math assignment on 'Linear Equations' is due tomorrow, Nov 19, 2024. Don't forget to submit it on time!
                     </p>
+                    <button className="mt-4 w-full bg-gradient-to-r from-orange-600 to-red-600 text-white font-semibold py-3 px-4 rounded-lg hover:from-orange-700 hover:to-red-700 transition-all duration-200 shadow-md hover:shadow-lg">
+                      View Assignment
+                    </button>
                   </div>
                 </div>
-                {/* notification button */}
-                <button
-                  className="text-[12px] sm:lg:text-[14px] md:text-[16px] lg:text-[18px] font-medium w-full rounded-[5px] h-[25px] lg:h-\[42px\] mt-[1rem] "
-                  style={{
-                    backgroundColor: "rgba(18, 40, 164, 1)",
-                    color: "rgba(255, 255, 255, 1)",
-                  }}
-                >
-                  View Assignment
-                </button>
               </div>
-              {/* end of  notification1 */}
-              {/* notification1 */}
-              <div
-                className=""
-                style={{ backgroundColor: "rgba(245, 248, 254, 1)" }}
-              >
-                <div className="flex items-center gap-[5px]">
-                  <img src={bell} alt="" />
-                  <div>
-                    <p
-                      className="lg:text-[14px] font-medium"
-                      style={{ color: "rgba(51, 51, 51, 1)" }}
-                    >
+              {/* end of notification2 */}
+
+              {/* notification3 */}
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-100 hover:shadow-md transition-all duration-200 hover:scale-[1.01]">
+                <div className="flex items-start gap-4">
+                  <div className="p-2 bg-gradient-to-r from-green-100 to-emerald-100 rounded-lg shadow-md">
+                    <img src={bell} alt="Notification bell" className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-lg font-bold text-slate-800 mb-2">
                       Assignment Due Soon
                     </p>
-                    <p
-                      className="text-[12px] font-normal "
-                      style={{ color: "rgba(90, 100, 125, 1)" }}
-                    >
-                      Your Math assignment on ‘Linear Equations’ is due
-                      tomorrow, Nov 19, 2024. Don’t forget to submit it on time!
+                    <p className="text-slate-600 font-medium leading-relaxed">
+                      Your Math assignment on 'Linear Equations' is due tomorrow, Nov 19, 2024. Don't forget to submit it on time!
                     </p>
+                    <button className="mt-4 w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold py-3 px-4 rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-md hover:shadow-lg">
+                      View Assignment
+                    </button>
                   </div>
                 </div>
-                {/* notification button */}
-                <button
-                  className="text-[12px] sm:lg:text-[14px] md:text-[16px] lg:text-[18px] font-medium w-full rounded-[5px] h-[25px] lg:h-\[42px\] mt-[1rem] "
-                  style={{
-                    backgroundColor: "rgba(18, 40, 164, 1)",
-                    color: "rgba(255, 255, 255, 1)",
-                  }}
-                >
-                  View Assignment
-                </button>
               </div>
-              {/* end of  notification1 */}
+              {/* end of notification3 */}
             </div>
           </div>
           {/* end of notification */}
