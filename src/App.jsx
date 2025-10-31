@@ -31,6 +31,14 @@ import SchoolAdmin from "@/features/school-admin/SchoolAdmin";
 import TeacherDashboard from "@/features/teacher/TeacherDashboard";
 import StudentDashboard from "@/features/student/StudentDashboard";
 import OrganizationDashboard from "@/features/organization/OrganizationDashboard";
+import OrganizationOverview from "@/features/organization/pages/OrganizationOverview";
+import OrganizationStudents from "@/features/organization/pages/OrganizationStudents";
+import OrganizationTeachers from "@/features/organization/pages/OrganizationTeachers";
+import OrganizationClasses from "@/features/organization/pages/OrganizationClasses";
+import OrganizationExams from "@/features/organization/pages/OrganizationExams";
+import OrganizationAnalytics from "@/features/organization/pages/OrganizationAnalytics";
+import OrganizationReports from "@/features/organization/pages/OrganizationReports";
+import OrganizationAlerts from "@/features/organization/pages/OrganizationAlerts";
 /* Removed duplicate imports of ParentDashboard and IndividualLearnerPersonalDashboard */
 import ParentDashboard from "@/features/parent/Pages/ParentDashboard";
 import ParentAttendance from "@/features/parent/Pages/ParentAttendance";
@@ -141,7 +149,17 @@ const AppContent = () => {
       {/* School Admin Dashboard - Authentication temporarily disabled */}
       <Route path="/dashboard" element={<SchoolAdmin />} />
       {/* Organization Dashboard - Authentication temporarily disabled */}
-      <Route path="/organization-dashboard" element={<OrganizationDashboard />} />
+      <Route path="/organization-dashboard" element={<OrganizationDashboard />}>
+        <Route index element={<Navigate to="/organization-dashboard/overview" replace />} />
+        <Route path="overview" element={<OrganizationOverview />} />
+        <Route path="students" element={<OrganizationStudents />} />
+        <Route path="teachers" element={<OrganizationTeachers />} />
+        <Route path="classes" element={<OrganizationClasses />} />
+        <Route path="exams" element={<OrganizationExams />} />
+        <Route path="analytics" element={<OrganizationAnalytics />} />
+        <Route path="reports" element={<OrganizationReports />} />
+        <Route path="alerts" element={<OrganizationAlerts />} />
+      </Route>
       {/* Parent Dashboard */}
       <Route path="/parent-dashboard" element={<ParentDashboard />} />
       {/* Parent Attendance */}
