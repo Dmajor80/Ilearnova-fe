@@ -148,7 +148,7 @@ const AppContent = () => {
       <Route path="/parent-attendance" element={<ParentAttendance />} />
       <Route path="/parent-attendance/:id" element={<ParentAttendance />} />
       {/* Individual Learner Dashboard */}
-      <Route path="/individual-learner-dashboard" element={<IndividualLearnerPersonalDashboard />} />
+      <Route path="/individual-dashboard" element={<IndividualLearnerPersonalDashboard />} />
       {/* New Features - Test Routes */}
       <Route path="/birthday-dashboard" element={<BirthdayDashboard />} />
       <Route path="/learning-dashboard" element={<VirtualLearningDashboard />} />
