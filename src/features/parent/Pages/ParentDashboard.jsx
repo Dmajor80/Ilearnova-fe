@@ -74,7 +74,7 @@ export default function ParentDashboard() {
   }, [location]);
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       <ParentSidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -90,7 +90,7 @@ export default function ParentDashboard() {
         />
 
         {/* Main Content Area */}
-        <div className="m-4 md:m-6 mt-0">
+        <main className="flex-1 m-4 md:m-6 mt-0 p-6 md:p-8">
           {activeTab === "dashboard" && (
             <div className="space-y-6">
               {/* Welcome Section */}
@@ -147,7 +147,7 @@ export default function ParentDashboard() {
           {activeTab === "fees" && <ParentPayment />}
           {activeTab === "timetable" && <ParentTimetable />}
           {activeTab === "reports" && <ParentTranscript />}
-        </div>
+        </main>
 
       </div>
     </div>

@@ -178,7 +178,7 @@ function Attendance({ isStandalone = true }) {
     const insights = perf ? perf.insights : "No insights available.";
 
     return (
-        <div className="flex min-h-screen bg-gray-50">
+        <div className="flex min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
             <ParentSidebar
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
@@ -193,7 +193,7 @@ function Attendance({ isStandalone = true }) {
                     dashboardData={dashboardData}
                 />
 
-                <div className="m-4 md:m-6 mt-0">
+                <main className="flex-1 m-4 md:m-6 mt-0 p-6 md:p-8">
                     {/* Child selection buttons always visible */}
                     <div className="bg-white rounded-xl shadow p-6 flex flex-col mx-2 md:mx-8 mt-8 mb-4">
                         <h2 className="text-lg font-semibold mb-4 text-gray-800">Select a child to view performance</h2>
@@ -333,7 +333,7 @@ function Attendance({ isStandalone = true }) {
                             </div>
                         </div>
                     </section>
-                </div>
+                </main>
             </div>
         </div>
     );
