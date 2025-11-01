@@ -23,6 +23,7 @@ const ParentMessages = () => {
   const [chatMessages, setChatMessages] = useState([]);
   const [messagesLoading, setMessagesLoading] = useState(true);
   const [conversations, setConversations] = useState([]);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   const chatEndRef = useRef(null);
 
@@ -70,8 +71,14 @@ const ParentMessages = () => {
   }, []);
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chatMessages]);
+    if (isInitialLoad && chatMessages.length > 0) {
+      // Only scroll to bottom on initial load
+      setTimeout(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        setIsInitialLoad(false);
+      }, 100);
+    }
+  }, [chatMessages, isInitialLoad]);
 
   const sendMessage = async () => {
     if (chatMessage.trim() || selectedFile) {

@@ -74,64 +74,69 @@ function ParentHeader({ activeTab, setIsMobileMenuOpen, dashboardData }) {
   ];
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-4 md:p-6 m-4 md:m-6 mb-0">
+    <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 m-4 md:m-6 mb-0 border border-slate-200">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4 md:space-x-6">
           <button
             onClick={() => setIsMobileMenuOpen(true)}
-            className="p-2 bg-white rounded-lg shadow hover:shadow-md transition-shadow md:hidden"
+            className="p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 md:hidden border border-slate-200"
           >
-            <Menu className="w-5 h-5 text-gray-600" />
+            <Menu className="w-5 h-5 text-slate-600" />
           </button>
-        <div>
-            <p className="text-gray-500 text-sm mb-1">Dashboard / Parent</p>
+          <div>
+            <p className="text-slate-500 text-sm mb-2 font-medium">Dashboard / Parent</p>
+            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent capitalize">
+              {navLinks.find(link => link.id === activeTab)?.label || 'Parent Dashboard'}
+            </h1>
+          </div>
         </div>
-        </div>
-        <div className="flex items-center space-x-2 md:space-x-4">
-          <button className="p-2 bg-white rounded-lg shadow hover:shadow-md transition-shadow">
-            <Bell className="w-5 h-5 text-gray-600" />
+        <div className="flex items-center space-x-3 md:space-x-4">
+          <button className="p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 border border-slate-200 group relative">
+            <Bell className="w-5 h-5 text-slate-600 group-hover:text-blue-600 transition-colors" />
+            <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-white"></span>
           </button>
-          <button className="p-2 bg-white rounded-lg shadow hover:shadow-md transition-shadow">
-            <Settings className="w-5 h-5 text-gray-600" />
+          <button className="p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 border border-slate-200 group">
+            <Settings className="w-5 h-5 text-slate-600 group-hover:text-blue-600 transition-colors" />
           </button>
 
           {/* Profile dropdown */}
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-              className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex items-center space-x-3 p-2 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 border border-slate-200"
               aria-haspopup="true"
               aria-expanded={isProfileDropdownOpen}
             >
               <img
                 src={dashboardData?.user?.profile_pic || "/default-profile.png"}
                 alt="Profile"
-                className="w-8 h-8 rounded-full object-cover border-2 border-blue-600"
+                className="w-10 h-10 rounded-full object-cover border-2 border-gradient-to-r from-blue-500 to-indigo-500 shadow-md"
               />
-              <ChevronDown className="w-4 h-4 text-gray-600" />
+              <ChevronDown className="w-4 h-4 text-slate-600" />
             </button>
             {/* Dropdown menu */}
             {isProfileDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-20 border border-gray-200">
+              <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-xl py-3 z-20 border border-slate-200 animate-in slide-in-from-top-2 duration-200">
                 <button
                   onClick={() => {
                     navigate("/profile");
                     setIsProfileDropdownOpen(false);
                   }}
-                  className="flex items-center w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
+                  className="flex items-center w-full text-left px-4 py-3 text-slate-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-200 rounded-lg mx-2"
                 >
-                  <User className="w-4 h-4 mr-3" />
-                  Edit Profile
+                  <User className="w-5 h-5 mr-3 text-blue-600" />
+                  <span className="font-medium">Edit Profile</span>
                 </button>
+                <div className="border-t border-slate-200 my-2"></div>
                 <button
                   onClick={() => {
                     handleLogout();
                     setIsProfileDropdownOpen(false);
                   }}
-                  className="flex items-center w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 transition-colors"
+                  className="flex items-center w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 transition-all duration-200 rounded-lg mx-2"
                 >
-                  <LogOut className="w-4 h-4 mr-3" />
-                  Logout
+                  <LogOut className="w-5 h-5 mr-3" />
+                  <span className="font-medium">Logout</span>
                 </button>
               </div>
             )}
