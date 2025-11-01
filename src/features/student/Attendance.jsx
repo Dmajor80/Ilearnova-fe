@@ -334,12 +334,12 @@ export default function Attendance() {
                         John Doe's Math score dropped to 45%.
                       </span>
                     </div>
-                    <div
-                      className="text-sm sm:text-lg w-full h-8 sm:h-[42px] rounded-2xl text-white"
+                    <button
+                      className="text-sm sm:text-lg w-full h-8 sm:h-[42px] rounded-2xl text-white px-4 py-2 hover:opacity-90 transition-opacity"
                       style={{ backgroundColor: "rgba(18, 40, 164, 1)" }}
                     >
                       Dismiss
-                    </div>
+                    </button>
                   </button>
                 ))}
               </div>

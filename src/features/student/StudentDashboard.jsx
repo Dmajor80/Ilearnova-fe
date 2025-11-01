@@ -309,7 +309,7 @@ export default function StudentDashboard() {
           </div>
         </div>
 
-        <main className="flex-1">
+        <main className="flex-1 m-4 md:m-6 mt-0 p-6 md:p-8">
           <Outlet /> {/* Display nested routes */}
         </main>
       </div>

@@ -202,7 +202,7 @@ export default function Grade() {
       <div className="h-32 sm:h-40 md:h-48 lg:h-56 xl:h-64"></div>
 
       {/* Content Section */}
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <div className="w-full m-4 md:m-6 mt-0 p-6 md:p-8 pt-6">
         <div className="max-w-7xl mx-auto">
           <div className="bg-white shadow-lg rounded-lg overflow-hidden">
             {/* Mobile Cards View (xs to md) */}
@@ -214,7 +214,7 @@ export default function Grade() {
               </div>
               <div className="divide-y divide-gray-200">
                 {studentData.courses.map((course) => (
-                  <div key={course.id} className="p-4 hover:bg-gray-50">
+                  <div key={course.id} className="p-6 hover:bg-gray-50">
                     <div className="flex justify-between items-start mb-3">
                       <div>
                         <h4 className="text-sm sm:text-base font-medium text-gray-900">
