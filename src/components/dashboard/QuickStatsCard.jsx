@@ -1,7 +1,7 @@
 import React from 'react';
 import { TrendingUp, Users, BookOpen, Calendar, AlertTriangle, CheckCircle } from 'lucide-react';
 
-const QuickStatsCard = ({ title, value, subtitle, icon, color = 'blue', trend }) => {
+const QuickStatsCard = ({ title, value, subtitle, icon, color = 'blue', trend, trendUp }) => {
   const getIcon = () => {
     switch (icon) {
       case 'users':
@@ -14,6 +14,10 @@ const QuickStatsCard = ({ title, value, subtitle, icon, color = 'blue', trend })
         return <AlertTriangle className="w-6 h-6" />;
       case 'check':
         return <CheckCircle className="w-6 h-6" />;
+      case 'award':
+        return <CheckCircle className="w-6 h-6" />;
+      case 'trending-up':
+        return <TrendingUp className="w-6 h-6" />;
       default:
         return <TrendingUp className="w-6 h-6" />;
     }
@@ -29,9 +33,22 @@ const QuickStatsCard = ({ title, value, subtitle, icon, color = 'blue', trend })
         return 'bg-yellow-50 text-yellow-600 border-yellow-200';
       case 'purple':
         return 'bg-purple-50 text-purple-600 border-purple-200';
+      case 'indigo':
+        return 'bg-indigo-50 text-indigo-600 border-indigo-200';
+      case 'teal':
+        return 'bg-teal-50 text-teal-600 border-teal-200';
       default:
         return 'bg-blue-50 text-blue-600 border-blue-200';
     }
+  };
+
+  const getTrendIcon = () => {
+    if (trendUp === null) return null;
+    return trendUp ? (
+      <TrendingUp className="w-3 h-3 mr-1 text-green-600" />
+    ) : (
+      <TrendingUp className="w-3 h-3 mr-1 text-red-600 rotate-180" />
+    );
   };
 
   return (
@@ -45,9 +62,9 @@ const QuickStatsCard = ({ title, value, subtitle, icon, color = 'blue', trend })
           )}
           {trend && (
             <div className="flex items-center mt-2">
-              <TrendingUp className="w-3 h-3 mr-1" />
-              <span className={`text-xs font-medium ${trend > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {trend > 0 ? '+' : ''}{trend}%
+              {getTrendIcon()}
+              <span className={`text-xs font-medium ${trendUp === null ? 'text-gray-600' : trendUp ? 'text-green-600' : 'text-red-600'}`}>
+                {trend}
               </span>
             </div>
           )}
