@@ -94,7 +94,7 @@ function CoursesComponent({ page }) {
           <h2 className="font-medium mt-2">{page}</h2>
         </div>
         <div className="flex items-center">
-          <div className="relative w-64 mr-4">
+          <div className="relative w-64">
             <input
               type="text"
               placeholder="Search courses..."
@@ -117,13 +117,6 @@ function CoursesComponent({ page }) {
               ></path>
             </svg>
           </div>
-          <div>
-            <img
-              src="../assets/image.png"
-              alt="User"
-              className="w-8 h-8 rounded-full"
-            />
-          </div>
         </div>
       </div>
       {/* end of dashboard nav */}
@@ -135,17 +128,7 @@ function CoursesComponent({ page }) {
         </div>
       )}
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-          <p className="text-red-600">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-          >
-            Retry
-          </button>
-        </div>
-      )}
+
 
       {!loading && !error && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

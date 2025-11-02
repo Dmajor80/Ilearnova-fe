@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   BookOpen,
   MessageCircle,
@@ -14,9 +14,17 @@ import {
   FileBarChart,
   Menu,
   X,
+  Bell,
+  Settings,
+  ChevronDown,
   User,
+  LogOut,
 } from "lucide-react";
-import Profile from "../auth/Profile";
+
+import { Link, useNavigate } from "react-router-dom";
+import { logout } from "../../api/authApi";
+import { clearAuth } from "../../api/auth";
+
 import Messages from "./Messages";
 import Attendance from "./Attendance";
 import Assignments from "./Assignments";
@@ -45,6 +53,9 @@ export default function TeacherDashboard() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchDashboard() {
@@ -74,11 +85,38 @@ export default function TeacherDashboard() {
     { id: "grade", icon: <Star size={20} />, label: "Grade" },
     { id: "analytics", icon: <BarChart3 size={20} />, label: "Analytics" },
     { id: "transcripts", icon: <FileBarChart size={20} />, label: "Transcripts" },
-    { id: "profile", icon: <User size={20} />, label: "Profile" },
+
   ];
 
   // Mock course data
-  
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+
+    if (isProfileDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isProfileDropdownOpen]);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      clearAuth();
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   // side bar
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -176,76 +214,475 @@ export default function TeacherDashboard() {
 
       {/* Main content area */}
       <div className="ml-16 md:ml-0 flex-1 p-4">
+        {/* Header Section */}
+        <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 mb-6 border border-slate-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4 md:space-x-6">
+              <div>
+                <p className="text-slate-500 text-sm mb-2 font-medium">Dashboard / Teacher</p>
+                <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent capitalize">
+                  {navLinks.find(link => link.id === activeTab)?.label}
+                </h1>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3 md:space-x-4">
+              <button className="p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 border border-slate-200 group relative">
+                <Bell className="w-5 h-5 text-slate-600 group-hover:text-blue-600 transition-colors" />
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-white"></span>
+              </button>
+              <button className="p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 border border-slate-200 group">
+                <Settings className="w-5 h-5 text-slate-600 group-hover:text-blue-600 transition-colors" />
+              </button>
+
+              {/* Profile dropdown */}
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                  className="flex items-center space-x-3 p-2 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 border border-slate-200"
+                  aria-haspopup="true"
+                  aria-expanded={isProfileDropdownOpen}
+                >
+                  <img
+                    src={dashboardData?.user?.profile_pic || "/default-profile.png"}
+                    alt="Profile"
+                    className="w-10 h-10 rounded-full object-cover border-2 border-gradient-to-r from-blue-500 to-indigo-500 shadow-md"
+                  />
+                  <ChevronDown className="w-4 h-4 text-slate-600" />
+                </button>
+                {/* Dropdown menu */}
+                {isProfileDropdownOpen && (
+                  <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-xl py-3 z-20 border border-slate-200 animate-in slide-in-from-top-2 duration-200">
+                    <button
+                      onClick={() => {
+                        navigate("/profile");
+                        setIsProfileDropdownOpen(false);
+                      }}
+                      className="flex items-center w-full text-left px-4 py-3 text-slate-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-200 rounded-lg mx-2"
+                    >
+                      <User className="w-5 h-5 mr-3 text-blue-600" />
+                      <span className="font-medium">Edit Profile</span>
+                    </button>
+                    <div className="border-t border-slate-200 my-2"></div>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setIsProfileDropdownOpen(false);
+                      }}
+                      className="flex items-center w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 transition-all duration-200 rounded-lg mx-2"
+                    >
+                      <LogOut className="w-5 h-5 mr-3" />
+                      <span className="font-medium">Logout</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
         {loading && <p>Loading dashboard data...</p>}
         {!loading && activeTab === "dashboard" && dashboardData && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            {/* Enhanced Quick Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
               <QuickStatsCard
                 title="Total Students"
                 value={dashboardData.quick_stats.total_students}
                 icon="users"
                 color="blue"
+                trend="+12%"
+                trendUp={true}
               />
               <QuickStatsCard
-                title="Total Classes"
+                title="Active Classes"
                 value={dashboardData.quick_stats.total_classes}
                 icon="book"
                 color="green"
+                trend="+3"
+                trendUp={true}
               />
               <QuickStatsCard
-                title="Today Attendance"
-                value={dashboardData.quick_stats.today_attendance}
+                title="Today's Attendance"
+                value={`${dashboardData.quick_stats.today_attendance}%`}
                 icon="calendar"
                 color="yellow"
+                trend="+5%"
+                trendUp={true}
               />
               <QuickStatsCard
-                title="Graded Today"
+                title="Assignments Graded"
                 value={dashboardData.quick_stats.graded_today}
                 icon="check"
                 color="purple"
+                trend="15/20"
+                trendUp={false}
               />
               <QuickStatsCard
-                title="Pending Submissions"
+                title="Pending Reviews"
                 value={dashboardData.quick_stats.pending_submissions}
                 icon="alert"
                 color="red"
+                trend="2 urgent"
+                trendUp={false}
               />
               <QuickStatsCard
                 title="Upcoming Exams"
                 value={dashboardData.quick_stats.upcoming_exams}
                 icon="calendar"
                 color="blue"
+                trend="Next: Tomorrow"
+                trendUp={null}
+              />
+              <QuickStatsCard
+                title="Average Class Score"
+                value="84.5%"
+                icon="award"
+                color="indigo"
+                trend="+2.1%"
+                trendUp={true}
+              />
+              <QuickStatsCard
+                title="Student Engagement"
+                value="92%"
+                icon="trending-up"
+                color="teal"
+                trend="+8%"
+                trendUp={true}
               />
             </div>
 
-            <ClassPerformanceOverview
-              classPerformance={dashboardData.class_performance}
-            />
+            {/* Class Performance Overview with Enhanced Data */}
+            <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-gray-900">Class Performance Overview</h2>
+                <div className="flex items-center space-x-2">
+                  <select className="bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                    <option>All Classes</option>
+                    <option>Grade 8A Mathematics</option>
+                    <option>Grade 9B Science</option>
+                    <option>Grade 7C English</option>
+                  </select>
+                  <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold">
+                    View Details
+                  </button>
+                </div>
+              </div>
 
-            <ClassRosters classRosters={dashboardData.class_rosters} />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Mathematics Class */}
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold text-gray-900">Grade 8A Mathematics</h3>
+                    <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">Excellent</span>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Students:</span>
+                      <span className="font-medium">28/30</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Avg Score:</span>
+                      <span className="font-medium text-green-600">87.3%</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Attendance:</span>
+                      <span className="font-medium">94%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                      <div className="bg-green-500 h-2 rounded-full" style={{width: '87%'}}></div>
+                    </div>
+                  </div>
+                </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-              <RecentActivityFeed activities={dashboardData.recent_activity} />
-              <StudentAlertsPanel alerts={dashboardData.student_alerts} />
+                {/* Science Class */}
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold text-gray-900">Grade 9B Science</h3>
+                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">Good</span>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Students:</span>
+                      <span className="font-medium">25/26</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Avg Score:</span>
+                      <span className="font-medium text-blue-600">82.1%</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Attendance:</span>
+                      <span className="font-medium">89%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                      <div className="bg-blue-500 h-2 rounded-full" style={{width: '82%'}}></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* English Class */}
+                <div className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold text-gray-900">Grade 7C English</h3>
+                    <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium">Needs Attention</span>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Students:</span>
+                      <span className="font-medium">22/24</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Avg Score:</span>
+                      <span className="font-medium text-yellow-600">74.8%</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Attendance:</span>
+                      <span className="font-medium">78%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                      <div className="bg-yellow-500 h-2 rounded-full" style={{width: '75%'}}></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="mt-6">
-              <QuickActionsGrid actions={dashboardData.quick_actions} />
+            {/* Enhanced Class Rosters */}
+            <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-gray-900">Today's Schedule & Attendance</h2>
+                <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold">
+                  Mark Attendance
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {/* Morning Classes */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3">Morning Session</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium text-gray-900">Mathematics - Grade 8A</h4>
+                        <span className="text-sm text-gray-500">8:00 AM - 9:00 AM</span>
+                      </div>
+                      <div className="flex items-center space-x-4 text-sm">
+                        <span className="text-green-600">Present: 27/30</span>
+                        <span className="text-red-600">Absent: 3</span>
+                        <span className="text-yellow-600">Late: 1</span>
+                      </div>
+                    </div>
+
+                    <div className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium text-gray-900">Science - Grade 9B</h4>
+                        <span className="text-sm text-gray-500">9:15 AM - 10:15 AM</span>
+                      </div>
+                      <div className="flex items-center space-x-4 text-sm">
+                        <span className="text-green-600">Present: 24/26</span>
+                        <span className="text-red-600">Absent: 2</span>
+                        <span className="text-yellow-600">Late: 0</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Afternoon Classes */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3">Afternoon Session</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium text-gray-900">English - Grade 7C</h4>
+                        <span className="text-sm text-gray-500">1:00 PM - 2:00 PM</span>
+                      </div>
+                      <div className="flex items-center space-x-4 text-sm">
+                        <span className="text-green-600">Present: 20/24</span>
+                        <span className="text-red-600">Absent: 4</span>
+                        <span className="text-yellow-600">Late: 2</span>
+                      </div>
+                    </div>
+
+                    <div className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium text-gray-900">History - Grade 8A</h4>
+                        <span className="text-sm text-gray-500">2:15 PM - 3:15 PM</span>
+                      </div>
+                      <div className="flex items-center space-x-4 text-sm">
+                        <span className="text-green-600">Present: 26/30</span>
+                        <span className="text-red-600">Absent: 3</span>
+                        <span className="text-yellow-600">Late: 1</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Enhanced Activity Feed and Alerts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              {/* Recent Activity Feed */}
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Activities</h2>
+                <div className="space-y-4">
+                  <div className="flex items-start space-x-3">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-900">Sarah Johnson submitted Mathematics Assignment #3</p>
+                      <p className="text-xs text-gray-500">2 minutes ago</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-900">Grade 8A Mathematics class completed with 94% attendance</p>
+                      <p className="text-xs text-gray-500">15 minutes ago</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-900">Mike Chen requested extension for Science project</p>
+                      <p className="text-xs text-gray-500">1 hour ago</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full mt-2"></div>
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-900">New resource uploaded: "Advanced Calculus Notes"</p>
+                      <p className="text-xs text-gray-500">2 hours ago</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-3">
+                    <div className="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-900">Emma Davis reported sick - absent from English class</p>
+                      <p className="text-xs text-gray-500">3 hours ago</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Student Alerts Panel */}
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Student Alerts</h2>
+                <div className="space-y-4">
+                  <div className="border border-red-200 bg-red-50 rounded-lg p-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                        <span className="text-red-600 text-sm font-bold">!</span>
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="text-sm font-semibold text-red-900">Urgent: Low Performance Alert</h4>
+                        <p className="text-sm text-red-700">John Smith (Grade 7C) has scored below 60% in 3 consecutive assignments</p>
+                        <p className="text-xs text-red-600 mt-1">Requires immediate attention</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border border-yellow-200 bg-yellow-50 rounded-lg p-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                        <span className="text-yellow-600 text-sm font-bold">⚠</span>
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="text-sm font-semibold text-yellow-900">Attendance Concern</h4>
+                        <p className="text-sm text-yellow-700">Lisa Wong has been absent for 3 consecutive days</p>
+                        <p className="text-xs text-yellow-600 mt-1">Follow up required</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border border-blue-200 bg-blue-50 rounded-lg p-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span className="text-blue-600 text-sm font-bold">★</span>
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="text-sm font-semibold text-blue-900">Achievement Unlocked</h4>
+                        <p className="text-sm text-blue-700">Maria Garcia achieved 95%+ in Mathematics for the entire term</p>
+                        <p className="text-xs text-blue-600 mt-1">Consider nomination for honor roll</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Enhanced Quick Actions */}
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-6">Quick Actions</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <button className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors">
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
+                    <FileText className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">Create Assignment</span>
+                </button>
+
+                <button className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-green-50 hover:border-green-300 transition-colors">
+                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-3">
+                    <Calendar className="w-6 h-6 text-green-600" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">Schedule Exam</span>
+                </button>
+
+                <button className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-purple-50 hover:border-purple-300 transition-colors">
+                  <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
+                    <BookOpen className="w-6 h-6 text-purple-600" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">Upload Resource</span>
+                </button>
+
+                <button className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-orange-50 hover:border-orange-300 transition-colors">
+                  <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-3">
+                    <MessageCircle className="w-6 h-6 text-orange-600" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">Send Announcement</span>
+                </button>
+
+                <button className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-indigo-50 hover:border-indigo-300 transition-colors">
+                  <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-3">
+                    <BarChart3 className="w-6 h-6 text-indigo-600" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">View Analytics</span>
+                </button>
+
+                <button className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-pink-50 hover:border-pink-300 transition-colors">
+                  <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center mb-3">
+                    <Award className="w-6 h-6 text-pink-600" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">Grade Submissions</span>
+                </button>
+
+                <button className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-teal-50 hover:border-teal-300 transition-colors">
+                  <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center mb-3">
+                    <Clock className="w-6 h-6 text-teal-600" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">Update Timetable</span>
+                </button>
+
+                <button className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors">
+                  <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-3">
+                    <Settings className="w-6 h-6 text-gray-600" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-900">Manage Classes</span>
+                </button>
+              </div>
             </div>
           </>
         )}
 
-        {activeTab === "messages" && <MessagesComponent />}
-        {activeTab === "courses" && <ClassManagementComponent />}
-        {activeTab === "attendance" && <AttendanceComponent />}
-        {activeTab === "attendancePage" && <AttendancePageComponent />}
-        {activeTab === "assignments" && <AssignmentsComponent />}
-        {activeTab === "timetable" && <TimetableComponent />}
-        {activeTab === "grade" && <GradeComponent />}
-        {activeTab === "resources" && <ResourcesComponent />}
-        {activeTab === "analytics" && <AnalyticsComponent />}
-        {activeTab === "transcripts" && <TranscriptsComponent />}
-        {activeTab === "profile" && <ProfileComponent />}
+        {activeTab === "messages" && <Messages />}
+        {activeTab === "courses" && <ClassManagement />}
+        {activeTab === "attendance" && <Attendance />}
+        {activeTab === "attendancePage" && <AttendancePage />}
+        {activeTab === "assignments" && <Assignments />}
+        {activeTab === "timetable" && <Timetable />}
+        {activeTab === "grade" && <Grade />}
+        {activeTab === "resources" && <Resources />}
+        {activeTab === "analytics" && <LearningAnalytics />}
+        {activeTab === "transcripts" && <TranscriptViewer />}
+
       </div>
     </div>
   );
@@ -253,101 +690,6 @@ export default function TeacherDashboard() {
 }
 
 
-function ClassManagementComponent() {
-  return (
-    <div className="p-4 bg-white rounded shadow">
-      <ClassManagement />
-    </div>
-  );
-}
 
 
 
-
-
-
-
-// Placeholder components for other tabs
-function MessagesComponent() {
-  return (
-    <div className="p-4 bg-white rounded shadow">
-      <Messages />
-    </div>
-  );
-}
-
-function AttendanceComponent() {
-  return (
-    <div className="p-4 bg-white rounded shadow" >
-      <Attendance />
-    </div>
-  );
-}
-
-
-function AttendancePageComponent() {
-  return (
-    <div className="p-4 bg-white rounded shadow">
-      <AttendancePage />
-    </div>
-  );
-}
-
-function ResourcesComponent() {
-  return (
-    <div className="p-4 bg-white rounded shadow">
-      <Resources />
-    </div>
-  );
-}
-
-
-
-
-function AssignmentsComponent() {
-  return (
-    <div className="p-4 bg-white rounded shadow">
-      <Assignments />
-    </div>
-  );
-}
-
-function TimetableComponent() {
-  return (
-    <div className="p-4 bg-white rounded shadow">
-      <Timetable />
-    </div>
-  );
-}
-
-function GradeComponent() {
-  return (
-    <div className="p-4 bg-white rounded shadow">
-      <Grade />
-    </div>
-  );
-}
-
-function AnalyticsComponent() {
-  return (
-    <div className="p-4 bg-white rounded shadow">
-      <LearningAnalytics />
-    </div>
-  );
-}
-
-function TranscriptsComponent() {
-  return (
-    <div className="p-4 bg-white rounded shadow">
-      <TranscriptViewer />
-    </div>
-  );
-}
-
-function ProfileComponent() {
-  return (
-    <div className="p-4 bg-white rounded shadow">
-      <Profile />
-    </div>
-  );
-}
