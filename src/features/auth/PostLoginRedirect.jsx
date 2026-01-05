@@ -16,7 +16,7 @@ import { http } from "../../api/baseClient";
  * - teacher → /teacher-dashboard
  * - student → /student-dashboard
  * - parent → /parent-dashboard
- * - individual_learner → /individual-learner-dashboard
+ * - individual_learner → /individual-dashboard
  * Fallback → /home
  */
 export default function PostLoginRedirect() {
@@ -120,8 +120,8 @@ export default function PostLoginRedirect() {
         return;
       }
       if (has("individual_learner")) {
-        console.log("PostLoginRedirect: Individual learner role detected, redirecting to /individual-learner-dashboard");
-        navigate("/individual-learner-dashboard", { replace: true });
+        console.log("PostLoginRedirect: Individual learner role detected, redirecting to /individual-dashboard");
+        navigate("/individual-dashboard", { replace: true });
         return;
       }
 

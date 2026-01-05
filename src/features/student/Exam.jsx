@@ -8,7 +8,7 @@ import {
   AlertCircle,
   ArrowRight,
 } from "lucide-react";
-import { getStudentExams } from "../../api/dashboardApi";
+import { getStudentExams } from "@/api/dashboardApi";
 
 // Sample exam data with realistic educational content
 const SAMPLE_EXAMS = [

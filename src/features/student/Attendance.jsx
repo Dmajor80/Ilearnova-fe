@@ -10,7 +10,7 @@ import {
   Legend,
 } from "recharts";
 import { Calendar, ChevronDown, Download, Filter } from "lucide-react";
-import { getStudentAttendance } from "../../api/dashboardApi";
+import { getStudentAttendance } from "@/api/dashboardApi";
 
 // WeeklyAttendanceChart Component
 function WeeklyAttendanceChart() {

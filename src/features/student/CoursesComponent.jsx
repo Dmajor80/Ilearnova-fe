@@ -21,7 +21,7 @@ import {
   Users,
   Star,
 } from "lucide-react";
-import { getStudentCourses } from "../../api/dashboardApi";
+import { getStudentCourses } from "@/api/dashboardApi";
 
 // Sample course data with realistic educational content
 const SAMPLE_COURSES = [

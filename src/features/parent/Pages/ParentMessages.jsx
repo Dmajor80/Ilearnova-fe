@@ -37,9 +37,11 @@ const ParentMessages = () => {
     const fetchAnnouncements = async () => {
       try {
         const data = await getAnnouncements();
-        setAnnouncements(data);
+        const announcementsData = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+        setAnnouncements(announcementsData);
       } catch (error) {
         console.error('Error fetching announcements:', error);
+        setAnnouncements([]);
       } finally {
         setAnnouncementsLoading(false);
       }
@@ -47,10 +49,20 @@ const ParentMessages = () => {
 
     const fetchMessages = async () => {
       try {
-        const data = await getMessages();
-        setChatMessages(data);
+        // Get current user ID from localStorage or context
+        const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
+        const userId = userData.id || userData.user_id;
+        if (userId) {
+          const data = await getMessages(userId);
+          const messagesData = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+          setChatMessages(messagesData);
+        } else {
+          console.warn('No user ID found for fetching messages');
+          setChatMessages([]);
+        }
       } catch (error) {
         console.error('Error fetching messages:', error);
+        setChatMessages([]);
       } finally {
         setMessagesLoading(false);
       }
@@ -59,9 +71,11 @@ const ParentMessages = () => {
     const fetchConversations = async () => {
       try {
         const data = await getConversations();
-        setConversations(data);
+        const conversationsData = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+        setConversations(conversationsData);
       } catch (error) {
         console.error('Error fetching conversations:', error);
+        setConversations([]);
       }
     };
 
@@ -83,21 +97,31 @@ const ParentMessages = () => {
   const sendMessage = async () => {
     if (chatMessage.trim() || selectedFile) {
       try {
+        // Get current user ID from localStorage or context
+        const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
+        const userId = userData.id || userData.user_id;
+
+        if (!userId) {
+          console.error('No user ID found for sending message');
+          return;
+        }
+
         const messageData = {
           message: chatMessage,
           file: selectedFile,
           conversationId: currentConversation
         };
 
-        await sendMessageApi(messageData);
+        await sendMessageApi(userId, messageData);
 
         // Clear input
         setChatMessage('');
         setSelectedFile(null);
 
         // Refresh messages
-        const updatedMessages = await getMessages();
-        setChatMessages(updatedMessages);
+        const updatedMessages = await getMessages(userId);
+        const messagesData = Array.isArray(updatedMessages) ? updatedMessages : Array.isArray(updatedMessages?.data) ? updatedMessages.data : [];
+        setChatMessages(messagesData);
       } catch (error) {
         console.error('Error sending message:', error);
         // Fallback to local state if API fails
@@ -201,27 +225,37 @@ const ParentMessages = () => {
         <div className="xl:col-span-2 space-y-6">
           {/* Announcements Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {announcements.map((announcement, index) => (
-              <div key={index} className="bg-white rounded-xl shadow-md p-6 hover:shadow-md transition-shadow">
-                <div className="flex items-center justify-between mb-4">
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${announcement.color}`}>
-                    {announcement.type}
-                  </span>
-                  <div className="text-xs text-gray-400">
-                    {announcement.date.split(' ')[2]}
-                  </div>
-                </div>
-                <h3 className="font-bold text-gray-900 mb-3 text-lg leading-tight">{announcement.title}</h3>
-                <p className="text-gray-600 text-sm mb-4 leading-relaxed">{announcement.description}</p>
-                <p className="text-xs text-gray-500 mb-6">{announcement.date}</p>
-                <button
-                  onClick={() => handleAnnouncementAction(index)}
-                  className={`w-full ${announcement.buttonColor} text-white px-6 py-3 rounded-lg text-sm font-semibold transition-colors transform hover:scale-105 active:scale-95`}
-                >
-                  {announcement.buttonText}
-                </button>
+            {announcementsLoading ? (
+              <div className="flex justify-center items-center p-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
               </div>
-            ))}
+            ) : announcements.length > 0 ? (
+              announcements.map((announcement, index) => (
+                <div key={index} className="bg-white rounded-xl shadow-md p-6 hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${announcement.color || 'bg-blue-100 text-blue-800'}`}>
+                      {announcement.type || 'General'}
+                    </span>
+                    <div className="text-xs text-gray-400">
+                      {announcement.date ? announcement.date.split(' ')[2] : 'N/A'}
+                    </div>
+                  </div>
+                  <h3 className="font-bold text-gray-900 mb-3 text-lg leading-tight">{announcement.title || 'No Title'}</h3>
+                  <p className="text-gray-600 text-sm mb-4 leading-relaxed">{announcement.description || 'No description available'}</p>
+                  <p className="text-xs text-gray-500 mb-6">{announcement.date || 'Date not available'}</p>
+                  <button
+                    onClick={() => handleAnnouncementAction(index)}
+                    className={`w-full ${announcement.buttonColor || 'bg-blue-500 hover:bg-blue-600'} text-white px-6 py-3 rounded-lg text-sm font-semibold transition-colors transform hover:scale-105 active:scale-95`}
+                  >
+                    {announcement.buttonText || 'View Details'}
+                  </button>
+                </div>
+              ))
+            ) : (
+              <div className="text-center p-8 text-gray-500">
+                No announcements available at this time.
+              </div>
+            )}
           </div>
 
           {/* Enhanced Chat Section */}
@@ -279,27 +313,37 @@ const ParentMessages = () => {
               </div>
 
               <div className="space-y-4 max-h-80 overflow-y-auto mb-6 scrollbar-thin scrollbar-thumb-gray-300">
-                {chatMessages.map((chat) => (
-                  <div key={chat.id} className={`flex items-start space-x-3 ${!chat.isTeacher ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                    <div className={`w-10 h-10 ${chat.avatar} rounded-full flex-shrink-0 flex items-center justify-center shadow-sm`}>
-                      <span className="text-white font-semibold text-sm">
-                        {chat.isTeacher ? 'T' : 'Y'}
-                      </span>
-                    </div>
-                    <div className={`flex-1 max-w-xs ${!chat.isTeacher ? 'text-right' : ''}`}>
-                      <div className={`inline-block p-3 rounded-2xl ${chat.isTeacher
-                          ? 'bg-gray-100 text-gray-900'
-                          : 'bg-blue-500 text-white'
-                        }`}>
-                        <p className="text-sm leading-relaxed">{chat.message}</p>
-                      </div>
-                      <div className={`flex items-center mt-1 space-x-2 text-xs text-gray-500 ${!chat.isTeacher ? 'justify-end' : ''}`}>
-                        <span>{chat.time}</span>
-                        {chat.read && <div className="w-2 h-2 bg-blue-500 rounded-full"></div>}
-                      </div>
-                    </div>
+                {messagesLoading ? (
+                  <div className="flex justify-center items-center p-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
                   </div>
-                ))}
+                ) : chatMessages.length > 0 ? (
+                  chatMessages.map((chat) => (
+                    <div key={chat.id || Math.random()} className={`flex items-start space-x-3 ${!chat.isTeacher ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                      <div className={`w-10 h-10 ${chat.avatar || 'bg-blue-500'} rounded-full flex-shrink-0 flex items-center justify-center shadow-sm`}>
+                        <span className="text-white font-semibold text-sm">
+                          {chat.isTeacher ? 'T' : 'Y'}
+                        </span>
+                      </div>
+                      <div className={`flex-1 max-w-xs ${!chat.isTeacher ? 'text-right' : ''}`}>
+                        <div className={`inline-block p-3 rounded-2xl ${chat.isTeacher
+                            ? 'bg-gray-100 text-gray-900'
+                            : 'bg-blue-500 text-white'
+                          }`}>
+                          <p className="text-sm leading-relaxed">{chat.message || 'No message content'}</p>
+                        </div>
+                        <div className={`flex items-center mt-1 space-x-2 text-xs text-gray-500 ${!chat.isTeacher ? 'justify-end' : ''}`}>
+                          <span>{chat.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                          {chat.read && <div className="w-2 h-2 bg-blue-500 rounded-full"></div>}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center p-8 text-gray-500">
+                    No messages yet. Start a conversation!
+                  </div>
+                )}
                 {isTyping && (
                   <div className="flex items-start space-x-3">
                     <div className="w-10 h-10 bg-blue-500 rounded-full flex-shrink-0 flex items-center justify-center shadow-sm">

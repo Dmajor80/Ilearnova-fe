@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Mail, ArrowLeft, AlertCircle, Check, X, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { http } from "../../api/baseClient";
+import { http } from "@/api/baseClient";
 
 const InputField = React.memo(function InputField({
   label,
