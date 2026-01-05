@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { getTokens, isJwtExpired, refreshAccessToken } from "../../api/auth";
+import { getTokens, isJwtExpired, refreshAccessToken } from "@/api/auth";
 
 export default function RedirectIfAuthenticated({ children }) {
   const location = useLocation();

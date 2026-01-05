@@ -1,6 +1,6 @@
 import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { getTokens } from "../../api/auth";
+import { getTokens } from "@/api/auth";
 
 /**
  * RoleGate
