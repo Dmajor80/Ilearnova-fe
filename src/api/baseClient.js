@@ -22,19 +22,43 @@ export function apiUrl(path) {
  * - Parses JSON when available, falls back to text
  * - Throws Error on non-2xx with { status, data } attached
  */
-async function request(method, path, { body, headers, signal, auth = true } = {}) {
-  const url = apiUrl(path);
+async function request(method, path, {
+  body,
+  params,
+  headers,
+  signal,
+  auth = true,
+  responseType
+} = {}) {
+  const requestUrl = new URL(apiUrl(path), window.location.origin);
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === "") return;
+
+    const values = Array.isArray(value) ? value : [value];
+    values.forEach((item) => {
+      if (item !== undefined && item !== null && item !== "") {
+        requestUrl.searchParams.append(key, String(item));
+      }
+    });
+  });
+
+  const url = requestUrl.toString();
+  const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
   const baseHeaders = {
     Accept: "application/json",
-    ...(body != null ? { "Content-Type": "application/json" } : {}),
+    ...(body != null && !isFormData ? { "Content-Type": "application/json" } : {}),
     ...(headers || {}),
   };
+
+  if (isFormData) {
+    delete baseHeaders["Content-Type"];
+  }
 
   const init = {
     method,
     headers: baseHeaders,
     ...(body != null
-      ? { body: typeof body === "string" ? body : JSON.stringify(body) }
+      ? { body: isFormData || typeof body === "string" ? body : JSON.stringify(body) }
       : {}),
     ...(signal ? { signal } : {}),
   };
@@ -44,20 +68,27 @@ async function request(method, path, { body, headers, signal, auth = true } = {}
   const contentType = res.headers.get("content-type") || "";
   const isJson = contentType.includes("application/json");
 
-  try {
-    const preview = isJson ? await res.clone().json() : await res.clone().text();
-    if (isJson) {
-      console.log("url:", url);
-      console.log("response:", preview);
-    } else {
-      console.log("response:", preview);
+  if (responseType !== "blob") {
+    try {
+      const preview = isJson ? await res.clone().json() : await res.clone().text();
+      if (isJson) {
+        console.log("url:", url);
+        console.log("response:", preview);
+      } else {
+        console.log("response:", preview);
+      }
+    } catch (error) {
+      console.warn("Unable to preview API response:", error);
     }
-  } catch (e) {
   }
 
   let data = null;
   try {
-    data = isJson ? await res.json() : await res.text();
+    data = responseType === "blob" && res.ok
+      ? await res.blob()
+      : isJson
+        ? await res.json()
+        : await res.text();
   } catch {
     data = null;
   }
@@ -76,10 +107,28 @@ async function request(method, path, { body, headers, signal, auth = true } = {}
   return data;
 }
 
+const REQUEST_OPTION_KEYS = ["auth", "body", "headers", "params", "responseType", "signal"];
+
+function getBodyOptions(bodyOrOptions, options) {
+  if (options !== undefined) {
+    return { ...options, body: bodyOrOptions };
+  }
+
+  if (
+    bodyOrOptions &&
+    typeof bodyOrOptions === "object" &&
+    REQUEST_OPTION_KEYS.some((key) => Object.prototype.hasOwnProperty.call(bodyOrOptions, key))
+  ) {
+    return bodyOrOptions;
+  }
+
+  return bodyOrOptions === undefined ? {} : { body: bodyOrOptions };
+}
+
 export const http = {
   get: (path, opts) => request("GET", path, opts),
-  post: (path, opts) => request("POST", path, opts),
-  put: (path, opts) => request("PUT", path, opts),
-  patch: (path, opts) => request("PATCH", path, opts),
+  post: (path, bodyOrOptions, opts) => request("POST", path, getBodyOptions(bodyOrOptions, opts)),
+  put: (path, bodyOrOptions, opts) => request("PUT", path, getBodyOptions(bodyOrOptions, opts)),
+  patch: (path, bodyOrOptions, opts) => request("PATCH", path, getBodyOptions(bodyOrOptions, opts)),
   del: (path, opts) => request("DELETE", path, opts),
 };

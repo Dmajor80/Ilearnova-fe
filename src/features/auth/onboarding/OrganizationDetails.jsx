@@ -191,10 +191,10 @@ export default function OrganizationDetails() {
         phone_number: form.phone_number.trim(),
       };
 
-      await http.post("/api/user-type/", {
+      const response = await http.post("/api/user-type/", {
         body,
       });
-
+      console.log(response)
       // Persist details
       try {
         sessionStorage.setItem("selected_user_type", "organization");

@@ -1,55 +1,62 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Mail, Lock, Check, BookOpen, GraduationCap } from "lucide-react";
 import InputField from "@/components/ui/InputField";
 import NotificationBar from "@/components/ui/NotificationBar";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import useLogin from "@/hooks/useLogin";
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation()
+  const { info } = location.state || {}
+
+  // To make the page always load from the top position
+  useEffect(()=>{
+    window.scrollTo(0,0)
+  },[])
 
   // Role-based redirection logic
-  const getRoleBasedRedirect = (user) => {
-    if (!user) return "/home";
+  // const getRoleBasedRedirect = (user) => {
+  //   if (!user) return "/home";
+    
+  //   // Support multiple possible backend flags for first-time login
+  //   // const isFirstTime = user.first_time_user === true;
+  //   // if (isFirstTime) {
+  //   //   return "/select-user-type";
+  //   // }
 
-    // Support multiple possible backend flags for first-time login
-    const isFirstTime = user.first_time_user === true;
-    if (isFirstTime) {
-      return "/select-user-type";
-    }
+  //   // Normalize roles: allow either user.role (string) or user.roles (array)
+  //   let roles = [];
+  //   if (Array.isArray(user.roles)) {
+  //     roles = user.roles.map((r) => String(r.role?.code || r || "").toLowerCase());
+  //   } else if (typeof user.role === "string") {
+  //     roles = [String(user.role).toLowerCase()];
+  //   }
 
-    // Normalize roles: allow either user.role (string) or user.roles (array)
-    let roles = [];
-    if (Array.isArray(user.roles)) {
-      roles = user.roles.map((r) => String(r.role?.code || r || "").toLowerCase());
-    } else if (typeof user.role === "string") {
-      roles = [String(user.role).toLowerCase()];
-    }
+  //   // Role precedence: super_admin > org_admin > teacher > student > parent > individual_learner
+  //   const has = (r) => roles.includes(r);
+  //   if (has("super_admin")) {
+  //     return "/admin-dashboard/dashboard";
+  //   }
+  //   if (has("org_admin") || has("admin")) {
+  //     return "/dashboard";
+  //   }
+  //   if (has("teacher")) {
+  //     return "/teacher-dashboard";
+  //   }
+  //   if (has("student")) {
+  //     return "/student-dashboard";
+  //   }
+  //   if (has("parent")) {
+  //     return "/parent-dashboard";
+  //   }
+  //   if (has("individual_learner")) {
+  //     return "/individual-learner-dashboard";
+  //   }
 
-    // Role precedence: super_admin > org_admin > teacher > student > parent > individual_learner
-    const has = (r) => roles.includes(r);
-    if (has("super_admin")) {
-      return "/admin-dashboard/dashboard";
-    }
-    if (has("org_admin") || has("admin")) {
-      return "/dashboard";
-    }
-    if (has("teacher")) {
-      return "/teacher-dashboard";
-    }
-    if (has("student")) {
-      return "/student-dashboard";
-    }
-    if (has("parent")) {
-      return "/parent-dashboard";
-    }
-    if (has("individual_learner")) {
-      return "/individual-learner-dashboard";
-    }
-
-    // Default fallback
-    return "/home";
-  };
+  //   // Default fallback
+  //   return "/home";
+  // };
 
   console.log("Login: Component rendered, useLogin hook initialized");
 
@@ -123,7 +130,7 @@ export default function Login() {
                   <GraduationCap className="w-8 h-8 text-white" />
                 </div>
                 <h1 className={`text-4xl sm:text-5xl font-bold ${darkMode ? "text-white" : "bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent"}`}>
-                  Welcome Back
+                  { info === "first_time_user"? "Welcome" : "Welcome Back"}
                 </h1>
               </div>
               <p
@@ -131,7 +138,7 @@ export default function Login() {
                   darkMode ? "text-gray-300" : "text-gray-600"
                 }`}
               >
-                Sign in to continue your learning journey
+                { info === "first_time_user" ? "Sign in to access your workspace" : "Sign in to continue your learning journey" }
               </p>
             </div>
 

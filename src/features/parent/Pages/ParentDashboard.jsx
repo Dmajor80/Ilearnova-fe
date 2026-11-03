@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Users } from "lucide-react";
-import Profile from "../../auth/Profile";
-import QuickStatsCard from "@/components/dashboard/QuickStatsCard";
 import RecentActivityFeed from "@/components/dashboard/RecentActivityFeed";
 import StudentAlertsPanel from "@/components/dashboard/StudentAlertsPanel";
 import QuickActionsGrid from "@/components/dashboard/QuickActionsGrid";
-import { getParentDashboard, getEnhancedParentDashboard } from "@/api/dashboardApi";
+import { useParentChildProgress, useParentChildren } from "@/hooks/parent";
 import ParentAttendance from "./ParentAttendance";
 import ParentMessages from "./ParentMessages";
 import ParentPayment from "./ParentPayment";
@@ -16,61 +14,42 @@ import ParentTranscript from "./ParentTranscript";
 import ParentSidebar from "../components/ParentSidebar";
 import ParentHeader from "../components/ParentHeader";
 import Announcement from "./Announcement";
+import ParentChildrenPanel from "../components/ParentChildrenPanel";
+import { getParentChildName } from "../components/parentDisplayUtils";
 
-// Main application component
 export default function ParentDashboard() {
   const location = useLocation();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [dashboardData, setDashboardData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [parentId, setParentId] = useState(null);
-
-  useEffect(() => {
-    // Get parent ID from user data
-    const getParentId = () => {
-      try {
-        const raw = localStorage.getItem("user_data") ||
-                    sessionStorage.getItem("user_data");
-        const user = raw ? JSON.parse(raw) : null;
-        return user?.id;
-      } catch {
-        return null;
-      }
-    };
-
-    const id = getParentId();
-    setParentId(id);
-
-    async function fetchDashboard() {
-      if (!id) return;
-
-      setLoading(true);
-      try {
-        const response = await getEnhancedParentDashboard(id);
-        setDashboardData(response.data);
-      } catch (error) {
-        console.error("Failed to fetch enhanced parent dashboard:", error);
-        // Fallback to basic dashboard
-        try {
-          const basicResponse = await getParentDashboard(id);
-          setDashboardData(basicResponse.data);
-        } catch (basicError) {
-          console.error("Failed to fetch basic parent dashboard:", basicError);
-        }
-      } finally {
-        setLoading(false);
-      }
+  const [selectedChildId, setSelectedChildId] = useState(null);
+  const { children, loading: childrenLoading, error: childrenError, refreshData } =
+    useParentChildren();
+  const selectedChild = children.find((child) => String(child.id) === String(selectedChildId));
+  const {
+    progress,
+    loading: progressLoading,
+    error: progressError,
+    refreshData: refreshProgress
+  } = useParentChildProgress(selectedChildId);
+  const dashboardData = useMemo(() => {
+    try {
+      const raw = localStorage.getItem("user_data") || sessionStorage.getItem("user_data");
+      const user = raw ? JSON.parse(raw) : null;
+      return { user };
+    } catch {
+      return null;
     }
-
-    fetchDashboard();
   }, []);
 
-  // Check if navigated from attendance page with activeTab state
   useEffect(() => {
-    if (location.state?.activeTab) {
-      setActiveTab(location.state.activeTab);
+    if (children.length
+      && !children.some((child) => String(child.id) === String(selectedChildId))) {
+      setSelectedChildId(children[0].id);
     }
+  }, [children, selectedChildId]);
+
+  useEffect(() => {
+    if (location.state?.activeTab) setActiveTab(location.state.activeTab);
   }, [location]);
 
   return (
@@ -81,148 +60,156 @@ export default function ParentDashboard() {
         isMobileMenuOpen={isMobileMenuOpen}
         setIsMobileMenuOpen={setIsMobileMenuOpen}
       />
-
       <div className="flex-1 md:ml-64">
         <ParentHeader
           activeTab={activeTab}
           setIsMobileMenuOpen={setIsMobileMenuOpen}
           dashboardData={dashboardData}
         />
-
-        {/* Main Content Area */}
-        <main className="flex-1 m-4 md:m-6 mt-0 p-6 md:p-8">
-          {activeTab === "dashboard" && (
+        <main className="m-4 mt-0 flex-1 p-6 md:m-6 md:mt-0 md:p-8">
+          {(activeTab === "dashboard" || activeTab === "children") && (
             <div className="space-y-6">
-              {/* Welcome Section */}
-              <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-xl shadow-lg p-8">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-3xl font-bold mb-2">
-                      Welcome back, {dashboardData?.user?.first_name || 'Parent'}!
-                    </h2>
-                    <p className="text-blue-100 text-lg">
-                      Here's an overview of your children's academic progress and activities.
-                    </p>
-                  </div>
-                  <div className="hidden md:block">
-                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
-                      <Users className="w-8 h-8 text-white" />
+              {activeTab === "dashboard" && (
+                <>
+                  <div className="rounded-xl bg-gradient-to-r from-blue-600 to-blue-800 p-8 text-white shadow-lg">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h2 className="mb-2 text-3xl font-bold">
+                          Welcome back, {dashboardData?.user?.first_name || "Parent"}!
+                        </h2>
+                        <p className="text-lg text-blue-100">
+                          Here&apos;s an overview of your children&apos;s academic progress and activities.
+                        </p>
+                      </div>
+                      <div className="hidden h-16 w-16 items-center justify-center rounded-full bg-white/20 md:flex">
+                        <Users className="h-8 w-8 text-white" />
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
 
-              {/* Dashboard Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Left Column - Stats and Activity */}
-                <div className="lg:col-span-2 space-y-8">
-                  <div className="bg-white rounded-xl shadow-lg p-6">
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">Performance Overview</h3>
-                    <QuickStatsCard />
+                  <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+                    <div className="space-y-8 lg:col-span-2">
+                      <section className="rounded-xl bg-white p-6 shadow-lg">
+                        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                          <div>
+                            <h3 className="text-xl font-semibold text-gray-800">Progress overview</h3>
+                            <p className="text-sm text-gray-500">
+                              {selectedChild ? getParentChildName(selectedChild) : "Select a linked child"}
+                            </p>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {children.map((child) => (
+                              <button
+                                key={child.id}
+                                type="button"
+                                onClick={() => setSelectedChildId(child.id)}
+                                className={`rounded-lg px-3 py-2 text-sm ${
+                                  String(child.id) === String(selectedChildId)
+                                    ? "bg-blue-700 text-white"
+                                    : "bg-slate-100 text-slate-700"
+                                }`}
+                              >
+                                {getParentChildName(child)}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        {progressLoading && <p className="py-5 text-slate-600">Loading progress…</p>}
+                        {!progressLoading && progressError && (
+                          <div className="rounded-lg bg-red-50 p-4 text-sm text-red-700" role="alert">
+                            Progress is currently unavailable.
+                            <button
+                              className="ml-2 underline"
+                              type="button"
+                              onClick={refreshProgress}
+                            >
+                              Try again
+                            </button>
+                          </div>
+                        )}
+                        {!progressLoading && !progressError && progress && (
+                          <ProgressSummary progress={progress} />
+                        )}
+                        {!progressLoading && !progressError && !progress && (
+                          <p className="py-5 text-slate-600">
+                            {selectedChild
+                              ? "No progress summary is available yet."
+                              : "Link a child to view progress."}
+                          </p>
+                        )}
+                      </section>
+                      <section className="rounded-xl bg-white p-6 shadow-lg">
+                        <h3 className="mb-4 text-xl font-semibold text-gray-800">Recent Activity</h3>
+                        <RecentActivityFeed />
+                      </section>
+                    </div>
+                    <div className="space-y-8">
+                      <section className="rounded-xl bg-white p-6 shadow-lg">
+                        <h3 className="mb-4 text-xl font-semibold text-gray-800">
+                          Alerts &amp; Notifications
+                        </h3>
+                        <StudentAlertsPanel />
+                      </section>
+                      <section className="rounded-xl bg-white p-6 shadow-lg">
+                        <h3 className="mb-4 text-xl font-semibold text-gray-800">Quick Actions</h3>
+                        <QuickActionsGrid />
+                      </section>
+                    </div>
                   </div>
-                  <div className="bg-white rounded-xl shadow-lg p-6">
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">Recent Activity</h3>
-                    <RecentActivityFeed />
-                  </div>
-                </div>
-
-                {/* Right Column - Alerts and Actions */}
-                <div className="space-y-8">
-                  <div className="bg-white rounded-xl shadow-lg p-6">
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">Alerts & Notifications</h3>
-                    <StudentAlertsPanel />
-                  </div>
-                  <div className="bg-white rounded-xl shadow-lg p-6">
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">Quick Actions</h3>
-                    <QuickActionsGrid />
-                  </div>
-                </div>
-              </div>
+                </>
+              )}
+              {activeTab === "children" && (
+                <ParentChildrenPanel
+                  children={children}
+                  loading={childrenLoading}
+                  error={childrenError}
+                  refreshData={refreshData}
+                  selectedChildId={selectedChildId}
+                  onSelectChild={(child) => {
+                    setSelectedChildId(child.id);
+                    setActiveTab("dashboard");
+                  }}
+                />
+              )}
             </div>
           )}
           {activeTab === "announcement" && <Announcement />}
-          {activeTab === "attendance" && <ParentAttendance />}
-          {activeTab === "grades" && <ParentResult />}
+          {activeTab === "attendance" && <ParentAttendance isStandalone={false} />}
+          {activeTab === "grades" && <ParentResult isStandalone={false} />}
           {activeTab === "messages" && <ParentMessages />}
           {activeTab === "fees" && <ParentPayment />}
           {activeTab === "timetable" && <ParentTimetable />}
           {activeTab === "reports" && <ParentTranscript />}
         </main>
-
       </div>
     </div>
   );
 }
 
-// Children component with list of children
-function ChildrenComponent() {
-  const children = [
-    {
-      id: 1,
-      name: "Priscilla Daniel",
-      age: 10,
-      classLevel: "Primary 5",
-      institution: "Primary",
-      school: "Sunshine Primary School"
-    },
-    {
-      id: 2,
-      name: "John Doe",
-      age: 15,
-      classLevel: "SS2",
-      institution: "Secondary",
-      school: "Bright Future Secondary School"
-    },
-    {
-      id: 3,
-      name: "Mary Johnson",
-      age: 19,
-      classLevel: "ND2",
-      institution: "Polytechnic",
-      school: "Federal Polytechnic, Lagos"
-    },
-    {
-      id: 4,
-      name: "Samuel Lee",
-      age: 22,
-      classLevel: "300 Level",
-      institution: "University",
-      school: "University of Ibadan"
-    }
-  ];
+function ProgressSummary({ progress }) {
+  const metrics = Object.entries(progress).filter(([key, value]) =>
+    !/^(id|child|student)$/i.test(key)
+    && ["string", "number", "boolean"].includes(typeof value)
+  );
+
+  if (!metrics.length) {
+    return (
+      <pre className="overflow-auto rounded-lg bg-slate-50 p-4 text-sm">
+        {JSON.stringify(progress, null, 2)}
+      </pre>
+    );
+  }
 
   return (
-    <div className="bg-white rounded-xl shadow p-6">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">My Children</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {children.map((child) => (
-          <div key={child.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-            <div className="flex items-center space-x-4 mb-4">
-              <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-lg">{child.name.charAt(0)}</span>
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg text-gray-800">{child.name}</h3>
-                <p className="text-gray-600">{child.classLevel}</p>
-              </div>
-            </div>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Age:</span>
-                <span className="font-medium">{child.age} years</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Institution:</span>
-                <span className="font-medium">{child.institution}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">School:</span>
-                <span className="font-medium">{child.school}</span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+    <dl className="grid gap-3 sm:grid-cols-2">
+      {metrics.map(([key, value]) => (
+        <div key={key} className="rounded-lg bg-slate-50 p-4">
+          <dt className="text-sm capitalize text-slate-500">{key.replaceAll("_", " ")}</dt>
+          <dd className="mt-1 text-lg font-semibold text-slate-800">
+            {typeof value === "boolean" ? (value ? "Yes" : "No") : value}
+          </dd>
+        </div>
+      ))}
+    </dl>
   );
 }

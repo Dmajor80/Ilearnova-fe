@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import { logout } from "@/api/authApi";
 import { clearAuth } from "@/api/auth";
+import useOrganizationAlerts from "@/hooks/organization/useNotificationsData";
 import {
   Bell,
   ChevronDown,
@@ -27,6 +28,8 @@ const OrganizationDashboard = () => {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const alertsApi = useOrganizationAlerts();
+  const { totalNotifications, loading: alertsLoading } = alertsApi;
 
   const handleLogout = async () => {
     try {
@@ -177,9 +180,13 @@ const OrganizationDashboard = () => {
               </div>
             </div>
             <div className="flex items-center space-x-3 md:space-x-4">
-              <button className="p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 border border-slate-200 group relative">
+              <button
+                onClick={() => navigate("/organization-dashboard/alerts")}
+                aria-label={alertsLoading ? "Open alerts" : `Open alerts (${totalNotifications} notifications)`}
+                className="p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 border border-slate-200 group relative"
+              >
                 <Bell className="w-5 h-5 text-slate-600 group-hover:text-blue-600 transition-colors" />
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-white"></span>
+                {totalNotifications > 0 && <span className="absolute -top-1 -right-1 min-w-5 rounded-full border border-white bg-red-500 px-1 text-center text-xs text-white">{totalNotifications > 99 ? "99+" : totalNotifications}</span>}
               </button>
               <button className="p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 border border-slate-200 group">
                 <Settings className="w-5 h-5 text-slate-600 group-hover:text-blue-600 transition-colors" />
@@ -193,11 +200,9 @@ const OrganizationDashboard = () => {
                   aria-haspopup="true"
                   aria-expanded={isProfileDropdownOpen}
                 >
-                  <img
-                    src="/default-profile.png"
-                    alt="Profile"
-                    className="w-10 h-10 rounded-full object-cover border-2 border-blue-500 shadow-md"
-                  />
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-blue-500 bg-blue-50 text-blue-600 shadow-md" aria-label="Profile">
+                    <User className="h-5 w-5" />
+                  </span>
                   <ChevronDown className="w-4 h-4 text-slate-600" />
                 </button>
                 {/* Dropdown menu */}
@@ -232,7 +237,7 @@ const OrganizationDashboard = () => {
         </div>
 
         <main className="flex-1 m-4 md:m-6 mt-0 p-6 md:p-8">
-          <Outlet />
+          <Outlet context={{ alertsApi }} />
         </main>
       </div>
     </div>

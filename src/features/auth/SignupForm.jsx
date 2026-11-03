@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
-import { Mail, User, Lock, CheckCircle, Building, Users, GraduationCap, UserCheck, Heart, BookOpen } from "lucide-react";
+import { Mail, User, Lock, CheckCircle, Building, Users, GraduationCap, UserCheck, Heart, BookOpen, Calendar } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import useRegister from "@/hooks/useRegister";
 import InputField from "@/components/ui/InputField";
@@ -49,12 +49,17 @@ export default function SignupForm() {
     onSuccess: (response) => {
       setUserEmail(response.user?.email || formData.email);
       setShowEmailVerification(true);
-
+      console.log(response)
       // If email verification is not required, redirect to post-login immediately
-      if (!response.email_verification_required) {
+      if (!response.user.is_verified) {
         // Delay a bit to show success notification
         setTimeout(() => {
-          window.location.href = "/post-login";
+          // window.location.href = "/post-login";
+          navigate("/login", {
+            state :{
+              info:"first_time_user"
+            }
+          })
         }, 1000);
       }
     },
@@ -69,7 +74,7 @@ export default function SignupForm() {
       setOrganizationsLoading(true);
       try {
         const response = await getOrganizations();
-        setOrganizations(response.data || []);
+        setOrganizations(response.results || []);
       } catch (error) {
         console.error("Failed to fetch organizations:", error);
       } finally {
@@ -78,7 +83,7 @@ export default function SignupForm() {
     };
 
     fetchOrganizations();
-  }, []);
+  }, [formData.role]);
 
   if (showEmailVerification) {
     return (
@@ -308,6 +313,33 @@ export default function SignupForm() {
                   formData={formData}
                   handleChange={handleInputChange}
                 />
+                
+                <div>
+                  <label className={`block text-sm font-medium mb-3 ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                    Date of Birth
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="date"
+                      name="date_of_birth"
+                      value={formData.date_of_birth || ""}
+                      onChange={(e) => handleInputChange("date_of_birth", e.target.value)}
+                      required
+                      max={new Date().toISOString().split("T")[0]}
+                      className={`w-full px-4 py-3 pl-12 pr-4 rounded-xl border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        darkMode
+                          ? "bg-gray-800 border-gray-600 text-gray-100 placeholder-gray-400"
+                          : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
+                      } ${errors.date_of_birth ? "border-red-500" : "focus:border-blue-500"}`}
+                    />
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Calendar className={`w-5 h-5 ${darkMode ? "text-gray-400" : "text-gray-500"}`} />
+                    </div>
+                  </div>
+                  {errors.date_of_birth && (
+                    <p className="mt-1 text-sm text-red-600">{errors.date_of_birth}</p>
+                  )}
+                </div>
 
                 {/* Organization Name for Super Admin and Org Admin */}
                 {["super_admin", "org_admin"].includes(formData.role) && (
@@ -347,7 +379,7 @@ export default function SignupForm() {
                           {organizationsLoading ? "Loading organizations..." : "Select an organization"}
                         </option>
                         {organizations.map((org) => (
-                          <option key={org.id} value={org.id}>
+                          <option key={org.id} value={org.code}>
                             {org.name} {org.city && `(${org.city})`}
                           </option>
                         ))}

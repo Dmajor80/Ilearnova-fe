@@ -30,28 +30,32 @@ export default function PostLoginRedirect() {
         try {
           // Prefer the storage that holds tokens
           const { store } = getTokens();
+          console.log(store)
           const raw =
             store?.getItem("user_data") ||
             window.localStorage.getItem("user_data") ||
             window.sessionStorage.getItem("user_data");
+            console.log(raw)
           return raw ? JSON.parse(raw) : null;
         } catch {
+          console.log("no user data")
           return null;
         }
       };
 
       let user = getStoredUser();
-
+      console.log(user+"1")
       if (!user) {
         try {
-          user = await http.get("/api/auth/me");
+          user = await http.get("/api/auth/profile/");
+          console.log(user+"2")
           // Store the fetched user data
           const { store } = getTokens();
           if (store && user) {
             store.setItem("user_data", JSON.stringify(user));
           }
         } catch (error) {
-          console.log("PostLoginRedirect: Failed to fetch user from /api/auth/me:", error);
+          console.log("PostLoginRedirect: Failed to fetch user from /api/auth/profile:", error);
           navigate("/home", { replace: true, state: { from: location } });
           return;
         }
@@ -68,20 +72,22 @@ export default function PostLoginRedirect() {
       }
 
       // Support multiple possible backend flags for first-time login
-      const isFirstTime = user.first_time_user === true;
-      console.log("PostLoginRedirect: isFirstTime:", isFirstTime);
+      // const isFirstTime = user.first_time_user === true;
+      // console.log("PostLoginRedirect: isFirstTime:", isFirstTime);
 
-      if (isFirstTime) {
-        console.log("PostLoginRedirect: First time user, redirecting to /select-user-type");
-        navigate("/select-user-type", { replace: true, state: { from: location } });
-        return;
-      }
+      // if (isFirstTime) {
+      //   console.log("PostLoginRedirect: First time user, redirecting to /select-user-type");
+      //   navigate("/select-user-type", { replace: true, state: { from: location } });
+      //   return;
+      // }
 
       // Normalize roles: allow either user.role (string) or user.roles (array)
       let roles = [];
       if (Array.isArray(user.roles)) {
+        console.log(user.roles)
         roles = user.roles.map((r) => {
           const roleCode = r.role?.code || r || "";
+          console.log(roleCode)
           console.log("PostLoginRedirect: Role raw value:", r, "Normalized:", roleCode.toLowerCase());
           return String(roleCode).toLowerCase();
         });
@@ -94,6 +100,7 @@ export default function PostLoginRedirect() {
 
       // Role precedence: super_admin > org_admin > teacher > student > parent > individual_learner
       const has = (r) => roles.includes(r);
+      console.log(roles)
       if (has("super_admin")) {
         console.log("PostLoginRedirect: Super admin role detected, redirecting to /admin-dashboard/dashboard");
         navigate("/admin-dashboard/dashboard", { replace: true });
@@ -119,7 +126,7 @@ export default function PostLoginRedirect() {
         navigate("/parent-dashboard", { replace: true });
         return;
       }
-      if (has("individual_learner")) {
+      if (has("individual_learner") || has("individual")) {
         console.log("PostLoginRedirect: Individual learner role detected, redirecting to /individual-dashboard");
         navigate("/individual-dashboard", { replace: true });
         return;

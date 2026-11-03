@@ -4,12 +4,14 @@ import { setTokens } from "@/api/auth";
 import useNotification from "@/hooks/useNotification";
 import usePrefersDarkMode from "@/hooks/usePrefersDarkMode";
 import { parseError, getUserFriendlyMessage, getNotificationType } from "@/lib/errorHandler";
+import { useNavigate } from "react-router-dom";
 
 /**
  * Hook that encapsulates registration form state, validation, notifications, and submit logic.
  * Pass an onSuccess callback to handle navigation after successful registration.
  */
 export default function useRegister({ onSuccess } = {}) {
+  const navigate = useNavigate();
   const darkMode = usePrefersDarkMode();
   const notification = useNotification("success");
 
@@ -20,6 +22,7 @@ export default function useRegister({ onSuccess } = {}) {
     email: "",
     password: "",
     password_confirmation: "",
+    date_of_birth:"",
     phone: "",
     role: "individual_learner",
     organization_name: "",
@@ -94,20 +97,43 @@ export default function useRegister({ onSuccess } = {}) {
       setLoading(true);
       setErrors({});
 
+      let registrationData
+
+      // Prepare registration data based on role
       try {
-        // Prepare registration data based on role
-        const registrationData = {
+        if (["parent","student","teacher"].includes(formData.role) ){
+          registrationData = {
           first_name: formData.first_name,
           last_name: formData.last_name,
           username: formData.username,
           email: formData.email,
           password: formData.password,
-          password_confirmation: formData.password_confirmation,
-          phone: formData.phone || undefined,
+          phone_number: formData.phone || undefined,
+          organization_code:formData.organization_id,
+          bio:"string",
+          date_of_birth: formData.date_of_birth,
+          address:"string",
+          additional_data:"string"
         };
+      } else {
+        registrationData = {
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+          date_of_birth: formData.date_of_birth,
+          phone_number: formData.phone || undefined,
+          bio:"string",
+          date_of_birth: "2026-01-01",
+          address:"string",
+          additional_data:"string"
+        };
+        }
+        
+        console.log(registrationData)
 
         let response;
-
         // Call specific registration endpoint based on role
         switch (formData.role) {
           case "super_admin":
@@ -119,21 +145,22 @@ export default function useRegister({ onSuccess } = {}) {
             response = await authApi.registerOrgAdmin(registrationData);
             break;
           case "teacher":
-            registrationData.organization_id = formData.organization_id;
+            // registrationData.organization_id = formData.organization_id;
             response = await authApi.registerTeacher(registrationData);
             break;
           case "student":
-            registrationData.organization_id = formData.organization_id;
+            // registrationData.organization_id = formData.organization_id;
             response = await authApi.registerStudent(registrationData);
             break;
           case "parent":
-            registrationData.organization_id = formData.organization_id;
+            // registrationData.organization_id = formData.organization_id;
             response = await authApi.registerParent(registrationData);
             break;
           case "individual_learner":
             response = await authApi.registerIndividualLearner(registrationData);
             break;
           default:
+
             // Fallback to general register for any other roles
             registrationData.role = formData.role;
             if (["super_admin", "org_admin"].includes(formData.role)) {
@@ -156,7 +183,6 @@ export default function useRegister({ onSuccess } = {}) {
             storage.setItem("user_data", JSON.stringify(user));
           }
         }
-
         notification.notify("Registration successful!", "success", 3000);
 
         if (typeof onSuccess === "function") {

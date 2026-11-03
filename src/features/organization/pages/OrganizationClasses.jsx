@@ -1,99 +1,113 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import SchoolDataTable from "@/components/school-admin/SchoolDataTable";
+import useOrganizationClasses from "@/hooks/organization/useOrganizationClasses";
 import GenericModal from "../components/GenericModal";
-import DeleteConfirmModal from "../components/DeleteConfirmModal";
-import { BookOpen, Activity, Users } from "lucide-react";
+import { BookOpen, RefreshCw, Search, Users } from "lucide-react";
 
 const OrganizationClasses = () => {
-  const [classes, setClasses] = useState([]);
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const classesApi = useOrganizationClasses({ page, search });
   const [showModal, setShowModal] = useState(false);
-  const [editingClass, setEditingClass] = useState(null);
-  const [deleteConfirm, setDeleteConfirm] = useState(null);
 
-  const addClass = (cls) => {
-    setClasses([...classes, { ...cls, id: Date.now() }]);
-  };
+  const rows = useMemo(() => classesApi.classes.map((item) => ({
+    ...item,
+    displayName: item.name || "—",
+    displayOrganization: item.organization_name || "—",
+    displayTeacher: item.teacher_name || "—",
+    displayStudents: item.student_count ?? "—",
+    displayStatus: item.is_active ? "Active" : "Inactive",
+    displayCreated: item.created_at ? new Date(item.created_at).toLocaleDateString() : "—"
+  })), [classesApi.classes]);
 
-  const updateClass = (cls) => {
-    setClasses(classes.map(c => c.id === cls.id ? cls : c));
-  };
-
-  const deleteClass = (id) => {
-    setClasses(classes.filter(c => c.id !== id));
+  const saveClass = async (classData) => {
+    try {
+      await classesApi.createClass(classData);
+      setShowModal(false);
+    } catch (error) {
+      console.warn("Unable to create organization class:", error);
+    }
   };
 
   return (
-    <div className="bg-white p-3 sm:p-4 md:p-6 rounded-xl shadow-sm">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b pb-4 gap-4">
+    <div className="space-y-5 rounded-xl bg-white p-3 shadow-sm sm:p-4 md:p-6">
+      <div className="flex flex-col justify-between gap-4 border-b pb-4 sm:flex-row sm:items-center">
         <div>
-          <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">Class Management</h3>
-          <p className="text-gray-600 text-sm sm:text-base">Manage classes and schedules</p>
+          <h3 className="text-lg font-bold text-gray-800 sm:text-2xl">Class Management</h3>
+          <p className="text-sm text-gray-600">View and search classes in your organization</p>
         </div>
-        <button onClick={() => { setEditingClass(null); setShowModal(true); }} className="bg-indigo-600 text-white px-3 py-2 sm:px-4 sm:py-2 md:px-6 md:py-2 rounded-lg hover:bg-indigo-700 transition flex items-center space-x-2 w-full sm:w-auto justify-center min-h-[44px]">
-          <BookOpen className="w-4 h-4 flex-shrink-0" />
-          <span className="hidden sm:inline">Add Class</span>
-        </button>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4 md:gap-6 mb-8">
-        <div className="p-4 sm:p-5 md:p-6 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl border min-h-[120px]">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs sm:text-sm font-medium text-indigo-700">Total Classes</p>
-              <p className="text-2xl sm:text-3xl font-bold text-indigo-600">{classes.length}</p>
-            </div>
-            <BookOpen className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-indigo-500" />
-          </div>
-        </div>
-        <div className="p-4 sm:p-5 md:p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border min-h-[120px]">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs sm:text-sm font-medium text-green-700">Active Classes</p>
-              <p className="text-2xl sm:text-3xl font-bold text-green-600">{classes.filter(c => c.status === 'Active').length || classes.length}</p>
-            </div>
-            <Activity className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-green-500" />
-          </div>
-        </div>
-        <div className="p-4 sm:p-5 md:p-6 bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl border min-h-[120px]">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs sm:text-sm font-medium text-teal-700">Avg Size</p>
-              <p className="text-2xl sm:text-3xl font-bold text-teal-600">25</p>
-            </div>
-            <Users className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-teal-500" />
-          </div>
+        <div className="flex gap-2">
+          <button onClick={() => setShowModal(true)} className="min-h-[44px] rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700">Add Class</button>
+          <button onClick={() => classesApi.refreshData(true)} aria-label="Refresh classes" className="min-h-[44px] rounded-lg border px-3 text-gray-700 hover:bg-gray-50"><RefreshCw className="h-4 w-4" /></button>
         </div>
       </div>
-      <div className="overflow-x-auto">
-        <SchoolDataTable
-          data={classes}
-          columns={[
-            { key: 'name', label: 'Class Name' },
-            { key: 'subject', label: 'Subject' },
-            { key: 'teacher', label: 'Teacher', className: 'hidden sm:table-cell' },
-            { key: 'students', label: '# Students' },
-          ]}
-          actions={['edit', 'delete']}
-          onAction={(row, action) => {
-            if (action === 'edit') {
-              setEditingClass(row);
-              setShowModal(true);
-            }
-            if (action === 'delete') {
-              setDeleteConfirm({ id: row.id, type: 'class' });
-            }
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="flex items-center justify-between rounded-xl border bg-indigo-50 p-4">
+          <div><p className="text-sm text-gray-600">Classes</p><p className="text-2xl font-bold">{classesApi.count}</p></div>
+          <BookOpen className="h-7 w-7 text-indigo-600" />
+        </div>
+        <div className="flex items-center justify-between rounded-xl border bg-teal-50 p-4">
+          <div><p className="text-sm text-gray-600">Students on this page</p><p className="text-2xl font-bold">{classesApi.classes.reduce((total, item) => total + (Number(item.student_count) || 0), 0)}</p></div>
+          <Users className="h-7 w-7 text-teal-600" />
+        </div>
+      </div>
+
+      <label className="flex max-w-md items-center gap-2 rounded-lg border border-gray-300 px-3 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500">
+        <Search className="h-4 w-4 text-gray-500" aria-hidden="true" />
+        <input
+          type="search"
+          value={search}
+          onChange={(event) => {
+            setSearch(event.target.value);
+            setPage(1);
           }}
+          placeholder="Search classes"
+          aria-label="Search classes"
+          className="min-h-[44px] w-full bg-transparent text-sm outline-none"
         />
-      </div>
-      {showModal && <GenericModal item={editingClass} type="class" onSave={(cls) => {
-        if (editingClass) {
-          updateClass(cls);
-        } else {
-          addClass(cls);
-        }
-        setShowModal(false);
-        setEditingClass(null);
-      }} onClose={() => { setShowModal(false); setEditingClass(null); }} />}
-      {deleteConfirm && deleteConfirm.type === 'class' && <DeleteConfirmModal item={classes.find(c => c.id === deleteConfirm.id)} type="class" onConfirm={() => { deleteClass(deleteConfirm.id); setDeleteConfirm(null); }} onCancel={() => setDeleteConfirm(null)} />}
+      </label>
+
+      <SchoolDataTable
+        data={rows}
+        loading={classesApi.loading}
+        error={classesApi.error?.message}
+        columns={[
+          { key: "displayName", label: "Class Name" },
+          { key: "displayOrganization", label: "Organization" },
+          { key: "displayTeacher", label: "Teacher" },
+          { key: "displayStudents", label: "Students" },
+          { key: "displayStatus", label: "Status" },
+          { key: "displayCreated", label: "Created" }
+        ]}
+        showPagination={false}
+      />
+      {!classesApi.loading && !classesApi.error && (
+        <div className="flex items-center justify-between gap-3 text-sm text-gray-600">
+          <span>
+            Showing {classesApi.classes.length} classes on this page · {classesApi.count} total
+          </span>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setPage((currentPage) => Math.max(currentPage - 1, 1))}
+              disabled={!classesApi.previous}
+              className="min-h-[40px] rounded-lg border px-3 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Previous
+            </button>
+            <button
+              type="button"
+              onClick={() => setPage((currentPage) => currentPage + 1)}
+              disabled={!classesApi.next}
+              className="min-h-[40px] rounded-lg border px-3 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
+      {showModal && <GenericModal type="class" saving={classesApi.mutating} availableClasses={classesApi.availableClasses} onSave={saveClass} onClose={() => setShowModal(false)} />}
     </div>
   );
 };
