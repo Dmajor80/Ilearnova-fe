@@ -1,23 +1,11 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { getTokens } from "../api/auth";
 
-/**
- * OrganizationContext
- * - Holds the user's organizations and currentOrgId selection
- * - Persists selectedOrgId back to the same storage as user_data
- *
- * Minimal skeleton:
- * - Initializes from user_data in storage
- * - Auto-picks first org if only one exists
- * - Exposes setter to update selection (and persist to storage)
- */
-
 const OrganizationContext = createContext(null);
 
 function readUserDataFromStorage() {
   try {
     const { store } = getTokens();
-    // console.log(store + "read user")
     const raw =
       store?.getItem("user_data") ||
       window.localStorage.getItem("user_data") ||
