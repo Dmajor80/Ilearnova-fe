@@ -9,6 +9,7 @@ import {
   ChevronRight,
   Star,
   ClipboardList,
+  ClipboardCheck,
   TrendingUp,
   BarChart3,
   FileBarChart,
@@ -28,6 +29,8 @@ import { clearAuth } from "../../api/auth";
 import Messages from "./Messages";
 import Attendance from "./Attendance";
 import Assignments from "./Assignments";
+import Examinations from "./Examinations";
+import TeacherCbt from "../cbt/TeacherCbt";
 import Grade from "./Grade";
 import Timetable from "./Timetable";
 import Resources from "./Resources";
@@ -44,34 +47,25 @@ import QuickActionsGrid from "../../components/dashboard/QuickActionsGrid";
 import ClassPerformanceOverview from "../../components/dashboard/ClassPerformanceOverview";
 import ClassRosters from "../../components/dashboard/ClassRosters";
 
-import { getEnhancedTeacherDashboard } from "../../api/dashboardApi";
-
+import {
+  useTeacherAssignments,
+  useTeacherClasses,
+  useTeacherExaminations,
+  useTeacherStudents
+} from "@/hooks/teacher";
 
 // Main application component
 export default function TeacherDashboard() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [dashboardData, setDashboardData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const classesApi = useTeacherClasses();
+  const studentsApi = useTeacherStudents();
+  const assignmentsApi = useTeacherAssignments();
+  const examinationsApi = useTeacherExaminations();
+  const loading = classesApi.loading || studentsApi.loading || assignmentsApi.loading || examinationsApi.loading;
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    async function fetchDashboard() {
-      setLoading(true);
-      try {
-        const response = await getEnhancedTeacherDashboard();
-        setDashboardData(response.data);
-      } catch (error) {
-        console.error("Failed to fetch enhanced teacher dashboard:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchDashboard();
-  }, []);
-
   // Navigation links data
   const navLinks = [
     { id: "dashboard", icon: <ClipboardList size={20} />, label: "Dashboard" },
@@ -80,6 +74,8 @@ export default function TeacherDashboard() {
     { id: "attendance", icon: <Calendar size={20} />, label: "Attendance" },
     { id: "attendancePage", icon: <Calendar size={20} />, label: "Attendance Page" },
     { id: "assignments", icon: <TrendingUp size={20} />, label: "Assignments" },
+    { id: "examinations", icon: <FileText size={20} />, label: "Examinations" },
+    { id: "cbt", icon: <ClipboardCheck size={20} />, label: "CBT Exams" },
     { id: "resources", icon: <BookOpen size={20} />, label: "Resources" },
     { id: "timetable", icon: <Clock size={20} />, label: "Timetable" },
     { id: "grade", icon: <Star size={20} />, label: "Grade" },
@@ -132,16 +128,17 @@ export default function TeacherDashboard() {
         {/* Sidebar */}
         <div
           className={`
-          w-16 md:w-48 h-[100%] bg-white border-r border-gray-200 pt-4
-          fixed md:static inset-y-0 left-0 z-50
+           h-dvh bg-white border-r border-gray-200 pt-4
+          fixed inset-y-0 left-0 z-50 overflow-y-auto overflow-x-hidden
           transition-all duration-300 ease-in-out
-          ${isMobileMenuOpen ? "w-48" : "w-16"}
+          ${isMobileMenuOpen ? "w-48" : "w-18"}
+          md:w-48
         `}
         >
-          <div className="px-4 pb-6 border-b border-gray-200 relative">
+          <div className="px-4 flex justify-center items-center pb-6 border-b border-gray-200 ">
             <h1
               className={`
-              font-bold text-[26px] text-blue-900 text-center ml-[-1rem] transition-all duration-300
+              font-bold md:text-[26px] text-blue-900 text-center transition-all duration-300
               ${isMobileMenuOpen ? "block" : "hidden md:block"}
             `}
             >
@@ -158,14 +155,14 @@ export default function TeacherDashboard() {
 
             {/* Mobile menu toggle */}
             <button
-              className="absolute top-0 right-4 md:hidden p-1 text-blue-900 hover:bg-blue-50 rounded"
+              className=" top-0 right-4 md:hidden p-1 text-blue-900 hover:bg-blue-50 rounded"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               {isMobileMenuOpen ? <X size={30} /> : <Menu size={20} />}
             </button>
           </div>
 
-          <nav className="mt-4">
+          <nav className="">
             {navLinks.map((link) => (
               <div key={link.id} className="relative group">
                 <button
@@ -213,7 +210,10 @@ export default function TeacherDashboard() {
       </aside>
 
       {/* Main content area */}
-      <div className="ml-16 md:ml-0 flex-1 p-4">
+      <div className={` flex-1 p-4 transition-all duration-300 ease-in-out
+        ${isMobileMenuOpen ? "ml-48" : "ml-18"}
+        md:ml-48`}>
+          
         {/* Header Section */}
         <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 mb-6 border border-slate-200">
           <div className="flex items-center justify-between">
@@ -242,11 +242,20 @@ export default function TeacherDashboard() {
                   aria-haspopup="true"
                   aria-expanded={isProfileDropdownOpen}
                 >
-                  <img
-                    src={dashboardData?.user?.profile_pic || "/default-profile.png"}
+                  {/* {
+                    user.profile_pic !== null ?
+                    <img
+                    src={user.profile_pic || "/default-profile.png"}
                     alt="Profile"
                     className="w-10 h-10 rounded-full object-cover border-2 border-gradient-to-r from-blue-500 to-indigo-500 shadow-md"
-                  />
+                  />:
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-blue-500 bg-blue-50 text-blue-600 shadow-md" aria-label="Profile">
+                    <User className="h-5 w-5" />
+                  </span>
+                  } */}
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-blue-500 bg-blue-50 text-blue-600 shadow-md" aria-label="Profile">
+                    <User className="h-5 w-5" />
+                  </span>
                   <ChevronDown className="w-4 h-4 text-slate-600" />
                 </button>
                 {/* Dropdown menu */}
@@ -281,13 +290,18 @@ export default function TeacherDashboard() {
         </div>
 
         {loading && <p>Loading dashboard data...</p>}
-        {!loading && activeTab === "dashboard" && dashboardData && (
+        {!loading && activeTab === "dashboard" && (
           <>
+            {[classesApi, studentsApi, assignmentsApi, examinationsApi].some((api) => api.error) && (
+              <p role="alert" className="mb-4 rounded-lg bg-red-50 p-4 text-red-700">
+                Some dashboard data could not be loaded. Check the relevant section and retry.
+              </p>
+            )}
             {/* Enhanced Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
               <QuickStatsCard
                 title="Total Students"
-                value={dashboardData.quick_stats.total_students}
+                value={studentsApi.students.length}
                 icon="users"
                 color="blue"
                 trend="+12%"
@@ -295,39 +309,31 @@ export default function TeacherDashboard() {
               />
               <QuickStatsCard
                 title="Active Classes"
-                value={dashboardData.quick_stats.total_classes}
+                value={classesApi.classes.length}
                 icon="book"
                 color="green"
                 trend="+3"
                 trendUp={true}
               />
               <QuickStatsCard
-                title="Today's Attendance"
-                value={`${dashboardData.quick_stats.today_attendance}%`}
-                icon="calendar"
-                color="yellow"
-                trend="+5%"
-                trendUp={true}
-              />
-              <QuickStatsCard
-                title="Assignments Graded"
-                value={dashboardData.quick_stats.graded_today}
+                title="Assignments"
+                value={assignmentsApi.assignments.length}
                 icon="check"
                 color="purple"
-                trend="15/20"
-                trendUp={false}
+                trend=""
+                trendUp={null}
               />
               <QuickStatsCard
-                title="Pending Reviews"
-                value={dashboardData.quick_stats.pending_submissions}
+                title="Submissions"
+                value={assignmentsApi.assignments.reduce((count, assignment) => count + Number(assignment.submission_count || 0), 0)}
                 icon="alert"
                 color="red"
-                trend="2 urgent"
-                trendUp={false}
+                trend=""
+                trendUp={null}
               />
               <QuickStatsCard
                 title="Upcoming Exams"
-                value={dashboardData.quick_stats.upcoming_exams}
+                value={examinationsApi.examinations.length}
                 icon="calendar"
                 color="blue"
                 trend="Next: Tomorrow"
@@ -677,6 +683,8 @@ export default function TeacherDashboard() {
         {activeTab === "attendance" && <Attendance />}
         {activeTab === "attendancePage" && <AttendancePage />}
         {activeTab === "assignments" && <Assignments />}
+        {activeTab === "examinations" && <Examinations />}
+        {activeTab === "cbt" && <TeacherCbt />}
         {activeTab === "timetable" && <Timetable />}
         {activeTab === "grade" && <Grade />}
         {activeTab === "resources" && <Resources />}
@@ -688,8 +696,3 @@ export default function TeacherDashboard() {
   );
   // end of side bar
 }
-
-
-
-
-

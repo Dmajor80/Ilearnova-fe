@@ -1,22 +1,21 @@
 import React, { useState } from "react";
 import {
   Search,
-  Plus,
   Phone,
   Mail,
   MoreHorizontal,
   ChevronLeft,
   ChevronRight,
-  X,
-  Calendar,
   User,
   Users,
-  ArrowLeft,
-  Timer,
-  LocationEditIcon,
+  RefreshCw,
   Loader2,
   AlertCircle,
-  RefreshCw,
+  ArrowLeft,
+  Trash2,
+  CheckCircle,
+  XCircle,
+  LocationEditIcon,
 } from "lucide-react";
 import { PaymentHistory } from "./PaymentHistory";
 import useStudentData from "@/hooks/useStudentData";
@@ -25,9 +24,10 @@ import NotificationBar from "@/components/ui/NotificationBar";
 import Avatar from "@/components/ui/Avatar";
 import { formatRegistrationDate, formatStudentId } from "@/lib/formatters";
 
+// Student Details Component (uses the real StudentDetail payload)
+const StudentDetails = ({ student, onBack, onToggleActive, onDelete, mutating }) => {
+  const fullName = student.full_name || student.name || student.username;
 
-// Student Details Component
-const StudentDetails = ({ student, onBack }) => {
   return (
     <div className="min-h-screen ">
       {/* Header */}
@@ -59,8 +59,8 @@ const StudentDetails = ({ student, onBack }) => {
               <div className="absolute mt-[2rem]  flex flex-col items-center space-x-6">
                 <div className="w-40 h-40 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
                   <Avatar
-                    src={student.avatar || student.profile_picture}
-                    name={student.name || student.full_name}
+                    src={student.profile_pic || student.avatar}
+                    name={fullName}
                     size="w-36 h-36"
                     textSize="text-4xl"
                     className="border-4 border-white"
@@ -75,51 +75,55 @@ const StudentDetails = ({ student, onBack }) => {
                 </div>
                 <div className="mt-[1rem] z-40 ">
                   <h2 className="text-3xl font-bold mb-1 text-[#303972] font-poppins">
-                    {student.name}
+                    {fullName}
                   </h2>
-                  <p className="text-[#4D44B5] mb-1 font-poppins text-[16px] font-semibold">
-                    Student
+                  <p className="text-[#4D44B5] mb-1 font-poppins text-[16px] font-semibold text-center">
+                    {student.class_name || "Student"}
                   </p>
-                  <div className="flex items-center space-x-4">
-                    {/* <span className="text-sm bg-white bg-opacity-20 px-3 py-1 rounded-full">
-                    {student.id}
-                  </span> */}
+                  <div className="flex items-center justify-center space-x-2">
+                    <span
+                      className={`inline-flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full ${
+                        student.is_active
+                          ? "bg-green-100 text-green-700"
+                          : "bg-gray-200 text-gray-600"
+                      }`}
+                    >
+                      {student.is_active ? (
+                        <CheckCircle className="w-3 h-3" />
+                      ) : (
+                        <XCircle className="w-3 h-3" />
+                      )}
+                      {student.is_active ? "Active" : "Inactive"}
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Contact Information */}
+            {/* Contact & Academic Information */}
             <div className="p-3.5 bg-[white] grid grid-col-1 lg:grid-cols-2 gap-6 mb-2 pt-[8rem]  relative ">
-              {/* parent information */}
-              <div className="flex items-center gap-3">
-                <div className="bg-[#FB7D5B] w-fit rounded-full p-[5px]">
-                  <User size={40} className="text-[white]" />
-                </div>
-                <div>
-                  <h1 className="text-[#A098AE]">Parents:</h1>
-                  <p className="text-[#303972] font-poppins font-semibold">
-                    {" "}
-                    {student.parent}
-                  </p>
-                </div>
-              </div>
-              {/* end of parent information */}
-              {/* add information */}
               <div className="flex items-center gap-3">
                 <div className="bg-[#FB7D5B] w-fit rounded-full p-[10px]">
-                  <LocationEditIcon size={30} className="text-[white]" />
+                  <User size={30} className="text-[white]" />
                 </div>
                 <div>
-                  <h1 className="text-[#22094f]">Address:</h1>
+                  <h1 className="text-[#A098AE]">Student ID:</h1>
                   <p className="text-[#303972] font-poppins font-semibold">
-                    {" "}
-                    {student.city}
+                    {student.student_id || "—"}
                   </p>
                 </div>
               </div>
-              {/* end of add information */}
-              {/* Phone information */}
+              <div className="flex items-center gap-3">
+                <div className="bg-[#FB7D5B] w-fit rounded-full p-[10px]">
+                  <Mail size={30} className="text-[white]" />
+                </div>
+                <div>
+                  <h1 className="text-[#A098AE]">Email:</h1>
+                  <p className="text-[#303972] font-poppins font-semibold">
+                    {student.email}
+                  </p>
+                </div>
+              </div>
               <div className="flex items-center gap-3">
                 <div className="bg-[#FB7D5B] w-fit rounded-full p-[10px]">
                   <Phone size={30} className="text-[white]" />
@@ -127,88 +131,81 @@ const StudentDetails = ({ student, onBack }) => {
                 <div>
                   <h1 className="text-[#A098AE]">Phone:</h1>
                   <p className="text-[#303972] font-poppins font-semibold">
-                    {student.Phone}
+                    {student.phone_number || "—"}
                   </p>
                 </div>
               </div>
-              {/* end of phone information */}
-              {/* Email information */}
+              <div className="flex items-center gap-3">
+                <div className="bg-[#FB7D5B] w-fit rounded-full p-[10px]">
+                  <LocationEditIcon size={30} className="text-[white]" />
+                </div>
+                <div>
+                  <h1 className="text-[#A098AE]">Address:</h1>
+                  <p className="text-[#303972] font-poppins font-semibold">
+                    {student.address || "—"}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="bg-[#FB7D5B] w-fit rounded-full p-[10px]">
+                  <Users size={30} className="text-[white]" />
+                </div>
+                <div>
+                  <h1 className="text-[#A098AE]">Class:</h1>
+                  <p className="text-[#303972] font-poppins font-semibold">
+                    {student.class_name || "—"}
+                  </p>
+                </div>
+              </div>
               <div className="flex items-center gap-3">
                 <div className="bg-[#FB7D5B] w-fit rounded-full p-[10px]">
                   <User size={30} className="text-[white]" />
                 </div>
                 <div>
-                  <h1 className="text-[#A098AE]">Email:</h1>
+                  <h1 className="text-[#A098AE]">Fees:</h1>
                   <p className="text-[#303972] font-poppins font-semibold">
-                    {" "}
-                    {student.email}
+                    {student.fees || "—"}
                   </p>
                 </div>
               </div>
-              {/* end of parent information */}
+              <div className="flex items-center gap-3">
+                <div className="bg-[#FB7D5B] w-fit rounded-full p-[10px]">
+                  <User size={30} className="text-[white]" />
+                </div>
+                <div>
+                  <h1 className="text-[#A098AE]">Enrolled:</h1>
+                  <p className="text-[#303972] font-poppins font-semibold">
+                    {student.enrollment_date || formatRegistrationDate(student)}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="px-3.5 pb-6 flex gap-3">
+              <button
+                onClick={() => onToggleActive(student)}
+                disabled={mutating}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 ${
+                  student.is_active
+                    ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "bg-green-100 text-green-700 hover:bg-green-200"
+                }`}
+              >
+                {student.is_active ? "Deactivate" : "Activate"}
+              </button>
+              <button
+                onClick={() => onDelete(student)}
+                disabled={mutating}
+                className="px-4 py-2 rounded-lg text-sm font-semibold bg-red-50 text-red-600 hover:bg-red-100 transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                Remove Student
+              </button>
             </div>
           </div>
           <div>
             <PaymentHistory />
-          </div>
-        </div>
-        {/* Schedule Sidebar */}
-        <div className="w-120   p-6">
-          <div className="space-y-4">
-            <div className="border-l-8 rounded-[10px] border-[#4D44B5] pl-4 py-3 bg-[white]">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-semibold text-gray-800">Basic Algorithm</h4>
-                <div className="w-7 h-7 bg-gray-200 rounded-full"></div>
-              </div>
-              <p className="text-sm text-gray-500 mb-2">Algorithm</p>
-              <div className="flex flex-col space-x-4 text-sm text-gray-500">
-                <span className="flex items-center mb-2">
-                  <Calendar className="w-5 h-5 mr-1 text-red-600" />
-                  March 20, 2022
-                </span>
-
-                <span className="flex items-center mb-2">
-                  <Timer className="w-5 h-5 mr-1 text-amber-300" />
-                  09:00 - 10:00 AM
-                </span>
-              </div>
-            </div>
-            <div className="border-l-8 rounded-[10px] border-[#4D44B5] pl-4 py-3 bg-[white]">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-semibold text-gray-800">Basic Algorithm</h4>
-                <div className="w-7 h-7 bg-gray-200 rounded-full"></div>
-              </div>
-              <p className="text-sm text-gray-500 mb-2">Algorithm</p>
-              <div className="flex flex-col space-x-4 text-sm text-gray-500">
-                <span className="flex items-center mb-2">
-                  <Calendar className="w-5 h-5 mr-1 text-red-600" />
-                  March 20, 2022
-                </span>
-
-                <span className="flex items-center mb-2">
-                  <Timer className="w-5 h-5 mr-1 text-amber-300" />
-                  09:00 - 10:00 AM
-                </span>
-              </div>
-            </div>
-            <div className="border-l-8 rounded-[10px] border-[#4D44B5] pl-4 py-3 bg-[white]">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-semibold text-gray-800">Basic Algorithm</h4>
-                <div className="w-7 h-7 bg-gray-200 rounded-full"></div>
-              </div>
-              <p className="text-sm text-gray-500 mb-2">Algorithm</p>
-              <div className="flex flex-col space-x-4 text-sm text-gray-500">
-                <span className="flex items-center mb-2">
-                  <Calendar className="w-5 h-5 mr-1 text-red-600" />
-                  March 20, 2022
-                </span>
-
-                <span className="flex items-center mb-2">
-                  <Timer className="w-5 h-5 mr-1 text-amber-300" />
-                  09:00 - 10:00 AM
-                </span>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -224,6 +221,7 @@ export const StudentListContent = () => {
     students,
     totalStudents,
     selectedStudent,
+    mutating,
     availableGrades,
     gradesLoading,
     gradesError,
@@ -235,6 +233,8 @@ export const StudentListContent = () => {
     searchQuery,
     selectedGrade,
     refreshData,
+    updateStudent,
+    deleteStudent,
     handleSearch,
     handleGradeFilter,
     handlePageChange,
@@ -244,32 +244,12 @@ export const StudentListContent = () => {
   } = useStudentData();
 
   // Local state for UI components
-  const [showModal, setShowModal] = useState(false);
   const [searchInput, setSearchInput] = useState("");
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    dateOfBirth: "",
-    address: "",
-    parentName: "",
-    parentPhone: "",
-    grade: "",
-    city: "",
-  });
 
   // Calculate display values
   const startIndex = (currentPage - 1) * studentsPerPage;
   const endIndex = Math.min(startIndex + studentsPerPage, totalStudents);
   const currentStudents = students;
-
-  const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
 
   const handleSearchInputChange = (e) => {
     const value = e.target.value;
@@ -288,35 +268,46 @@ export const StudentListContent = () => {
     clearStudentSelection();
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Handle form submission here
-    console.log("Form submitted:", formData);
-    setShowModal(false);
-    // Reset form
-    setFormData({
-      firstName: "",
-      lastName: "",
-      email: "",
-      phone: "",
-      dateOfBirth: "",
-      address: "",
-      parentName: "",
-      parentPhone: "",
-      grade: "",
-      city: "",
-    });
+  const handleToggleActive = async (student) => {
+    try {
+      await updateStudent(student.id, { is_active: !student.is_active });
+      clearStudentSelection();
+    } catch (err) {
+      // Notification already surfaced by the hook
+    }
   };
 
-  const getGradeColor = (grade) => {
-    if (grade === "VII A") return "bg-orange-100 text-orange-800";
+  const handleDeleteStudent = async (student) => {
+    const name = student.full_name || student.email;
+    if (!window.confirm(`Remove ${name} from students? This cannot be undone.`)) {
+      return;
+    }
+    try {
+      await deleteStudent(student.id);
+      clearStudentSelection();
+    } catch (err) {
+      // Notification already surfaced by the hook
+    }
+  };
+
+  const getStatusColor = (status) => {
+    const value = (status || "").toLowerCase();
+    if (value === "active" || value === "enrolled") return "bg-green-100 text-green-800";
+    if (value === "paid") return "bg-green-100 text-green-800";
+    if (value === "unpaid" || value === "overdue") return "bg-red-100 text-red-700";
     return "bg-blue-100 text-blue-800";
   };
 
   // Show student details if a student is selected
   if (selectedStudent) {
     return (
-      <StudentDetails student={selectedStudent} onBack={handleBackToList} />
+      <StudentDetails
+        student={selectedStudent}
+        onBack={handleBackToList}
+        onToggleActive={handleToggleActive}
+        onDelete={handleDeleteStudent}
+        mutating={mutating}
+      />
     );
   }
 
@@ -351,16 +342,16 @@ export const StudentListContent = () => {
               onChange={(e) => handleGradeFilter(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               disabled={loading || gradesLoading}
-              title={gradesError ? `Error loading grades: ${gradesError}` : "Filter by grade"}
+              title={gradesError ? `Error loading grades: ${gradesError}` : "Filter by class"}
             >
               <option value="">
                 {gradesLoading
-                  ? "Loading grades..."
+                  ? "Loading classes..."
                   : gradesError
-                    ? "Error loading grades"
+                    ? "Error loading classes"
                     : availableGrades.length === 0
-                      ? "No grades available"
-                      : "All Grades"
+                      ? "No classes available"
+                      : "All Classes"
                 }
               </option>
               {!gradesLoading && !gradesError && availableGrades.length > 0 &&
@@ -371,10 +362,10 @@ export const StudentListContent = () => {
                 ))
               }
               {gradesError && (
-                <option disabled>Failed to load grades</option>
+                <option disabled>Failed to load classes</option>
               )}
               {!gradesLoading && !gradesError && availableGrades.length === 0 && (
-                <option disabled>No grades configured</option>
+                <option disabled>No classes configured</option>
               )}
             </select>
             <button
@@ -386,47 +377,39 @@ export const StudentListContent = () => {
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             </button>
           </div>
-          <button
-            onClick={() => setShowModal(true)}
-            className="bg-[#4D44B5] hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors disabled:opacity-50"
-            disabled={loading}
-          >
-            <Plus className="w-4 h-4 font-semibold" />
-            <span className="text-[13px] font-semibold">New Student</span>
-          </button>
         </div>
-      <div className="">
+        <div className="">
         {/* Table */}
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="">
               <tr className="bg-[#f3f1f8]">
-                <th className="px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider cursor-pointer hover:bg-gray-100">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider">
                   <input type="checkbox" className="rounded border-gray-300" />
                 </th>
-                <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider cursor-pointer hover:bg-gray-100">
-                  Name ↕
+                <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider">
+                  Name
                 </th>
-                <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider cursor-pointer hover:bg-gray-100">
-                  ID ↕
+                <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider">
+                  ID
                 </th>
-                <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider cursor-pointer hover:bg-gray-100">
-                  Registered ↕
+                <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider">
+                  Registered
                 </th>
-                <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider cursor-pointer hover:bg-gray-100">
-                  Parent Name ↕
+                <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider">
+                  Class
                 </th>
-                <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider cursor-pointer hover:bg-gray-100">
-                  City ↕
+                <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider">
+                  Status
                 </th>
-                <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider cursor-pointer hover:bg-gray-100">
-                  Contact ↕
+                <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider">
+                  Fees
                 </th>
-                <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider cursor-pointer hover:bg-gray-100">
-                  Grade ↕
+                <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider">
+                  Contact
                 </th>
-                <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider cursor-pointer hover:bg-gray-100">
-                  Action ↕
+                <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider">
+                  Action
                 </th>
               </tr>
             </thead>
@@ -468,7 +451,7 @@ export const StudentListContent = () => {
                               <div>Search: "{searchQuery}"</div>
                             )}
                             {selectedGrade && (
-                              <div>Grade: {selectedGrade}</div>
+                              <div>Class: {selectedGrade}</div>
                             )}
                           </div>
                           <button
@@ -514,13 +497,13 @@ export const StudentListContent = () => {
                     <td className="p-4">
                       <div className="flex items-center space-x-3">
                         <Avatar
-                          src={student.avatar || student.profile_picture}
-                          name={student.name || student.full_name}
+                          src={student.profile_pic || student.avatar}
+                          name={student.full_name}
                           size="w-8 h-8"
                           textSize="text-sm"
                         />
                         <span className="font-bold text-[#303972] text-[16px] font-poppins">
-                          {student.name || student.full_name}
+                          {student.full_name}
                         </span>
                       </div>
                     </td>
@@ -528,7 +511,7 @@ export const StudentListContent = () => {
                       <button
                         onClick={() => handleStudentClick(student)}
                         className="text-[#4D44B5] font-bold text-[16px] font-poppins hover:text-[#3D34A5] hover:underline transition-colors cursor-pointer"
-                        title={`View profile for ${student.name || student.full_name} (Full ID: ${student.id || student.student_id})`}
+                        title={`View profile for ${student.full_name} (Full ID: ${student.id || student.student_id})`}
                       >
                         {formatStudentId(student)}
                       </button>
@@ -538,39 +521,37 @@ export const StudentListContent = () => {
                         {formatRegistrationDate(student)}
                       </span>
                     </td>
-                    <td className="p-4 text-[#303972] text-[16px] font-normal font-poppins">
-                      {student.parent || student.parent_name || student.guardian_name}
+                    <td className="p-4">
+                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {student.class_name || "—"}
+                      </span>
                     </td>
-                    <td className="p-4 text-[#303972] text-[16px] font-normal font-poppins">
-                      {student.city || student.address}
+                    <td className="p-4">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(student.status)}`}>
+                        {student.status || "—"}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(student.fees_status)}`}>
+                        {student.fees_status || "—"}
+                      </span>
                     </td>
                     <td className="p-4" onClick={(e) => e.stopPropagation()}>
                       <div className="flex space-x-2">
                         <button
                           className="p-2 bg-[#EBEBF9] hover:text-blue-600 rounded-full"
-                          title="Call student"
-                        >
-                          <Phone className="w-5 h-5 text-[#A098AE]" />
-                        </button>
-                        <button
-                          className="p-2 hover:text-blue-600 bg-[#EBEBF9] rounded-full"
                           title="Email student"
                         >
                           <Mail className="w-5 h-5 text-[#A098AE]" />
                         </button>
                       </div>
                     </td>
-                    <td className="p-4">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${getGradeColor(
-                          student.grade || student.class
-                        )}`}
-                      >
-                        {student.grade || student.class}
-                      </span>
-                    </td>
                     <td className="p-4" onClick={(e) => e.stopPropagation()}>
-                      <button className="p-1 text-gray-400 hover:text-gray-600">
+                      <button
+                        onClick={() => handleStudentClick(student)}
+                        className="p-1 text-gray-400 hover:text-gray-600"
+                        title="View details"
+                      >
                         <MoreHorizontal className="w-4 h-4" />
                       </button>
                     </td>
@@ -682,74 +663,7 @@ export const StudentListContent = () => {
           </div>
         )}
       </div>
-
-      {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            {/* Modal Header */}
-            <div className="flex justify-between items-center p-6 border-b border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-800">
-                Add New Student
-              </h2>
-              <button
-                onClick={() => setShowModal(false)}
-                className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <form onSubmit={handleSubmit} className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Personal Information Section */}
-                <div className="md:col-span-2">
-                  <div className="flex items-center space-x-2 mb-4">
-                    <User className="w-5 h-5 text-blue-600" />
-                    <h3 className="text-lg font-semibold text-gray-800">
-                      Personal Information
-                    </h3>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    First Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="firstName"
-                    value={formData.firstName}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter parent phone number"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Modal Footer */}
-              <div className="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-200">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Add Student
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-      </div>
+    </div>
     </ErrorBoundary>
   );
 };

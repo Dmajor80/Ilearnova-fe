@@ -1,99 +1,140 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import SchoolDataTable from "@/components/school-admin/SchoolDataTable";
+import useOrganizationStudents from "@/hooks/organization/useStudentData";
 import GenericModal from "../components/GenericModal";
 import DeleteConfirmModal from "../components/DeleteConfirmModal";
-import { GraduationCap, Users, UserCheck, AlertTriangle } from "lucide-react";
+import { GraduationCap, Users, UserCheck, AlertTriangle, RefreshCw } from "lucide-react";
+
+const getStudentName = (student) =>
+  student.full_name ||
+  [student.first_name, student.last_name].filter(Boolean).join(" ") ||
+  student.name ||
+  student.email ||
+  "—";
+
+const getRecordStatus = (record) => {
+  if (typeof record.is_active === "boolean") return record.is_active ? "Active" : "Inactive";
+  if (typeof record.status === "string" && record.status) return record.status;
+  return "Unknown";
+};
 
 const OrganizationStudents = () => {
-  const [students, setStudents] = useState([]);
+  const studentsApi = useOrganizationStudents();
   const [showModal, setShowModal] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
-  const addStudent = (student) => {
-    setStudents([...students, { ...student, id: Date.now() }]);
+  const rows = useMemo(() => studentsApi.students.map((student) => ({
+    ...student,
+    displayName: getStudentName(student),
+    displayClass: student.class_name || student.grade || student.class || "—",
+    displayStatus: getRecordStatus(student)
+  })), [studentsApi.students]);
+  const statStyles = {
+    blue: { background: "bg-blue-50", foreground: "text-blue-600" },
+    green: { background: "bg-green-50", foreground: "text-green-600" },
+    yellow: { background: "bg-yellow-50", foreground: "text-yellow-600" }
   };
 
-  const updateStudent = (student) => {
-    setStudents(students.map(s => s.id === student.id ? student : s));
+  const saveStudent = async (studentData) => {
+    try {
+      if (editingStudent) {
+        await studentsApi.updateStudent(editingStudent.id, studentData);
+      } else {
+        await studentsApi.createStudent(studentData);
+      }
+      setShowModal(false);
+      setEditingStudent(null);
+    } catch (error) {
+      console.warn("Unable to save organization student:", error);
+    }
   };
 
-  const deleteStudent = (id) => {
-    setStudents(students.filter(s => s.id !== id));
+  const removeStudent = async () => {
+    try {
+      await studentsApi.deleteStudent(deleteConfirm.id);
+      setDeleteConfirm(null);
+    } catch (error) {
+      console.warn("Unable to delete organization student:", error);
+    }
   };
 
   return (
-    <div className="bg-white p-3 sm:p-4 md:p-6 rounded-xl shadow-sm">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b pb-4 gap-4">
+    <div className="space-y-5 rounded-xl bg-white p-3 shadow-sm sm:p-4 md:p-6">
+      <div className="flex flex-col justify-between gap-4 border-b pb-4 sm:flex-row sm:items-center">
         <div>
-          <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">Student Management</h3>
-          <p className="text-gray-600 text-sm sm:text-base">Manage student records and enrollment</p>
+          <h3 className="text-lg font-bold text-gray-800 sm:text-2xl">Student Management</h3>
+          <p className="text-sm text-gray-600">Manage student records and enrollment</p>
         </div>
-        <button onClick={() => { setEditingStudent(null); setShowModal(true); }} className="bg-green-600 text-white px-3 py-2 sm:px-4 sm:py-2 md:px-6 md:py-2 rounded-lg hover:bg-green-700 transition flex items-center space-x-2 w-full sm:w-auto justify-center min-h-[44px]">
-          <Users className="w-4 h-4 flex-shrink-0" />
-          <span className="hidden sm:inline">Add Student</span>
-        </button>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4 md:gap-6 mb-8">
-        <div className="p-4 sm:p-5 md:p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border min-h-[120px]">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs sm:text-sm font-medium text-blue-700">Total Students</p>
-              <p className="text-2xl sm:text-3xl font-bold text-blue-600">{students.length}</p>
-            </div>
-            <GraduationCap className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-blue-500" />
-          </div>
-        </div>
-        <div className="p-4 sm:p-5 md:p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border min-h-[120px]">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs sm:text-sm font-medium text-green-700">Active</p>
-              <p className="text-2xl sm:text-3xl font-bold text-green-600">{students.filter(s => s.status === 'Active').length}</p>
-            </div>
-            <UserCheck className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-green-500" />
-          </div>
-        </div>
-        <div className="p-4 sm:p-5 md:p-6 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl border min-h-[120px]">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs sm:text-sm font-medium text-yellow-700">At Risk</p>
-              <p className="text-2xl sm:text-3xl font-bold text-yellow-600">{students.filter(s => s.status === 'Inactive').length}</p>
-            </div>
-            <AlertTriangle className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-yellow-500" />
-          </div>
+        <div className="flex w-full gap-2 sm:w-auto">
+          <input
+            aria-label="Search students"
+            className="min-w-0 flex-1 rounded-lg border px-3 py-2 sm:w-56"
+            placeholder="Search students"
+            value={studentsApi.searchQuery}
+            onChange={(event) => studentsApi.handleSearch(event.target.value)}
+          />
+          <button
+            onClick={() => { setEditingStudent(null); setShowModal(true); }}
+            className="min-h-[44px] rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+          >
+            Add Student
+          </button>
+          <button
+            onClick={() => studentsApi.refreshData(true)}
+            aria-label="Refresh students"
+            className="min-h-[44px] rounded-lg border px-3 text-gray-700 hover:bg-gray-50"
+          >
+            <RefreshCw className="h-4 w-4" />
+          </button>
         </div>
       </div>
-      <div className="overflow-x-auto">
-        <SchoolDataTable
-          data={students}
-          columns={[
-            { key: 'name', label: 'Student Name' },
-            { key: 'email', label: 'Email', className: 'hidden sm:table-cell' },
-            { key: 'grade', label: 'Grade' },
-            { key: 'status', label: 'Status', render: (status) => <span className={`px-2 py-1 rounded-full text-xs ${status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>{status}</span> },
-          ]}
-          actions={['edit', 'delete']}
-          onAction={(row, action) => {
-            if (action === 'edit') {
-              setEditingStudent(row);
-              setShowModal(true);
-            }
-            if (action === 'delete') {
-              setDeleteConfirm({ id: row.id, type: 'student' });
-            }
-          }}
-        />
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {[
+          ["Total Students", studentsApi.totalStudents, GraduationCap, "blue"],
+          ["Active", rows.filter((student) => student.displayStatus === "Active").length, UserCheck, "green"],
+          ["Inactive", rows.filter((student) => student.displayStatus === "Inactive").length, AlertTriangle, "yellow"]
+        ].map(([label, value, icon, color]) => (
+          <div key={label} className={`flex items-center justify-between rounded-xl border p-4 ${statStyles[color].background}`}>
+            <div><p className="text-sm text-gray-600">{label}</p><p className="text-2xl font-bold">{value}</p></div>
+            {React.createElement(icon, { className: `h-7 w-7 ${statStyles[color].foreground}` })}
+          </div>
+        ))}
       </div>
-      {showModal && <GenericModal item={editingStudent} type="student" onSave={(student) => {
-        if (editingStudent) {
-          updateStudent(student);
-        } else {
-          addStudent(student);
-        }
-        setShowModal(false);
-        setEditingStudent(null);
-      }} onClose={() => { setShowModal(false); setEditingStudent(null); }} />}
-      {deleteConfirm && deleteConfirm.type === 'student' && <DeleteConfirmModal item={students.find(s => s.id === deleteConfirm.id)} type="student" onConfirm={() => { deleteStudent(deleteConfirm.id); setDeleteConfirm(null); }} onCancel={() => setDeleteConfirm(null)} />}
+
+      {studentsApi.error && <p role="alert" className="text-sm text-red-600">{studentsApi.error.message}</p>}
+      <SchoolDataTable
+        data={rows}
+        loading={studentsApi.loading}
+        error={studentsApi.error?.message}
+        columns={[
+          { key: "displayName", label: "Student Name" },
+          { key: "email", label: "Email", className: "hidden sm:table-cell" },
+          { key: "displayClass", label: "Class" },
+          { key: "displayStatus", label: "Status", render: (status) => (
+            <span className={`rounded-full px-2 py-1 text-xs ${status === "Active" ? "bg-green-100 text-green-800" : status === "Inactive" ? "bg-red-100 text-red-800" : "bg-gray-100 text-gray-700"}`}>{status}</span>
+          ) },
+          { key: "actions", label: "", sortable: false, align: "right", render: (_, row) => (
+            <div className="flex justify-end gap-2">
+              <button className="text-blue-700 hover:underline" onClick={() => { setEditingStudent(row); setShowModal(true); }}>Edit</button>
+              <button className="text-red-700 hover:underline" onClick={() => setDeleteConfirm(row)}>Delete</button>
+            </div>
+          ) }
+        ]}
+        showPagination={false}
+      />
+
+      {studentsApi.totalPages > 1 && (
+        <div className="flex items-center justify-end gap-3">
+          <button className="rounded border px-3 py-2 disabled:opacity-50" disabled={!studentsApi.hasPreviousPage} onClick={() => studentsApi.handlePageChange(studentsApi.currentPage - 1)}>Previous</button>
+          <span>Page {studentsApi.currentPage} of {studentsApi.totalPages}</span>
+          <button className="rounded border px-3 py-2 disabled:opacity-50" disabled={!studentsApi.hasNextPage} onClick={() => studentsApi.handlePageChange(studentsApi.currentPage + 1)}>Next</button>
+        </div>
+      )}
+
+      {showModal && <GenericModal item={editingStudent} type="student" saving={studentsApi.mutating} onSave={saveStudent} onClose={() => { setShowModal(false); setEditingStudent(null); }} />}
+      {deleteConfirm && <DeleteConfirmModal item={deleteConfirm} type="student" onConfirm={removeStudent} onCancel={() => setDeleteConfirm(null)} />}
     </div>
   );
 };

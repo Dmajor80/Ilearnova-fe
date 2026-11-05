@@ -5,7 +5,7 @@ import { useOrganization } from "@/context/OrganizationContext";
 import useNotification from "@/hooks/useNotification";
 
 const Profile = () => {
-  const { user, refreshUser } = useOrganization();
+  const { user } = useOrganization();
   const [loading, setLoading] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [formData, setFormData] = useState({
@@ -39,6 +39,9 @@ const Profile = () => {
         country: profile.country || user.country || "",
       });
     }
+
+  console.log(user)
+
   }, [user]);
 
   const handleInputChange = (e) => {
@@ -118,6 +121,7 @@ const Profile = () => {
       </div>
     );
   }
+
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">

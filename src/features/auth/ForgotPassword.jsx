@@ -17,6 +17,7 @@ const InputField = React.memo(function InputField({
   onEnter,
   inputRef,
 }) {
+  
   return (
     <div className="mb-6 group">
       <label

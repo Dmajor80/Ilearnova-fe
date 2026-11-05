@@ -150,7 +150,7 @@ export default function VerifyOtp() {
         body: { email, otp },
         auth: false,
       });
-
+      console.log(data)
       const prefillEmail = data?.prefill?.email || email;
       const prefillUsername = data?.prefill?.username || email;
 

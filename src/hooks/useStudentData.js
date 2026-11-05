@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { http } from "@/api/baseClient";
 import useNotification from "@/hooks/useNotification";
 import { parseError, getUserFriendlyMessage, getNotificationType } from "@/lib/errorHandler";
-import { getSchoolGrades } from "@/api/schoolAdminApi";
+import { getSchoolGrades, createStudent as apiCreateStudent, deleteStudent as apiDeleteStudent } from "@/api/schoolAdminApi";
 import useApiCircuitBreaker from "@/hooks/useApiCircuitBreaker";
 
 /**
@@ -36,6 +36,9 @@ export default function useStudentData() {
   const [availableGrades, setAvailableGrades] = useState([]);
   const [gradesLoading, setGradesLoading] = useState(false);
   const [gradesError, setGradesError] = useState(null);
+
+  // Mutation loading state (create/update/delete)
+  const [mutating, setMutating] = useState(false);
 
 
 
@@ -71,7 +74,7 @@ export default function useStudentData() {
         auth: true,
         params: queryParams
       });
-      
+      console.log(payload)
       const data = payload?.data ?? payload;
       console.log("Students API response:", data);
 
@@ -192,6 +195,93 @@ export default function useStudentData() {
       return null;
     }
   }, [circuitBreaker, notification]);
+
+  /**
+   * Create a new student (StudentCreateUpdateRequest: email required).
+   * Reuses the existing createStudent() from schoolAdminApi.js rather than
+   * duplicating the POST call.
+   */
+  const createStudent = useCallback(async (studentData) => {
+    setMutating(true);
+    try {
+      const payload = await apiCreateStudent(studentData);
+      const data = payload?.data ?? payload;
+      console.log("Create student API response:", data);
+
+      notification.notify("Student added successfully", "success");
+      await fetchStudents();
+      return data;
+    } catch (err) {
+      const appError = parseError(err, { action: "create_student" });
+      const userMessage = getUserFriendlyMessage(appError);
+      const notificationType = getNotificationType(appError);
+
+      notification.notify(`Failed to add student: ${userMessage}`, notificationType);
+      console.warn("Failed to create student:", err);
+      throw appError;
+    } finally {
+      setMutating(false);
+    }
+  }, [notification, fetchStudents]);
+
+  /**
+   * Update an existing student (PatchedStudentCreateUpdateRequest - partial update).
+   * NOTE: schoolAdminApi.js already exports an updateStudent() but it calls
+   * http.put (a full replace) - fine for a complete edit form, but unsafe for
+   * partial updates like the activate/deactivate toggle below (PUT-ing just
+   * { is_active } would blank out the other required fields). This calls
+   * PATCH directly instead, matching the spec's PatchedStudentCreateUpdateRequest.
+   * If/when a full "edit student" form is built, prefer the PUT-based
+   * updateStudent() from schoolAdminApi.js for that case.
+   */
+  const updateStudent = useCallback(async (studentId, studentData) => {
+    setMutating(true);
+    try {
+      const payload = await http.patch(`/api/admin/school/students/${studentId}/`, studentData, {
+        auth: true
+      });
+      const data = payload?.data ?? payload;
+      console.log("Update student API response:", data);
+
+      notification.notify("Student updated successfully", "success");
+      await fetchStudents();
+      return data;
+    } catch (err) {
+      const appError = parseError(err, { action: "update_student" });
+      const userMessage = getUserFriendlyMessage(appError);
+      const notificationType = getNotificationType(appError);
+
+      notification.notify(`Failed to update student: ${userMessage}`, notificationType);
+      console.warn("Failed to update student:", err);
+      throw appError;
+    } finally {
+      setMutating(false);
+    }
+  }, [notification, fetchStudents]);
+
+  /**
+   * Delete a student. Reuses the existing deleteStudent() from
+   * schoolAdminApi.js (which correctly calls http.del, not http.delete).
+   */
+  const deleteStudent = useCallback(async (studentId) => {
+    setMutating(true);
+    try {
+      await apiDeleteStudent(studentId);
+
+      notification.notify("Student removed successfully", "success");
+      await fetchStudents();
+    } catch (err) {
+      const appError = parseError(err, { action: "delete_student" });
+      const userMessage = getUserFriendlyMessage(appError);
+      const notificationType = getNotificationType(appError);
+
+      notification.notify(`Failed to remove student: ${userMessage}`, notificationType);
+      console.warn("Failed to delete student:", err);
+      throw appError;
+    } finally {
+      setMutating(false);
+    }
+  }, [notification, fetchStudents]);
 
   /**
    * Refresh student data
@@ -366,6 +456,7 @@ export default function useStudentData() {
     students: filteredStudents,
     totalStudents,
     selectedStudent,
+    mutating,
 
     // Grades data
     availableGrades,
@@ -395,6 +486,9 @@ export default function useStudentData() {
     resetEndpoint: circuitBreaker.resetEndpoint,
     getEndpointStatus: circuitBreaker.getEndpointStatus,
     fetchStudentDetails,
+    createStudent,
+    updateStudent,
+    deleteStudent,
     fetchGrades,
     handleSearch,
     handleGradeFilter,

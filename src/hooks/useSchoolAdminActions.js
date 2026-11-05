@@ -30,6 +30,7 @@ export default function useSchoolAdminActions() {
    * Handle navigation between routes
    */
   const handleNavigation = useCallback((routeId) => {
+    console.log(routeId)
     setActiveRoute(routeId);
     // Close any open quick actions when navigating
     setQuickActionsOpen(false);
@@ -107,6 +108,65 @@ export default function useSchoolAdminActions() {
     handleNavigation("add-menu");
     closeQuickActions();
   }, [handleNavigation, closeQuickActions]);
+
+  /**
+   * Handle calendar/event-related actions
+   */
+  const handleViewCalendar = useCallback(() => {
+    handleNavigation("calendar-app");
+  }, [handleNavigation]);
+
+  const handleAddEvent = useCallback(() => {
+    handleNavigation("add-event");
+    closeQuickActions();
+  }, [handleNavigation, closeQuickActions]);
+
+  /**
+   * Handle academics (classes/subjects) actions
+   */
+  const handleViewClasses = useCallback(() => {
+    handleNavigation("classes");
+  }, [handleNavigation]);
+
+  const handleAddClass = useCallback(() => {
+    handleNavigation("classes");
+    closeQuickActions();
+  }, [handleNavigation, closeQuickActions]);
+
+  const handleViewSubjects = useCallback(() => {
+    handleNavigation("subjects");
+  }, [handleNavigation]);
+
+  /**
+   * Handle notification-related actions
+   */
+  const handleViewNotifications = useCallback(() => {
+    handleNavigation("notifications");
+  }, [handleNavigation]);
+
+  const handleSendNotification = useCallback(() => {
+    handleNavigation("notifications");
+    closeQuickActions();
+  }, [handleNavigation, closeQuickActions]);
+
+  /**
+   * Handle reports/export actions
+   */
+  const handleViewReports = useCallback(() => {
+    handleNavigation("reports");
+  }, [handleNavigation]);
+
+  const handleExportSchoolData = useCallback(() => {
+    handleNavigation("reports");
+    closeQuickActions();
+  }, [handleNavigation, closeQuickActions]);
+
+  /**
+   * Handle user management actions
+   */
+  const handleViewUsers = useCallback(() => {
+    handleNavigation("user-management");
+  }, [handleNavigation]);
 
   /**
    * Export student data
@@ -193,7 +253,7 @@ export default function useSchoolAdminActions() {
       students: "Student",
       teachers: "teacher-list",
       events: "calendar-app",
-      finance: "finance"
+      financial: "reports"
     };
 
     const route = navigationMap[metricId];
@@ -221,6 +281,13 @@ export default function useSchoolAdminActions() {
       description: "Add a new teacher to staff"
     },
     {
+      id: "add-parent",
+      label: "Add New Parent",
+      icon: "userPlus",
+      action: handleAddParent,
+      description: "Register a new parent"
+    },
+    {
       id: "export-students",
       label: "Export Student Data",
       icon: "download",
@@ -240,8 +307,47 @@ export default function useSchoolAdminActions() {
       icon: "utensils",
       action: handleAddMenu,
       description: "Add new food menu item"
+    },
+    {
+      id: "add-class",
+      label: "Add New Class",
+      icon: "users",
+      action: handleAddClass,
+      description: "Set up a new class"
+    },
+    {
+      id: "add-event",
+      label: "Add Calendar Event",
+      icon: "calendar",
+      action: handleAddEvent,
+      description: "Schedule a new school event"
+    },
+    {
+      id: "send-notification",
+      label: "Send Notification",
+      icon: "bell",
+      action: handleSendNotification,
+      description: "Broadcast a notification to parents, teachers, or students"
+    },
+    {
+      id: "export-school-data",
+      label: "Export School Data",
+      icon: "download",
+      action: handleExportSchoolData,
+      description: "Download a full school data export"
     }
-  ], [handleAddStudent, handleAddTeacher, handleExportStudentData, handleExportTeacherData, handleAddMenu]);
+  ], [
+    handleAddStudent,
+    handleAddTeacher,
+    handleAddParent,
+    handleExportStudentData,
+    handleExportTeacherData,
+    handleAddMenu,
+    handleAddClass,
+    handleAddEvent,
+    handleSendNotification,
+    handleExportSchoolData
+  ]);
 
   /**
    * Sidebar navigation items (memoized for performance)
@@ -301,8 +407,8 @@ export default function useSchoolAdminActions() {
       hasSubmenu: true,
       submenu: [
         { id: "calendar-app", label: "School Calendar", icon: "Calendar" },
-        { id: "events", label: "Events", icon: "Star" },
-        { id: "holidays", label: "Holidays", icon: "Sun" },
+        // { id: "events", label: "Events", icon: "Star" },
+        // { id: "holidays", label: "Holidays", icon: "Sun" },
         { id: "add-event", label: "Add Event", icon: "Plus" },
       ],
     },
@@ -314,97 +420,97 @@ export default function useSchoolAdminActions() {
       submenu: [
         { id: "subjects", label: "Subjects", icon: "Book" },
         { id: "classes", label: "Classes", icon: "Users" },
-        { id: "timetable", label: "Timetable", icon: "Clock" },
-        { id: "exams", label: "Exams", icon: "FileText" },
-        { id: "results", label: "Results", icon: "Award" },
+        // { id: "timetable", label: "Timetable", icon: "Clock" },
+        // { id: "exams", label: "Exams", icon: "FileText" },
+        // { id: "results", label: "Results", icon: "Award" },
       ],
     },
-    {
-      id: "finance",
-      icon: "DollarSign",
-      label: "Finance",
-      hasSubmenu: true,
-      submenu: [
-        { id: "fees", label: "Fee Management", icon: "CreditCard" },
-        { id: "expenses", label: "Expenses", icon: "Receipt" },
-        { id: "payroll", label: "Payroll", icon: "Banknote" },
-        { id: "reports", label: "Financial Reports", icon: "BarChart" },
-      ],
-    },
+    // {
+    //   id: "finance",
+    //   icon: "DollarSign",
+    //   label: "Finance",
+    //   hasSubmenu: true,
+    //   submenu: [
+    //     { id: "fees", label: "Fee Management", icon: "CreditCard" },
+    //     { id: "expenses", label: "Expenses", icon: "Receipt" },
+    //     { id: "payroll", label: "Payroll", icon: "Banknote" },
+    //     { id: "reports", label: "Financial Reports", icon: "BarChart" },
+    //   ],
+    // },
     {
       id: "communication",
       icon: "MessageSquare",
       label: "Communication",
       hasSubmenu: true,
       submenu: [
-        { id: "announcements", label: "Announcements", icon: "Megaphone" },
-        { id: "messages", label: "Messages", icon: "Mail" },
+        // { id: "announcements", label: "Announcements", icon: "Megaphone" },
+        // { id: "messages", label: "Messages", icon: "Mail" },
         { id: "notifications", label: "Notifications", icon: "Bell" },
-        { id: "newsletters", label: "Newsletters", icon: "Newspaper" },
+        // { id: "newsletters", label: "Newsletters", icon: "Newspaper" },
       ],
     },
-    {
-      id: "library",
-      icon: "Library",
-      label: "Library",
-      hasSubmenu: true,
-      submenu: [
-        { id: "books", label: "Books", icon: "Book" },
-        { id: "issue-return", label: "Issue/Return", icon: "RefreshCw" },
-        { id: "library-members", label: "Members", icon: "Users" },
-        { id: "library-reports", label: "Library Reports", icon: "FileText" },
-      ],
-    },
-    {
-      id: "transport",
-      icon: "Bus",
-      label: "Transport",
-      hasSubmenu: true,
-      submenu: [
-        { id: "routes", label: "Routes", icon: "Map" },
-        { id: "vehicles", label: "Vehicles", icon: "Truck" },
-        { id: "drivers", label: "Drivers", icon: "User" },
-        { id: "transport-fees", label: "Transport Fees", icon: "CreditCard" },
-      ],
-    },
-    {
-      id: "inventory",
-      icon: "Package",
-      label: "Inventory",
-      hasSubmenu: true,
-      submenu: [
-        { id: "items", label: "Items", icon: "Box" },
-        { id: "suppliers", label: "Suppliers", icon: "Truck" },
-        { id: "purchase", label: "Purchase Orders", icon: "ShoppingCart" },
-        { id: "stock", label: "Stock Management", icon: "Warehouse" },
-      ],
-    },
-    {
-      id: "reports",
-      icon: "BarChart3",
-      label: "Reports",
-      hasSubmenu: true,
-      submenu: [
-        { id: "student-reports", label: "Student Reports", icon: "Users" },
-        { id: "teacher-reports", label: "Teacher Reports", icon: "UserCheck" },
-        { id: "financial-reports", label: "Financial Reports", icon: "DollarSign" },
-        { id: "attendance-reports", label: "Attendance Reports", icon: "Calendar" },
-        { id: "academic-reports", label: "Academic Reports", icon: "GraduationCap" },
-      ],
-    },
-    {
-      id: "settings",
-      icon: "Settings",
-      label: "Settings",
-      hasSubmenu: true,
-      submenu: [
-        { id: "school-settings", label: "School Settings", icon: "Building" },
-        { id: "user-management", label: "User Management", icon: "Users" },
-        { id: "permissions", label: "Permissions", icon: "Shield" },
-        { id: "backup", label: "Backup & Restore", icon: "Database" },
-        { id: "system-logs", label: "System Logs", icon: "FileText" },
-      ],
-    }
+    // {
+    //   id: "library",
+    //   icon: "Library",
+    //   label: "Library",
+    //   hasSubmenu: true,
+    //   submenu: [
+    //     { id: "books", label: "Books", icon: "Book" },
+    //     { id: "issue-return", label: "Issue/Return", icon: "RefreshCw" },
+    //     { id: "library-members", label: "Members", icon: "Users" },
+    //     { id: "library-reports", label: "Library Reports", icon: "FileText" },
+    //   ],
+    // },
+    // {
+    //   id: "transport",
+    //   icon: "Bus",
+    //   label: "Transport",
+    //   hasSubmenu: true,
+    //   submenu: [
+    //     { id: "routes", label: "Routes", icon: "Map" },
+    //     { id: "vehicles", label: "Vehicles", icon: "Truck" },
+    //     { id: "drivers", label: "Drivers", icon: "User" },
+    //     { id: "transport-fees", label: "Transport Fees", icon: "CreditCard" },
+    //   ],
+    // },
+    // {
+    //   id: "inventory",
+    //   icon: "Package",
+    //   label: "Inventory",
+    //   hasSubmenu: true,
+    //   submenu: [
+    //     { id: "items", label: "Items", icon: "Box" },
+    //     { id: "suppliers", label: "Suppliers", icon: "Truck" },
+    //     { id: "purchase", label: "Purchase Orders", icon: "ShoppingCart" },
+    //     { id: "stock", label: "Stock Management", icon: "Warehouse" },
+    //   ],
+    // },
+    // {
+    //   id: "reports",
+    //   icon: "BarChart3",
+    //   label: "Reports",
+    //   hasSubmenu: true,
+    //   submenu: [
+    //     { id: "student-reports", label: "Student Reports", icon: "Users" },
+    //     { id: "teacher-reports", label: "Teacher Reports", icon: "UserCheck" },
+    //     { id: "financial-reports", label: "Financial Reports", icon: "DollarSign" },
+    //     { id: "attendance-reports", label: "Attendance Reports", icon: "Calendar" },
+    //     { id: "academic-reports", label: "Academic Reports", icon: "GraduationCap" },
+    //   ],
+    // },
+    // {
+    //   id: "settings",
+    //   icon: "Settings",
+    //   label: "Settings",
+    //   hasSubmenu: true,
+    //   submenu: [
+    //     { id: "school-settings", label: "School Settings", icon: "Building" },
+    //     { id: "user-management", label: "User Management", icon: "Users" },
+    //     { id: "permissions", label: "Permissions", icon: "Shield" },
+    //     { id: "backup", label: "Backup & Restore", icon: "Database" },
+    //     { id: "system-logs", label: "System Logs", icon: "FileText" },
+    //   ],
+    // }
   ], []); // Empty dependency array since this is static data
 
   return {
@@ -431,6 +537,16 @@ export default function useSchoolAdminActions() {
     handleViewParents,
     handleViewMenu,
     handleAddMenu,
+    handleViewCalendar,
+    handleAddEvent,
+    handleViewClasses,
+    handleAddClass,
+    handleViewSubjects,
+    handleViewNotifications,
+    handleSendNotification,
+    handleViewReports,
+    handleExportSchoolData,
+    handleViewUsers,
     handleExportStudentData,
     handleExportTeacherData,
     handleMetricClick,

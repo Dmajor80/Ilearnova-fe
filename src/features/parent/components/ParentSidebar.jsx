@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   User,
   BookOpen,
@@ -23,8 +23,6 @@ import {
   LogOut,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { logout } from "@/api/authApi";
-import { clearAuth } from "@/api/auth";
 
 function ParentSidebar({ activeTab, setActiveTab, isMobileMenuOpen, setIsMobileMenuOpen }) {
   const navigate = useNavigate();
@@ -33,6 +31,7 @@ function ParentSidebar({ activeTab, setActiveTab, isMobileMenuOpen, setIsMobileM
     setActiveTab(tabId);
     const routes = {
       dashboard: '/parent-dashboard',
+      children: '/parent-dashboard',
       announcement: '/parent-dashboard',
       attendance: '/parent-attendance',
       grades: '/parent-dashboard',
@@ -52,21 +51,10 @@ function ParentSidebar({ activeTab, setActiveTab, isMobileMenuOpen, setIsMobileM
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      clearAuth();
-      navigate("/login");
-    } catch (error) {
-      console.error("Logout failed:", error);
-      clearAuth();
-      navigate("/login");
-    }
-  };
-
   // Navigation links data based on available page files
   const navLinks = [
     { id: "dashboard", icon: <ClipboardList size={20} />, label: "Dashboard" },
+    { id: "children", icon: <Users size={20} />, label: "My Children" },
     { id: "announcement", icon: <Bell size={20} />, label: "Announcements" },
     { id: "attendance", icon: <Calendar size={20} />, label: "Attendance" },
     { id: "grades", icon: <Star size={20} />, label: "Grades & Results" },

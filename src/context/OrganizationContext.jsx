@@ -1,17 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { getTokens } from "../api/auth";
 
-/**
- * OrganizationContext
- * - Holds the user's organizations and currentOrgId selection
- * - Persists selectedOrgId back to the same storage as user_data
- *
- * Minimal skeleton:
- * - Initializes from user_data in storage
- * - Auto-picks first org if only one exists
- * - Exposes setter to update selection (and persist to storage)
- */
-
 const OrganizationContext = createContext(null);
 
 function readUserDataFromStorage() {
@@ -30,6 +19,7 @@ function readUserDataFromStorage() {
 function writeUserDataToStorage(nextUser) {
   try {
     const { store } = getTokens();
+    console.log(store + "write user")
     const json = JSON.stringify(nextUser);
     // Prefer the same store that currently holds tokens
     if (store) {
@@ -56,6 +46,7 @@ export function OrganizationProvider({ children }) {
 
     function init() {
       const userData = readUserDataFromStorage();
+      console.log(userData)
 
       // Debug logging to help identify the issue
       console.log("OrganizationContext: User data loaded:", userData);
@@ -126,6 +117,7 @@ export function OrganizationProvider({ children }) {
 
   const persistSelectedOrgId = useCallback((orgId) => {
     const userData = readUserDataFromStorage();
+    console.log(userData)
     if (!userData) return;
     const nextUser = {
       ...userData,
@@ -147,7 +139,7 @@ export function OrganizationProvider({ children }) {
       // Fetch fresh user data from backend API
       const token = localStorage.getItem('token') || '';
       console.log("OrganizationContext: Using token:", token ? 'present' : 'missing');
-      const response = await fetch('/api/me', {
+      const response = await fetch('/api/auth/profile/', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -159,6 +151,7 @@ export function OrganizationProvider({ children }) {
         throw new Error(`Failed to fetch user data: ${response.status} ${response.statusText}`);
       }
       const userData = await response.json();
+      console.log(userData)
       console.log("OrganizationContext: Fetched user data:", userData);
       if (userData) {
         // Create a new object reference to ensure React detects the change
@@ -174,7 +167,6 @@ export function OrganizationProvider({ children }) {
       console.error("OrganizationContext: Error refreshing user data:", error);
     }
   }, []);
-
   const value = useMemo(
     () => ({
       loading,

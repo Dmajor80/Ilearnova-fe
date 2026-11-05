@@ -4,6 +4,7 @@ import {
   MessageCircle,
   Calendar,
   FileText,
+  ClipboardCheck,
   Clock,
   Award,
   ChevronRight,
@@ -23,6 +24,7 @@ import {
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { logout } from "@/api/authApi";
 import { clearAuth } from "@/api/auth";
+import { useOrganization } from "@/context/OrganizationContext";
 
 // Main application component
 export default function StudentDashboard() {
@@ -33,13 +35,15 @@ export default function StudentDashboard() {
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useOrganization();
+
 
   // Mock dashboard data - replace with actual API call
-  const [dashboardData, setDashboardData] = useState({
-    user: {
-      profile_pic: "/default-profile.png"
-    }
-  });
+  // const [dashboardData, setDashboardData] = useState({
+  //   user: {
+  //     profile_pic: "/default-profile.png"
+  //   }
+  // });
 
   // Navigation links data
   const navLinks = [
@@ -97,6 +101,12 @@ export default function StudentDashboard() {
       icon: <BookOpen size={20} />,
       label: "Exam",
       air: "exam",
+    },
+    {
+      id: "cbt",
+      icon: <ClipboardCheck size={20} />,
+      label: "CBT Exams",
+      air: "cbt",
     },
     {
       id: "forums",
@@ -271,11 +281,21 @@ export default function StudentDashboard() {
                   aria-haspopup="true"
                   aria-expanded={isProfileDropdownOpen}
                 >
-                  <img
-                    src={dashboardData?.user?.profile_pic || "/default-profile.png"}
+                  {/* {
+                    user.profile_pic?
+                    <img
+                    src={user.profile_pic || "/default-profile.png"}
                     alt="Profile"
                     className="w-10 h-10 rounded-full object-cover border-2 border-gradient-to-r from-blue-500 to-indigo-500 shadow-md"
-                  />
+                  />:
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-blue-500 bg-blue-50 text-blue-600 shadow-md" aria-label="Profile">
+                    <User className="h-5 w-5" />
+                  </span>
+                  } */}
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-blue-500 bg-blue-50 text-blue-600 shadow-md" aria-label="Profile">
+                    <User className="h-5 w-5" />
+                  </span>
+                  
                   <ChevronDown className="w-4 h-4 text-slate-600" />
                 </button>
                 {/* Dropdown menu */}

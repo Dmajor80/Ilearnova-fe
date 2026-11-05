@@ -62,6 +62,7 @@ import { CoursesComponent } from "@/features/student/CoursesComponent";
 import CoursePage from "@/features/student/CoursePage";
 import Result from "@/features/student/Result";
 import Exam from "@/features/student/Exam";
+import StudentCbt from "@/features/cbt/StudentCbt";
 
 // Communication Features
 import { ForumList, ForumDetail, VideoCallList, VideoCallRoom } from "@/features/communication";
@@ -75,6 +76,11 @@ import XAPIStatementViewer from "@/features/analytics/components/XAPIStatementVi
 /* Removed imports of non-existent components to fix errors */
 import BirthdayDashboard from "@/features/birthday/BirthdayDashboard"; // Remove or comment out if file does not exist
 import VirtualLearningDashboard from "@/features/virtual-learning/VirtualLearningDashboard"; // Remove or comment out if file does not exist
+import { ParentListContent } from "./features/school-admin/ParentListContent";
+import { TeacherListContent } from "./features/school-admin/TeacherListContent";
+import HomePageRefresh from "./pages/HomePageRefresh";
+// import { ParentListContentNew } from "./features/school-admin/ParentListContentNew";
+
 // import ParentDashboard from "@/features/parent/Pages/ParentDashboard"; // Removed due to missing file
 // import IndividualLearnerPersonalDashboard from "@/features/individual-learners/components/IndividualLearnerPersonalDashboard"; // Removed due to missing file
 // import ParentDashboard from "@/features/parent/Pages/ParentDashboard";
@@ -102,6 +108,7 @@ const AppContent = () => {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      {/* <Route path="/" element={<HomePageRefresh />} /> */}
       <Route path="/home" element={<RegisteredHomePage />} />
       {/* Authentication Routes - Temporarily disabled for development */}
       <Route path="/new-login" element={<Navigate to="/login" replace />} />
@@ -121,8 +128,11 @@ const AppContent = () => {
       <Route path="/parent-login" element={<Navigate to="/login" replace />} />
       <Route path="/Admin-login" element={<Navigate to="/login" replace />} />
       {/* Dashboard Routes - Authentication temporarily disabled for development */}
+
       <Route path="/profile" element={<Profile />} />
+
       <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
+
       {/* Student Dashboard with nested routes */}
       <Route path="/student-dashboard" element={<StudentDashboard />}>
         <Route index element={<Overview />} />
@@ -136,8 +146,10 @@ const AppContent = () => {
         <Route path="courses/:courseId" element={<CoursePage />} />
         <Route path="result" element={<Result />} />
         <Route path="exam" element={<Exam />} />
+        <Route path="cbt" element={<StudentCbt />} />
         <Route path="*" element={<Error />} />
       </Route>
+      
       {/* Admin Dashboard */}
       <Route path="/admin-dashboard" element={<AdminDashboard />}>
         <Route path="dashboard" element={<Dashboard />} />
@@ -179,6 +191,10 @@ const AppContent = () => {
       <Route path="/analytics" element={<LearningAnalytics />} />
       <Route path="/transcripts" element={<TranscriptViewer />} />
       <Route path="/xapi-statements" element={<XAPIStatementViewer />} />
+
+      {/* <Route path="/parent-list" element={<ParentListContentNew/>} /> */}
+      {/* <Route path="/teacher-list" element={<TeacherListContentNew/>} /> */}
+
       {/* Catch-all route for 404 errors */}
       <Route path="*" element={<Error />} />
     </Routes>

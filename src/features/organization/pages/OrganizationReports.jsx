@@ -1,30 +1,46 @@
 import React from "react";
-import { ArrowRight } from "lucide-react";
+import useOrganizationReports from "@/hooks/organization/useSchoolExport";
+import { Download, FileText } from "lucide-react";
 
 const OrganizationReports = () => {
+  const reports = useOrganizationReports();
+
+  const downloadExport = async () => {
+    try {
+      await reports.exportSchoolData();
+    } catch (error) {
+      console.warn("Unable to download organization export:", error);
+    }
+  };
+
   return (
-    <div className="bg-white p-3 sm:p-4 md:p-6 rounded-xl shadow-sm">
-      <h3 className="text-lg sm:text-xl md:text-2xl font-semibold mb-4">Reports & Documents</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 md:gap-6">
-        <div className="p-3 sm:p-4 md:p-6 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="text-sm sm:text-base font-medium">Monthly Performance Report</h4>
-              <p className="text-xs sm:text-sm text-gray-600">Generated on {new Date().toLocaleDateString()}</p>
-            </div>
-            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
-          </div>
-        </div>
-        <div className="p-3 sm:p-4 md:p-6 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="text-sm sm:text-base font-medium">Student Enrollment Report</h4>
-              <p className="text-xs sm:text-sm text-gray-600">Generated on {new Date().toLocaleDateString()}</p>
-            </div>
-            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
-          </div>
-        </div>
+    <div className="space-y-5 rounded-xl bg-white p-4 shadow-sm md:p-6">
+      <div className="border-b pb-4">
+        <h3 className="text-xl font-semibold">Reports & Documents</h3>
+        <p className="mt-1 text-sm text-gray-600">Download the school data export provided by the admin API.</p>
       </div>
+      <div className="flex flex-col gap-4 rounded-xl border p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <span className="rounded-lg bg-blue-50 p-3 text-blue-700"><FileText className="h-6 w-6" /></span>
+          <div>
+            <h4 className="font-medium">School data export</h4>
+            <p className="text-sm text-gray-600">Exports data using the configured school admin endpoint.</p>
+          </div>
+        </div>
+        <button
+          onClick={downloadExport}
+          disabled={reports.exporting}
+          className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <Download className="h-4 w-4" />
+          {reports.exporting ? "Preparing export…" : "Download export"}
+        </button>
+      </div>
+      {reports.notification.show && (
+        <p role="status" className={`rounded-lg p-3 text-sm ${reports.notification.type === "success" ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"}`}>
+          {reports.notification.message}
+        </p>
+      )}
     </div>
   );
 };

@@ -34,6 +34,7 @@ export default function SelectUserType() {
   }, [navigate]);
 
   const postUserType = async (body) => {
+    console.log(body)
     const token = getToken();
     if (!token) {
       showNotification("Authentication required. Please log in again.", "error");
@@ -66,7 +67,7 @@ export default function SelectUserType() {
     await postUserType({ "account_type": "individual" });
   };
 
-  const onSelectOrganization = () => {
+  const onSelectOrganization = async () => {
     try {
       sessionStorage.setItem("selected_user_type", "organization");
       localStorage.setItem("selected_user_type", "organization");

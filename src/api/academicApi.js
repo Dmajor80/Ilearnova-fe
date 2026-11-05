@@ -7,7 +7,7 @@ import { http } from "@/api/baseClient";
 
 // Classes API
 export const getClasses = async (params = {}) => {
-  return await http.get("/api/classes", { auth: true, params });
+  return await http.get("/api/classes/", { auth: true, params });
 };
 
 export const createClass = async (classData) => {

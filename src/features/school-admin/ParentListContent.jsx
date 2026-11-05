@@ -1,27 +1,34 @@
 import React, { useState } from "react";
 import {
   Search,
-  Plus,
   Phone,
   Mail,
   MoreHorizontal,
   ChevronLeft,
   ChevronRight,
-  X,
-  Calendar,
   User,
-  MapPin,
   Users,
   ArrowLeft,
-  Timer,
-  LocationEdit,
-  LocationEditIcon,
+  RefreshCw,
+  Loader2,
+  AlertCircle,
+  Trash2,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
-import ss from "../../assets/9.jpg";
 import { PaymentHistory } from "./PaymentHistory";
+import useParentData from "@/hooks/useParentData";
+import ErrorBoundary from "@/components/ui/ErrorBoundary";
+import NotificationBar from "@/components/ui/NotificationBar";
+import Avatar from "@/components/ui/Avatar";
+import { formatRegistrationDate } from "@/lib/formatters";
 
-// parent Details Component
-const ParentDetails = ({ parent, onBack }) => {
+// Parent Details Component
+const ParentDetails = ({ parent, onBack, onToggleActive, onDelete, mutating }) => {
+  const fullName =
+    `${parent.first_name || ""} ${parent.last_name || ""}`.trim() ||
+    parent.username;
+
   return (
     <div className="min-h-screen ">
       {/* Header */}
@@ -45,17 +52,19 @@ const ParentDetails = ({ parent, onBack }) => {
         {/* Main Content */}
         <div className="flex flex-col w-full">
           <div className="  flex-1 p-6 relative ">
-            {/* parent Profile Card */}
+            {/* Parent Profile Card */}
             <div className="bg-gradient-to-r bg-[#3d3690] rounded-xl p-6   overflow-hidden h-[200px]">
               <div className=""></div>
               <div className=""></div>
 
               <div className="absolute mt-[2rem]  flex flex-col items-center space-x-6">
-                <div className="w-40 h-40  rounded-full flex items-center justify-center text-4xl  ">
-                  <img
-                    src={parent.avatar}
-                    alt=""
-                    className="border-10 border-b-white border-t-white border-l-white border-r-white  rounded-full z-1 p-0"
+                <div className="w-40 h-40 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
+                  <Avatar
+                    src={parent.avatar || parent.profile_picture}
+                    name={fullName}
+                    size="w-36 h-36"
+                    textSize="text-4xl"
+                    className="border-4 border-white"
                   />
                 </div>
                 <div className="absolute flex justify-center right-[-35rem] z-0 mt-[0.6rem]">
@@ -67,140 +76,96 @@ const ParentDetails = ({ parent, onBack }) => {
                 </div>
                 <div className="mt-[1rem] z-40 ">
                   <h2 className="text-3xl font-bold mb-1 text-[#303972] font-poppins">
-                    {parent.name}
+                    {fullName}
                   </h2>
                   <p className="text-[#4D44B5] mb-1 font-poppins text-[16px] font-semibold text-center">
                     Parent
                   </p>
-                  <div className="flex items-center space-x-4">
-                    {/* <span className="text-sm bg-white bg-opacity-20 px-3 py-1 rounded-full">
-                    {parent.id}
-                  </span> */}
+                  <div className="flex items-center justify-center space-x-2">
+                    <span
+                      className={`inline-flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full ${
+                        parent.is_active
+                          ? "bg-green-100 text-green-700"
+                          : "bg-gray-200 text-gray-600"
+                      }`}
+                    >
+                      {parent.is_active ? (
+                        <CheckCircle className="w-3 h-3" />
+                      ) : (
+                        <XCircle className="w-3 h-3" />
+                      )}
+                      {parent.is_active ? "Active" : "Inactive"}
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Contact Information */}
-            <div className="p-8 bg-[white] grid grid-col-1 lg:grid-cols-2 gap-6 mb-6 pt-[8rem]  relative">
-              {/* parent information */}
-              <div className="flex items-center gap-3">
-                <div className="bg-[#FB7D5B] w-fit rounded-full p-[5px]">
-                  <User size={40} className="text-[white]" />
-                </div>
-                <div>
-                  <h1 className="text-[#A098AE]">Child Name:</h1>
-                  <p className="text-[#303972] font-poppins font-semibold">
-                    {" "}
-                    {parent.childName}
-                  </p>
-                </div>
-              </div>
-              {/* end of parent information */}
-              {/* add information */}
-              <div className="flex items-center gap-3">
-                <div className="bg-[#FB7D5B] w-fit rounded-full p-[10px]">
-                  <LocationEditIcon size={30} className="text-[white]" />
-                </div>
-                <div>
-                  <h1 className="text-[#A098AE]">Address:</h1>
-                  <p className="text-[#303972] font-poppins font-semibold">
-                    {" "}
-                    {parent.city}
-                  </p>
-                </div>
-              </div>
-              {/* end of add information */}
-              {/* Phone information */}
-              <div className="flex items-center gap-3">
-                <div className="bg-[#FB7D5B] w-fit rounded-full p-[10px]">
-                  <Phone size={30} className="text-[white]" />
-                </div>
-                <div>
-                  <h1 className="text-[#A098AE]">Phone:</h1>
-                  <p className="text-[#303972] font-poppins font-semibold">
-                    {parent.Phone}
-                  </p>
-                </div>
-              </div>
-              {/* end of phone information */}
-              {/* Email information */}
+            <div className="p-8 bg-[white] grid grid-col-1 lg:grid-cols-2 gap-6 mb-2 pt-[8rem]  relative">
+              {/* Username */}
               <div className="flex items-center gap-3">
                 <div className="bg-[#FB7D5B] w-fit rounded-full p-[10px]">
                   <User size={30} className="text-[white]" />
                 </div>
                 <div>
+                  <h1 className="text-[#A098AE]">Username:</h1>
+                  <p className="text-[#303972] font-poppins font-semibold">
+                    {parent.username}
+                  </p>
+                </div>
+              </div>
+              {/* Email */}
+              <div className="flex items-center gap-3">
+                <div className="bg-[#FB7D5B] w-fit rounded-full p-[10px]">
+                  <Mail size={30} className="text-[white]" />
+                </div>
+                <div>
                   <h1 className="text-[#A098AE]">Email:</h1>
                   <p className="text-[#303972] font-poppins font-semibold">
-                    {" "}
                     {parent.email}
                   </p>
                 </div>
               </div>
-              {/* end of parent information */}
+              {/* Date joined */}
+              <div className="flex items-center gap-3">
+                <div className="bg-[#FB7D5B] w-fit rounded-full p-[10px]">
+                  <Phone size={30} className="text-[white]" />
+                </div>
+                <div>
+                  <h1 className="text-[#A098AE]">Member Since:</h1>
+                  <p className="text-[#303972] font-poppins font-semibold">
+                    {formatRegistrationDate(parent)}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="px-8 pb-6 flex gap-3">
+              <button
+                onClick={() => onToggleActive(parent)}
+                disabled={mutating}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 ${
+                  parent.is_active
+                    ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    : "bg-green-100 text-green-700 hover:bg-green-200"
+                }`}
+              >
+                {parent.is_active ? "Deactivate" : "Activate"}
+              </button>
+              <button
+                onClick={() => onDelete(parent)}
+                disabled={mutating}
+                className="px-4 py-2 rounded-lg text-sm font-semibold bg-red-50 text-red-600 hover:bg-red-100 transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                Remove Parent
+              </button>
             </div>
           </div>
           <div>
             <PaymentHistory />
-          </div>
-        </div>
-        {/* Schedule Sidebar */}
-        <div className="w-120   p-6">
-          <div className="space-y-4">
-            <div className="border-l-8 rounded-[10px] border-[#4D44B5] pl-4 py-3 bg-[white]">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-semibold text-gray-800">Basic Algorithm</h4>
-                <div className="w-7 h-7 bg-gray-200 rounded-full"></div>
-              </div>
-              <p className="text-sm text-gray-500 mb-2">Algorithm</p>
-              <div className="flex flex-col space-x-4 text-sm text-gray-500">
-                <span className="flex items-center mb-2">
-                  <Calendar className="w-5 h-5 mr-1 text-red-600" />
-                  March 20, 2022
-                </span>
-
-                <span className="flex items-center mb-2">
-                  <Timer className="w-5 h-5 mr-1 text-amber-300" />
-                  09:00 - 10:00 AM
-                </span>
-              </div>
-            </div>
-            <div className="border-l-8 rounded-[10px] border-[#4D44B5] pl-4 py-3 bg-[white]">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-semibold text-gray-800">Basic Algorithm</h4>
-                <div className="w-7 h-7 bg-gray-200 rounded-full"></div>
-              </div>
-              <p className="text-sm text-gray-500 mb-2">Algorithm</p>
-              <div className="flex flex-col space-x-4 text-sm text-gray-500">
-                <span className="flex items-center mb-2">
-                  <Calendar className="w-5 h-5 mr-1 text-red-600" />
-                  March 20, 2022
-                </span>
-
-                <span className="flex items-center mb-2">
-                  <Timer className="w-5 h-5 mr-1 text-amber-300" />
-                  09:00 - 10:00 AM
-                </span>
-              </div>
-            </div>
-            <div className="border-l-8 rounded-[10px] border-[#4D44B5] pl-4 py-3 bg-[white]">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-semibold text-gray-800">Basic Algorithm</h4>
-                <div className="w-7 h-7 bg-gray-200 rounded-full"></div>
-              </div>
-              <p className="text-sm text-gray-500 mb-2">Algorithm</p>
-              <div className="flex flex-col space-x-4 text-sm text-gray-500">
-                <span className="flex items-center mb-2">
-                  <Calendar className="w-5 h-5 mr-1 text-red-600" />
-                  March 20, 2022
-                </span>
-
-                <span className="flex items-center mb-2">
-                  <Timer className="w-5 h-5 mr-1 text-amber-300" />
-                  09:00 - 10:00 AM
-                </span>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -209,411 +174,339 @@ const ParentDetails = ({ parent, onBack }) => {
 };
 
 export const ParentListContent = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [sortBy, setSortBy] = useState("newest");
-  const [showModal, setShowModal] = useState(false);
-  const [selectedParent, setSelectedParent] = useState(null);
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    dateOfBirth: "",
-    address: "",
-    parentName: "",
-    parentPhone: "",
-    grade: "",
-    city: "",
-  });
+  const {
+    loading,
+    error,
+    parents,
+    totalParents,
+    selectedParent,
+    mutating,
+    currentPage,
+    totalPages,
+    parentsPerPage,
+    hasNextPage,
+    hasPreviousPage,
+    searchQuery,
+    ordering,
+    refreshData,
+    updateParent,
+    deleteParent,
+    handleSearch,
+    handleOrderingChange,
+    handlePageChange,
+    handleParentSelect,
+    clearParentSelection,
+    notification
+  } = useParentData();
 
-  // Sample parent data based on your images
-  const parents = [
-    {
-      id: "ID 123456789",
-      name: "Dakota Farral",
-      date: "March 25, 2021",
-      childName: "Miranda Adila",
-      city: "Jakarta",
-      avatar: ss,
-      Phone: "+123456780",
-      email: "karen123@gmail",
-    },
-    {
-      id: "ID 123456789",
-      name: "Dakota Farral",
-      date: "March 25, 2021",
-      childName: "Miranda Adila",
-      city: "Jakarta",
-      avatar: ss,
-      Phone: "+123456780",
-      email: "karen123@gmail",
-    },
-    {
-      id: "ID 123456789",
-      name: "Dakota Farral",
-      date: "March 25, 2021",
-      childName: "Miranda Adila",
-      city: "Jakarta",
-      avatar: ss,
-      Phone: "+123456780",
-      email: "karen123@gmail",
-    },
-    {
-      id: "ID 123456789",
-      name: "Dakota Farral",
-      date: "March 25, 2021",
-      childName: "Miranda Adila",
-      city: "Jakarta",
-      avatar: ss,
-      Phone: "+123456780",
-      email: "karen123@gmail",
-    },
-    {
-      id: "ID 123456789",
-      name: "Dakota Farral",
-      date: "March 25, 2021",
-      childName: "Miranda Adila",
-      city: "Jakarta",
-      avatar: ss,
-      Phone: "+123456780",
-      email: "karen123@gmail",
-    },
-    {
-      id: "ID 123456789",
-      name: "Dakota Farral",
-      date: "March 25, 2021",
-      childName: "Miranda Adila",
-      city: "Jakarta",
-      avatar: ss,
-      Phone: "+123456780",
-      email: "karen123@gmail",
-    },
-    {
-      id: "ID 123456789",
-      name: "Dakota Farral",
-      date: "March 25, 2021",
-      childName: "Miranda Adila",
-      city: "Jakarta",
-      avatar: ss,
-      Phone: "+123456780",
-      email: "karen123@gmail",
-    },
-    {
-      id: "ID 123456789",
-      name: "Dakota Farral",
-      date: "March 25, 2021",
-      childName: "Miranda Adila",
-      city: "Jakarta",
-      avatar: ss,
-      Phone: "+123456780",
-      email: "karen123@gmail",
-    },
-    {
-      id: "ID 123456789",
-      name: "Dakota Farral",
-      date: "March 25, 2021",
-      childName: "Miranda Adila",
-      city: "Jakarta",
-      avatar: ss,
-      Phone: "+123456780",
-      email: "karen123@gmail",
-    },
-    {
-      id: "ID 123456789",
-      name: "Dakota Farral",
-      date: "March 25, 2021",
-      childName: "Miranda Adila",
-      city: "Jakarta",
-      avatar: ss,
-      Phone: "+123456780",
-      email: "karen123@gmail",
-    },
-  ];
+  const [searchInput, setSearchInput] = useState("");
 
-  const parentPerPage = 10;
-  const totalPages = Math.ceil(parents.length / parentPerPage);
-  const startIndex = (currentPage - 1) * parentPerPage;
-  const currentStudents = parents.slice(startIndex, startIndex + parentPerPage);
+  const startIndex = (currentPage - 1) * parentsPerPage;
+  const endIndex = Math.min(startIndex + parentsPerPage, totalParents);
+  const currentParents = parents;
 
-  const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
+  const handleSearchInputChange = (e) => {
+    const value = e.target.value;
+    setSearchInput(value);
+    // Debounce search to avoid too many API calls
+    setTimeout(() => {
+      handleSearch(value);
+    }, 300);
   };
 
   const handleParentClick = (parent) => {
-    setSelectedParent(parent);
+    handleParentSelect(parent);
   };
 
   const handleBackToList = () => {
-    setSelectedParent(null);
+    clearParentSelection();
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Handle form submission here
-    console.log("Form submitted:", formData);
-    setShowModal(false);
-    // Reset form
-    setFormData({
-      firstName: "",
-      lastName: "",
-      email: "",
-      phone: "",
-      dateOfBirth: "",
-      address: "",
-      parentName: "",
-      parentPhone: "",
-      grade: "",
-      city: "",
-    });
+  const handleToggleActive = async (parent) => {
+    try {
+      await updateParent(parent.id, { is_active: !parent.is_active });
+      clearParentSelection();
+    } catch (err) {
+      // Notification already surfaced by the hook
+    }
+  };
+
+  const handleDeleteParent = async (parent) => {
+    if (!window.confirm(`Remove ${parent.username} from parents? This cannot be undone.`)) {
+      return;
+    }
+    try {
+      await deleteParent(parent.id);
+      clearParentSelection();
+    } catch (err) {
+      // Notification already surfaced by the hook
+    }
   };
 
   // Show parent details if a parent is selected
   if (selectedParent) {
-    return <ParentDetails parent={selectedParent} onBack={handleBackToList} />;
+    return (
+      <ParentDetails
+        parent={selectedParent}
+        onBack={handleBackToList}
+        onToggleActive={handleToggleActive}
+        onDelete={handleDeleteParent}
+        mutating={mutating}
+      />
+    );
   }
 
   return (
-    <div className=" min-h-screen p-6">
-      {/* Header */}
-      <div className="flex justify-between items-center p-6 bg-[white] mb-10">
-        <div className="flex items-center space-x-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Search here..."
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="newest">Newest</option>
-            <option value="oldest">Oldest</option>
-            <option value="name">Name</option>
-          </select>
-        </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="bg-[#4D44B5] hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-        >
-          <Plus className="w-4 h-4 font-semibold" />
-          <span className="text-[13px] font-semibold">New Parent</span>
-        </button>
-      </div>
-      <div className="">
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="">
-              <tr className="bg-[#f3f1f8]">
-                <th className="px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider cursor-pointer hover:bg-gray-100">
-                  <input type="checkbox" className="rounded border-gray-300" />
-                </th>
-                <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider cursor-pointer hover:bg-gray-100">
-                  Name ↕
-                </th>
-                <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider cursor-pointer hover:bg-gray-100">
-                  ID ↕
-                </th>
-                <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider cursor-pointer hover:bg-gray-100">
-                  Date ↕
-                </th>
-                <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider cursor-pointer hover:bg-gray-100">
-                  Child Name ↕
-                </th>
-                <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider cursor-pointer hover:bg-gray-100">
-                  City ↕
-                </th>
-                <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider cursor-pointer hover:bg-gray-100">
-                  Contact ↕
-                </th>
+    <ErrorBoundary>
+      <div className="min-h-screen p-6">
+        {/* Notification */}
+        {notification.show && (
+          <NotificationBar
+            message={notification.message}
+            type={notification.type}
+            onClose={notification.hide}
+          />
+        )}
 
-                <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider cursor-pointer hover:bg-gray-100">
-                  Action ↕
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-[white] rounded-[5px]">
-              {currentStudents.map((parent, index) => (
-                <tr
-                  key={index}
-                  className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
-                  onClick={() => handleParentClick(parent)}
-                >
-                  <td className="p-4" onClick={(e) => e.stopPropagation()}>
-                    <input
-                      type="checkbox"
-                      className="rounded border-gray-300"
-                    />
-                  </td>
-                  <td className="p-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8   flex items-center justify-center text-sm">
-                        <img
-                          src={parent.avatar}
-                          alt=""
-                          className="rounded-full"
-                        />
-                      </div>
-                      <span className="font-bold text-[#303972] text-[16px] font-poppins">
-                        {parent.name}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="p-4 text-[#4D44B5] font-bold text-[16px] font-poppins">
-                    {parent.id}
-                  </td>
-                  <td className="p-4 text-[#A098AE] text-[16px] font-normal font-poppins">
-                    {parent.date}
-                  </td>
-                  <td className="p-4 text-[#303972] text-[16px] font-normal font-poppins">
-                    {parent.childName}
-                  </td>
-                  <td className="p-4 text-[#303972] text-[16px] font-normal font-poppins">
-                    {parent.city}
-                  </td>
-                  <td className="p-4" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex space-x-2">
-                      <button className="p-2  bg-[#EBEBF9] hover:text-blue-600 rounded-full">
-                        <Phone className="w-5 h-5 text-[#A098AE]" />
-                      </button>
-                      <button className="p-2  hover:text-blue-600 bg-[#EBEBF9] rounded-full">
-                        <Mail className="w-5 h-5 text-[#A098AE]" />
-                      </button>
-                    </div>
-                  </td>
-
-                  <td className="p-4" onClick={(e) => e.stopPropagation()}>
-                    <button className="p-1 text-gray-400 hover:text-gray-600">
-                      <MoreHorizontal className="w-4 h-4" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        <div className="flex justify-between items-center p-6 border-t border-gray-200">
-          <div className="text-sm text-gray-600">
-            Showing {startIndex + 1} to{" "}
-            {Math.min(startIndex + parentPerPage, parents.length)} of{" "}
-            {parents.length} entries
-          </div>
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-
-            {[...Array(totalPages)].map((_, index) => {
-              const page = index + 1;
-              return (
-                <button
-                  key={page}
-                  onClick={() => handlePageChange(page)}
-                  className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                    currentPage === page
-                      ? "bg-blue-600 text-white"
-                      : "text-gray-600 hover:bg-gray-100"
-                  }`}
-                >
-                  {page}
-                </button>
-              );
-            })}
-
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            {/* Modal Header */}
-            <div className="flex justify-between items-center p-6 border-b border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-800">
-                Add New parent
-              </h2>
-              <button
-                onClick={() => setShowModal(false)}
-                className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
-              >
-                <X className="w-5 h-5" />
-              </button>
+        {/* Header */}
+        <div className="flex justify-between items-center p-6 bg-white mb-10 rounded-lg shadow-sm">
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search parents..."
+                value={searchInput}
+                onChange={handleSearchInputChange}
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={loading}
+              />
             </div>
-
-            {/* Modal Body */}
-            <form onSubmit={handleSubmit} className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Personal Information Section */}
-                <div className="md:col-span-2">
-                  <div className="flex items-center space-x-2 mb-4">
-                    <User className="w-5 h-5 text-blue-600" />
-                    <h3 className="text-lg font-semibold text-gray-800">
-                      Personal Information
-                    </h3>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    First Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="firstName"
-                    value={formData.firstName}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter parent phone number"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Modal Footer */}
-              <div className="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-200">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Add parent
-                </button>
-              </div>
-            </form>
+            <select
+              value={ordering}
+              onChange={(e) => handleOrderingChange(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={loading}
+            >
+              <option value="-date_joined">Newest</option>
+              <option value="date_joined">Oldest</option>
+              <option value="first_name">Name</option>
+            </select>
+            <button
+              onClick={() => refreshData(true)}
+              disabled={loading}
+              className="p-2 text-gray-500 hover:text-gray-700 disabled:opacity-50"
+              title="Refresh data"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+            </button>
           </div>
+
         </div>
-      )}
-    </div>
+        <div className="">
+          {/* Table */}
+          <div className="overflow-x-auto bg-white rounded-t-lg">
+            <table className="w-full">
+              <thead className="">
+                <tr className="bg-[#f3f1f8]">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider">
+                    <input type="checkbox" className="rounded border-gray-300" />
+                  </th>
+                  <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider">
+                    Name
+                  </th>
+                  <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider">
+                    Username
+                  </th>
+                  <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider">
+                    Email
+                  </th>
+                  <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider">
+                    Joined
+                  </th>
+                  <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className=" font-poppins px-6 py-3 text-left text-xs font-semibold text-[#4D44B5] uppercase tracking-wider">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-[white] rounded-[5px]">
+                {loading ? (
+                  <tr>
+                    <td colSpan="7" className="p-8 text-center">
+                      <div className="flex items-center justify-center space-x-2">
+                        <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
+                        <span className="text-gray-500">Loading parents...</span>
+                      </div>
+                    </td>
+                  </tr>
+                ) : error ? (
+                  <tr>
+                    <td colSpan="7" className="p-8 text-center">
+                      <div className="flex flex-col items-center space-y-2">
+                        <AlertCircle className="w-8 h-8 text-red-500" />
+                        <span className="text-gray-500">Failed to load parents</span>
+                        <button
+                          onClick={() => refreshData(true)}
+                          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                        >
+                          Try Again
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ) : currentParents.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="p-8 text-center">
+                      <div className="flex flex-col items-center space-y-3">
+                        <Users className="w-12 h-12 text-gray-400" />
+                        {searchQuery ? (
+                          <>
+                            <span className="text-gray-600 font-medium">No parents match your search</span>
+                            <div className="text-sm text-gray-500">Search: "{searchQuery}"</div>
+                            <button
+                              onClick={() => {
+                                setSearchInput("");
+                                handleSearch("");
+                              }}
+                              className="px-4 py-2 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+                            >
+                              Clear search
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <span className="text-gray-600 font-medium">No parents registered yet</span>
+                            <span className="text-sm text-gray-500">
+                              Parents will appear here once they are registered in the system
+                            </span>
+                            <button
+                              onClick={() => refreshData(true)}
+                              className="px-4 py-2 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+                            >
+                              Refresh
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  currentParents.map((parent, index) => {
+                    const fullName =
+                      `${parent.first_name || ""} ${parent.last_name || ""}`.trim() ||
+                      parent.username;
+                    return (
+                      <tr
+                        key={parent.id || index}
+                        className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
+                        onClick={() => handleParentClick(parent)}
+                      >
+                        <td className="p-4" onClick={(e) => e.stopPropagation()}>
+                          <input type="checkbox" className="rounded border-gray-300" />
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-center space-x-3">
+                            <Avatar
+                              src={parent.avatar || parent.profile_picture}
+                              name={fullName}
+                              size="w-8 h-8"
+                              textSize="text-sm"
+                            />
+                            <span className="font-bold text-[#303972] text-[16px] font-poppins">
+                              {fullName}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="p-4 text-[#4D44B5] font-bold text-[16px] font-poppins">
+                          {parent.username}
+                        </td>
+                        <td className="p-4 text-[#A098AE] text-[16px] font-normal font-poppins">
+                          {parent.email}
+                        </td>
+                        <td className="p-4 text-[#303972] text-[16px] font-normal font-poppins">
+                          {formatRegistrationDate(parent)}
+                        </td>
+                        <td className="p-4">
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              parent.is_active
+                                ? "bg-green-100 text-green-800"
+                                : "bg-gray-100 text-gray-600"
+                            }`}
+                          >
+                            {parent.is_active ? "Active" : "Inactive"}
+                          </span>
+                        </td>
+                        <td className="p-4" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center space-x-2">
+                            <button className="p-2 bg-[#EBEBF9] hover:text-blue-600 rounded-full" title="Email parent">
+                              <Mail className="w-4 h-4 text-[#A098AE]" />
+                            </button>
+                            <button
+                              onClick={() => handleParentClick(parent)}
+                              className="p-1 text-gray-400 hover:text-gray-600"
+                              title="View details"
+                            >
+                              <MoreHorizontal className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          {!loading && totalParents > 0 && (
+            <div className="flex justify-between items-center p-6 border-t border-gray-200 bg-white rounded-b-lg">
+              <div className="text-sm text-gray-600">
+                Showing {startIndex + 1} to {endIndex} of {totalParents} entries
+              </div>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={!hasPreviousPage || loading}
+                  className="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+
+                {[...Array(totalPages)].map((_, index) => {
+                  const page = index + 1;
+                  return (
+                    <button
+                      key={page}
+                      onClick={() => handlePageChange(page)}
+                      disabled={loading}
+                      className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                        currentPage === page
+                          ? "bg-blue-600 text-white"
+                          : "text-gray-600 hover:bg-gray-100"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  );
+                })}
+
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={!hasNextPage || loading}
+                  className="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </ErrorBoundary>
   );
 };

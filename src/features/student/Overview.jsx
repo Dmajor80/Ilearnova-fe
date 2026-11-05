@@ -1,9 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { getStudentDashboard } from "@/api/dashboardApi";
 import Profile from "../auth/Profile";
-import { useNavigate } from "react-router-dom";
-import { logout } from "@/api/authApi";
-import { clearAuth } from "@/api/auth";
 import {
   Bell,
   Calendar,
@@ -32,14 +29,15 @@ import bell from "../../assets/bell.png";
 import chemistry from "../../assets/chemistry.png";
 import LiveCalendar from "./LiveCalendar";
 import StudentsTable from "./StudentsTable";
+import { useStudentAnnouncements, useStudentAssignments } from "@/hooks/student";
 const Overview = () => {
+  const studentAnnouncements = useStudentAnnouncements();
+  const studentAssignments = useStudentAssignments();
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [progress, setProgress] = useState(0);
   const [showProfile, setShowProfile] = useState(false);
-  const navigate = useNavigate();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const chartRef = useRef(null);
@@ -99,19 +97,6 @@ const Overview = () => {
     };
   }, [isProfileDropdownOpen]);
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      clearAuth();
-      navigate("/login");
-    } catch (error) {
-      console.error("Logout failed:", error);
-      // Even if API call fails, clear local auth and redirect
-      clearAuth();
-      navigate("/login");
-    }
-  };
-
   // Sample data
   const chartData = [35, 42, 55, 60, 48, 72];
   // const activityData = [
@@ -121,50 +106,11 @@ const Overview = () => {
   //   { name: "Strategy Session", time: "4:00 PM", color: "purple" },
   // ];
 
-  const taskData = [
-    {
-      name: "UX Research",
-      completion: "80%",
-      color: "blue",
-      time: "13 Lessons - 3 hrs 15mins",
-    },
-    {
-      name: "Wireframe Design",
-      completion: "65%",
-      color: "amber",
-      time: "13 Lessons - 3 hrs 15mins",
-    },
-    {
-      name: "Frontend Development",
-      completion: "42%",
-      color: "green",
-      time: "13 Lessons - 3 hrs 15mins",
-    },
-  ];
-
   // const projectData = [
   //   { name: "Website Redesign", status: "In Progress", daysLeft: 7 },
   //   { name: "Mobile App Updates", status: "On Hold", daysLeft: 12 },
   //   { name: "Marketing Campaign", status: "Completed", daysLeft: 0 },
   // ];
-
-  const teamData = [
-    {
-      name: "Alex Johnson",
-      role: "UX Designer",
-      avatar: "AJ",
-      performance: 92,
-    },
-    { name: "Maria Garcia", role: "Developer", avatar: "MG", performance: 88 },
-    {
-      name: "David Kim",
-      role: "Project Manager",
-      avatar: "DK",
-      performance: 95,
-    },
-    { name: "Sarah Wilson", role: "Marketing", avatar: "SW", performance: 85 },
-    { name: "James Chen", role: "Developer", avatar: "JC", performance: 90 },
-  ];
 
   const fadeInUp = (delay) => {
     return {
@@ -191,6 +137,8 @@ const Overview = () => {
         </div>
       </div>
 
+      {loading && <p role="status" className="mb-4 text-slate-600">Loading dashboard data…</p>}
+      {error && <p role="alert" className="mb-4 text-red-700">{error}</p>}
 
       {/* Profile Modal */}
       {showProfile && (
@@ -256,7 +204,11 @@ const Overview = () => {
         >
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              {dashboardData?.quick_stats?.pending_assignments || 0}
+              {studentAssignments.loading
+                ? "…"
+                : studentAssignments.error
+                  ? "—"
+                  : studentAssignments.pendingAssignments.length}
             </h2>
             <div className="p-3 bg-gradient-to-r from-orange-100 to-red-100 rounded-xl shadow-md">
               <img src={assignment} alt="Pending assignments" className="w-6 h-6" />
@@ -343,70 +295,49 @@ const Overview = () => {
               </button>
             </div>
 
-            <div className="space-y-4">
-              {/* notification1 */}
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-100 hover:shadow-md transition-all duration-200 hover:scale-[1.01]">
-                <div className="flex items-start gap-4">
-                  <div className="p-2 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-lg shadow-md">
-                    <img src={bell} alt="Notification bell" className="w-5 h-5" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-lg font-bold text-slate-800 mb-2">
-                      Assignment Due Soon
-                    </p>
-                    <p className="text-slate-600 font-medium leading-relaxed">
-                      Your Math assignment on 'Linear Equations' is due tomorrow, Nov 19, 2024. Don't forget to submit it on time!
-                    </p>
-                    <button className="mt-4 w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold py-3 px-4 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg">
-                      View Assignment
-                    </button>
-                  </div>
-                </div>
-              </div>
-              {/* end of notification1 */}
+            {studentAnnouncements.loading ? (
+              <p className="text-slate-500" role="status">Loading announcements…</p>
+            ) : studentAnnouncements.error ? (
+              <p className="text-red-600" role="alert">{studentAnnouncements.error.message}</p>
+            ) : studentAnnouncements.announcements.length ? (
+              <div className="space-y-4">
+                {studentAnnouncements.announcements.map((announcement, index) => {
+                  const colors = [
+                    "from-blue-50 to-indigo-50 border-blue-100",
+                    "from-orange-50 to-red-50 border-orange-100",
+                    "from-green-50 to-emerald-50 border-green-100"
+                  ];
 
-              {/* notification2 */}
-              <div className="bg-gradient-to-r from-orange-50 to-red-50 p-4 rounded-xl border border-orange-100 hover:shadow-md transition-all duration-200 hover:scale-[1.01]">
-                <div className="flex items-start gap-4">
-                  <div className="p-2 bg-gradient-to-r from-orange-100 to-red-100 rounded-lg shadow-md">
-                    <img src={bell} alt="Notification bell" className="w-5 h-5" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-lg font-bold text-slate-800 mb-2">
-                      Assignment Due Soon
-                    </p>
-                    <p className="text-slate-600 font-medium leading-relaxed">
-                      Your Math assignment on 'Linear Equations' is due tomorrow, Nov 19, 2024. Don't forget to submit it on time!
-                    </p>
-                    <button className="mt-4 w-full bg-gradient-to-r from-orange-600 to-red-600 text-white font-semibold py-3 px-4 rounded-lg hover:from-orange-700 hover:to-red-700 transition-all duration-200 shadow-md hover:shadow-lg">
-                      View Assignment
-                    </button>
-                  </div>
-                </div>
+                  return (
+                    <div
+                      key={announcement.id}
+                      className={`bg-gradient-to-r ${colors[index % colors.length]} p-4 rounded-xl border hover:shadow-md transition-all duration-200`}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="p-2 bg-white rounded-lg shadow-md">
+                          <img src={bell} alt="" className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-lg font-bold text-slate-800 mb-2">
+                            {announcement.title}
+                          </p>
+                          <p className="text-slate-600 font-medium leading-relaxed">
+                            {announcement.message}
+                          </p>
+                          {announcement.created_at && (
+                            <p className="mt-2 text-sm text-slate-500">
+                              {new Date(announcement.created_at).toLocaleDateString()}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-              {/* end of notification2 */}
-
-              {/* notification3 */}
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-100 hover:shadow-md transition-all duration-200 hover:scale-[1.01]">
-                <div className="flex items-start gap-4">
-                  <div className="p-2 bg-gradient-to-r from-green-100 to-emerald-100 rounded-lg shadow-md">
-                    <img src={bell} alt="Notification bell" className="w-5 h-5" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-lg font-bold text-slate-800 mb-2">
-                      Assignment Due Soon
-                    </p>
-                    <p className="text-slate-600 font-medium leading-relaxed">
-                      Your Math assignment on 'Linear Equations' is due tomorrow, Nov 19, 2024. Don't forget to submit it on time!
-                    </p>
-                    <button className="mt-4 w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold py-3 px-4 rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-md hover:shadow-lg">
-                      View Assignment
-                    </button>
-                  </div>
-                </div>
-              </div>
-              {/* end of notification3 */}
-            </div>
+            ) : (
+              <p className="text-slate-500">No announcements yet.</p>
+            )}
           </div>
           {/* end of notification */}
         </div>

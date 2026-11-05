@@ -1,365 +1,132 @@
-import React, { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { BookOpen, FileText, Link as LinkIcon, Plus, RefreshCw, Search, Video } from "lucide-react";
+import { useTeacherClasses } from "@/hooks/teacher";
 import CoursesComponent from "./components/CourseComponents";
-import { Search, Filter, Plus, Download, Upload, Eye, Edit, Trash2, FileText, Video, Image, Music, BookOpen, Link, Folder } from "lucide-react";
 
-const Resources = () => {
-  const [activeTab, setActiveTab] = useState("library");
+const CONTENT_TYPES = ["file", "video_url", "youtube", "text", "quiz"];
+
+export default function Resources() {
+  const classesApi = useTeacherClasses();
+  const [selectedClassId, setSelectedClassId] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedSubject, setSelectedSubject] = useState("all");
+  const [contentType, setContentType] = useState("all");
+  const [showForm, setShowForm] = useState(false);
+  const [file, setFile] = useState(null);
+  const [form, setForm] = useState({ title: "", description: "", content_type: "text", link: "", is_published: true });
+  const fetchMaterials = classesApi.fetchMaterials;
 
-  const categories = ["all", "documents", "videos", "images", "audio", "links"];
-  const subjects = ["all", "Mathematics", "Physics", "Chemistry", "English", "Biology", "History"];
+  useEffect(() => {
+    if (!selectedClassId && classesApi.classes.length) setSelectedClassId(classesApi.classes[0].id);
+  }, [classesApi.classes, selectedClassId]);
 
-  const resources = [
-    {
-      id: 1,
-      title: "Algebra Fundamentals PDF",
-      type: "document",
-      subject: "Mathematics",
-      description: "Comprehensive guide to basic algebraic concepts",
-      size: "2.5 MB",
-      uploadedBy: "Mr. Johnson",
-      uploadDate: "2024-01-10",
-      downloads: 45,
-      tags: ["algebra", "equations", "basics"]
-    },
-    {
-      id: 2,
-      title: "Newton's Laws Video Lecture",
-      type: "video",
-      subject: "Physics",
-      description: "Complete explanation of Newton's three laws of motion",
-      size: "156 MB",
-      uploadedBy: "Ms. Davis",
-      uploadDate: "2024-01-12",
-      downloads: 78,
-      tags: ["physics", "newton", "motion"]
-    },
-    {
-      id: 3,
-      title: "Periodic Table Chart",
-      type: "image",
-      subject: "Chemistry",
-      description: "High-resolution periodic table with element details",
-      size: "1.2 MB",
-      uploadedBy: "Mr. Brown",
-      uploadDate: "2024-01-08",
-      downloads: 92,
-      tags: ["chemistry", "periodic table", "elements"]
-    },
-    {
-      id: 4,
-      title: "Shakespeare Sonnets Audio",
-      type: "audio",
-      subject: "English",
-      description: "Professional recordings of famous Shakespeare sonnets",
-      size: "45 MB",
-      uploadedBy: "Mrs. Wilson",
-      uploadDate: "2024-01-15",
-      downloads: 23,
-      tags: ["english", "shakespeare", "poetry"]
-    },
-    {
-      id: 5,
-      title: "Khan Academy Links",
-      type: "link",
-      subject: "Mathematics",
-      description: "Curated collection of Khan Academy math tutorials",
-      size: "N/A",
-      uploadedBy: "Mr. Johnson",
-      uploadDate: "2024-01-05",
-      downloads: 156,
-      tags: ["khan academy", "tutorials", "math"]
-    },
-    {
-      id: 6,
-      title: "Biology Lab Safety Guidelines",
-      type: "document",
-      subject: "Biology",
-      description: "Essential safety protocols for biology laboratory work",
-      size: "890 KB",
-      uploadedBy: "Ms. Green",
-      uploadDate: "2024-01-18",
-      downloads: 67,
-      tags: ["biology", "safety", "lab"]
-    }
-  ];
+  useEffect(() => {
+    if (selectedClassId) fetchMaterials(selectedClassId).catch(() => {});
+  }, [fetchMaterials, selectedClassId]);
 
-  const filteredResources = resources.filter(resource => {
-    const matchesSearch = resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         resource.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         resource.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesCategory = selectedCategory === "all" || resource.type === selectedCategory;
-    const matchesSubject = selectedSubject === "all" || resource.subject === selectedSubject;
-    return matchesSearch && matchesCategory && matchesSubject;
-  });
+  const selectedClass = classesApi.classes.find((item) => item.id === selectedClassId);
+  const materials = classesApi.materials;
+  const filteredMaterials = useMemo(() => materials.filter((item) => {
+    const matchesSearch = `${item.title || ""} ${item.description || ""}`.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType = contentType === "all" || item.content_type === contentType;
+    return matchesSearch && matchesType;
+  }), [contentType, materials, searchTerm]);
 
-  const getTypeIcon = (type) => {
-    switch (type) {
-      case "document":
-        return <FileText className="w-5 h-5" />;
-      case "video":
-        return <Video className="w-5 h-5" />;
-      case "image":
-        return <Image className="w-5 h-5" />;
-      case "audio":
-        return <Music className="w-5 h-5" />;
-      case "link":
-        return <Link className="w-5 h-5" />;
-      default:
-        return <FileText className="w-5 h-5" />;
+  const saveMaterial = async (event) => {
+    event.preventDefault();
+    if (!selectedClass) return;
+    const formData = new FormData();
+    formData.append("title", form.title);
+    formData.append("description", form.description);
+    formData.append("content_type", form.content_type);
+    formData.append("class_obj", selectedClass.id);
+    formData.append("organization", selectedClass.organization);
+    formData.append("is_published", String(form.is_published));
+    if (form.link) formData.append("link", form.link);
+    if (file) formData.append("file", file);
+
+    try {
+      await classesApi.addMaterial(selectedClass.id, formData);
+      setForm({ title: "", description: "", content_type: "text", link: "", is_published: true });
+      setFile(null);
+      setShowForm(false);
+    } catch {
+      // The API hook reports request failures.
     }
   };
 
-  const getTypeColor = (type) => {
-    switch (type) {
-      case "document":
-        return "bg-blue-100 text-blue-800";
-      case "video":
-        return "bg-red-100 text-red-800";
-      case "image":
-        return "bg-green-100 text-green-800";
-      case "audio":
-        return "bg-purple-100 text-purple-800";
-      case "link":
-        return "bg-yellow-100 text-yellow-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
+  const iconFor = (type) => {
+    if (type === "video_url" || type === "youtube") return <Video size={20} />;
+    if (type === "text") return <FileText size={20} />;
+    if (type === "file") return <BookOpen size={20} />;
+    return <LinkIcon size={20} />;
   };
 
   return (
-    <>
+    <div className="space-y-6">
       <CoursesComponent page="Resources" />
-      <div className="min-h-screen bg-gray-100 p-6">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold text-gray-900">Resource Library</h2>
-              <div className="flex items-center space-x-3">
-                <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold flex items-center space-x-2 transition-colors">
-                  <Upload className="w-5 h-5" />
-                  <span>Upload Resource</span>
-                </button>
-                <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold flex items-center space-x-2 transition-colors">
-                  <Plus className="w-5 h-5" />
-                  <span>Create Folder</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Tab Navigation */}
-            <div className="flex space-x-1">
-              {["library", "shared", "favorites"].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors capitalize ${
-                    activeTab === tab
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
+      <section className="rounded-xl bg-white p-5 shadow-sm">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Course materials</h2>
+            <p className="text-sm text-gray-600">Browse and add resources attached to your classes.</p>
           </div>
-
-          {/* Filters and Search */}
-          <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Search resources..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              <div className="relative">
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="appearance-none w-full bg-white border border-gray-300 rounded-lg px-4 py-3 pr-8 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="all">All Categories</option>
-                  {categories.slice(1).map(category => (
-                    <option key={category} value={category}>{category.charAt(0).toUpperCase() + category.slice(1)}</option>
-                  ))}
-                </select>
-                <Filter className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
-              </div>
-
-              <div className="relative">
-                <select
-                  value={selectedSubject}
-                  onChange={(e) => setSelectedSubject(e.target.value)}
-                  className="appearance-none w-full bg-white border border-gray-300 rounded-lg px-4 py-3 pr-8 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="all">All Subjects</option>
-                  {subjects.slice(1).map(subject => (
-                    <option key={subject} value={subject}>{subject}</option>
-                  ))}
-                </select>
-                <Filter className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <button className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-lg font-medium transition-colors">
-                  Clear Filters
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-6">
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-blue-600 mb-2">
-                  {resources.length}
-                </div>
-                <div className="text-sm text-gray-600">Total Resources</div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-green-600 mb-2">
-                  {resources.filter(r => r.type === 'document').length}
-                </div>
-                <div className="text-sm text-gray-600">Documents</div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-red-600 mb-2">
-                  {resources.filter(r => r.type === 'video').length}
-                </div>
-                <div className="text-sm text-gray-600">Videos</div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-purple-600 mb-2">
-                  {resources.filter(r => r.type === 'image').length}
-                </div>
-                <div className="text-sm text-gray-600">Images</div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-yellow-600 mb-2">
-                  {resources.reduce((sum, r) => sum + r.downloads, 0)}
-                </div>
-                <div className="text-sm text-gray-600">Total Downloads</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Resources Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredResources.map((resource) => (
-              <div key={resource.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center space-x-3">
-                      <div className={`p-2 rounded-lg ${getTypeColor(resource.type)}`}>
-                        {getTypeIcon(resource.type)}
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-900 text-sm">{resource.title}</h3>
-                        <p className="text-xs text-gray-500">{resource.subject}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center space-x-1">
-                      <button className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors">
-                        <Eye className="w-4 h-4" />
-                      </button>
-                      <button className="p-1 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded transition-colors">
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-
-                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">{resource.description}</p>
-
-                  <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
-                    <span>Size: {resource.size}</span>
-                    <span>{resource.downloads} downloads</span>
-                  </div>
-
-                  <div className="flex flex-wrap gap-1 mb-4">
-                    {resource.tags.slice(0, 3).map((tag, index) => (
-                      <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="text-xs text-gray-500">
-                      <div>By {resource.uploadedBy}</div>
-                      <div>{new Date(resource.uploadDate).toLocaleDateString()}</div>
-                    </div>
-
-                    <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-medium flex items-center space-x-1 transition-colors">
-                      <Download className="w-3 h-3" />
-                      <span>Download</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {filteredResources.length === 0 && (
-            <div className="text-center py-12">
-              <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No resources found</h3>
-              <p className="text-gray-600">Try adjusting your search or filter criteria</p>
-            </div>
-          )}
-
-          {/* Recent Activity */}
-          <div className="mt-6 bg-white rounded-xl shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
-            <div className="space-y-3">
-              {resources.slice(0, 5).map((resource) => (
-                <div key={resource.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-                  <div className="flex items-center space-x-3">
-                    <div className={`p-1 rounded ${getTypeColor(resource.type)}`}>
-                      {getTypeIcon(resource.type)}
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">{resource.title}</div>
-                      <div className="text-xs text-gray-500">Downloaded by {resource.downloads} students</div>
-                    </div>
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {new Date(resource.uploadDate).toLocaleDateString()}
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div className="flex gap-2">
+            <button onClick={() => classesApi.refreshData({}, true)} aria-label="Refresh classes" className="rounded-lg border px-3 text-gray-700"><RefreshCw size={17} /></button>
+            <button onClick={() => setShowForm(true)} disabled={!selectedClass} className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-50"><Plus size={17} /> Add material</button>
           </div>
         </div>
-      </div>
-    </>
-  );
-};
 
-export default Resources;
+        <div className="mb-5 grid grid-cols-1 gap-3 md:grid-cols-3">
+          <label className="text-sm font-medium">Class
+            <select value={selectedClassId} onChange={(event) => setSelectedClassId(event.target.value)} className="mt-1 w-full rounded-lg border p-3">
+              {classesApi.classes.map((item) => <option key={item.id} value={item.id}>{item.name || item.class_name}</option>)}
+            </select>
+          </label>
+          <label className="text-sm font-medium">Search
+            <span className="relative mt-1 block"><Search className="absolute left-3 top-3.5 text-gray-400" size={17} /><input value={searchTerm} onChange={(event) => setSearchTerm(event.target.value)} placeholder="Search course materials" className="w-full rounded-lg border py-3 pl-10 pr-3" /></span>
+          </label>
+          <label className="text-sm font-medium">Content type
+            <select value={contentType} onChange={(event) => setContentType(event.target.value)} className="mt-1 w-full rounded-lg border p-3">
+              <option value="all">All types</option>
+              {CONTENT_TYPES.map((type) => <option key={type} value={type}>{type.replace("_", " ")}</option>)}
+            </select>
+          </label>
+        </div>
+
+        {classesApi.error && <p role="alert" className="mb-4 rounded-lg bg-red-50 p-3 text-red-700">{classesApi.error.message}</p>}
+        {classesApi.loading && <p className="py-8 text-center text-gray-500">Loading course materials...</p>}
+        {!classesApi.loading && !classesApi.classes.length && <p className="rounded-lg bg-gray-50 p-6 text-center text-gray-600">No classes are available to browse course materials.</p>}
+        {!classesApi.loading && selectedClass && !filteredMaterials.length && <p className="rounded-lg bg-gray-50 p-6 text-center text-gray-600">No materials found for this class.</p>}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {!classesApi.loading && filteredMaterials.map((item) => (
+            <article key={item.id} className="rounded-xl border p-5">
+              <div className="mb-3 flex items-start justify-between gap-3">
+                <span className="rounded-lg bg-blue-50 p-2 text-blue-700">{iconFor(item.content_type)}</span>
+                <span className={`rounded-full px-2 py-1 text-xs ${item.is_published ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-600"}`}>{item.is_published ? "Published" : "Draft"}</span>
+              </div>
+              <h3 className="font-semibold text-gray-900">{item.title}</h3>
+              {item.description && <p className="mt-1 line-clamp-3 text-sm text-gray-600">{item.description}</p>}
+              <p className="mt-3 text-xs capitalize text-gray-500">{(item.content_type || "material").replace("_", " ")}</p>
+              {(item.file || item.link) && <a href={item.file || item.link} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:underline">Open material</a>}
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {showForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <form onSubmit={saveMaterial} className="w-full max-w-lg space-y-4 rounded-xl bg-white p-6 shadow-xl">
+            <div className="flex items-center justify-between"><h3 className="text-xl font-semibold">Add course material</h3><button type="button" onClick={() => setShowForm(false)} className="text-gray-500">Close</button></div>
+            <input required maxLength={255} placeholder="Title" value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} className="w-full rounded-lg border p-3" />
+            <textarea placeholder="Description" value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} className="w-full rounded-lg border p-3" rows="3" />
+            <select value={form.content_type} onChange={(event) => setForm({ ...form, content_type: event.target.value })} className="w-full rounded-lg border p-3">{CONTENT_TYPES.map((type) => <option key={type} value={type}>{type.replace("_", " ")}</option>)}</select>
+            <input type="url" placeholder="Link (optional)" value={form.link} onChange={(event) => setForm({ ...form, link: event.target.value })} className="w-full rounded-lg border p-3" />
+            {form.content_type === "file" && <input type="file" onChange={(event) => setFile(event.target.files?.[0] || null)} className="w-full rounded-lg border p-3" />}
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.is_published} onChange={(event) => setForm({ ...form, is_published: event.target.checked })} /> Publish immediately</label>
+            <button disabled={classesApi.mutating} className="w-full rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white disabled:opacity-50">{classesApi.mutating ? "Saving..." : "Save material"}</button>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+}
