@@ -46,13 +46,8 @@ export function OrganizationProvider({ children }) {
 
     function init() {
       const userData = readUserDataFromStorage();
-      console.log(userData)
-
-      // Debug logging to help identify the issue
-      console.log("OrganizationContext: User data loaded:", userData);
 
       if (!userData) {
-        console.log("OrganizationContext: No user data found in storage");
         if (!cancelled) {
           setLoading(false);
         }
@@ -67,21 +62,12 @@ export function OrganizationProvider({ children }) {
         userOrgs = userData.orgs;
       }
 
-      console.log("OrganizationContext: User organizations:", userOrgs);
-      console.log("OrganizationContext: Organizations structure:", userOrgs.map(org => ({
-        id: org?.organization?.id || org?.id,
-        name: org?.organization?.name || org?.name,
-        hasOrganization: !!org?.organization,
-        rawOrg: org
-      })));
-
+    
       const selectedOrgId = userData?.selectedOrgId || null;
 
       let initialOrgId = selectedOrgId;
       if (!initialOrgId) {
-        // If exactly one org, auto-select it
         if (userOrgs.length === 1) {
-          // Handle multiple possible API response structures
           const firstOrg = userOrgs[0];
           initialOrgId = firstOrg?.organization?.id ||
                         firstOrg?.id ||
@@ -98,7 +84,6 @@ export function OrganizationProvider({ children }) {
         }
       }
 
-      console.log("OrganizationContext: Final state - orgs:", userOrgs.length, "currentOrgId:", initialOrgId);
 
       if (!cancelled) {
         setUser(userData);
@@ -134,11 +119,9 @@ export function OrganizationProvider({ children }) {
   }, [persistSelectedOrgId]);
 
   const refreshUser = useCallback(async () => {
-    console.log("OrganizationContext: refreshUser called");
     try {
       // Fetch fresh user data from backend API
       const token = localStorage.getItem('token') || '';
-      console.log("OrganizationContext: Using token:", token ? 'present' : 'missing');
       const response = await fetch('/api/auth/profile/', {
         method: 'GET',
         headers: {
@@ -146,20 +129,15 @@ export function OrganizationProvider({ children }) {
           'Authorization': `Bearer ${token}`
         }
       });
-      console.log("OrganizationContext: API response status:", response.status);
       if (!response.ok) {
         throw new Error(`Failed to fetch user data: ${response.status} ${response.statusText}`);
       }
       const userData = await response.json();
-      console.log(userData)
-      console.log("OrganizationContext: Fetched user data:", userData);
       if (userData) {
-        // Create a new object reference to ensure React detects the change
         const newUserData = { ...userData };
         setUser(newUserData);
         // Update user_data in storage
         writeUserDataToStorage(newUserData);
-        console.log("OrganizationContext: User data refreshed from API:", newUserData);
       } else {
         console.log("OrganizationContext: No user data received from API");
       }
