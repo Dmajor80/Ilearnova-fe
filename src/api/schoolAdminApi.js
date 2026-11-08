@@ -1,10 +1,6 @@
 import { http } from "@/api/baseClient";
 
 /**
- * School Admin API functions for organization and user profile management
- */
-
-/**
  * Upload organization logo
  * @param {File} logoFile - The logo image file
  * @param {string} organizationId - The organization ID
