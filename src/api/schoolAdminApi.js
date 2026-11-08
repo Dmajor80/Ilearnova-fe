@@ -1,10 +1,6 @@
 import { http } from "@/api/baseClient";
 
 /**
- * School Admin API functions for organization and user profile management
- */
-
-/**
  * Upload organization logo
  * @param {File} logoFile - The logo image file
  * @param {string} organizationId - The organization ID
@@ -251,6 +247,36 @@ export const getSchoolGrades = async (params = {}) => {
 };
 
 /**
+ * School exams (org admin, scoped server-side to the admin's school).
+ * List envelope: { success, data: { exams: [...], pagination: { page, limit, total, pages, has_next, has_prev } } }
+ * @param {Object} params - page, page_size, status (draft|published|archived), class_id, subject_id, search, ordering
+ */
+export const getSchoolExams = (params = {}) =>
+  http.get('/api/admin/school/exams/', { auth: true, params });
+
+export const getSchoolExam = (examId) =>
+  http.get(`/api/admin/school/exams/${examId}/`, { auth: true });
+
+export const createSchoolExam = (examData) =>
+  http.post('/api/admin/school/exams/', examData, { auth: true });
+
+// The backend exam viewset disallows PUT; PATCH is the update method.
+export const updateSchoolExam = (examId, examData) =>
+  http.patch(`/api/admin/school/exams/${examId}/`, examData, { auth: true });
+
+// Hard-deletes drafts; archives exams that already have attempts.
+export const deleteSchoolExam = (examId) =>
+  http.del(`/api/admin/school/exams/${examId}/`, { auth: true });
+
+/** Attempt summaries: [{ id, student_name, status, started_at, submitted_at, score, percentage, is_passed, ... }] */
+export const getSchoolExamResults = (examId) =>
+  http.get(`/api/admin/school/exams/${examId}/results/`, { auth: true });
+
+/** Legacy admin subject list (currently returns an empty list from the backend). */
+export const getAdminSubjects = () =>
+  http.get('/api/admin/subjects/', { auth: true });
+
+/**
  * API endpoints being used by the school admin dashboard:
  * 
  * Organization Management:
@@ -275,7 +301,10 @@ export const getSchoolGrades = async (params = {}) => {
  * - GET /api/classes/ - Available grades/classes (org ID via X-Org-Id header)
  * - GET /api/admin/school/students/unpaid_tuition/ - Unpaid tuition data
  * - GET /api/admin/school/dashboard/activities/ - Recent activities
- * 
+ * - GET/POST /api/admin/school/exams/ - School exams list / create
+ * - GET/PATCH/DELETE /api/admin/school/exams/{id}/ - Exam detail / update / delete (archives if attempted)
+ * - GET /api/admin/school/exams/{id}/results/ - Exam attempt summaries
+ *
  * Expected API Response Structures:
  * 
  * Organization Data:
