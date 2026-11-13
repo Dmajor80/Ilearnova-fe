@@ -8,11 +8,8 @@ import useApiCircuitBreaker from "@/hooks/useApiCircuitBreaker";
  * Hook that manages school notification fetching, caching, and state management.
  * Follows the same patterns as useStudentData / useParentData for consistency.
  *
- * NOTE: the API spec's documented request/response schema for this endpoint (and
- * for broadcast/bulk_operations) is a generic fallback (AdminUser), not a real
- * Notification schema, so the field names below (title, message, recipient_type,
- * is_read) are a reasonable best guess and should be confirmed against the actual
- * backend serializer.
+ * The API documents Notification and BroadcastRequest schemas. The bulk-operation
+ * request schema should be confirmed against the backend contract.
  */
 export default function useNotificationsData() {
   const notification = useNotification("info", 5000);
@@ -68,10 +65,10 @@ export default function useNotificationsData() {
 
       if (data.results) {
         setNotifications(data.results || []);
-        setTotalNotifications(data.count || 0);
+        setTotalNotifications(data.pagination?.total ?? data.count ?? data.results.length);
       } else if (Array.isArray(data.notifications)) {
         setNotifications(data.notifications || []);
-        setTotalNotifications(data.notifications?.length || 0);
+        setTotalNotifications(data.pagination?.total ?? data.notifications.length);
       } else if (Array.isArray(data)) {
         setNotifications(data || []);
         setTotalNotifications(data?.length || 0);
@@ -165,7 +162,7 @@ export default function useNotificationsData() {
 
   /**
    * Broadcast a notification to a role/audience
-   * (e.g. { title, message, recipient_type: "all" | "students" | "teachers" | "parents" }).
+   * Accepts title/message and optional user_ids, role_codes, notification_type, and priority.
    */
   const broadcastNotification = useCallback(async (broadcastData) => {
     setMutating(true);

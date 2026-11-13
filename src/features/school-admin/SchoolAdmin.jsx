@@ -20,6 +20,7 @@ import { ClassesContent } from "./ClassesContent";
 import { SubjectsContent } from "./SubjectsContent";
 import { UsersContent } from "./UsersContent";
 import { ReportsContent } from "./ReportsContent";
+import DirectMessages from "@/features/communication/DirectMessages";
 import AddStudentModal from "./AddStudentModal";
 import AddNewTeacher from "./AddTeacherModal";
 import AddNewParent from "./AddParentModal";
@@ -178,6 +179,9 @@ const SchoolAdmin = React.memo(function SchoolAdmin() {
 
       case "reports":
         return <ReportsContent />;
+
+      case "messages":
+        return <DirectMessages />;
       
       default:
         return <DashboardContent />;

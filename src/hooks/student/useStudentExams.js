@@ -15,7 +15,10 @@ import {
   getUserFriendlyMessage,
   parseError
 } from "@/lib/errorHandler";
-import { getStudentList, unwrapStudentResponse } from "./studentApiUtils";
+import {
+  getStudentListAcrossPages,
+  unwrapStudentResponse
+} from "./studentApiUtils";
 
 export default function useStudentExams() {
   const notification = useNotification("info", 5000);
@@ -42,13 +45,13 @@ export default function useStudentExams() {
     const requests = [
       {
         endpoint: "studentExaminations",
-        load: () => getStudentExaminations({ page: 1 }),
-        update: (response) => setExaminations(getStudentList(response))
+        load: () => getStudentListAcrossPages((page) => getStudentExaminations({ page })),
+        update: setExaminations
       },
       {
         endpoint: "studentExamSubmissions",
-        load: () => getStudentExamSubmissions({ page: 1 }),
-        update: (response) => setSubmissions(getStudentList(response))
+        load: () => getStudentListAcrossPages((page) => getStudentExamSubmissions({ page })),
+        update: setSubmissions
       }
     ].filter(({ endpoint }) => resetFailures || shouldCallEndpoint(endpoint));
 

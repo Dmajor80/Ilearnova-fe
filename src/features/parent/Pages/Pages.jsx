@@ -3,7 +3,7 @@ import Attendance from "./ParentAttendance";
 import Timetable from "./ParentTimetable";
 import ParentResult from "./ParentResult";
 import Transcript from "./ParentTranscript";
-import ParentMessages from "./ParentMessages";
+import DirectMessages from "@/features/communication/DirectMessages";
 import ParentDashboard from "./ParentDashboard";
 import PaymentProcess from "./PaymentProcess";
 import { Route, Routes } from "react-router-dom";
@@ -23,7 +23,7 @@ function Pages() {
       <Route path="/parent-attendance/:id" element={<Attendance />} />
       <Route path="/parent-results" element={<ParentResult />} />
       <Route path="/parent-transcript" element={<Transcript />} />
-      <Route path="/parent-messages" element={<ParentMessages />} />
+      <Route path="/parent-messages" element={<DirectMessages />} />
       <Route path="/payment-process" element={<PaymentProcess />} />
     </Routes>
   );

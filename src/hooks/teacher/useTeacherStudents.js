@@ -8,12 +8,12 @@ export default function useTeacherStudents() {
   const [students, setStudents] = useState([]);
 
   const refreshData = useCallback(async (params = {}, resetFailures = false) => {
-    if (resetFailures) resetAllEndpoints();
+    if (resetFailures || params?.resetFailures === true) resetAllEndpoints();
     try {
       const result = await request(
         "teacherStudents",
         "fetch_teacher_students",
-        () => getTeacherStudents(params),
+        () => getTeacherStudents(),
         { failureMessage: "Students unavailable" }
       );
       if (result !== null) setStudents(getTeacherList(result, ["students"]));

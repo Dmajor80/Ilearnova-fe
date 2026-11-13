@@ -8,8 +8,8 @@ import useApiCircuitBreaker from "@/hooks/useApiCircuitBreaker";
  * Hook that manages the unpaid-tuition list fetching and state management.
  * Follows the same patterns as useStudentData / useSchoolDashboardData for consistency.
  *
- * Endpoint returns StudentDetail records (id, full_name, student_id, class_name,
- * fees, etc.) for students who currently owe tuition fees.
+ * The API documents a StudentDetail response; array response formats are also
+ * accepted to keep the hook usable if the backend returns multiple students.
  */
 export default function useUnpaidTuitionData() {
   const notification = useNotification("info", 5000);
@@ -50,13 +50,16 @@ export default function useUnpaidTuitionData() {
 
       if (Array.isArray(data.students)) {
         setStudents(data.students);
-        setTotalStudents(data.students.length);
+        setTotalStudents(data.pagination?.total ?? data.students.length);
       } else if (Array.isArray(data.results)) {
         setStudents(data.results);
-        setTotalStudents(data.count ?? data.results.length);
+        setTotalStudents(data.pagination?.total ?? data.count ?? data.results.length);
       } else if (Array.isArray(data)) {
         setStudents(data);
         setTotalStudents(data.length);
+      } else if (data?.id) {
+        setStudents([data]);
+        setTotalStudents(1);
       } else {
         setStudents([]);
         setTotalStudents(0);

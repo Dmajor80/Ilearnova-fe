@@ -65,9 +65,7 @@ export const getEnhancedTeacherDashboard = async () => {
   return await http.get("/api/dashboard/teacher/enhanced", { auth: true });
 };
 
-export const getTeacherAnalytics = async () => {
-  return await http.get("/api/dashboard/teacher/analytics", { auth: true });
-};
+export { getTeacherAnalytics } from "@/api/teacher";
 
 // Parent Dashboard
 export const getParentDashboard = async (parentId) => {

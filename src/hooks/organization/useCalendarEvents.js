@@ -8,12 +8,7 @@ import useApiCircuitBreaker from "@/hooks/useApiCircuitBreaker";
  * Hook that manages school calendar event fetching, caching, and state management.
  * Follows the same patterns as useStudentData / useParentData for consistency.
  *
- * NOTE: the API spec's documented request/response schema for this endpoint is a
- * generic fallback (AdminUser), not a real Event schema, so the field names below
- * (title, description, start_time, end_time, all_day, event_type, location) are a
- * reasonable best guess and should be confirmed against the actual backend
- * serializer. Reads are done defensively (several possible field names) so this
- * is easy to adjust once confirmed.
+ * The API uses EventCreateUpdate for writes and EventList for list responses.
  */
 export default function useCalendarEvents() {
   const notification = useNotification("info", 5000);
@@ -69,10 +64,10 @@ export default function useCalendarEvents() {
 
       if (data.results) {
         setEvents(data.results || []);
-        setTotalEvents(data.count || 0);
+        setTotalEvents(data.pagination?.total ?? data.count ?? data.results.length);
       } else if (Array.isArray(data.events)) {
         setEvents(data.events || []);
-        setTotalEvents(data.events?.length || 0);
+        setTotalEvents(data.pagination?.total ?? data.events.length);
       } else if (Array.isArray(data)) {
         setEvents(data || []);
         setTotalEvents(data?.length || 0);
@@ -222,8 +217,7 @@ export default function useCalendarEvents() {
   const eventsByDate = useMemo(() => {
     const map = {};
     events.forEach((event) => {
-      const raw =
-        event.start_time || event.start_date || event.date || event.event_date;
+      const raw = event.start_datetime || event.start_time || event.start_date || event.date || event.event_date;
       if (!raw) return;
       const key = String(raw).slice(0, 10); // yyyy-mm-dd
       if (!map[key]) map[key] = [];

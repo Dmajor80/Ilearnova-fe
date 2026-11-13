@@ -10,7 +10,8 @@ import {
   ChevronRight,
   User,
   FileText,
-  Calendar
+  Calendar,
+  MessageSquare
 } from "lucide-react";
 
 /**
@@ -40,7 +41,8 @@ const SchoolSidebar = React.memo(function SchoolSidebar({
       Plus,
       User,
       FileText,
-      Calendar
+      Calendar,
+      MessageSquare
     };
     
     const IconComponent = iconMap[iconName] || Home;

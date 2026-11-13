@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import useNotification from "@/hooks/useNotification";
 import {
   getNotificationType,
@@ -17,34 +17,79 @@ export default function useParentQuery({
 }) {
   const notification = useNotification("info", 5000);
   const { notify } = notification;
-  const [data, setData] = useState(initialData);
-  const [loading, setLoading] = useState(enabled);
-  const [error, setError] = useState(null);
-  const [lastUpdated, setLastUpdated] = useState(null);
+  const initialDataRef = useRef(initialData);
+  initialDataRef.current = initialData;
+  const requestId = useRef(0);
+  const [queryState, setQueryState] = useState(() => ({
+    query,
+    data: initialData,
+    error: null,
+    loading: enabled,
+    lastUpdated: null
+  }));
 
   const refreshData = useCallback(async () => {
     if (!enabled) return;
 
-    setLoading(true);
-    setError(null);
+    const currentRequestId = ++requestId.current;
+    setQueryState((current) => ({
+      query,
+      data: current.query === query ? current.data : initialDataRef.current,
+      error: null,
+      loading: true,
+      lastUpdated: current.query === query ? current.lastUpdated : null
+    }));
+
     try {
       const response = await query();
-      setData(select(response));
-      setLastUpdated(new Date());
+      if (currentRequestId !== requestId.current) return;
+      setQueryState({
+        query,
+        data: select(response),
+        error: null,
+        loading: false,
+        lastUpdated: new Date()
+      });
     } catch (requestError) {
+      if (currentRequestId !== requestId.current) return;
       const appError = parseError(requestError, { action });
       const message = getUserFriendlyMessage(appError);
-      setError(appError);
+      setQueryState((current) => ({
+        query,
+        data: current.query === query ? current.data : initialDataRef.current,
+        error: appError,
+        loading: false,
+        lastUpdated: current.query === query ? current.lastUpdated : null
+      }));
       notify(`${label} unavailable: ${message}`, getNotificationType(appError));
       console.warn(`Failed to ${action}:`, requestError);
-    } finally {
-      setLoading(false);
     }
   }, [action, enabled, label, notify, query, select]);
 
   useEffect(() => {
-    if (enabled) refreshData();
-  }, [enabled, refreshData]);
+    if (!enabled) {
+      requestId.current += 1;
+      setQueryState({
+        query,
+        data: initialDataRef.current,
+        error: null,
+        loading: false,
+        lastUpdated: null
+      });
+    } else {
+      refreshData();
+    }
+
+    return () => {
+      requestId.current += 1;
+    };
+  }, [enabled, query, refreshData]);
+
+  const stateMatchesQuery = queryState.query === query;
+  const data = enabled && stateMatchesQuery ? queryState.data : initialDataRef.current;
+  const loading = enabled && (!stateMatchesQuery || queryState.loading);
+  const error = enabled && stateMatchesQuery ? queryState.error : null;
+  const lastUpdated = enabled && stateMatchesQuery ? queryState.lastUpdated : null;
 
   return { data, loading, error, lastUpdated, refreshData, notification };
 }

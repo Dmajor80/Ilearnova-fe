@@ -272,9 +272,9 @@ export const deleteSchoolExam = (examId) =>
 export const getSchoolExamResults = (examId) =>
   http.get(`/api/admin/school/exams/${examId}/results/`, { auth: true });
 
-/** Legacy admin subject list (currently returns an empty list from the backend). */
+/** Organization-admin subject list. */
 export const getAdminSubjects = () =>
-  http.get('/api/admin/subjects/', { auth: true });
+  http.get('/api/admin/school/subjects/', { auth: true });
 
 /**
  * API endpoints being used by the school admin dashboard:

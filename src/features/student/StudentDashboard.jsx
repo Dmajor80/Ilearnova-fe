@@ -24,7 +24,89 @@ import {
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { logout } from "@/api/authApi";
 import { clearAuth } from "@/api/auth";
-import { useOrganization } from "@/context/OrganizationContext";
+
+const navLinks = [
+  {
+    id: "overview",
+    icon: <LayoutDashboard size={20} />,
+    label: "Overview",
+    air: "overview",
+  },
+  {
+    id: "courses",
+    icon: <BookOpen size={20} />,
+    label: "Courses",
+    air: "courses",
+  },
+  {
+    id: "id card",
+    icon: <CreditCard size={20} />,
+    label: "ID Card",
+    air: "IDcard",
+  },
+  {
+    id: "attendance",
+    icon: <Calendar size={20} />,
+    label: "Attendance",
+    air: "attendance",
+  },
+  {
+    id: "assignments",
+    icon: <FileText size={20} />,
+    label: "Assignments",
+    air: "assignment",
+  },
+  {
+    id: "timetable",
+    icon: <Clock size={20} />,
+    label: "Timetable",
+    air: "timetable",
+  },
+  {
+    id: "transcript",
+    icon: <Award size={20} />,
+    label: "Transcript",
+    air: "transcript",
+  },
+  {
+    id: "result",
+    icon: <BookOpen size={20} />,
+    label: "Result",
+    air: "result",
+  },
+  {
+    id: "exam",
+    icon: <BookOpen size={20} />,
+    label: "Exam",
+    air: "exam",
+  },
+  {
+    id: "cbt",
+    icon: <ClipboardCheck size={20} />,
+    label: "CBT Exams",
+    air: "cbt",
+  },
+  {
+    id: "messages",
+    icon: <MessageCircle size={20} />,
+    label: "Messages",
+    air: "messages",
+  },
+  {
+    id: "forums",
+    icon: <MessageCircle size={20} />,
+    label: "Forums",
+    air: "/forums",
+    external: true,
+  },
+  {
+    id: "video-calls",
+    icon: <Video size={20} />,
+    label: "Video Calls",
+    air: "/video-calls",
+    external: true,
+  },
+];
 
 // Main application component
 export default function StudentDashboard() {
@@ -35,7 +117,6 @@ export default function StudentDashboard() {
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useOrganization();
 
 
   // Mock dashboard data - replace with actual API call
@@ -44,85 +125,6 @@ export default function StudentDashboard() {
   //     profile_pic: "/default-profile.png"
   //   }
   // });
-
-  // Navigation links data
-  const navLinks = [
-    {
-      id: "overview",
-      icon: <LayoutDashboard size={20} />,
-      label: "Overview",
-      air: "overview",
-    },
-    {
-      id: "courses",
-      icon: <BookOpen size={20} />,
-      label: "Courses",
-      air: "courses",
-    },
-    {
-      id: "id card",
-      icon: <CreditCard size={20} />,
-      label: "ID Card",
-      air: "IDcard",
-    },
-    {
-      id: "attendance",
-      icon: <Calendar size={20} />,
-      label: "Attendance",
-      air: "attendance",
-    },
-    // {
-    //   id: "assignments",
-    //   icon: <FileText size={20} />,
-    //   label: "Assignments",
-    //   air: "assignment",
-    // },
-
-    {
-      id: "timetable",
-      icon: <Clock size={20} />,
-      label: "Timetable",
-      air: "timetable",
-    },
-    {
-      id: "transcript",
-      icon: <Award size={20} />,
-      label: "Transcript",
-      air: "transcript",
-    },
-    {
-      id: "result",
-      icon: <BookOpen size={20} />,
-      label: "Result",
-      air: "result",
-    },
-    {
-      id: "exam",
-      icon: <BookOpen size={20} />,
-      label: "Exam",
-      air: "exam",
-    },
-    {
-      id: "cbt",
-      icon: <ClipboardCheck size={20} />,
-      label: "CBT Exams",
-      air: "cbt",
-    },
-    {
-      id: "forums",
-      icon: <MessageCircle size={20} />,
-      label: "Forums",
-      air: "/forums",
-      external: true,
-    },
-    {
-      id: "video-calls",
-      icon: <Video size={20} />,
-      label: "Video Calls",
-      air: "/video-calls",
-      external: true,
-    },
-  ];
 
   // Sync activeTab with current route
   useEffect(() => {

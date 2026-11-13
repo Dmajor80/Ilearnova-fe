@@ -4,6 +4,37 @@ import useNotification from "@/hooks/useNotification";
 import { parseError, getUserFriendlyMessage, getNotificationType } from "@/lib/errorHandler";
 import useApiCircuitBreaker from "@/hooks/useApiCircuitBreaker";
 
+const normalizeEmail = (email) => String(email || "").trim().toLowerCase();
+
+const unwrapApiData = (payload) => {
+  const response = payload?.data ?? payload;
+  return response?.data ?? response;
+};
+
+const fetchPendingTeacherRecords = async () => {
+  const records = [];
+  let page = 1;
+  let pages = 1;
+
+  while (page <= pages) {
+    const payload = await http.get("/api/admin/school/pending-staff/", {
+      auth: true,
+      params: { page, page_size: 100, role: "teacher" }
+    });
+    const data = unwrapApiData(payload);
+
+    if (!Array.isArray(data?.pending_staff)) {
+      throw new Error("The pending staff endpoint returned an unexpected response.");
+    }
+
+    records.push(...data.pending_staff);
+    pages = Math.max(page, Number(data.pagination?.pages) || page);
+    page += 1;
+  }
+
+  return records;
+};
+
 /**
  * Hook that manages teacher data fetching, caching, and state management.
  * Follows the same patterns as useStudentData / useParentData for consistency.
@@ -62,27 +93,54 @@ export default function useTeacherData() {
         }
       });
 
-      const payload = await http.get("/api/admin/school/teachers/", {
-        auth: true,
-        params: queryParams
-      });
+      const [payload, pendingTeacherRecords] = await Promise.all([
+        http.get("/api/admin/school/teachers/", {
+          auth: true,
+          params: queryParams
+        }),
+        fetchPendingTeacherRecords()
+      ]);
 
-      const data = payload?.data ?? payload;
+      const data = unwrapApiData(payload);
       console.log("Teachers API response:", data);
+      const pendingTeacherEmails = new Set(
+        pendingTeacherRecords.map((record) => normalizeEmail(record.user?.email)).filter(Boolean)
+      );
+      const search = searchQuery.trim().toLowerCase();
+      const pendingTeachersMatchingSearch = new Set(
+        pendingTeacherRecords
+          .filter((record) => {
+            if (!search) return true;
+            return `${record.user?.name || ""} ${record.user?.email || ""}`
+              .toLowerCase()
+              .includes(search);
+          })
+          .map((record) => normalizeEmail(record.user?.email))
+          .filter(Boolean)
+      ).size;
 
-      // Handle both paginated and non-paginated responses
-      if (data.results) {
+      const setVerifiedTeachers = (records, total) => {
+        const verifiedTeachers = records.filter((teacher) => (
+          teacher.is_verified !== false &&
+          !pendingTeacherEmails.has(normalizeEmail(teacher.email || teacher.user?.email))
+        ));
+        const otherUnverifiedTeachers = records.filter((teacher) => (
+          teacher.is_verified === false &&
+          !pendingTeacherEmails.has(normalizeEmail(teacher.email || teacher.user?.email))
+        )).length;
+        setTeachers(verifiedTeachers);
+        setTotalTeachers(Math.max(0, total - pendingTeachersMatchingSearch - otherUnverifiedTeachers));
+      };
+
+      // Handle the documented { teachers, pagination } response and legacy formats.
+      if (Array.isArray(data.teachers)) {
+        setVerifiedTeachers(data.teachers, data.pagination?.total ?? data.teachers.length);
+      } else if (Array.isArray(data.results)) {
         // Paginated response (PaginatedTeacherListList)
-        setTeachers(data.results || []);
-        setTotalTeachers(data.count || 0);
-      } else if (Array.isArray(data.teachers)) {
-        // Non-paginated response with teachers array
-        setTeachers(data.teachers || []);
-        setTotalTeachers(data.teachers?.length || 0);
+        setVerifiedTeachers(data.results, data.pagination?.total ?? data.count ?? data.results.length);
       } else if (Array.isArray(data)) {
         // Direct array response
-        setTeachers(data || []);
-        setTotalTeachers(data?.length || 0);
+        setVerifiedTeachers(data, data.length);
       } else {
         // Fallback
         setTeachers([]);

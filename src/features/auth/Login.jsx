@@ -163,6 +163,7 @@ export default function Login() {
                 <InputField
                   label="Password"
                   name="password"
+                  type="password"
                   placeholder="Enter your password"
                   icon={Lock}
                   showToggle={true}

@@ -8,10 +8,7 @@ import useApiCircuitBreaker from "@/hooks/useApiCircuitBreaker";
  * Hook that manages food menu item fetching, caching, and state management.
  * Follows the same patterns as useStudentData / useParentData for consistency.
  *
- * NOTE: the API spec's documented request/response schema for this endpoint is a
- * generic fallback (AdminUser), not a real MenuItem schema, so the field names
- * below (name, description, price, category, is_available) are a reasonable best
- * guess and should be confirmed against the actual backend serializer.
+ * The API documents MenuItem fields and returns menu_items with pagination.
  */
 export default function useFoodMenuData() {
   const notification = useNotification("info", 5000);
@@ -67,10 +64,10 @@ export default function useFoodMenuData() {
 
       if (data.results) {
         setMenuItems(data.results || []);
-        setTotalMenuItems(data.count || 0);
+        setTotalMenuItems(data.pagination?.total ?? data.count ?? data.results.length);
       } else if (Array.isArray(data.menu_items)) {
         setMenuItems(data.menu_items || []);
-        setTotalMenuItems(data.menu_items?.length || 0);
+        setTotalMenuItems(data.pagination?.total ?? data.menu_items.length);
       } else if (Array.isArray(data)) {
         setMenuItems(data || []);
         setTotalMenuItems(data?.length || 0);

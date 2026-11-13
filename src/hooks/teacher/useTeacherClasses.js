@@ -22,12 +22,12 @@ export default function useTeacherClasses() {
   const [topics, setTopics] = useState([]);
 
   const refreshData = useCallback(async (params = {}, resetFailures = false) => {
-    if (resetFailures) resetAllEndpoints();
+    if (resetFailures || params?.resetFailures === true) resetAllEndpoints();
     try {
       const result = await request(
         "teacherClasses",
         "fetch_teacher_classes",
-        () => getTeacherClasses(params),
+        () => getTeacherClasses(),
         { failureMessage: "Classes unavailable" }
       );
       if (result !== null) setClasses(getTeacherList(result, ["classes"]));

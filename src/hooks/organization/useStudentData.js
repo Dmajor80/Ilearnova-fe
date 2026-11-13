@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { http } from "@/api/baseClient";
 import useNotification from "@/hooks/useNotification";
 import { parseError, getUserFriendlyMessage, getNotificationType } from "@/lib/errorHandler";
@@ -28,8 +28,8 @@ export default function useStudentData() {
   const [currentPage, setCurrentPage] = useState(1);
   const [studentsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedGrade, setSelectedGrade] = useState("");
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const requestId = useRef(0);
 
   // Grades data state
   const [availableGrades, setAvailableGrades] = useState([]);
@@ -53,12 +53,15 @@ export default function useStudentData() {
       return;
     }
 
+    const request = ++requestId.current;
+    setLoading(true);
+    setError(null);
+
     try {
       const queryParams = {
         page: currentPage,
         page_size: studentsPerPage,
-        search: searchQuery,
-        grade: selectedGrade,
+        search: searchQuery.trim(),
         ...params
       };
 
@@ -73,32 +76,32 @@ export default function useStudentData() {
         auth: true,
         params: queryParams
       });
-      console.log(payload)
-      const data = payload?.data ?? payload;
+      const responseData = payload?.data ?? payload;
+      const data = responseData?.data ?? responseData;
       console.log("Students API response:", data);
 
-      // Handle both paginated and non-paginated responses
-      if (data.results) {
+      // Handle the documented { students, pagination } response and legacy formats.
+      if (Array.isArray(data?.students)) {
+        if (request !== requestId.current) return;
+        setStudents(data.students);
+        setTotalStudents(data.pagination?.total ?? data.students.length);
+      } else if (Array.isArray(data?.results)) {
         // Paginated response
+        if (request !== requestId.current) return;
         setStudents(data.results || []);
-        setTotalStudents(data.count || 0);
-      } else if (Array.isArray(data.students)) {
-        // Non-paginated response with students array
-        setStudents(data.students || []);
-        setTotalStudents(data.students?.length || 0);
+        setTotalStudents(data.pagination?.total ?? data.count ?? data.results.length);
       } else if (Array.isArray(data)) {
         // Direct array response
+        if (request !== requestId.current) return;
         setStudents(data || []);
         setTotalStudents(data?.length || 0);
       } else {
-        // Fallback
-        setStudents([]);
-        setTotalStudents(0);
+        throw new Error("The students endpoint returned an unexpected response.");
       }
 
-      setError(null);
+      if (request === requestId.current) setError(null);
     } catch (err) {
-      console.log(err)
+      if (request !== requestId.current) return;
       const appError = parseError(err, { action: "fetch_students" });
       const userMessage = getUserFriendlyMessage(appError);
       const notificationType = getNotificationType(appError);
@@ -114,16 +117,19 @@ export default function useStudentData() {
       console.warn("Failed to fetch student data:", err);
       setStudents([]);
       setTotalStudents(0);
+    } finally {
+      if (request === requestId.current) setLoading(false);
     }
-  }, [currentPage, studentsPerPage, searchQuery, selectedGrade, circuitBreaker, notification]);
+  }, [currentPage, studentsPerPage, searchQuery, circuitBreaker, notification]);
 
   /**
    * Fetch available grades from API
    */
   const fetchGrades = useCallback(async () => {
     const endpointName = "grades";
+    const { shouldCallEndpoint, markEndpointFailed } = circuitBreaker;
 
-    if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
+    if (!shouldCallEndpoint(endpointName)) {
       console.log("Skipping grades call - endpoint marked as failed");
       return;
     }
@@ -132,10 +138,9 @@ export default function useStudentData() {
     setGradesError(null);
 
     try {
-      // Organization ID is automatically injected via X-Org-Id header by org_gate system
-      const response = await http.get("/api/classes/", {
+      const response = await http.get("/api/admin/school/classes/", {
         auth: true,
-        params: { active_only: true }
+        params: { page_size: 100 }
       });
       const data = response?.data ?? response;
       console.log("Grades API response:", data);
@@ -154,7 +159,7 @@ export default function useStudentData() {
       const appError = parseError(err, { action: "fetch_grades" });
       const userMessage = getUserFriendlyMessage(appError);
 
-      circuitBreaker.markEndpointFailed(endpointName, userMessage);
+      markEndpointFailed(endpointName, userMessage);
       setGradesError(userMessage);
       console.warn("Failed to fetch grades:", err);
 
@@ -163,7 +168,7 @@ export default function useStudentData() {
     } finally {
       setGradesLoading(false);
     }
-  }, [circuitBreaker.shouldCallEndpoint, circuitBreaker.markEndpointFailed]);
+  }, [circuitBreaker]);
 
   /**
    * Fetch individual student details
@@ -334,14 +339,6 @@ export default function useStudentData() {
   }, []);
 
   /**
-   * Handle grade filter
-   */
-  const handleGradeFilter = useCallback((grade) => {
-    setSelectedGrade(grade);
-    setCurrentPage(1); // Reset to first page when filtering
-  }, []);
-
-  /**
    * Handle pagination
    */
   const handlePageChange = useCallback((page) => {
@@ -362,79 +359,31 @@ export default function useStudentData() {
     setSelectedStudent(null);
   }, []);
 
-  // Initial data fetch
+  const refreshDataRef = useRef(refreshData);
+  refreshDataRef.current = refreshData;
+  const fetchGradesRef = useRef(fetchGrades);
+  fetchGradesRef.current = fetchGrades;
+
+  const fetchStudentsRef = useRef(fetchStudents);
+  fetchStudentsRef.current = fetchStudents;
+  const lastSearch = useRef({ currentPage, searchQuery });
+
   useEffect(() => {
-    refreshData(); // Fetches students only
-  }, []); // Empty dependency array - only run once on mount
-
-  // Fetch grades only once on mount (separate effect to avoid re-runs)
-  useEffect(() => {
-    let mounted = true;
-
-    const loadGrades = async () => {
-      const endpointName = "grades";
-
-      if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
-        console.log("Skipping grades call - endpoint marked as failed");
-        return;
-      }
-
-      setGradesLoading(true);
-      setGradesError(null);
-
-      try {
-        // Organization ID is automatically injected via X-Org-Id header by org_gate system
-        const response = await http.get("/api/classes/", {
-          auth: true,
-          params: { active_only: true }
-        });
-        const data = response?.data ?? response;
-        console.log("Grades API response:", data);
-
-        if (!mounted) return; // Component unmounted
-
-        // Handle different response formats
-        if (Array.isArray(data.classes)) {
-          setAvailableGrades(data.classes);
-        } else if (Array.isArray(data.results)) {
-          setAvailableGrades(data.results);
-        } else if (Array.isArray(data)) {
-          setAvailableGrades(data);
-        } else {
-          setAvailableGrades([]);
-        }
-      } catch (err) {
-        if (!mounted) return; // Component unmounted
-
-        const appError = parseError(err, { action: "fetch_grades" });
-        const userMessage = getUserFriendlyMessage(appError);
-
-        circuitBreaker.markEndpointFailed(endpointName, userMessage);
-        setGradesError(userMessage);
-        console.warn("Failed to fetch grades:", err);
-
-        // Don't use fallback data - set empty array
-        setAvailableGrades([]);
-      } finally {
-        if (mounted) {
-          setGradesLoading(false);
-        }
-      }
-    };
-
-    loadGrades();
-
+    refreshDataRef.current();
+    fetchGradesRef.current();
     return () => {
-      mounted = false;
+      requestId.current += 1;
     };
-  }, []); // Empty dependency array - only run once on mount
+  }, []);
 
-  // Refetch when filters change
+  // Refetch when the user changes the page or search term, including during initial loading.
   useEffect(() => {
-    if (!loading) {
-      fetchStudents();
-    }
-  }, [currentPage, searchQuery, selectedGrade]);
+    if (lastSearch.current.currentPage === currentPage &&
+      lastSearch.current.searchQuery === searchQuery) return;
+
+    lastSearch.current = { currentPage, searchQuery };
+    fetchStudentsRef.current();
+  }, [currentPage, searchQuery]);
 
   /**
    * Computed values
@@ -479,7 +428,6 @@ export default function useStudentData() {
 
     // Filters
     searchQuery,
-    selectedGrade,
 
     // Error handling (from circuit breaker)
     failedEndpoints: circuitBreaker.failedEndpoints,
@@ -498,7 +446,6 @@ export default function useStudentData() {
     deleteStudent,
     fetchGrades,
     handleSearch,
-    handleGradeFilter,
     handlePageChange,
     handleStudentSelect,
     clearStudentSelection,

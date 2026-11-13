@@ -22,7 +22,6 @@ const LoadingSpinner = () => (
 
 
 const roleOptions = [
-  { value: "super_admin", label: "Super Admin", icon: Building, description: "Full system access" },
   { value: "org_admin", label: "Organization Admin", icon: Users, description: "Manage your organization" },
   { value: "teacher", label: "Teacher", icon: GraduationCap, description: "Teach and manage students" },
   { value: "student", label: "Student", icon: UserCheck, description: "Learn and participate" },

@@ -42,7 +42,7 @@ export const getStudentExaminations = (params = {}) =>
   http.get(`${STUDENT_API}/examinations/`, { auth: true, params });
 
 export const startStudentExamSession = (examId) =>
-  http.post(`${STUDENT_API}/exams/${resourceId(examId)}/session/start/`, { auth: true });
+  http.post(`${STUDENT_API}/exams/${resourceId(examId)}/session/start/`, {}, { auth: true });
 
 export const getStudentExamSession = (sessionId) =>
   http.get(`${STUDENT_API}/exams/session/${resourceId(sessionId)}/`, { auth: true });
@@ -58,7 +58,39 @@ export const getStudentExamResult = (sessionId) =>
   http.get(`${STUDENT_API}/exams/session/${resourceId(sessionId)}/result/`, { auth: true });
 
 export const submitStudentExamSession = (sessionId) =>
-  http.post(`${STUDENT_API}/exams/session/${resourceId(sessionId)}/submit/`, { auth: true });
+  http.post(`${STUDENT_API}/exams/session/${resourceId(sessionId)}/submit/`, {}, { auth: true });
+
+export const getStudentCbtExams = (params = {}) =>
+  http.get(`${STUDENT_API}/cbt/exams/`, { auth: true, params });
+
+export const getStudentCbtExam = (examId) =>
+  http.get(`${STUDENT_API}/cbt/exams/${resourceId(examId)}/`, { auth: true });
+
+export const startStudentCbtAttempt = (examId) =>
+  http.post(`${STUDENT_API}/cbt/exams/${resourceId(examId)}/attempts/`, {}, { auth: true });
+
+export const getStudentCbtAttempt = (attemptId) =>
+  http.get(`${STUDENT_API}/cbt/attempts/${resourceId(attemptId)}/`, { auth: true });
+
+export const saveStudentCbtAnswer = (attemptId, questionId, answer) =>
+  http.put(
+    `${STUDENT_API}/cbt/attempts/${resourceId(attemptId)}/answers/${resourceId(questionId)}/`,
+    { answer },
+    { auth: true }
+  );
+
+export const createStudentCbtIntegrityEvent = (attemptId, eventData) =>
+  http.post(
+    `${STUDENT_API}/cbt/attempts/${resourceId(attemptId)}/integrity-events/`,
+    eventData,
+    { auth: true }
+  );
+
+export const getStudentCbtResult = (attemptId) =>
+  http.get(`${STUDENT_API}/cbt/attempts/${resourceId(attemptId)}/result/`, { auth: true });
+
+export const submitStudentCbtAttempt = (attemptId) =>
+  http.post(`${STUDENT_API}/cbt/attempts/${resourceId(attemptId)}/submit/`, {}, { auth: true });
 
 export const getStudentSubjectTopics = (subjectId) =>
   http.get(`${STUDENT_API}/subjects/${resourceId(subjectId)}/topics/`, { auth: true });

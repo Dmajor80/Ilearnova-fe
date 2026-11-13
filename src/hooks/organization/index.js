@@ -1,6 +1,7 @@
 export { default as useOrganizationOverview } from "./useOrganizationOverview";
 export { default as useOrganizationStudents } from "./useStudentData";
 export { default as useOrganizationTeachers } from "./useTeacherData";
+export { default as useOrganizationPendingStaff } from "./usePendingStaffData";
 export { default as useOrganizationClasses } from "./useOrganizationClasses";
 export { default as useOrganizationAnalytics } from "./useOrganizationAnalytics";
 export { default as useOrganizationReports } from "./useSchoolExport";

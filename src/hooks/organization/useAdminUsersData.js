@@ -9,12 +9,9 @@ import useApiCircuitBreaker from "@/hooks/useApiCircuitBreaker";
  * not just parents/teachers/students individually).
  * Follows the same patterns as useStudentData / useParentData for consistency.
  *
- * NOTE: /api/admin/users/ is documented as a bare "Legacy admin user list view"
- * with NO response schema at all, and the spec defines no corresponding
- * create/update/delete endpoint - it appears to be read-only from the admin
- * API today. Rendered fields (username, email, first_name, last_name, role,
- * is_active) are a best-effort guess based on the AdminUser shape used
- * elsewhere in the spec and should be confirmed against the actual backend view.
+ * The documented /api/admin/users/ route is deprecated and returns placeholder
+ * empty data. The current API has no general organization-wide user-list route;
+ * replace this hook only once its intended user scope is defined.
  */
 export default function useAdminUsersData() {
   const notification = useNotification("info", 5000);

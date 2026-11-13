@@ -114,7 +114,7 @@ export default function useSchoolDashboardData() {
 
       setSchoolData(prev => ({
         ...prev,
-        performanceChart: data.performance_chart
+        performanceChart: data.charts
       }));
     } catch (err) {
       circuitBreaker.markEndpointFailed(endpointName, "Performance data unavailable");
@@ -137,7 +137,7 @@ export default function useSchoolDashboardData() {
     try {
       const payload = await http.get("/api/admin/school/teachers/", {
         auth: true,
-        params: { limit: 10, include_performance: true }
+        params: { page_size: 10 }
       });
       const data = payload?.data ?? payload;
       console.log("Teachers API response:", data);
@@ -170,16 +170,22 @@ export default function useSchoolDashboardData() {
 
     try {
       const payload = await http.get("/api/admin/school/students/unpaid_tuition/", {
-        auth: true,
-        params: { limit: 10 }
+        auth: true
       });
       console.log("unpaid tuition data:", payload);
 
       const data = payload?.data ?? payload;
+      const students = Array.isArray(data?.students)
+        ? data.students
+        : Array.isArray(data)
+          ? data
+          : data?.id
+            ? [data]
+            : [];
 
       setSchoolData(prev => ({
         ...prev,
-        unpaidTuition: data.students || []
+        unpaidTuition: students
       }));
     } catch (err) {
       circuitBreaker.markEndpointFailed(endpointName, "Unpaid tuition data unavailable");

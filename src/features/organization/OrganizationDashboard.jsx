@@ -3,6 +3,7 @@ import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import { logout } from "@/api/authApi";
 import { clearAuth } from "@/api/auth";
 import useOrganizationAlerts from "@/hooks/organization/useNotificationsData";
+import { useOrganizationPendingStaff } from "@/hooks/organization";
 import {
   Bell,
   ChevronDown,
@@ -20,6 +21,8 @@ import {
   Menu,
   X,
   User,
+  SlidersHorizontal,
+  MessageCircle,
 } from "lucide-react";
 
 const OrganizationDashboard = () => {
@@ -29,6 +32,7 @@ const OrganizationDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const dropdownRef = useRef(null);
   const alertsApi = useOrganizationAlerts();
+  const pendingStaffApi = useOrganizationPendingStaff();
   const { totalNotifications, loading: alertsLoading } = alertsApi;
 
   const handleLogout = async () => {
@@ -65,11 +69,14 @@ const OrganizationDashboard = () => {
     { id: "overview", label: "Overview", icon: Home, path: "/organization-dashboard/overview" },
     { id: "students", label: "Students", icon: GraduationCap, path: "/organization-dashboard/students" },
     { id: "teachers", label: "Teachers", icon: UserCheck, path: "/organization-dashboard/teachers" },
+    { id: "pending-teachers", label: "Pending Teachers", icon: UserCheck, path: "/organization-dashboard/pending-teachers" },
     { id: "classes", label: "Classes", icon: BookOpen, path: "/organization-dashboard/classes" },
     { id: "exams", label: "Exams", icon: FileText, path: "/organization-dashboard/exams" },
     { id: "analytics", label: "Analytics", icon: TrendingUp, path: "/organization-dashboard/analytics" },
     { id: "reports", label: "Reports", icon: FileText, path: "/organization-dashboard/reports" },
     { id: "alerts", label: "Alerts", icon: AlertTriangle, path: "/organization-dashboard/alerts" },
+    { id: "operations", label: "Operations", icon: SlidersHorizontal, path: "/organization-dashboard/operations" },
+    { id: "messages", label: "Messages", icon: MessageCircle, path: "/organization-dashboard/messages" },
   ];
 
   const getCurrentSection = () => {
@@ -134,10 +141,17 @@ const OrganizationDashboard = () => {
                       isActive ? "text-white" : "text-slate-500 group-hover:text-blue-600"
                     }`}>{<Icon className="w-5 h-5" />}</span>
                     <span className={`
-                      transition-all duration-300 font-medium
-                      ${isSidebarOpen ? "block" : "hidden md:block"}
+                      flex w-full items-center gap-2 transition-all duration-300 font-medium
+                      ${isSidebarOpen ? "" : "hidden md:flex"}
                     `}>
                       {item.label}
+                      {item.id === "pending-teachers" && pendingStaffApi.totalPendingStaff > 0 && (
+                        <span className={`ml-auto rounded-full px-2 py-0.5 text-xs ${
+                          isActive ? "bg-white/20 text-white" : "bg-amber-100 text-amber-800"
+                        }`}>
+                          {pendingStaffApi.totalPendingStaff > 99 ? "99+" : pendingStaffApi.totalPendingStaff}
+                        </span>
+                      )}
                     </span>
                   </button>
 
@@ -237,7 +251,7 @@ const OrganizationDashboard = () => {
         </div>
 
         <main className="flex-1 m-4 md:m-6 mt-0 p-6 md:p-8">
-          <Outlet context={{ alertsApi }} />
+          <Outlet context={{ alertsApi, pendingStaffApi }} />
         </main>
       </div>
     </div>

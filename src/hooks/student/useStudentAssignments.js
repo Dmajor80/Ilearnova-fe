@@ -11,7 +11,10 @@ import {
   getUserFriendlyMessage,
   parseError
 } from "@/lib/errorHandler";
-import { getStudentList, unwrapStudentResponse } from "./studentApiUtils";
+import {
+  getStudentListAcrossPages,
+  unwrapStudentResponse
+} from "./studentApiUtils";
 
 const getSubmissionAssignmentId = (submission) => {
   const assignment = submission?.assignment;
@@ -41,13 +44,13 @@ export default function useStudentAssignments() {
     const requests = [
       {
         endpoint: "studentAssignments",
-        load: () => getStudentAssignments({ page: 1 }),
-        update: (response) => setAssignments(getStudentList(response))
+        load: () => getStudentListAcrossPages((page) => getStudentAssignments({ page })),
+        update: setAssignments
       },
       {
         endpoint: "studentSubmissions",
-        load: () => getStudentSubmissions({ page: 1 }),
-        update: (response) => setSubmissions(getStudentList(response))
+        load: () => getStudentListAcrossPages((page) => getStudentSubmissions({ page })),
+        update: setSubmissions
       }
     ].filter(({ endpoint }) => resetFailures || shouldCallEndpoint(endpoint));
 
@@ -91,6 +94,15 @@ export default function useStudentAssignments() {
   }, [markEndpointFailed, notification, resetAllEndpoints, shouldCallEndpoint]);
 
   const submitAssignment = useCallback(async (assignmentId, content, file) => {
+    if (!assignmentId || typeof content !== "string" || !content.trim() ||
+      typeof Blob === "undefined" || !(file instanceof Blob)) {
+      const validationError = new Error(
+        "An assignment, response, and attached file are required to submit this assignment."
+      );
+      notification.notify(validationError.message, "error");
+      throw validationError;
+    }
+
     setMutating(true);
     try {
       const formData = new FormData();

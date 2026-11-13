@@ -11,10 +11,10 @@ const OrganizationAlerts = () => {
   const sendBroadcast = async (event) => {
     event.preventDefault();
     try {
+      const broadcastData = { title, message };
+      if (recipientType !== "all") broadcastData.role_codes = [recipientType];
       await alertsApi.broadcastNotification({
-        title,
-        message,
-        recipient_type: recipientType
+        ...broadcastData
       });
       setTitle("");
       setMessage("");
@@ -49,9 +49,9 @@ const OrganizationAlerts = () => {
           <input className="rounded-lg border bg-white px-3 py-2" placeholder="Notification title" value={title} onChange={(event) => setTitle(event.target.value)} required />
           <select className="rounded-lg border bg-white px-3 py-2" value={recipientType} onChange={(event) => setRecipientType(event.target.value)}>
             <option value="all">Everyone</option>
-            <option value="students">Students</option>
-            <option value="teachers">Teachers</option>
-            <option value="parents">Parents</option>
+            <option value="student">Students</option>
+            <option value="teacher">Teachers</option>
+            <option value="parent">Parents</option>
           </select>
         </div>
         <textarea className="w-full rounded-lg border bg-white px-3 py-2" placeholder="Write a message" value={message} onChange={(event) => setMessage(event.target.value)} required rows={3} />

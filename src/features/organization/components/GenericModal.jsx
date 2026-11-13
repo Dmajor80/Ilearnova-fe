@@ -24,10 +24,9 @@ const fieldGroups = {
   ],
   class: [
     { name: "name", label: "Class name", required: true },
-    { name: "grade_level", label: "Grade level" },
-    { name: "section", label: "Section" },
-    { name: "academic_year", label: "Academic year" },
-    { name: "capacity", label: "Capacity", type: "number" }
+    { name: "description", label: "Description", type: "textarea" },
+    { name: "teacher_role", label: "Teacher role ID" },
+    { name: "is_active", label: "Active", type: "checkbox" }
   ],
   exam: [
     { name: "name", label: "Exam name", required: true },
@@ -41,7 +40,9 @@ const GenericModal = ({ item, type, onSave, onClose, saving = false, availableCl
   const [form, setForm] = useState(() => {
     const initial = item ? { ...item } : {};
     if (type === "student" || type === "teacher") {
-      const [firstName = "", ...lastName] = String(initial.name || "").split(" ");
+      const [firstName = "", ...lastName] = String(
+        initial.full_name || initial.name || ""
+      ).split(" ");
       initial.first_name = initial.first_name || firstName;
       initial.last_name = initial.last_name || lastName.join(" ");
     }
@@ -87,6 +88,23 @@ const GenericModal = ({ item, type, onSave, onClose, saving = false, availableCl
                     </option>
                   ))}
                 </select>
+              ) : field.type === "textarea" ? (
+                <textarea
+                  id={`organization-${type}-${field.name}`}
+                  value={form[field.name] ?? ""}
+                  required={field.required}
+                  onChange={(event) => setForm({ ...form, [field.name]: event.target.value })}
+                  className="w-full rounded-lg border border-gray-300 p-3"
+                  rows={3}
+                />
+              ) : field.type === "checkbox" ? (
+                <input
+                  id={`organization-${type}-${field.name}`}
+                  type="checkbox"
+                  checked={Boolean(form[field.name])}
+                  onChange={(event) => setForm({ ...form, [field.name]: event.target.checked })}
+                  className="h-4 w-4 rounded border-gray-300"
+                />
               ) : (
                 <input
                   id={`organization-${type}-${field.name}`}

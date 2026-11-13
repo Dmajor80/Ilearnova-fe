@@ -13,10 +13,10 @@ const OrganizationClasses = () => {
   const rows = useMemo(() => classesApi.classes.map((item) => ({
     ...item,
     displayName: item.name || "—",
-    displayOrganization: item.organization_name || "—",
+    displayDescription: item.description || "—",
     displayTeacher: item.teacher_name || "—",
     displayStudents: item.student_count ?? "—",
-    displayStatus: item.is_active ? "Active" : "Inactive",
+    displayStatus: item.is_active === false ? "Inactive" : item.is_active === true ? "Active" : "Unknown",
     displayCreated: item.created_at ? new Date(item.created_at).toLocaleDateString() : "—"
   })), [classesApi.classes]);
 
@@ -74,7 +74,7 @@ const OrganizationClasses = () => {
         error={classesApi.error?.message}
         columns={[
           { key: "displayName", label: "Class Name" },
-          { key: "displayOrganization", label: "Organization" },
+          { key: "displayDescription", label: "Description" },
           { key: "displayTeacher", label: "Teacher" },
           { key: "displayStudents", label: "Students" },
           { key: "displayStatus", label: "Status" },
