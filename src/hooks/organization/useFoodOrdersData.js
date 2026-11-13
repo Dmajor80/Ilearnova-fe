@@ -8,10 +8,7 @@ import useApiCircuitBreaker from "@/hooks/useApiCircuitBreaker";
  * Hook that manages food order fetching, caching, and state management.
  * Follows the same patterns as useStudentData / useParentData for consistency.
  *
- * NOTE: the API spec's documented request/response schema for this endpoint is a
- * generic fallback (AdminUser), not a real FoodOrder schema, so the field names
- * below (student_name, items, total_amount, status, order_date) are a reasonable
- * best guess and should be confirmed against the actual backend serializer.
+ * The API documents FoodOrder fields and returns orders with pagination.
  */
 export default function useFoodOrdersData() {
   const notification = useNotification("info", 5000);
@@ -67,10 +64,10 @@ export default function useFoodOrdersData() {
 
       if (data.results) {
         setOrders(data.results || []);
-        setTotalOrders(data.count || 0);
+        setTotalOrders(data.pagination?.total ?? data.count ?? data.results.length);
       } else if (Array.isArray(data.orders)) {
         setOrders(data.orders || []);
-        setTotalOrders(data.orders?.length || 0);
+        setTotalOrders(data.pagination?.total ?? data.orders.length);
       } else if (Array.isArray(data)) {
         setOrders(data || []);
         setTotalOrders(data?.length || 0);
@@ -118,7 +115,7 @@ export default function useFoodOrdersData() {
 
   /**
    * Update an order - most commonly used to change its status
-   * (e.g. { status: "preparing" | "ready" | "completed" | "cancelled" }).
+   * (e.g. { status: "preparing" | "ready" | "delivered" | "cancelled" }).
    */
   const updateOrder = useCallback(async (orderId, orderData) => {
     setMutating(true);

@@ -1,359 +1,161 @@
-import React, { useState } from "react";
-import CoursesComponent from "./components/CourseComponents";
-import { Calendar, Clock, MapPin, User, Plus, Edit, Trash2, Download, Share, Bell } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { CalendarDays, Clock3, ExternalLink, RefreshCw } from "lucide-react";
+import { useTeacherTimetable } from "@/hooks/teacher";
 
-const Timetable = () => {
-  const [selectedDay, setSelectedDay] = useState("Monday");
-  const [viewMode, setViewMode] = useState("list"); // "list" or "grid"
-  const [selectedClass, setSelectedClass] = useState("all");
+const DAY_KEYS = ["day_name", "day", "name", "weekday"];
+const SESSION_KEYS = ["entries", "sessions", "schedule", "slots", "periods", "classes"];
+const WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-  const classes = ["all", "Grade 6A", "Grade 7B", "Grade 8A", "Grade 9B", "Grade 10A"];
-
-  const timetableData = {
-    Monday: [
-      { time: "8:00 AM - 9:00 AM", subject: "Mathematics", teacher: "Mr. Johnson", room: "Room 101", type: "Lecture", class: "Grade 8A", color: "bg-blue-500" },
-      { time: "9:15 AM - 10:15 AM", subject: "Physics", teacher: "Ms. Davis", room: "Lab 201", type: "Lab", class: "Grade 8A", color: "bg-green-500" },
-      { time: "10:30 AM - 11:30 AM", subject: "English", teacher: "Mrs. Wilson", room: "Room 105", type: "Lecture", class: "Grade 8A", color: "bg-purple-500" },
-      { time: "1:00 PM - 2:00 PM", subject: "Chemistry", teacher: "Mr. Brown", room: "Lab 202", type: "Lab", class: "Grade 8A", color: "bg-red-500" },
-      { time: "2:15 PM - 3:15 PM", subject: "Biology", teacher: "Ms. Green", room: "Lab 203", type: "Lab", class: "Grade 8A", color: "bg-yellow-500" },
-    ],
-    Tuesday: [
-      { time: "8:00 AM - 9:00 AM", subject: "Chemistry", teacher: "Mr. Brown", room: "Lab 202", type: "Lab", class: "Grade 8A", color: "bg-red-500" },
-      { time: "9:15 AM - 10:15 AM", subject: "Mathematics", teacher: "Mr. Johnson", room: "Room 101", type: "Lecture", class: "Grade 8A", color: "bg-blue-500" },
-      { time: "10:30 AM - 11:30 AM", subject: "History", teacher: "Mr. Smith", room: "Room 106", type: "Lecture", class: "Grade 8A", color: "bg-indigo-500" },
-      { time: "1:00 PM - 2:00 PM", subject: "English", teacher: "Mrs. Wilson", room: "Room 105", type: "Lecture", class: "Grade 8A", color: "bg-purple-500" },
-      { time: "2:15 PM - 3:15 PM", subject: "Physics", teacher: "Ms. Davis", room: "Lab 201", type: "Lab", class: "Grade 8A", color: "bg-green-500" },
-    ],
-    Wednesday: [
-      { time: "8:00 AM - 9:00 AM", subject: "Biology", teacher: "Ms. Green", room: "Lab 203", type: "Lab", class: "Grade 8A", color: "bg-yellow-500" },
-      { time: "9:15 AM - 10:15 AM", subject: "History", teacher: "Mr. Smith", room: "Room 106", type: "Lecture", class: "Grade 8A", color: "bg-indigo-500" },
-      { time: "10:30 AM - 11:30 AM", subject: "Mathematics", teacher: "Mr. Johnson", room: "Room 101", type: "Lecture", class: "Grade 8A", color: "bg-blue-500" },
-      { time: "1:00 PM - 2:00 PM", subject: "Chemistry", teacher: "Mr. Brown", room: "Lab 202", type: "Lab", class: "Grade 8A", color: "bg-red-500" },
-      { time: "2:15 PM - 3:15 PM", subject: "English", teacher: "Mrs. Wilson", room: "Room 105", type: "Lecture", class: "Grade 8A", color: "bg-purple-500" },
-    ],
-    Thursday: [
-      { time: "8:00 AM - 9:00 AM", subject: "Physics", teacher: "Ms. Davis", room: "Lab 201", type: "Lab", class: "Grade 8A", color: "bg-green-500" },
-      { time: "9:15 AM - 10:15 AM", subject: "Biology", teacher: "Ms. Green", room: "Lab 203", type: "Lab", class: "Grade 8A", color: "bg-yellow-500" },
-      { time: "10:30 AM - 11:30 AM", subject: "History", teacher: "Mr. Smith", room: "Room 106", type: "Lecture", class: "Grade 8A", color: "bg-indigo-500" },
-      { time: "1:00 PM - 2:00 PM", subject: "Mathematics", teacher: "Mr. Johnson", room: "Room 101", type: "Lecture", class: "Grade 8A", color: "bg-blue-500" },
-      { time: "2:15 PM - 3:15 PM", subject: "Chemistry", teacher: "Mr. Brown", room: "Lab 202", type: "Lab", class: "Grade 8A", color: "bg-red-500" },
-    ],
-    Friday: [
-      { time: "8:00 AM - 9:00 AM", subject: "English", teacher: "Mrs. Wilson", room: "Room 105", type: "Lecture", class: "Grade 8A", color: "bg-purple-500" },
-      { time: "9:15 AM - 10:15 AM", subject: "Physics", teacher: "Ms. Davis", room: "Lab 201", type: "Lab", class: "Grade 8A", color: "bg-green-500" },
-      { time: "10:30 AM - 11:30 AM", subject: "Biology", teacher: "Ms. Green", room: "Lab 203", type: "Lab", class: "Grade 8A", color: "bg-yellow-500" },
-      { time: "1:00 PM - 2:00 PM", subject: "History", teacher: "Mr. Smith", room: "Room 106", type: "Lecture", class: "Grade 8A", color: "bg-indigo-500" },
-      { time: "2:15 PM - 3:15 PM", subject: "Mathematics", teacher: "Mr. Johnson", room: "Room 101", type: "Lecture", class: "Grade 8A", color: "bg-blue-500" },
-    ],
-  };
-
-  const timeSlots = [
-    "8:00 AM", "9:15 AM", "10:30 AM", "1:00 PM", "2:15 PM"
-  ];
-
-  const filteredSessions = selectedClass === "all"
-    ? timetableData[selectedDay] || []
-    : (timetableData[selectedDay] || []).filter(session => session.class === selectedClass);
-
-  const getTypeColor = (type) => {
-    switch (type) {
-      case "Lecture":
-        return "bg-blue-100 text-blue-800";
-      case "Lab":
-        return "bg-green-100 text-green-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const getCurrentTimeSlot = () => {
-    const now = new Date();
-    const currentTime = now.getHours() * 60 + now.getMinutes();
-    const currentDay = days[now.getDay() - 1]; // 0 = Sunday, so Monday = 1
-
-    if (currentDay !== selectedDay) return null;
-
-    // Convert time slots to minutes
-    const timeToMinutes = (timeStr) => {
-      const [time, period] = timeStr.split(' ');
-      const [hours, minutes] = time.split(':').map(Number);
-      let totalMinutes = hours * 60 + minutes;
-      if (period === 'PM' && hours !== 12) totalMinutes += 12 * 60;
-      if (period === 'AM' && hours === 12) totalMinutes -= 12 * 60;
-      return totalMinutes;
-    };
-
-    for (let i = 0; i < timeSlots.length; i++) {
-      const slotStart = timeToMinutes(timeSlots[i]);
-      const slotEnd = slotStart + 60; // Assuming 1 hour slots
-
-      if (currentTime >= slotStart && currentTime < slotEnd) {
-        return i;
-      }
-    }
-    return null;
-  };
-
-  const currentSlotIndex = getCurrentTimeSlot();
-
-  return (
-    <>
-      <CoursesComponent page="Timetable" />
-      <div className="min-h-screen bg-gray-100 p-6">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold text-gray-900">Weekly Timetable</h2>
-              <div className="flex items-center space-x-3">
-                <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold flex items-center space-x-2 transition-colors">
-                  <Plus className="w-5 h-5" />
-                  <span>Add Session</span>
-                </button>
-                <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold flex items-center space-x-2 transition-colors">
-                  <Download className="w-5 h-5" />
-                  <span>Export</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Controls */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              {/* Class Selector */}
-              <div className="relative">
-                <select
-                  value={selectedClass}
-                  onChange={(e) => setSelectedClass(e.target.value)}
-                  className="appearance-none w-full bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  {classes.map(cls => (
-                    <option key={cls} value={cls}>{cls === "all" ? "All Classes" : cls}</option>
-                  ))}
-                </select>
-                <User className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
-              </div>
-
-              {/* View Mode Toggle */}
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => setViewMode("list")}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    viewMode === "list"
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  List View
-                </button>
-                <button
-                  onClick={() => setViewMode("grid")}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    viewMode === "grid"
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  Grid View
-                </button>
-              </div>
-
-              {/* Quick Actions */}
-              <div className="flex items-center space-x-2">
-                <button className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg font-medium transition-colors flex items-center justify-center space-x-1">
-                  <Share className="w-4 h-4" />
-                  <span>Share</span>
-                </button>
-                <button className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg font-medium transition-colors flex items-center justify-center space-x-1">
-                  <Bell className="w-4 h-4" />
-                  <span>Remind</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Day Selector */}
-            <div className="flex space-x-2 overflow-x-auto">
-              {days.map((day) => (
-                <button
-                  key={day}
-                  onClick={() => setSelectedDay(day)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
-                    selectedDay === day
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  {day}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Timetable Content */}
-          {viewMode === "list" ? (
-            /* List View */
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">{selectedDay}'s Schedule</h3>
-
-                {filteredSessions.length > 0 ? (
-                  <div className="space-y-4">
-                    {filteredSessions.map((session, index) => (
-                      <div
-                        key={index}
-                        className={`flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors ${
-                          currentSlotIndex === index ? "ring-2 ring-blue-500 bg-blue-50" : ""
-                        }`}
-                      >
-                        <div className="flex items-center space-x-4">
-                          <div className="flex items-center space-x-2">
-                            <Clock className="w-5 h-5 text-gray-500" />
-                            <span className="font-medium text-gray-900">{session.time}</span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <User className="w-5 h-5 text-gray-500" />
-                            <span className="text-gray-700">{session.teacher}</span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <MapPin className="w-5 h-5 text-gray-500" />
-                            <span className="text-gray-700">{session.room}</span>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center space-x-4">
-                          <div className="text-right">
-                            <span className="font-semibold text-gray-900 block">{session.subject}</span>
-                            <span className="text-sm text-gray-600">{session.class}</span>
-                          </div>
-                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${getTypeColor(session.type)}`}>
-                            {session.type}
-                          </span>
-                          <div className="flex items-center space-x-1">
-                            <button className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors">
-                              <Edit className="w-4 h-4" />
-                            </button>
-                            <button className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors">
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <h4 className="text-lg font-medium text-gray-900 mb-2">No classes scheduled</h4>
-                    <p className="text-gray-600">No classes are scheduled for {selectedDay}.</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : (
-            /* Grid View */
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-              <div className="p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">{selectedDay}'s Schedule</h3>
-
-                <div className="grid grid-cols-1 gap-4">
-                  {timeSlots.map((timeSlot, index) => {
-                    const session = filteredSessions.find(s => s.time.startsWith(timeSlot));
-                    return (
-                      <div
-                        key={index}
-                        className={`p-4 border border-gray-200 rounded-lg min-h-24 flex items-center ${
-                          currentSlotIndex === index ? "ring-2 ring-blue-500 bg-blue-50" : "hover:bg-gray-50"
-                        } transition-colors`}
-                      >
-                        <div className="flex items-center space-x-4 w-full">
-                          <div className="text-sm font-medium text-gray-600 w-32">{timeSlot}</div>
-                          {session ? (
-                            <div className={`flex-1 p-3 rounded-lg ${session.color} text-white`}>
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <h4 className="font-semibold">{session.subject}</h4>
-                                  <p className="text-sm opacity-90">{session.teacher}</p>
-                                  <p className="text-sm opacity-90">{session.room}</p>
-                                </div>
-                                <div className="text-right">
-                                  <span className={`px-2 py-1 rounded text-xs font-medium bg-white bg-opacity-20`}>
-                                    {session.type}
-                                  </span>
-                                  <div className="flex items-center space-x-1 mt-2">
-                                    <button className="p-1 text-white hover:bg-white hover:bg-opacity-20 rounded transition-colors">
-                                      <Edit className="w-3 h-3" />
-                                    </button>
-                                    <button className="p-1 text-white hover:bg-white hover:bg-opacity-20 rounded transition-colors">
-                                      <Trash2 className="w-3 h-3" />
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="flex-1 text-center text-gray-400">
-                              <span className="text-sm">No class scheduled</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Quick Stats */}
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-blue-600 mb-2">
-                  {filteredSessions.length}
-                </div>
-                <div className="text-sm text-gray-600">Total Sessions</div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-green-600 mb-2">
-                  {filteredSessions.filter(s => s.type === 'Lab').length}
-                </div>
-                <div className="text-sm text-gray-600">Lab Sessions</div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-purple-600 mb-2">
-                  {filteredSessions.filter(s => s.type === 'Lecture').length}
-                </div>
-                <div className="text-sm text-gray-600">Lectures</div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-yellow-600 mb-2">
-                  {Math.round(filteredSessions.reduce((sum, s) => {
-                    const [start] = s.time.split(' - ');
-                    const [time, period] = start.split(' ');
-                    const [hours] = time.split(':').map(Number);
-                    let totalHours = hours;
-                    if (period === 'PM' && hours !== 12) totalHours += 12;
-                    if (period === 'AM' && hours === 12) totalHours = 0;
-                    return sum + totalHours;
-                  }, 0) / filteredSessions.length) || 0}
-                </div>
-                <div className="text-sm text-gray-600">Avg Start Time</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
-  );
+const getDayName = (day, fallback) => {
+  if (typeof day === "string") return day;
+  if (Number.isInteger(day)) return WEEKDAYS[day] || fallback;
+  for (const key of DAY_KEYS) {
+    if (typeof day?.[key] === "string") return day[key];
+  }
+  if (Number.isInteger(day?.day_of_week)) return WEEKDAYS[day.day_of_week] || fallback;
+  const keyedSessions = Object.entries(day || {}).find(([, value]) => Array.isArray(value));
+  if (keyedSessions) return keyedSessions[0];
+  return fallback;
 };
 
-export default Timetable;
+const getDaySessions = (day) => {
+  if (Array.isArray(day)) return day;
+  if (!day || typeof day !== "object") return [];
+  for (const key of SESSION_KEYS) {
+    if (Array.isArray(day[key])) return day[key];
+  }
+  const keyedSessions = Object.values(day).find(Array.isArray);
+  if (keyedSessions) return keyedSessions;
+  return day.start_time ? [day] : [];
+};
+
+const formatTime = (value) => {
+  if (!value) return "";
+  const [hours, minutes] = String(value).split(":");
+  if (!minutes || Number.isNaN(Number(hours))) return String(value);
+  const hour = Number(hours);
+  return `${hour % 12 || 12}:${minutes.slice(0, 2)} ${hour >= 12 ? "PM" : "AM"}`;
+};
+
+export default function Timetable() {
+  const timetableApi = useTeacherTimetable();
+  const [selectedDay, setSelectedDay] = useState("");
+  const [selectedClass, setSelectedClass] = useState("all");
+
+  const days = useMemo(() => {
+    const rawDays = Array.isArray(timetableApi.timetable?.days)
+      ? timetableApi.timetable.days
+      : [];
+    return rawDays.map((day, index) => ({
+      name: getDayName(day, `Day ${index + 1}`),
+      sessions: getDaySessions(day)
+    }));
+  }, [timetableApi.timetable]);
+
+  const classNames = useMemo(
+    () => [...new Set(days.flatMap(({ sessions }) => sessions
+      .map((session) => session.class_name || session.class?.name)
+      .filter(Boolean)))],
+    [days]
+  );
+  const activeDay = days.find((day) => day.name === selectedDay) || days[0];
+  const sessions = (activeDay?.sessions || []).filter((session) =>
+    selectedClass === "all" ||
+    (session.class_name || session.class?.name) === selectedClass
+  );
+
+  useEffect(() => {
+    if (!selectedDay && days.length) setSelectedDay(days[0].name);
+    if (selectedDay && !days.some((day) => day.name === selectedDay) && days.length) {
+      setSelectedDay(days[0].name);
+    }
+  }, [days, selectedDay]);
+
+  return (
+    <div className="space-y-5">
+      <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white p-5 shadow-sm">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Weekly timetable</h2>
+          <p className="mt-1 text-sm text-gray-600">Your scheduled subject and class sessions.</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => timetableApi.refreshData(true)}
+          disabled={timetableApi.loading}
+          className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+        >
+          <RefreshCw size={16} className={timetableApi.loading ? "animate-spin" : ""} />
+          Refresh
+        </button>
+      </section>
+
+      {timetableApi.error && (
+        <p role="alert" className="rounded-lg bg-red-50 p-4 text-red-700">{timetableApi.error.message}</p>
+      )}
+
+      <section className="rounded-xl bg-white p-5 shadow-sm">
+        <div className="mb-5 grid gap-3 sm:grid-cols-2">
+          <label className="text-sm font-medium text-gray-700">
+            Class
+            <select value={selectedClass} onChange={(event) => setSelectedClass(event.target.value)} className="mt-1 w-full rounded-lg border p-3">
+              <option value="all">All classes</option>
+              {classNames.map((name) => <option key={name} value={name}>{name}</option>)}
+            </select>
+          </label>
+        </div>
+
+        {days.length > 0 && (
+          <div className="mb-5 flex gap-2 overflow-x-auto pb-1">
+            {days.map((day) => (
+              <button
+                key={day.name}
+                type="button"
+                onClick={() => setSelectedDay(day.name)}
+                className={`shrink-0 rounded-lg px-4 py-2 text-sm font-medium ${
+                  day.name === activeDay?.name ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                {day.name}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {timetableApi.loading && !timetableApi.timetable ? (
+          <p className="py-10 text-center text-gray-500">Loading timetable...</p>
+        ) : !days.length ? (
+          <div className="py-10 text-center">
+            <CalendarDays className="mx-auto mb-3 text-gray-300" size={40} />
+            <p className="font-medium text-gray-800">No timetable available</p>
+            <p className="mt-1 text-sm text-gray-500">Scheduled sessions will appear here when they are assigned.</p>
+          </div>
+        ) : sessions.length ? (
+          <div className="divide-y">
+            {sessions.map((session, index) => (
+              <article key={session.id || `${activeDay?.name}-${index}`} className="flex flex-wrap items-center justify-between gap-4 py-4">
+                <div className="flex min-w-48 items-center gap-3">
+                  <span className="rounded-lg bg-blue-50 p-2 text-blue-700"><Clock3 size={18} /></span>
+                  <div className="font-medium text-gray-900">
+                    {formatTime(session.start_time)}{session.end_time ? ` – ${formatTime(session.end_time)}` : ""}
+                  </div>
+                </div>
+                <div className="min-w-48 flex-1">
+                  <p className="font-semibold text-gray-900">{session.subject_name || session.subject?.name || "Class session"}</p>
+                  <p className="text-sm text-gray-600">{session.class_name || session.class?.name || "Class"}</p>
+                </div>
+                <div className="text-sm text-gray-500">{session.room || "Room not specified"}</div>
+                {session.meeting_link && (
+                  <a href={session.meeting_link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sm font-medium text-blue-700 hover:underline">
+                    Join <ExternalLink size={14} />
+                  </a>
+                )}
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p className="rounded-lg bg-gray-50 p-6 text-center text-sm text-gray-600">No sessions are scheduled for {activeDay?.name}.</p>
+        )}
+      </section>
+    </div>
+  );
+}

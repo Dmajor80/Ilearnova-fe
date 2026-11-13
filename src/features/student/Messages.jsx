@@ -1,7 +1,5 @@
-import React from "react";
+import DirectMessages from "@/features/communication/DirectMessages";
 
-const Messages = () => {
-  return <div>Messages</div>;
-};
-
-export default Messages;
+export default function StudentMessages() {
+  return <DirectMessages restrictRecipients />;
+}

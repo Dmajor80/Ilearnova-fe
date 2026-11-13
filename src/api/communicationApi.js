@@ -144,29 +144,27 @@ export const getVideoCallStatistics = async () => {
   return await http.get("/api/video-calls/statistics", { auth: true });
 };
 
-// Messaging API
+// Direct messaging API
+export const getMessageContacts = async (params = {}) => {
+  return await http.get("/api/messages/contacts/", { auth: true, params });
+};
+
 export const getConversations = async () => {
-  return await http.get("/api/messages/conversations", { auth: true });
+  return await http.get("/api/messages/conversations/", { auth: true });
 };
 
 export const getMessages = async (userId, params = {}) => {
-  return await http.get(`/api/messages/${userId}`, { auth: true, params });
+  return await http.get(
+    `/api/messages/conversations/${encodeURIComponent(userId)}/`,
+    { auth: true, params }
+  );
 };
 
-export const sendMessage = async (userId, messageData) => {
-  return await http.post(`/api/messages/${userId}`, { auth: true, body: messageData });
-};
-
-export const markMessagesAsRead = async (userId) => {
-  return await http.put(`/api/messages/${userId}/read`, { auth: true });
-};
-
-export const sendTypingIndicator = async (userId) => {
-  return await http.post(`/api/messages/${userId}/typing`, { auth: true });
-};
-
-export const deleteMessage = async (messageId) => {
-  return await http.del(`/api/messages/${messageId}`, { auth: true });
+export const sendMessage = async (recipientId, body) => {
+  return await http.post("/api/messages/", {
+    recipient_id: recipientId,
+    body
+  }, { auth: true });
 };
 
 // Notification Preferences API

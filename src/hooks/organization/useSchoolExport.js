@@ -6,26 +6,20 @@ import { parseError, getUserFriendlyMessage, getNotificationType } from "@/lib/e
 /**
  * Hook that triggers a school data export.
  *
- * NOTE: /api/admin/school/export/ is documented only as "Export school data in
- * various formats" with NO query parameters, request, or response schema at
- * all. It's a GET, so it likely either streams a file (csv/xlsx/pdf) directly
- * or returns a download URL/job id - both are common for "various formats"
- * export endpoints. This hook handles the common case (a direct file
- * response) and falls back to opening a returned URL if the response looks
- * like JSON with a url/file_url field instead. Confirm the actual response
- * shape (and whether a `format=` query param is expected) against the backend
- * view before relying on this.
+ * The API supports the default export endpoint and an export-type path.
  */
 export default function useSchoolExport() {
   const notification = useNotification("info", 5000);
   const [exporting, setExporting] = useState(false);
 
-  const exportSchoolData = useCallback(async (params = {}) => {
+  const exportSchoolData = useCallback(async ({ format } = {}) => {
     setExporting(true);
     try {
-      const payload = await http.get("/api/admin/school/export/", {
+      const endpoint = format
+        ? `/api/admin/school/export/${encodeURIComponent(format)}/`
+        : "/api/admin/school/export/";
+      const payload = await http.get(endpoint, {
         auth: true,
-        params,
         responseType: "blob"
       });
 
@@ -43,7 +37,7 @@ export default function useSchoolExport() {
       const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = downloadUrl;
-      link.download = `school-export-${new Date().toISOString().slice(0, 10)}`;
+      link.download = `school-export-${new Date().toISOString().slice(0, 10)}${format ? `.${format}` : ""}`;
       document.body.appendChild(link);
       link.click();
       link.remove();

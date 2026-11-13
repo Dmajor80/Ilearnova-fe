@@ -1,7 +1,10 @@
 export { default as useTeacherAnnouncements } from "./useTeacherAnnouncements";
 export { default as useTeacherAssignments } from "./useTeacherAssignments";
+export { default as useTeacherAnalytics } from "./useTeacherAnalytics";
 export { default as useTeacherAttendance } from "./useTeacherAttendance";
 export { default as useTeacherBankQuestions } from "./useTeacherBankQuestions";
+export { default as useTeacherCbt } from "./useTeacherCbt";
 export { default as useTeacherClasses } from "./useTeacherClasses";
 export { default as useTeacherExaminations } from "./useTeacherExaminations";
 export { default as useTeacherStudents } from "./useTeacherStudents";
+export { default as useTeacherTimetable } from "./useTeacherTimetable";

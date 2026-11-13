@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { BookOpen, FilePlus2, Megaphone, Plus, RefreshCw, Users } from "lucide-react";
 import { useTeacherAnnouncements, useTeacherClasses } from "@/hooks/teacher";
+import { useOrganization } from "@/context/OrganizationContext";
 import CoursesComponent from "./components/CourseComponents";
 
 export default function ClassManagement() {
   const classesApi = useTeacherClasses();
   const announcementApi = useTeacherAnnouncements();
+  const { currentOrgId } = useOrganization();
   const [selectedClass, setSelectedClass] = useState(null);
   const [activeModal, setActiveModal] = useState(null);
   const [selectedSubjectId, setSelectedSubjectId] = useState("");
@@ -13,6 +15,7 @@ export default function ClassManagement() {
   const [material, setMaterial] = useState({ title: "", description: "", content_type: "text", link: "" });
   const [subjectName, setSubjectName] = useState("");
   const [topic, setTopic] = useState({ name: "", description: "" });
+  const [classForm, setClassForm] = useState({ name: "", description: "" });
 
   const selectClass = async (classItem) => {
     setSelectedClass(classItem);
@@ -80,13 +83,31 @@ export default function ClassManagement() {
     }
   };
 
+  const saveClass = async (event) => {
+    event.preventDefault();
+    if (!currentOrgId) return;
+    try {
+      await classesApi.addClass({
+        ...classForm,
+        organization: currentOrgId,
+        is_active: true
+      });
+      setClassForm({ name: "", description: "" });
+      setActiveModal(null);
+    } catch {
+      // The API hook reports request failures.
+    }
+  };
+
   const modalForm = activeModal === "announcement"
     ? { title: "Publish announcement", submit: saveAnnouncement, busy: announcementApi.mutating }
     : activeModal === "material"
       ? { title: "Add class material", submit: saveMaterial, busy: classesApi.mutating }
       : activeModal === "subject"
         ? { title: "Add subject", submit: saveSubject, busy: classesApi.mutating }
-        : { title: "Add topic", submit: saveTopic, busy: classesApi.mutating };
+        : activeModal === "class"
+          ? { title: "Create class", submit: saveClass, busy: classesApi.mutating }
+          : { title: "Add topic", submit: saveTopic, busy: classesApi.mutating };
 
   return (
     <div className="space-y-6">
@@ -98,6 +119,10 @@ export default function ClassManagement() {
             <p className="text-sm text-gray-600">Manage class subjects, topics, course materials, and announcements.</p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <button onClick={() => setActiveModal("class")} disabled={!currentOrgId} className="inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-gray-700 hover:bg-gray-50 disabled:opacity-50">
+              <Plus size={17} /> Create class
+            </button>
+            {!currentOrgId && <span className="self-center text-xs text-gray-500">Choose an organization to create a class.</span>}
             <button onClick={() => setActiveModal("announcement")} className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700">
               <Megaphone size={17} /> Announcement
             </button>
@@ -204,6 +229,11 @@ export default function ClassManagement() {
             {activeModal === "topic" && <>
               <input required maxLength={100} placeholder="Topic name" value={topic.name} onChange={(event) => setTopic({ ...topic, name: event.target.value })} className="w-full rounded-lg border p-3" />
               <textarea placeholder="Description" value={topic.description} onChange={(event) => setTopic({ ...topic, description: event.target.value })} className="w-full rounded-lg border p-3" rows="3" />
+            </>}
+            {activeModal === "class" && <>
+              <input required maxLength={100} placeholder="Class name" value={classForm.name} onChange={(event) => setClassForm({ ...classForm, name: event.target.value })} className="w-full rounded-lg border p-3" />
+              <textarea placeholder="Description" value={classForm.description} onChange={(event) => setClassForm({ ...classForm, description: event.target.value })} className="w-full rounded-lg border p-3" rows="3" />
+              {!currentOrgId && <p role="alert" className="text-sm text-red-700">Select an organization before creating a class.</p>}
             </>}
             <button disabled={modalForm.busy} className="w-full rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white disabled:opacity-50">
               {modalForm.busy ? "Saving..." : "Save"}

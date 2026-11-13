@@ -27,6 +27,8 @@ import Dashboard from "@/features/admin/Dashboard";
 import Users from "@/features/admin/Users";
 import NewUser from "@/features/admin/NewUser";
 import Report from "@/features/admin/Report";
+import Organizations from "@/features/admin/Organizations";
+import EmailLogs from "@/features/admin/EmailLogs";
 import SchoolAdmin from "@/features/school-admin/SchoolAdmin";
 import TeacherDashboard from "@/features/teacher/TeacherDashboard";
 import StudentDashboard from "@/features/student/StudentDashboard";
@@ -34,11 +36,13 @@ import OrganizationDashboard from "@/features/organization/OrganizationDashboard
 import OrganizationOverview from "@/features/organization/pages/OrganizationOverview";
 import OrganizationStudents from "@/features/organization/pages/OrganizationStudents";
 import OrganizationTeachers from "@/features/organization/pages/OrganizationTeachers";
+import OrganizationPendingTeachers from "@/features/organization/pages/OrganizationPendingTeachers";
 import OrganizationClasses from "@/features/organization/pages/OrganizationClasses";
 import OrganizationExams from "@/features/organization/pages/OrganizationExams";
 import OrganizationAnalytics from "@/features/organization/pages/OrganizationAnalytics";
 import OrganizationReports from "@/features/organization/pages/OrganizationReports";
 import OrganizationAlerts from "@/features/organization/pages/OrganizationAlerts";
+import OrganizationOperations from "@/features/organization/pages/OrganizationOperations";
 /* Removed duplicate imports of ParentDashboard and IndividualLearnerPersonalDashboard */
 import ParentDashboard from "@/features/parent/Pages/ParentDashboard";
 import ParentAttendance from "@/features/parent/Pages/ParentAttendance";
@@ -62,7 +66,9 @@ import { CoursesComponent } from "@/features/student/CoursesComponent";
 import CoursePage from "@/features/student/CoursePage";
 import Result from "@/features/student/Result";
 import Exam from "@/features/student/Exam";
-import StudentCbt from "@/features/cbt/StudentCbt";
+import StudentCbt from "@/features/student/StudentCbt";
+import DirectMessages from "@/features/communication/DirectMessages";
+import StudentMessages from "@/features/student/Messages";
 
 // Communication Features
 import { ForumList, ForumDetail, VideoCallList, VideoCallRoom } from "@/features/communication";
@@ -147,6 +153,7 @@ const AppContent = () => {
         <Route path="result" element={<Result />} />
         <Route path="exam" element={<Exam />} />
         <Route path="cbt" element={<StudentCbt />} />
+        <Route path="messages" element={<StudentMessages />} />
         <Route path="*" element={<Error />} />
       </Route>
       
@@ -155,6 +162,8 @@ const AppContent = () => {
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="users" element={<Users />} />
         <Route path="users/new-user" element={<NewUser />} />
+        <Route path="organizations" element={<Organizations />} />
+        <Route path="emails" element={<EmailLogs />} />
         <Route path="reports" element={<Report />} />
         <Route path="*" element={<Error />} />
       </Route>
@@ -166,11 +175,14 @@ const AppContent = () => {
         <Route path="overview" element={<OrganizationOverview />} />
         <Route path="students" element={<OrganizationStudents />} />
         <Route path="teachers" element={<OrganizationTeachers />} />
+        <Route path="pending-teachers" element={<OrganizationPendingTeachers />} />
         <Route path="classes" element={<OrganizationClasses />} />
         <Route path="exams" element={<OrganizationExams />} />
         <Route path="analytics" element={<OrganizationAnalytics />} />
         <Route path="reports" element={<OrganizationReports />} />
         <Route path="alerts" element={<OrganizationAlerts />} />
+        <Route path="operations" element={<OrganizationOperations />} />
+        <Route path="messages" element={<DirectMessages />} />
       </Route>
       {/* Parent Dashboard */}
       <Route path="/parent-dashboard" element={<ParentDashboard />} />

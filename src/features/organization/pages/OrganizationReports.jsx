@@ -1,13 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import useOrganizationReports from "@/hooks/organization/useSchoolExport";
 import { Download, FileText } from "lucide-react";
 
 const OrganizationReports = () => {
   const reports = useOrganizationReports();
+  const [format, setFormat] = useState("csv");
 
   const downloadExport = async () => {
     try {
-      await reports.exportSchoolData();
+      await reports.exportSchoolData({ format });
     } catch (error) {
       console.warn("Unable to download organization export:", error);
     }
@@ -27,6 +28,18 @@ const OrganizationReports = () => {
             <p className="text-sm text-gray-600">Exports data using the configured school admin endpoint.</p>
           </div>
         </div>
+        <label className="flex items-center gap-2 text-sm text-gray-700">
+          Format
+          <select
+            value={format}
+            onChange={(event) => setFormat(event.target.value)}
+            className="min-h-[40px] rounded-lg border px-3"
+          >
+            <option value="csv">CSV</option>
+            <option value="xlsx">Excel</option>
+            <option value="pdf">PDF</option>
+          </select>
+        </label>
         <button
           onClick={downloadExport}
           disabled={reports.exporting}

@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { getClasses } from "@/api/academicApi";
 import { http } from "@/api/baseClient";
 import { useOrganization } from "@/context/OrganizationContext";
 import useNotification from "@/hooks/useNotification";
@@ -7,10 +6,10 @@ import { parseError, getUserFriendlyMessage, getNotificationType } from "@/lib/e
 import useApiCircuitBreaker from "@/hooks/useApiCircuitBreaker";
 
 /**
- * Loads the organization class list from the paginated classes endpoint.
+ * Loads classes from the organization-admin endpoint, scoped to the caller's organization.
  */
 export default function useClassesData({ page = 1, search = "" } = {}) {
-  const { currentOrgId, loading: organizationLoading } = useOrganization();
+  const { loading: organizationLoading } = useOrganization();
   const notification = useNotification("info", 5000);
 
   const circuitBreaker = useApiCircuitBreaker({
@@ -46,22 +45,30 @@ export default function useClassesData({ page = 1, search = "" } = {}) {
     try {
       const params = {
         page,
+        page_size: 20,
         search: search.trim() || undefined,
-        organization: currentOrgId || undefined
       };
-      const payload = await getClasses(params);
+      const payload = await http.get("/api/admin/school/classes/", {
+        auth: true,
+        params
+      });
       const data = payload?.data ?? payload;
-      const results = Array.isArray(data?.results)
-        ? data.results
-        : Array.isArray(data?.classes)
-          ? data.classes
+      const results = Array.isArray(data?.classes)
+        ? data.classes
+        : Array.isArray(data?.results)
+          ? data.results
           : Array.isArray(data)
             ? data
             : [];
+      const pagination = data?.pagination;
       setClasses(results);
-      setCount(typeof data?.count === "number" ? data.count : results.length);
-      setNext(data?.next ?? null);
-      setPrevious(data?.previous ?? null);
+      setCount(typeof pagination?.total === "number"
+        ? pagination.total
+        : typeof data?.count === "number"
+          ? data.count
+          : results.length);
+      setNext(pagination ? Boolean(pagination.has_next) : data?.next ?? null);
+      setPrevious(pagination ? Boolean(pagination.has_prev) : data?.previous ?? null);
 
       setError(null);
       return results;
@@ -81,14 +88,13 @@ export default function useClassesData({ page = 1, search = "" } = {}) {
     notify,
     page,
     search,
-    currentOrgId,
     organizationLoading
   ]);
 
   const createClass = useCallback(async (classData) => {
     setMutating(true);
     try {
-      const payload = await http.post("/api/admin/classes/create/", classData, { auth: true });
+      const payload = await http.post("/api/admin/school/classes/", classData, { auth: true });
       const data = payload?.data ?? payload;
 
       notify("Class created successfully", "success");

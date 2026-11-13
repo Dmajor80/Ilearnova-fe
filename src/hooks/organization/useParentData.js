@@ -70,11 +70,13 @@ export default function useParentData() {
       const data = payload?.data ?? payload;
       console.log("Parents API response:", data);
 
-      // Handle both paginated and non-paginated responses
-      if (data.results) {
-        // Paginated response (PaginatedAdminUserList)
+      // Handle the documented { parents, pagination } response and legacy formats.
+      if (Array.isArray(data.parents)) {
+        setParents(data.parents);
+        setTotalParents(data.pagination?.total ?? data.parents.length);
+      } else if (data.results) {
         setParents(data.results || []);
-        setTotalParents(data.count || 0);
+        setTotalParents(data.pagination?.total ?? data.count ?? data.results.length);
       } else if (Array.isArray(data)) {
         // Direct array response
         setParents(data || []);
@@ -138,7 +140,7 @@ export default function useParentData() {
   }, [circuitBreaker, notification]);
 
   /**
-   * Create a new parent (AdminUserRequest: username + email required)
+   * Create a parent with the documented ParentCreateUpdateRequest fields.
    */
   const createParent = useCallback(async (parentData) => {
     setMutating(true);
@@ -166,7 +168,7 @@ export default function useParentData() {
   }, [notification, fetchParents]);
 
   /**
-   * Update an existing parent (PatchedAdminUserRequest - partial update)
+   * Partially update an existing parent.
    */
   const updateParent = useCallback(async (parentId, parentData) => {
     setMutating(true);

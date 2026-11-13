@@ -444,7 +444,7 @@ export default function useSchoolAdminActions() {
       hasSubmenu: true,
       submenu: [
         // { id: "announcements", label: "Announcements", icon: "Megaphone" },
-        // { id: "messages", label: "Messages", icon: "Mail" },
+        { id: "messages", label: "Direct Messages", icon: "MessageSquare" },
         { id: "notifications", label: "Notifications", icon: "Bell" },
         // { id: "newsletters", label: "Newsletters", icon: "Newspaper" },
       ],

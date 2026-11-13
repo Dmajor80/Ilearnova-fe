@@ -19,7 +19,7 @@ export default function useLinkParentStudent() {
     setError(null);
     try {
       const response = await linkParentStudent(requestData);
-      notify("Student linked successfully", "success");
+      notify("Student link request sent successfully", "success");
       return unwrapParentResponse(response);
     } catch (requestError) {
       const appError = parseError(requestError, { action: "link_parent_student" });

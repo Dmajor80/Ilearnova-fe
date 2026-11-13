@@ -1,9 +1,9 @@
 import React, { Suspense } from "react";
 import DashboardLayout from "@/components/admin/DashboardLayout";
 import DashboardErrorBoundary from "@/components/admin/DashboardErrorBoundary";
-import useDashboardData from "@/hooks/useDashboardData";
 import useDashboardActions from "@/hooks/useDashboardActions";
 import useAdminUser from "@/hooks/useAdminUser";
+import { useSuperAdminMetrics } from "@/hooks/superadmin";
 import Loader from "@/components/Loader";
 
 /**
@@ -12,16 +12,14 @@ import Loader from "@/components/Loader";
  */
 
 const Dashboard = React.memo(function Dashboard() {
-  // Custom hooks for data and state management
   const {
-    loading: dataLoading,
-    error: dataError,
+    loading: metricsLoading,
+    error: metricsError,
     lastUpdated,
-    metricsArray,
-    chartData,
+    metrics,
     refreshData,
     notification: dataNotification
-  } = useDashboardData();
+  } = useSuperAdminMetrics();
 
   const {
     quickActionsOpen,
@@ -39,18 +37,24 @@ const Dashboard = React.memo(function Dashboard() {
     displayName,
     welcomeMessage
   } = useAdminUser();
-  // Combine notifications from different hooks
   const notification = dataNotification.show ? dataNotification :
                       actionNotification.show ? actionNotification : null;
 
-  // Handle retry actions
-  const handleRetryMetrics = () => {
-    refreshData();
-  };
+  const metricsArray = Object.entries(metrics ?? {}).map(([key, value]) => {
+    const label = key.replace(/[_-]/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+    const metricValue = value && typeof value === "object"
+      ? value.value ?? value.count ?? JSON.stringify(value)
+      : value;
 
-  const handleRetryCharts = () => {
-    refreshData();
-  };
+    return {
+      id: key,
+      value: metricValue == null ? "—" : String(metricValue),
+      label,
+      description: value?.description ?? `Platform-wide ${label.toLowerCase()}.`,
+      iconType: /user|student|teacher|parent|organization/i.test(key) ? "users" : "activity"
+    };
+  });
+  const metricsErrorMessage = metricsError?.message ?? metricsError;
 
   return (
     <Suspense fallback={<Loader />}>
@@ -68,20 +72,14 @@ const Dashboard = React.memo(function Dashboard() {
 
           // Metrics data
           metrics={metricsArray}
-          metricsLoading={dataLoading}
-          metricsError={dataError}
-
-          // Charts data
-          chartData={chartData}
-          chartsLoading={dataLoading}
-          chartsError={dataError}
+          metricsLoading={metricsLoading}
+          metricsError={metricsErrorMessage}
 
           // Actions
           onRefresh={refreshData}
           onViewReports={handleViewReports}
           onMetricClick={handleMetricClick}
-          onRetryMetrics={handleRetryMetrics}
-          onRetryCharts={handleRetryCharts}
+          onRetryMetrics={refreshData}
 
           // Quick actions
           quickActions={quickActions}
@@ -90,14 +88,14 @@ const Dashboard = React.memo(function Dashboard() {
           onCloseQuickActions={closeQuickActions}
 
           // Loading states
-          refreshLoading={dataLoading}
+          refreshLoading={metricsLoading}
           actionLoading={actionLoading}
 
           // Notifications
           notification={notification}
 
           // Layout options
-          showCharts={true}
+          showCharts={false}
           maxWidth="max-w-7xl"
           className="min-h-screen bg-gray-50"
         />

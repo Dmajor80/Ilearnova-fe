@@ -10,7 +10,7 @@ import {
   patchTeacherExamination,
   updateTeacherExamination
 } from "@/api/teacher";
-import useTeacherApi, { getTeacherList } from "./teacherApiUtils";
+import useTeacherApi, { getTeacherList, getTeacherPagination } from "./teacherApiUtils";
 
 export default function useTeacherExaminations() {
   const { request, circuitBreaker, loading, mutating, error, lastUpdated, notification } = useTeacherApi();
@@ -18,6 +18,8 @@ export default function useTeacherExaminations() {
   const [examinations, setExaminations] = useState([]);
   const [submissions, setSubmissions] = useState([]);
   const [bankQuestions, setBankQuestions] = useState([]);
+  const [examinationPagination, setExaminationPagination] = useState(null);
+  const [submissionPagination, setSubmissionPagination] = useState(null);
 
   const refreshData = useCallback(async (params = {}, resetFailures = false) => {
     if (resetFailures) resetAllEndpoints();
@@ -28,10 +30,15 @@ export default function useTeacherExaminations() {
         () => getTeacherExaminations(params),
         { failureMessage: "Examinations unavailable" }
       );
-      if (result !== null) setExaminations(getTeacherList(result, ["examinations", "exams"]));
+      if (result !== null) {
+        const rows = getTeacherList(result, ["examinations", "exams"]);
+        setExaminations(rows);
+        setExaminationPagination(getTeacherPagination(result, params?.page, rows.length));
+      }
       return result;
     } catch {
       setExaminations([]);
+      setExaminationPagination(null);
       return null;
     }
   }, [request, resetAllEndpoints]);
@@ -50,7 +57,11 @@ export default function useTeacherExaminations() {
       () => getTeacherExaminationSubmissions(id, params),
       { failureMessage: "Examination submissions unavailable" }
     );
-    if (result !== null) setSubmissions(getTeacherList(result, ["submissions"]));
+    if (result !== null) {
+      const rows = getTeacherList(result, ["submissions"]);
+      setSubmissions(rows);
+      setSubmissionPagination(getTeacherPagination(result, params?.page, rows.length));
+    }
     return result;
   }, [request]);
 
@@ -76,7 +87,7 @@ export default function useTeacherExaminations() {
     }
   ), [request]);
 
-  const saveExamination = useCallback(async (data, id) => {
+  const saveExamination = useCallback(async (data, id, params = {}) => {
     const update = Boolean(id);
     const result = await request(
       update ? `teacherExamination:${id}` : "teacherExaminations",
@@ -88,29 +99,29 @@ export default function useTeacherExaminations() {
         failureMessage: update ? "Failed to update examination" : "Failed to create examination"
       }
     );
-    await refreshData();
+    await refreshData(params);
     return result;
   }, [request, refreshData]);
 
-  const replaceExamination = useCallback(async (id, data) => {
+  const replaceExamination = useCallback(async (id, data, params = {}) => {
     const result = await request(
       `teacherExamination:${id}`,
       "replace_teacher_examination",
       () => updateTeacherExamination(id, data),
       { mutation: true, successMessage: "Examination updated successfully", failureMessage: "Failed to update examination" }
     );
-    await refreshData();
+    await refreshData(params);
     return result;
   }, [request, refreshData]);
 
-  const removeExamination = useCallback(async (id) => {
+  const removeExamination = useCallback(async (id, params = {}) => {
     const result = await request(
       `teacherExamination:${id}`,
       "delete_teacher_examination",
       () => deleteTeacherExamination(id),
       { mutation: true, successMessage: "Examination deleted successfully", failureMessage: "Failed to delete examination" }
     );
-    await refreshData();
+    await refreshData(params);
     return result;
   }, [request, refreshData]);
 
@@ -124,6 +135,8 @@ export default function useTeacherExaminations() {
     examinations,
     submissions,
     bankQuestions,
+    examinationPagination,
+    submissionPagination,
     loading,
     mutating,
     error,

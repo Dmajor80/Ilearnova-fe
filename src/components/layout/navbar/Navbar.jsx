@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { CDN_BASE_URL, LOGO_URL } from "../../../api/config";
 import { http } from "../../../api/baseClient";
 import { clearAuth } from "../../../api/auth";
+import ilearnova from "../../../assets/ilearnova-logo.png"
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -156,7 +157,7 @@ const Navbar = () => {
 
           <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
             <div className="flex flex-shrink-0 items-center">
-              <img className="h-10 w-10 rounded-full object-cover drop-shadow-lg" src={LOGO_URL} alt="School Portal" />
+              <img className="h-10 w-10 rounded-full object-cover drop-shadow-lg" src={ilearnova} alt="School Portal" />
               {orgName && (
                 <span className="ml-3 text-lg font-semibold text-white hidden sm:block truncate max-w-[200px]">
                   {orgName}

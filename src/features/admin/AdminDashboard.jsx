@@ -16,6 +16,8 @@ import {
   Wallet,
   LogOut,
   ChevronDown,
+  Building2,
+  Mail,
 } from "lucide-react";
 
 import { Link, Outlet, useNavigate } from "react-router-dom";
@@ -74,6 +76,18 @@ export default function AdminDashboard() {
       icon: <User size={20} />,
       label: "Users",
       air: "users",
+    },
+    {
+      id: "Organizations",
+      icon: <Building2 size={20} />,
+      label: "Organizations",
+      air: "organizations",
+    },
+    {
+      id: "EmailLogs",
+      icon: <Mail size={20} />,
+      label: "Email Logs",
+      air: "emails",
     },
 
     {

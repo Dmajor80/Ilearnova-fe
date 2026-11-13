@@ -22,6 +22,22 @@ export const getTeacherList = (response, keys = []) => {
   return [];
 };
 
+export const getTeacherPagination = (response, fallbackPage = 1, fallbackTotal = 0) => {
+  const data = unwrapTeacherResponse(response);
+  const pagination = data?.pagination || {};
+  const next = data?.next ?? null;
+  const previous = data?.previous ?? null;
+
+  return {
+    total: Number(pagination.total ?? data?.count ?? fallbackTotal),
+    page: Number(pagination.page ?? fallbackPage),
+    next,
+    previous,
+    hasNext: Boolean(pagination.has_next ?? next),
+    hasPrevious: Boolean(pagination.has_prev ?? previous)
+  };
+};
+
 export default function useTeacherApi() {
   const notification = useNotification("info", 5000);
   const circuitBreaker = useApiCircuitBreaker({
@@ -43,7 +59,16 @@ export default function useTeacherApi() {
     operation,
     { mutation = false, successMessage, failureMessage = "Request failed" } = {}
   ) => {
-    if (!shouldCallEndpoint(endpoint)) return null;
+    if (!shouldCallEndpoint(endpoint)) {
+      const appError = parseError(
+        new Error("This endpoint is temporarily unavailable after repeated failures."),
+        { action }
+      );
+      const message = getUserFriendlyMessage(appError);
+      setError(appError);
+      notification.notify(`${failureMessage}: ${message}`, getNotificationType(appError));
+      throw appError;
+    }
 
     const counter = mutation ? activeMutations : activeRequests;
     const setActive = mutation ? setMutating : setLoading;

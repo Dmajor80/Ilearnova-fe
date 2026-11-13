@@ -15,10 +15,7 @@ import {
 } from "lucide-react";
 import {
   useOrganizationCalendar,
-  useOrganizationClasses,
   useOrganizationOverview,
-  useOrganizationStudents,
-  useOrganizationTeachers
 } from "@/hooks/organization";
 
 const readMetric = (metrics, key, nestedKey = "total") => {
@@ -41,15 +38,12 @@ const getLabel = (item) =>
   JSON.stringify(item);
 
 const getTimestamp = (item) =>
-  item.timestamp || item.created_at || item.date || item.start_time || "";
+  item.timestamp || item.created_at || item.date || item.start_datetime || item.start_time || "";
 
 const OrganizationOverview = () => {
   const navigate = useNavigate();
   const { alertsApi } = useOutletContext();
   const overview = useOrganizationOverview();
-  const students = useOrganizationStudents();
-  const teachers = useOrganizationTeachers();
-  const classes = useOrganizationClasses();
   const calendar = useOrganizationCalendar();
   const alerts = alertsApi;
   const metrics = overview.metrics || {};
@@ -57,8 +51,8 @@ const OrganizationOverview = () => {
   const notifications = Array.isArray(alerts.notifications) ? alerts.notifications : [];
   const upcomingEvents = calendar.events
     .filter((event) => {
-      const date = event.start_time || event.start_date || event.date || event.event_date;
-      return !date || new Date(date) >= new Date(new Date().toDateString());
+      const date = event.start_datetime || event.start_time || event.start_date || event.date || event.event_date;
+      return date && new Date(date) >= new Date(new Date().toDateString());
     })
     .slice(0, 4);
 
@@ -68,8 +62,7 @@ const OrganizationOverview = () => {
       value: firstValue(
         readMetric(metrics, "students"),
         readMetric(metrics, "total_students"),
-        readMetric(metrics, "student_count"),
-        students.totalStudents
+        readMetric(metrics, "student_count")
       ) ?? "—",
       icon: GraduationCap,
       theme: "blue"
@@ -79,8 +72,7 @@ const OrganizationOverview = () => {
       value: firstValue(
         readMetric(metrics, "teachers"),
         readMetric(metrics, "total_teachers"),
-        readMetric(metrics, "teacher_count"),
-        teachers.totalTeachers
+        readMetric(metrics, "teacher_count")
       ) ?? "—",
       icon: UserCheck,
       theme: "green"
@@ -90,21 +82,15 @@ const OrganizationOverview = () => {
       value: firstValue(
         readMetric(metrics, "classes"),
         readMetric(metrics, "total_classes"),
-        readMetric(metrics, "class_count"),
-        classes.count
+        readMetric(metrics, "class_count")
       ) ?? "—",
       icon: BookOpen,
       theme: "purple"
     },
     {
-      label: "Attendance",
-      value: firstValue(
-        metrics.attendance_rate,
-        metrics.attendance?.rate,
-        metrics.attendance?.percentage,
-        "—"
-      ),
-      icon: Target,
+      label: "Upcoming events",
+      value: firstValue(readMetric(metrics, "events", "upcoming"), "—"),
+      icon: Calendar,
       theme: "orange"
     }
   ];
@@ -119,9 +105,6 @@ const OrganizationOverview = () => {
         <button
           onClick={() => {
             overview.refreshData(true);
-            students.refreshData(true);
-            teachers.refreshData(true);
-            classes.refreshData(true);
             calendar.refreshData(true);
             alerts.refreshData(true);
           }}
@@ -131,7 +114,7 @@ const OrganizationOverview = () => {
         </button>
       </div>
 
-      {(overview.error || students.error || teachers.error || classes.error || calendar.error || alerts.error) && (
+      {(overview.error || calendar.error || alerts.error) && (
         <p role="alert" className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
           Some dashboard data could not be loaded. Refresh to retry, or check the affected API request in the browser network panel.
         </p>
@@ -144,7 +127,7 @@ const OrganizationOverview = () => {
               <p className="text-sm text-gray-500">{label}</p>
               <p className="mt-1 text-2xl font-bold text-gray-900">{value}</p>
               <p className="mt-1 text-xs text-gray-400">
-                {overview.loading || students.loading || teachers.loading || classes.loading ? "Loading live data…" : ""}
+                {overview.loading ? "Loading live data…" : ""}
               </p>
             </div>
             <span className={`rounded-lg p-3 ${theme === "blue" ? "bg-blue-100 text-blue-600" : theme === "green" ? "bg-green-100 text-green-600" : theme === "purple" ? "bg-purple-100 text-purple-600" : "bg-orange-100 text-orange-600"}`}>

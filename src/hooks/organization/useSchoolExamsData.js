@@ -76,8 +76,7 @@ export default function useSchoolExamsData({ page = 1, status = "", search = "" 
     refreshData();
   }, [refreshData]);
 
-  // Subject options for the exam form. Best effort: the legacy admin subjects
-  // endpoint may return nothing, so the page also offers subjects seen on exams.
+  // Subject options for the exam form; exams also provide a fallback list.
   useEffect(() => {
     let cancelled = false;
     getAdminSubjects()

@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import SchoolDataTable from "@/components/school-admin/SchoolDataTable";
 import useOrganizationStudents from "@/hooks/organization/useStudentData";
+import useOrganizationClasses from "@/hooks/organization/useOrganizationClasses";
 import GenericModal from "../components/GenericModal";
 import DeleteConfirmModal from "../components/DeleteConfirmModal";
 import { GraduationCap, Users, UserCheck, AlertTriangle, RefreshCw } from "lucide-react";
@@ -14,12 +15,18 @@ const getStudentName = (student) =>
 
 const getRecordStatus = (record) => {
   if (typeof record.is_active === "boolean") return record.is_active ? "Active" : "Inactive";
-  if (typeof record.status === "string" && record.status) return record.status;
+  if (typeof record.status === "string" && record.status) {
+    const status = record.status.toLowerCase();
+    if (status === "active") return "Active";
+    if (status === "inactive") return "Inactive";
+    return record.status;
+  }
   return "Unknown";
 };
 
 const OrganizationStudents = () => {
   const studentsApi = useOrganizationStudents();
+  const classesApi = useOrganizationClasses({ page: 1 });
   const [showModal, setShowModal] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
@@ -133,7 +140,7 @@ const OrganizationStudents = () => {
         </div>
       )}
 
-      {showModal && <GenericModal item={editingStudent} type="student" saving={studentsApi.mutating} onSave={saveStudent} onClose={() => { setShowModal(false); setEditingStudent(null); }} />}
+      {showModal && <GenericModal item={editingStudent} type="student" saving={studentsApi.mutating} availableClasses={classesApi.classes} onSave={saveStudent} onClose={() => { setShowModal(false); setEditingStudent(null); }} />}
       {deleteConfirm && <DeleteConfirmModal item={deleteConfirm} type="student" onConfirm={removeStudent} onCancel={() => setDeleteConfirm(null)} />}
     </div>
   );

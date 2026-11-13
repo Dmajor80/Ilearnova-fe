@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import CoursesComponent from "./components/CourseComponents";
-import { Plus, Search, Filter, Calendar, Clock, Users, FileText, Edit, Trash2, Eye, Download } from "lucide-react";
+import { Plus, Search, Filter, Calendar, Clock, Users, FileText, Edit, Trash2, Eye, Download, RefreshCw } from "lucide-react";
 import { useTeacherAssignments, useTeacherClasses, useTeacherStudents } from "@/hooks/teacher";
 
 const Assignments = () => {
@@ -17,6 +17,8 @@ const Assignments = () => {
   const [subjects, setSubjects] = useState([]);
   const [selectedAssignment, setSelectedAssignment] = useState(null);
   const [submissionsLoading, setSubmissionsLoading] = useState(false);
+  const [assignmentPage, setAssignmentPage] = useState(1);
+  const [submissionPage, setSubmissionPage] = useState(1);
 
   useEffect(() => {
     const loadSubjects = async () => {
@@ -59,7 +61,7 @@ const Assignments = () => {
       await assignmentsApi.saveAssignment({
         ...form,
         due_date: new Date(form.due_date).toISOString()
-      }, editingAssignment?.id);
+      }, editingAssignment?.id, { page: assignmentPage });
       setShowForm(false);
       setEditingAssignment(null);
     } catch {
@@ -69,14 +71,26 @@ const Assignments = () => {
 
   const openSubmissions = async (assignment) => {
     setSelectedAssignment(assignment);
+    setSubmissionPage(1);
     setSubmissionsLoading(true);
     try {
-      await assignmentsApi.fetchSubmissions(assignment.id);
+      await assignmentsApi.fetchSubmissions(assignment.id, { page: 1 });
     } catch {
       // The API hook reports request failures to the user.
     } finally {
       setSubmissionsLoading(false);
     }
+  };
+
+  const changeAssignmentPage = (page) => {
+    setAssignmentPage(page);
+    assignmentsApi.refreshData({ page });
+  };
+
+  const changeSubmissionPage = (page) => {
+    if (!selectedAssignment) return;
+    setSubmissionPage(page);
+    assignmentsApi.fetchSubmissions(selectedAssignment.id, { page }).catch(() => {});
   };
 
   const filteredAssignments = assignments.filter(assignment => {
@@ -113,10 +127,15 @@ const Assignments = () => {
           <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-2xl font-bold text-gray-900">Assignments Management</h2>
-              <button onClick={() => openForm()} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold flex items-center space-x-2 transition-colors">
-                <Plus className="w-5 h-5" />
-                <span>Create Assignment</span>
-              </button>
+              <div className="flex gap-2">
+                <button type="button" onClick={() => assignmentsApi.refreshData({ page: assignmentPage }, true)} aria-label="Refresh assignments" className="rounded-lg border px-3 text-gray-700 hover:bg-gray-50">
+                  <RefreshCw className="h-5 w-5" />
+                </button>
+                <button onClick={() => openForm()} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold flex items-center space-x-2 transition-colors">
+                  <Plus className="w-5 h-5" />
+                  <span>Create Assignment</span>
+                </button>
+              </div>
             </div>
 
             {/* Tab Navigation */}
@@ -170,6 +189,8 @@ const Assignments = () => {
           <div className="space-y-4">
             {assignmentsApi.loading && <p className="rounded-xl bg-white p-6 text-center text-gray-600">Loading assignments...</p>}
             {assignmentsApi.error && <p role="alert" className="rounded-xl bg-red-50 p-4 text-red-700">{assignmentsApi.error.message}</p>}
+            {classesApi.error && <p role="alert" className="rounded-xl bg-red-50 p-4 text-red-700">{classesApi.error.message}</p>}
+            {studentsApi.error && <p role="alert" className="rounded-xl bg-red-50 p-4 text-red-700">{studentsApi.error.message}</p>}
             {!assignmentsApi.loading && filteredAssignments.map((assignment) => (
               <div key={assignment.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="p-6">
@@ -213,7 +234,7 @@ const Assignments = () => {
                       </button>
                       <button onClick={async () => {
                         if (window.confirm(`Delete "${assignment.title}"?`)) {
-                          try { await assignmentsApi.removeAssignment(assignment.id); } catch { /* Hook reports failures. */ }
+                          try { await assignmentsApi.removeAssignment(assignment.id, { page: assignmentPage }); } catch { /* Hook reports failures. */ }
                         }
                       }} aria-label="Delete assignment" className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
                         <Trash2 className="w-5 h-5" />
@@ -276,6 +297,18 @@ const Assignments = () => {
               <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">No assignments found</h3>
               <p className="text-gray-600">Try adjusting your search or filter criteria</p>
+            </div>
+          )}
+
+          {assignmentsApi.assignmentPagination && (
+            <div className="flex items-center justify-between rounded-xl bg-white p-4">
+              <span className="text-sm text-gray-500">
+                Page {assignmentsApi.assignmentPagination.page} · {assignmentsApi.assignmentPagination.total} assignments
+              </span>
+              <div className="flex gap-2">
+                <button type="button" disabled={!assignmentsApi.assignmentPagination.previous || assignmentPage <= 1} onClick={() => changeAssignmentPage(assignmentPage - 1)} className="rounded-lg border px-3 py-2 text-sm disabled:opacity-40">Previous</button>
+                <button type="button" disabled={!assignmentsApi.assignmentPagination.next} onClick={() => changeAssignmentPage(assignmentPage + 1)} className="rounded-lg border px-3 py-2 text-sm disabled:opacity-40">Next</button>
+              </div>
             </div>
           )}
 
@@ -367,6 +400,17 @@ const Assignments = () => {
                 ))}
               </div>
             ) : <p className="text-gray-600">No submissions are available for this assignment.</p>}
+            {assignmentsApi.submissionPagination && (
+              <div className="mt-4 flex items-center justify-between border-t pt-3">
+                <span className="text-sm text-gray-500">
+                  Page {assignmentsApi.submissionPagination.page} · {assignmentsApi.submissionPagination.total} submissions
+                </span>
+                <div className="flex gap-2">
+                  <button type="button" disabled={!assignmentsApi.submissionPagination.previous || submissionPage <= 1} onClick={() => changeSubmissionPage(submissionPage - 1)} className="rounded-lg border px-3 py-2 text-sm disabled:opacity-40">Previous</button>
+                  <button type="button" disabled={!assignmentsApi.submissionPagination.next} onClick={() => changeSubmissionPage(submissionPage + 1)} className="rounded-lg border px-3 py-2 text-sm disabled:opacity-40">Next</button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

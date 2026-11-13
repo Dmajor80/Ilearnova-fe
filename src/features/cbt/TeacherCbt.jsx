@@ -1,491 +1,686 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  AlertCircle,
-  BookOpenCheck,
-  Check,
-  ChevronDown,
-  ChevronUp,
-  ClipboardList,
-  Clock3,
-  FileUp,
-  Plus,
-  Save,
-  Trash2,
-  Users
-} from "lucide-react";
-import { useOrganization } from "@/context/OrganizationContext";
-import {
-  createId,
-  DEMO_CLASSES,
-  loadAttempts,
-  loadExams,
-  saveExams,
-  subscribeToCbtUpdates
-} from "./cbtStorage";
-import { parseQtiXml } from "./qtiImport";
+import { AlertCircle, Check, ChevronLeft, ChevronRight, FileUp, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { useTeacherCbt, useTeacherClasses } from "@/hooks/teacher";
 
 const initialExamForm = {
   title: "",
+  description: "",
+  instructions: "",
+  class_id: "",
   subject: "",
-  classId: DEMO_CLASSES[0].id,
-  durationMinutes: 30,
-  availableFrom: "",
-  availableUntil: "",
-  instructions: "Read each question carefully. You may move between questions and review flagged items before submitting.",
-  shuffleQuestions: false,
-  shuffleOptions: false
+  term: "",
+  start_time: "",
+  end_time: "",
+  duration_minutes: 30,
+  passing_percentage: 50,
+  status: "draft",
+  shuffle_questions: false,
+  shuffle_options: false,
+  allow_review: true
 };
 
-const initialQuestion = {
-  type: "single",
-  prompt: "",
-  options: ["", "", "", ""],
-  correctOptionIds: [],
-  correctText: ""
+const makeInitialQuestion = () => ({
+  question_text: "",
+  question_type: "mcq",
+  marks: 1,
+  explanation: "",
+  options: [
+    { option_text: "", is_correct: false },
+    { option_text: "", is_correct: false },
+    { option_text: "", is_correct: false },
+    { option_text: "", is_correct: false }
+  ]
+});
+
+const EXAM_STATUSES = ["", "draft", "published", "archived"];
+const QUESTION_TYPES = ["mcq", "mcq_multi", "true_false", "short_answer", "essay", "fill_blank"];
+const toDateTimeInput = (value) => {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+  return date.toISOString().slice(0, 16);
 };
 
-const QTI_SAMPLE = `<?xml version="1.0" encoding="UTF-8"?>
-<assessmentItem xmlns="http://www.imsglobal.org/xsd/imsqtiasi_v3p0"
-  identifier="sample-item" title="Sample question" adaptive="false" timeDependent="false">
-  <responseDeclaration identifier="RESPONSE" cardinality="single" baseType="identifier">
-    <correctResponse><value>choice-a</value></correctResponse>
-  </responseDeclaration>
-  <itemBody>
-    <p>Which planet is known as the Red Planet?</p>
-    <choiceInteraction responseIdentifier="RESPONSE" maxChoices="1">
-      <simpleChoice identifier="choice-a">Mars</simpleChoice>
-      <simpleChoice identifier="choice-b">Venus</simpleChoice>
-      <simpleChoice identifier="choice-c">Jupiter</simpleChoice>
-    </choiceInteraction>
-  </itemBody>
-</assessmentItem>`;
+const unwrapList = (response, keys) => {
+  const data = response?.data ?? response;
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.results)) return data.results;
+  for (const key of keys) {
+    if (Array.isArray(data?.[key])) return data[key];
+  }
+  return [];
+};
 
-function downloadQtiSample() {
-  const file = new Blob([QTI_SAMPLE], { type: "application/xml" });
-  const url = URL.createObjectURL(file);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = "ilearnova-qti-sample.xml";
-  link.click();
-  URL.revokeObjectURL(url);
-}
+const pageButtonClass = "inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm disabled:opacity-40";
 
 export default function TeacherCbt() {
-  const { user } = useOrganization();
-  const [exams, setExams] = useState(loadExams);
-  const [attempts, setAttempts] = useState(loadAttempts);
+  const cbtApi = useTeacherCbt();
+  const classesApi = useTeacherClasses();
   const [examForm, setExamForm] = useState(initialExamForm);
-  const [questionDraft, setQuestionDraft] = useState(initialQuestion);
-  const [questions, setQuestions] = useState([]);
-  const [isCreating, setIsCreating] = useState(false);
-  const [expandedExamId, setExpandedExamId] = useState(null);
-  const [error, setError] = useState("");
+  const [questionForm, setQuestionForm] = useState(makeInitialQuestion);
+  const [filterClass, setFilterClass] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+  const [examPage, setExamPage] = useState(1);
+  const [attemptPage, setAttemptPage] = useState(1);
+  const [questionPage, setQuestionPage] = useState(1);
+  const [selectedExamId, setSelectedExamId] = useState("");
+  const [detailTab, setDetailTab] = useState("questions");
+  const [errorMessage, setErrorMessage] = useState("");
   const [notice, setNotice] = useState("");
-  const [importing, setImporting] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingExamId, setEditingExamId] = useState("");
+  const [subjects, setSubjects] = useState([]);
+  const [gradingDraft, setGradingDraft] = useState({});
+  const fetchSubjects = classesApi.fetchSubjects;
 
-  useEffect(() => subscribeToCbtUpdates(() => {
-    setExams(loadExams());
-    setAttempts(loadAttempts());
-  }), []);
+  const selectedExam = cbtApi.selectedExam?.id === selectedExamId
+    ? cbtApi.selectedExam
+    : cbtApi.exams.find((exam) => exam.id === selectedExamId);
+  const listedQuestions = useMemo(
+    () => unwrapList(cbtApi.questions, ["questions"]),
+    [cbtApi.questions]
+  );
+  const listedAttempts = useMemo(
+    () => unwrapList(cbtApi.attempts, ["attempts"]),
+    [cbtApi.attempts]
+  );
+  const examPagination = cbtApi.examPagination;
+  const questionPagination = cbtApi.questionPagination;
+  const attemptPagination = cbtApi.attemptPagination;
 
-  const selectedClass = DEMO_CLASSES.find((classItem) => classItem.id === examForm.classId) || DEMO_CLASSES[0];
-  const publishedCount = useMemo(() => exams.filter((exam) => exam.status === "published").length, [exams]);
-  const questionOptions = questionDraft.options.map((text, index) => ({
-    id: `option-${index}`,
-    text
-  }));
+  useEffect(() => {
+    if (!examForm.class_id && classesApi.classes.length) {
+      setExamForm((current) => ({ ...current, class_id: classesApi.classes[0].id }));
+    }
+  }, [classesApi.classes, examForm.class_id]);
 
-  const updateExamField = (event) => {
-    const { name, value, type, checked } = event.target;
-    setExamForm((form) => ({ ...form, [name]: type === "checkbox" ? checked : value }));
-  };
+  useEffect(() => {
+    if (!examForm.class_id) {
+      setSubjects([]);
+      setExamForm((current) => ({ ...current, subject: "" }));
+      return;
+    }
+    let active = true;
+    fetchSubjects(examForm.class_id).then((response) => {
+      if (!active) return;
+      const classSubjects = unwrapList(response, ["subjects"]);
+      setSubjects(classSubjects);
+      setExamForm((current) => ({
+        ...current,
+        subject: classSubjects.some((subject) => subject.id === current.subject)
+          ? current.subject
+          : classSubjects[0]?.id || ""
+      }));
+    }).catch(() => {
+      if (active) {
+        setSubjects([]);
+        setExamForm((current) => ({ ...current, subject: "" }));
+      }
+    });
+    return () => { active = false; };
+  }, [fetchSubjects, examForm.class_id]);
 
-  const updateQuestionType = (type) => {
-    setQuestionDraft({
-      ...initialQuestion,
-      type,
-      options: type === "text" ? [] : ["", "", "", ""]
+  const handleFilter = async (event) => {
+    event.preventDefault();
+    setExamPage(1);
+    await cbtApi.refreshExams({
+      class_id: filterClass || undefined,
+      status: filterStatus || undefined,
+      page: 1
     });
   };
 
-  const updateOption = (index, value) => {
-    setQuestionDraft((draft) => ({
-      ...draft,
-      options: draft.options.map((option, optionIndex) => optionIndex === index ? value : option)
+  const changeExamPage = (page) => {
+    setExamPage(page);
+    cbtApi.refreshExams({
+      class_id: filterClass || undefined,
+      status: filterStatus || undefined,
+      page
+    });
+  };
+
+  const editExam = async (exam) => {
+    setErrorMessage("");
+    try {
+      const details = await cbtApi.fetchExam(exam.id);
+      const source = details || exam;
+      setEditingExamId(exam.id);
+      setExamForm({
+        ...initialExamForm,
+        class_id: source.class_id || exam.class_id || "",
+        subject: source.subject || exam.subject || "",
+        title: source.title || "",
+        description: source.description || "",
+        instructions: source.instructions || "",
+        term: source.term || "",
+        duration_minutes: source.duration_minutes ?? initialExamForm.duration_minutes,
+        passing_percentage: source.passing_percentage ?? initialExamForm.passing_percentage,
+        status: source.status || "draft",
+        start_time: toDateTimeInput(source.start_time),
+        end_time: toDateTimeInput(source.end_time),
+        shuffle_questions: Boolean(source.shuffle_questions),
+        shuffle_options: Boolean(source.shuffle_options),
+        allow_review: source.allow_review ?? true
+      });
+      setShowCreateForm(true);
+    } catch (error) {
+      setErrorMessage(error.message || "Unable to load CBT exam for editing.");
+    }
+  };
+
+  const chooseExam = async (examId) => {
+    setSelectedExamId(examId);
+    setDetailTab("questions");
+    setAttemptPage(1);
+    setQuestionPage(1);
+    setErrorMessage("");
+    try {
+      await Promise.all([
+        cbtApi.fetchExam(examId),
+        cbtApi.fetchQuestions(examId, { page: 1 }),
+        cbtApi.fetchAttempts(examId, { page: 1 })
+      ]);
+    } catch (error) {
+      setErrorMessage(error.message || "Unable to load CBT exam details.");
+    }
+  };
+
+  const createExam = async (event) => {
+    event.preventDefault();
+    setErrorMessage("");
+    setNotice("");
+    if (!examForm.title.trim() || !examForm.subject) {
+      setErrorMessage("Enter an exam title and choose a subject.");
+      return;
+    }
+    if (examForm.status === "published" && (!examForm.start_time || !examForm.end_time)) {
+      setErrorMessage("Published exams need a start and end time.");
+      return;
+    }
+    if (examForm.start_time && examForm.end_time &&
+      new Date(examForm.start_time) >= new Date(examForm.end_time)) {
+      setErrorMessage("The exam end time must be later than its start time.");
+      return;
+    }
+
+    const payload = {
+      title: examForm.title.trim(),
+      description: examForm.description.trim() || null,
+      instructions: examForm.instructions.trim(),
+      subject: examForm.subject,
+      term: examForm.term.trim(),
+      duration_minutes: Number(examForm.duration_minutes),
+      passing_percentage: Number(examForm.passing_percentage),
+      shuffle_questions: examForm.shuffle_questions,
+      shuffle_options: examForm.shuffle_options,
+      allow_review: examForm.allow_review,
+      status: examForm.status
+    };
+    if (examForm.start_time) payload.start_time = new Date(examForm.start_time).toISOString();
+    if (examForm.end_time) payload.end_time = new Date(examForm.end_time).toISOString();
+
+    try {
+      const savedExam = await cbtApi.saveExam(payload, editingExamId || undefined, {
+        class_id: filterClass || undefined,
+        status: filterStatus || undefined,
+        page: examPage
+      });
+      setShowCreateForm(false);
+      setEditingExamId("");
+      setExamForm((current) => ({
+        ...initialExamForm,
+        class_id: current.class_id,
+        subject: current.subject
+      }));
+      if (savedExam?.id) {
+        setSelectedExamId(savedExam.id);
+        await Promise.all([
+          cbtApi.fetchExam(savedExam.id),
+          cbtApi.fetchQuestions(savedExam.id, { page: 1 }),
+          cbtApi.fetchAttempts(savedExam.id, { page: 1 })
+        ]);
+      }
+      setNotice(editingExamId ? "CBT exam updated." : "CBT exam saved.");
+    } catch (error) {
+      setErrorMessage(error.message || "Unable to save CBT exam.");
+    }
+  };
+
+  const updateQuestionOption = (index, field, value) => {
+    setQuestionForm((current) => ({
+      ...current,
+      options: current.options.map((option, optionIndex) => ({
+        ...option,
+        [field]: field === "is_correct" && value && ["mcq", "true_false"].includes(current.question_type)
+          ? optionIndex === index
+          : optionIndex === index ? value : option[field]
+      }))
     }));
   };
 
-  const toggleCorrectOption = (optionId) => {
-    setQuestionDraft((draft) => {
-      if (draft.type === "single") return { ...draft, correctOptionIds: [optionId] };
-      const selected = draft.correctOptionIds.includes(optionId)
-        ? draft.correctOptionIds.filter((id) => id !== optionId)
-        : [...draft.correctOptionIds, optionId];
-      return { ...draft, correctOptionIds: selected };
-    });
-  };
-
-  const addOption = () => {
-    setQuestionDraft((draft) => ({ ...draft, options: [...draft.options, ""] }));
-  };
-
-  const addQuestion = () => {
-    const prompt = questionDraft.prompt.trim();
-    if (!prompt) {
-      setError("Enter the question text before adding it.");
-      return;
-    }
-    if (questionDraft.type === "text" && !questionDraft.correctText.trim()) {
-      setError("Provide the expected answer for an automatically marked text question.");
-      return;
-    }
-    if (questionDraft.type !== "text") {
-      const options = questionDraft.options
-        .map((text, index) => ({ id: `option-${index}`, text: text.trim() }))
-        .filter((option) => option.text);
-      if (options.length < 2) {
-        setError("Add at least two non-empty answer options.");
-        return;
-      }
-      if (!questionDraft.correctOptionIds.some((id) => options.some((option) => option.id === id))) {
-        setError("Mark the correct answer before adding this question.");
-        return;
-      }
-      setQuestions((current) => [...current, {
-        id: createId("question"),
-        type: questionDraft.type,
-        prompt,
-        options,
-        correctOptionIds: questionDraft.correctOptionIds.filter((id) => options.some((option) => option.id === id)),
-        points: 1
-      }]);
-    } else {
-      setQuestions((current) => [...current, {
-        id: createId("question"),
-        type: "text",
-        prompt,
-        correctText: questionDraft.correctText.trim(),
-        points: 1
-      }]);
-    }
-    setError("");
-    setQuestionDraft(initialQuestion);
-  };
-
-  const removeQuestion = (questionId) => {
-    setQuestions((current) => current.filter((question) => question.id !== questionId));
-  };
-
-  const importQtiFiles = async (event) => {
-    const files = [...(event.target.files || [])];
-    event.target.value = "";
-    if (!files.length) return;
-
-    setImporting(true);
-    setError("");
-    const imported = [];
-    const failures = [];
-    for (const file of files) {
-      try {
-        imported.push(...parseQtiXml(await file.text(), file.name));
-      } catch (importError) {
-        failures.push(`${file.name}: ${importError.message}`);
-      }
-    }
-    if (imported.length) {
-      setQuestions((current) => [...current, ...imported]);
-      setNotice(`Imported ${imported.length} question${imported.length === 1 ? "" : "s"} from QTI XML.`);
-    }
-    if (failures.length) setError(failures.join(" "));
-    setImporting(false);
-  };
-
-  const createExam = (status) => {
-    setError("");
+  const saveQuestion = async (event) => {
+    event.preventDefault();
+    setErrorMessage("");
     setNotice("");
-    if (!examForm.title.trim() || !examForm.subject.trim()) {
-      setError("Enter an exam title and subject.");
+    if (!selectedExamId || !questionForm.question_text.trim()) {
+      setErrorMessage("Select an exam and enter the question text.");
       return;
     }
-    if (!questions.length) {
-      setError("Add or import at least one question before saving the exam.");
+    const hasOptions = ["mcq", "mcq_multi", "true_false"].includes(questionForm.question_type);
+    const options = hasOptions
+      ? questionForm.options
+        .map((option, index) => ({ ...option, option_text: option.option_text.trim(), order: index }))
+        .filter((option) => option.option_text)
+      : [];
+    if (hasOptions && options.length < 2) {
+      setErrorMessage("Add at least two answer options.");
       return;
     }
-    if (examForm.availableFrom && examForm.availableUntil
-      && new Date(examForm.availableFrom) >= new Date(examForm.availableUntil)) {
-      setError("The exam closing time must be later than its opening time.");
+    if (hasOptions && !options.some((option) => option.is_correct)) {
+      setErrorMessage("Mark at least one answer as correct.");
       return;
     }
 
-    const exam = {
-      id: createId("exam"),
-      title: examForm.title.trim(),
-      subject: examForm.subject.trim(),
-      classId: selectedClass.id,
-      className: selectedClass.name,
-      durationMinutes: Math.max(1, Number(examForm.durationMinutes) || 1),
-      availableFrom: examForm.availableFrom ? new Date(examForm.availableFrom).toISOString() : null,
-      availableUntil: examForm.availableUntil ? new Date(examForm.availableUntil).toISOString() : null,
-      instructions: examForm.instructions.trim(),
-      status,
-      shuffleQuestions: examForm.shuffleQuestions,
-      shuffleOptions: examForm.shuffleOptions,
-      createdBy: user?.name || user?.full_name || user?.email || "Teacher",
-      createdAt: new Date().toISOString(),
-      questions
-    };
-    const nextExams = [exam, ...loadExams()];
-    saveExams(nextExams);
-    setExams(nextExams);
-    setExamForm({ ...initialExamForm });
-    setQuestions([]);
-    setQuestionDraft(initialQuestion);
-    setIsCreating(false);
-    setNotice(status === "published" ? "Exam published to the selected class." : "Exam saved as a draft.");
+    try {
+      await cbtApi.addQuestion(selectedExamId, {
+        question_text: questionForm.question_text.trim(),
+        question_type: questionForm.question_type,
+        marks: Number(questionForm.marks),
+        explanation: questionForm.explanation.trim(),
+        ...(hasOptions ? { options } : {})
+      });
+      setQuestionForm(makeInitialQuestion());
+      setNotice("Question added to the exam.");
+    } catch (error) {
+      setErrorMessage(error.message || "Unable to add question.");
+    }
   };
 
-  const updateExamStatus = (exam, status) => {
-    const nextExams = loadExams().map((item) =>
-      item.id === exam.id ? { ...item, status } : item
-    );
-    saveExams(nextExams);
-    setExams(nextExams);
-    setNotice(status === "published" ? "Exam published to its class." : "Exam moved to drafts.");
+  const importQuestion = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || !selectedExamId) return;
+    setErrorMessage("");
+    setNotice("");
+    try {
+      await cbtApi.importQuestion(selectedExamId, file);
+      setNotice("QTI question imported.");
+    } catch (error) {
+      setErrorMessage(error.message || "Unable to import this QTI item.");
+    }
   };
 
-  const deleteExam = (exam) => {
-    if (!window.confirm(`Delete "${exam.title}"? This also removes the demo exam from the student list.`)) return;
-    const nextExams = loadExams().filter((item) => item.id !== exam.id);
-    saveExams(nextExams);
-    setExams(nextExams);
+  const changeQuestionPage = (page) => {
+    setQuestionPage(page);
+    cbtApi.fetchQuestions(selectedExamId, { page });
   };
+
+  const changeAttemptPage = (page) => {
+    setAttemptPage(page);
+    cbtApi.fetchAttempts(selectedExamId, { page });
+  };
+
+  const updateGradeDraft = (answerId, field, value) => {
+    setGradingDraft((current) => ({
+      ...current,
+      [answerId]: { ...current[answerId], [field]: value }
+    }));
+  };
+
+  const saveGrade = async (answer) => {
+    const attemptId = cbtApi.selectedAttempt?.attempt_id || cbtApi.selectedAttempt?.id;
+    const questionId = answer.question_id || answer.question?.id;
+    if (!attemptId || !questionId) {
+      setErrorMessage("This answer is missing an attempt or question identifier.");
+      return;
+    }
+    const draft = gradingDraft[questionId] || {};
+    try {
+      await cbtApi.gradeAnswer(attemptId, questionId, {
+        marks_awarded: Number(draft.marks_awarded ?? answer.marks_awarded ?? 0),
+        feedback: draft.feedback ?? answer.feedback ?? ""
+      });
+      setNotice("Answer grade saved.");
+    } catch (error) {
+      setErrorMessage(error.message || "Unable to save this grade.");
+    }
+  };
+
+  const pageInfo = (pagination) => pagination
+    ? `Page ${pagination.page} · ${pagination.total} total`
+    : "";
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-2xl bg-gradient-to-r from-indigo-700 to-blue-600 p-6 text-white shadow-sm">
-        <p className="text-sm font-semibold uppercase tracking-wide text-indigo-100">Computer-based testing</p>
-        <div className="mt-2 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
-          <div>
-            <h2 className="text-2xl font-bold sm:text-3xl">Create and manage exams</h2>
-            <p className="mt-2 max-w-2xl text-sm text-blue-100">Build a question set, import QTI items, then publish it to a class roster.</p>
-          </div>
-          <button
-            type="button"
-            onClick={() => { setIsCreating((open) => !open); setError(""); setNotice(""); }}
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-white px-4 py-2 font-semibold text-indigo-700 hover:bg-indigo-50"
-          >
-            <Plus size={18} /> {isCreating ? "Close builder" : "Create exam"}
-          </button>
+    <div className="space-y-5">
+      <section className="flex flex-wrap items-center justify-between gap-4 rounded-xl bg-gradient-to-r from-indigo-700 to-blue-600 p-6 text-white shadow-sm">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-wide text-indigo-100">Computer-based testing</p>
+          <h2 className="mt-1 text-2xl font-bold">CBT exam management</h2>
+          <p className="mt-2 text-sm text-blue-100">Create and publish exams, manage questions, review attempts, and grade responses.</p>
         </div>
+        <button type="button" onClick={() => {
+          if (showCreateForm) {
+            setEditingExamId("");
+            setExamForm(initialExamForm);
+            setShowCreateForm(false);
+          } else {
+            setShowCreateForm(true);
+          }
+          setErrorMessage("");
+        }} className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 font-semibold text-indigo-700 hover:bg-indigo-50">
+          <Plus size={17} /> {showCreateForm ? "Close form" : "Create exam"}
+        </button>
       </section>
 
-      {(error || notice) && (
-        <div role={error ? "alert" : "status"} className={`flex items-start gap-2 rounded-lg border p-3 text-sm ${error ? "border-red-200 bg-red-50 text-red-800" : "border-green-200 bg-green-50 text-green-800"}`}>
-          {error ? <AlertCircle size={18} className="mt-0.5 shrink-0" /> : <Check size={18} className="mt-0.5 shrink-0" />}
-          <span>{error || notice}</span>
+      {(errorMessage || notice || cbtApi.error) && (
+        <div role={errorMessage || cbtApi.error ? "alert" : "status"} className={`flex items-start gap-2 rounded-lg border p-3 text-sm ${
+          errorMessage || cbtApi.error ? "border-red-200 bg-red-50 text-red-800" : "border-green-200 bg-green-50 text-green-800"
+        }`}>
+          {errorMessage || cbtApi.error ? <AlertCircle size={18} className="mt-0.5 shrink-0" /> : <Check size={18} className="mt-0.5 shrink-0" />}
+          <span>{errorMessage || cbtApi.error?.message || notice}</span>
         </div>
       )}
+      {classesApi.error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{classesApi.error.message}</p>}
 
-      {isCreating && (
-        <section className="space-y-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
-          <div>
-            <h3 className="text-xl font-bold text-gray-900">Exam details</h3>
-            <p className="mt-1 text-sm text-gray-500">The exam will only appear in the selected class's student exam list.</p>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="space-y-1 text-sm font-medium text-gray-700">
-              Exam title
-              <input name="title" value={examForm.title} onChange={updateExamField} placeholder="e.g. Biology: Cell Structure" className="min-h-11 w-full rounded-lg border border-gray-300 px-3 font-normal" />
+      {showCreateForm && (
+        <form onSubmit={createExam} className="space-y-4 rounded-xl bg-white p-5 shadow-sm">
+          <h3 className="text-lg font-semibold">{editingExamId ? "Edit CBT exam" : "New CBT exam"}</h3>
+          <div className="grid gap-3 md:grid-cols-2">
+            <label className="text-sm font-medium">Title
+              <input required maxLength={200} value={examForm.title} onChange={(event) => setExamForm({ ...examForm, title: event.target.value })} className="mt-1 w-full rounded-lg border p-3" />
             </label>
-            <label className="space-y-1 text-sm font-medium text-gray-700">
-              Subject
-              <input name="subject" value={examForm.subject} onChange={updateExamField} placeholder="e.g. Biology" className="min-h-11 w-full rounded-lg border border-gray-300 px-3 font-normal" />
-            </label>
-            <label className="space-y-1 text-sm font-medium text-gray-700">
-              Class
-              <select name="classId" value={examForm.classId} onChange={updateExamField} className="min-h-11 w-full rounded-lg border border-gray-300 px-3 font-normal">
-                {DEMO_CLASSES.map((classItem) => <option key={classItem.id} value={classItem.id}>{classItem.name} ({classItem.students} demo students)</option>)}
+            <label className="text-sm font-medium">Class
+              <select value={examForm.class_id} onChange={(event) => setExamForm({ ...examForm, class_id: event.target.value })} className="mt-1 w-full rounded-lg border p-3">
+                <option value="">Choose a class</option>
+                {classesApi.classes.map((classItem) => <option key={classItem.id} value={classItem.id}>{classItem.name || classItem.class_name}</option>)}
               </select>
             </label>
-            <label className="space-y-1 text-sm font-medium text-gray-700">
-              Duration (minutes)
-              <input name="durationMinutes" type="number" min="1" max="300" value={examForm.durationMinutes} onChange={updateExamField} className="min-h-11 w-full rounded-lg border border-gray-300 px-3 font-normal" />
-            </label>
-            <label className="space-y-1 text-sm font-medium text-gray-700">
-              Opens at (optional)
-              <input name="availableFrom" type="datetime-local" value={examForm.availableFrom} onChange={updateExamField} className="min-h-11 w-full rounded-lg border border-gray-300 px-3 font-normal" />
-            </label>
-            <label className="space-y-1 text-sm font-medium text-gray-700">
-              Closes at (optional)
-              <input name="availableUntil" type="datetime-local" value={examForm.availableUntil} onChange={updateExamField} className="min-h-11 w-full rounded-lg border border-gray-300 px-3 font-normal" />
-            </label>
-            <label className="space-y-1 text-sm font-medium text-gray-700 sm:col-span-2">
-              Instructions
-              <textarea name="instructions" rows="3" value={examForm.instructions} onChange={updateExamField} className="w-full rounded-lg border border-gray-300 p-3 font-normal" />
-            </label>
-          </div>
-          <div className="flex flex-wrap gap-x-6 gap-y-3 text-sm text-gray-700">
-            <label className="inline-flex items-center gap-2"><input name="shuffleQuestions" type="checkbox" checked={examForm.shuffleQuestions} onChange={updateExamField} /> Shuffle questions per attempt</label>
-            <label className="inline-flex items-center gap-2"><input name="shuffleOptions" type="checkbox" checked={examForm.shuffleOptions} onChange={updateExamField} /> Shuffle answer options per attempt</label>
-          </div>
-
-          <div className="rounded-xl border border-indigo-100 bg-indigo-50/60 p-4">
-            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-              <div>
-                <h4 className="font-semibold text-gray-900">Import question files</h4>
-                <p className="mt-1 text-xs leading-5 text-gray-600">Import one or more standalone QTI 2.x/3.x XML item files. Choice and text-entry items are supported; packaged ZIP tests and embedded media are not parsed.</p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <button type="button" onClick={downloadQtiSample} className="min-h-10 rounded-lg border border-indigo-200 bg-white px-3 text-sm font-medium text-indigo-700 hover:bg-indigo-50">Download sample</button>
-                <label className="inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-lg bg-indigo-600 px-3 text-sm font-medium text-white hover:bg-indigo-700">
-                  <FileUp size={16} /> {importing ? "Importing..." : "Choose XML"}
-                  <input type="file" accept=".xml,text/xml,application/xml" multiple onChange={importQtiFiles} disabled={importing} className="sr-only" />
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-4 rounded-xl border border-gray-200 p-4">
-            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-              <div>
-                <h4 className="font-semibold text-gray-900">Add a question</h4>
-                <p className="mt-1 text-xs text-gray-500">Single choice, multiple select, and exact-match short answer are supported in this demo.</p>
-              </div>
-              <select value={questionDraft.type} onChange={(event) => updateQuestionType(event.target.value)} aria-label="Question type" className="min-h-10 rounded-lg border border-gray-300 px-3 text-sm">
-                <option value="single">Single choice</option>
-                <option value="multi">Multiple select</option>
-                <option value="text">Short answer</option>
+            <label className="text-sm font-medium">Subject
+              <select required value={examForm.subject} onChange={(event) => setExamForm({ ...examForm, subject: event.target.value })} className="mt-1 w-full rounded-lg border p-3">
+                <option value="">Choose a subject</option>
+                {subjects.map((subject) => <option key={subject.id} value={subject.id}>{subject.name}</option>)}
               </select>
-            </div>
-            <textarea
-              value={questionDraft.prompt}
-              onChange={(event) => setQuestionDraft((draft) => ({ ...draft, prompt: event.target.value }))}
-              placeholder="Write the question..."
-              rows="2"
-              className="w-full rounded-lg border border-gray-300 p-3"
-              aria-label="Question text"
-            />
-            {questionDraft.type === "text" ? (
-              <label className="block space-y-1 text-sm font-medium text-gray-700">
-                Expected answer
-                <input value={questionDraft.correctText} onChange={(event) => setQuestionDraft((draft) => ({ ...draft, correctText: event.target.value }))} className="min-h-11 w-full rounded-lg border border-gray-300 px-3 font-normal" />
+            </label>
+            <label className="text-sm font-medium">Term
+              <input maxLength={20} placeholder="e.g. 2026-T1" value={examForm.term} onChange={(event) => setExamForm({ ...examForm, term: event.target.value })} className="mt-1 w-full rounded-lg border p-3" />
+            </label>
+            <label className="text-sm font-medium">Starts at
+              <input type="datetime-local" value={examForm.start_time} onChange={(event) => setExamForm({ ...examForm, start_time: event.target.value })} className="mt-1 w-full rounded-lg border p-3" />
+            </label>
+            <label className="text-sm font-medium">Ends at
+              <input type="datetime-local" value={examForm.end_time} onChange={(event) => setExamForm({ ...examForm, end_time: event.target.value })} className="mt-1 w-full rounded-lg border p-3" />
+            </label>
+            <label className="text-sm font-medium">Duration (minutes)
+              <input type="number" min="1" required value={examForm.duration_minutes} onChange={(event) => setExamForm({ ...examForm, duration_minutes: event.target.value })} className="mt-1 w-full rounded-lg border p-3" />
+            </label>
+            <label className="text-sm font-medium">Passing percentage
+              <input type="number" min="0" max="100" step="0.1" value={examForm.passing_percentage} onChange={(event) => setExamForm({ ...examForm, passing_percentage: event.target.value })} className="mt-1 w-full rounded-lg border p-3" />
+            </label>
+            <label className="text-sm font-medium">Status
+              <select value={examForm.status} onChange={(event) => setExamForm({ ...examForm, status: event.target.value })} className="mt-1 w-full rounded-lg border p-3">
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
+              </select>
+            </label>
+            <label className="text-sm font-medium md:col-span-2">Description
+              <textarea rows="2" value={examForm.description} onChange={(event) => setExamForm({ ...examForm, description: event.target.value })} className="mt-1 w-full rounded-lg border p-3" />
+            </label>
+            <label className="text-sm font-medium md:col-span-2">Instructions
+              <textarea rows="2" value={examForm.instructions} onChange={(event) => setExamForm({ ...examForm, instructions: event.target.value })} className="mt-1 w-full rounded-lg border p-3" />
+            </label>
+          </div>
+          <div className="flex flex-wrap gap-5 text-sm">
+            {[
+              ["shuffle_questions", "Shuffle questions"],
+              ["shuffle_options", "Shuffle options"],
+              ["allow_review", "Allow review after the exam"]
+            ].map(([field, label]) => (
+              <label key={field} className="inline-flex items-center gap-2">
+                <input type="checkbox" checked={examForm[field]} onChange={(event) => setExamForm({ ...examForm, [field]: event.target.checked })} />
+                {label}
               </label>
-            ) : (
-              <div className="space-y-2">
-                <p className="text-xs text-gray-600">Select the correct {questionDraft.type === "single" ? "option" : "options"}.</p>
-                {questionOptions.map((option, index) => (
-                  <div key={option.id} className="flex items-center gap-2">
-                    <input
-                      type={questionDraft.type === "single" ? "radio" : "checkbox"}
-                      name="correct-answer"
-                      checked={questionDraft.correctOptionIds.includes(option.id)}
-                      onChange={() => toggleCorrectOption(option.id)}
-                      aria-label={`Mark option ${index + 1} correct`}
-                    />
-                    <input value={option.text} onChange={(event) => updateOption(index, event.target.value)} placeholder={`Option ${index + 1}`} className="min-h-10 flex-1 rounded-lg border border-gray-300 px-3" />
-                  </div>
-                ))}
-                <button type="button" onClick={addOption} className="text-sm font-medium text-indigo-700 hover:underline">+ Add option</button>
-              </div>
-            )}
-            <button type="button" onClick={addQuestion} className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-indigo-200 px-3 text-sm font-semibold text-indigo-700 hover:bg-indigo-50">
-              <Plus size={16} /> Add question to exam
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h4 className="font-semibold text-gray-900">Question list</h4>
-              <span className="text-sm text-gray-500">{questions.length} question{questions.length === 1 ? "" : "s"}</span>
-            </div>
-            {!questions.length && <p className="rounded-lg bg-gray-50 p-4 text-sm text-gray-500">Add questions manually or import QTI XML files.</p>}
-            {questions.map((question, index) => (
-              <div key={question.id} className="flex items-start justify-between gap-3 rounded-lg border border-gray-200 p-3">
-                <div>
-                  <p className="text-sm font-semibold text-gray-800">{index + 1}. {question.prompt}</p>
-                  <p className="mt-1 text-xs capitalize text-gray-500">{question.type === "multi" ? "Multiple select" : question.type === "text" ? "Short answer" : "Single choice"}</p>
-                </div>
-                <button type="button" onClick={() => removeQuestion(question.id)} aria-label={`Remove question ${index + 1}`} className="rounded p-1 text-gray-500 hover:bg-red-50 hover:text-red-700"><Trash2 size={16} /></button>
-              </div>
             ))}
           </div>
-          <div className="flex flex-wrap justify-end gap-3 border-t pt-4">
-            <button type="button" onClick={() => createExam("draft")} className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-gray-300 px-4 font-semibold text-gray-700 hover:bg-gray-50">
-              <Save size={16} /> Save draft
-            </button>
-            <button type="button" onClick={() => createExam("published")} className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-indigo-600 px-4 font-semibold text-white hover:bg-indigo-700">
-              <BookOpenCheck size={17} /> Publish to {selectedClass.name}
-            </button>
-          </div>
-        </section>
+          <button type="submit" disabled={cbtApi.mutating || classesApi.loading} className="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 disabled:opacity-50">
+            {cbtApi.mutating ? "Saving..." : editingExamId ? "Save changes" : "Save exam"}
+          </button>
+        </form>
       )}
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="flex items-center gap-3 rounded-xl border bg-white p-4 shadow-sm"><ClipboardList className="text-indigo-600" /><div><p className="text-sm text-gray-500">Total exams</p><p className="text-xl font-bold text-gray-900">{exams.length}</p></div></div>
-        <div className="flex items-center gap-3 rounded-xl border bg-white p-4 shadow-sm"><BookOpenCheck className="text-green-600" /><div><p className="text-sm text-gray-500">Published</p><p className="text-xl font-bold text-gray-900">{publishedCount}</p></div></div>
-        <div className="flex items-center gap-3 rounded-xl border bg-white p-4 shadow-sm"><Users className="text-blue-600" /><div><p className="text-sm text-gray-500">Demo classes</p><p className="text-xl font-bold text-gray-900">{DEMO_CLASSES.length}</p></div></div>
-        <div className="flex items-center gap-3 rounded-xl border bg-white p-4 shadow-sm"><Check className="text-teal-600" /><div><p className="text-sm text-gray-500">Demo submissions</p><p className="text-xl font-bold text-gray-900">{attempts.filter((attempt) => attempt.status === "submitted").length}</p></div></div>
+      <section className="space-y-4 rounded-xl bg-white p-5 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h3 className="text-lg font-semibold">Exams</h3>
+          <button type="button" onClick={() => cbtApi.refreshExams({ class_id: filterClass || undefined, status: filterStatus || undefined, page: examPage }, true)} className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm hover:bg-gray-50">
+            <RefreshCw size={15} /> Refresh
+          </button>
+        </div>
+        <form onSubmit={handleFilter} className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
+          <select value={filterClass} onChange={(event) => setFilterClass(event.target.value)} aria-label="Filter CBT exams by class" className="rounded-lg border p-3">
+            <option value="">All classes</option>
+            {classesApi.classes.map((classItem) => <option key={classItem.id} value={classItem.id}>{classItem.name || classItem.class_name}</option>)}
+          </select>
+          <select value={filterStatus} onChange={(event) => setFilterStatus(event.target.value)} aria-label="Filter CBT exams by status" className="rounded-lg border p-3">
+            {EXAM_STATUSES.map((status) => <option key={status || "all"} value={status}>{status ? status[0].toUpperCase() + status.slice(1) : "All statuses"}</option>)}
+          </select>
+          <button type="submit" className="rounded-lg bg-gray-900 px-4 py-3 font-medium text-white">Apply filters</button>
+        </form>
+        {cbtApi.loading && <p className="py-4 text-center text-gray-500">Loading CBT exams...</p>}
+        {!cbtApi.loading && !cbtApi.exams.length && <p className="rounded-lg bg-gray-50 p-6 text-center text-gray-600">No CBT exams found.</p>}
+        <div className="divide-y">
+          {cbtApi.exams.map((exam) => (
+            <article key={exam.id} className="flex flex-wrap items-center justify-between gap-3 py-4">
+              <div>
+                <h4 className="font-semibold text-gray-900">{exam.title}</h4>
+                <p className="mt-1 text-sm text-gray-600">
+                  {exam.subject_name || "Subject"}{exam.class_name ? ` · ${exam.class_name}` : ""}
+                  {` · ${exam.question_count ?? exam.questions?.length ?? 0} questions · ${exam.duration_minutes || 0} min`}
+                </p>
+                <p className="mt-1 text-xs capitalize text-gray-500">{exam.status || "draft"}{exam.attempt_count != null ? ` · ${exam.attempt_count} attempts` : ""}</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button type="button" onClick={() => chooseExam(exam.id)} className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50">Manage</button>
+                <button type="button" onClick={() => editExam(exam)} className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50">Edit</button>
+                {exam.status !== "archived" && (
+                  <button type="button" disabled={cbtApi.mutating} onClick={() => cbtApi.saveExam({
+                    status: exam.status === "published" ? "draft" : "published"
+                  }, exam.id, {
+                    class_id: filterClass || undefined,
+                    status: filterStatus || undefined,
+                    page: examPage
+                  }).catch((error) => setErrorMessage(error.message || "Unable to update exam status."))} className="rounded-lg border px-3 py-2 text-sm text-indigo-700 hover:bg-indigo-50 disabled:opacity-50">
+                    {exam.status === "published" ? "Move to draft" : "Publish"}
+                  </button>
+                )}
+                <button type="button" onClick={async () => {
+                  if (window.confirm(`Delete "${exam.title}"?`)) {
+                    try {
+                      await cbtApi.removeExam(exam.id, {
+                        class_id: filterClass || undefined,
+                        status: filterStatus || undefined,
+                        page: examPage
+                      });
+                      if (selectedExamId === exam.id) setSelectedExamId("");
+                    } catch (error) {
+                      setErrorMessage(error.message || "Unable to delete exam.");
+                    }
+                  }
+                }} aria-label={`Delete ${exam.title}`} className="rounded-lg border px-3 py-2 text-red-700 hover:bg-red-50"><Trash2 size={16} /></button>
+              </div>
+            </article>
+          ))}
+        </div>
+        {examPagination && (
+          <div className="flex items-center justify-between border-t pt-3">
+            <span className="text-sm text-gray-500">{pageInfo(examPagination)}</span>
+            <div className="flex gap-2">
+              <button type="button" className={pageButtonClass} disabled={!examPagination.previous || examPage <= 1} onClick={() => changeExamPage(examPage - 1)}><ChevronLeft size={15} /> Previous</button>
+              <button type="button" className={pageButtonClass} disabled={!examPagination.next} onClick={() => changeExamPage(examPage + 1)}>Next <ChevronRight size={15} /></button>
+            </div>
+          </div>
+        )}
       </section>
 
-      <section className="space-y-3">
-        <div>
-          <h3 className="text-xl font-bold text-gray-900">Your exams</h3>
-          <p className="mt-1 text-sm text-gray-500">Drafts are visible only to teachers. Published exams appear to students in the assigned demo class.</p>
-        </div>
-        {!exams.length && <p className="rounded-xl border border-dashed bg-white p-8 text-center text-gray-500">No exams yet. Create an exam to get started.</p>}
-        {exams.map((exam) => (
-          <article key={exam.id} className="rounded-xl border border-gray-200 bg-white shadow-sm">
-            <div className="flex flex-col justify-between gap-4 p-4 sm:flex-row sm:items-center sm:p-5">
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h4 className="font-bold text-gray-900">{exam.title}</h4>
-                  <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${exam.status === "published" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-700"}`}>{exam.status}</span>
-                </div>
-                <p className="mt-1 text-sm text-gray-600">{exam.subject} · {exam.className} · {exam.questions.length} questions · {exam.durationMinutes} min</p>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <button type="button" onClick={() => setExpandedExamId((id) => id === exam.id ? null : exam.id)} className="inline-flex min-h-10 items-center gap-1 rounded-lg border px-3 text-sm text-gray-700 hover:bg-gray-50">
-                  Questions {expandedExamId === exam.id ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
-                </button>
-                <button type="button" onClick={() => updateExamStatus(exam, exam.status === "published" ? "draft" : "published")} className="min-h-10 rounded-lg border px-3 text-sm font-medium text-indigo-700 hover:bg-indigo-50">
-                  {exam.status === "published" ? "Unpublish" : "Publish"}
-                </button>
-                <button type="button" onClick={() => deleteExam(exam)} aria-label={`Delete ${exam.title}`} className="min-h-10 rounded-lg border px-3 text-sm text-red-700 hover:bg-red-50"><Trash2 size={16} /></button>
-              </div>
+      {selectedExamId && (
+        <section className="space-y-4 rounded-xl bg-white p-5 shadow-sm">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h3 className="text-lg font-semibold">{selectedExam?.title || "Selected exam"}</h3>
+              <p className="text-sm text-gray-500">{selectedExam?.subject_name || "CBT exam details"}</p>
             </div>
-            {expandedExamId === exam.id && (
-              <div className="space-y-3 border-t bg-gray-50/70 p-4">
-                <div className="flex items-center gap-2 text-xs text-gray-500"><Clock3 size={14} /> {exam.durationMinutes} minute limit <span>·</span> {exam.questions.length} questions</div>
-                <div className="rounded-lg border bg-white p-3">
-                  <h5 className="mb-2 text-sm font-semibold text-gray-900">Student attempts</h5>
-                  {attempts.filter((attempt) => attempt.examId === exam.id && attempt.status === "submitted").length
-                    ? <div className="space-y-2">
-                      {attempts.filter((attempt) => attempt.examId === exam.id && attempt.status === "submitted").map((attempt) => (
-                        <div key={`${attempt.studentId}-${attempt.examId}`} className="flex flex-wrap items-center justify-between gap-2 border-b pb-2 text-sm last:border-b-0 last:pb-0">
-                          <span className="font-medium text-gray-800">{attempt.studentName}</span>
-                          <span className="text-gray-600">{attempt.result?.earnedPoints ?? 0}/{attempt.result?.totalPoints ?? 0} points ({attempt.result?.percentage ?? 0}%)</span>
-                          <span className="text-xs text-gray-500">{attempt.automatic ? "Auto-submitted" : "Submitted"} · {attempt.focusWarnings || 0} focus warnings</span>
-                        </div>
-                      ))}
-                    </div>
-                    : <p className="text-xs text-gray-500">No demo submissions yet.</p>}
-                </div>
-                {exam.questions.map((question, index) => (
-                  <div key={question.id} className="rounded-lg border bg-white p-3">
-                    <p className="text-sm font-medium text-gray-800">{index + 1}. {question.prompt}</p>
-                    <ul className="mt-2 space-y-1 text-xs text-gray-600">
-                      {question.type === "text"
-                        ? <li>Expected: {question.correctText}</li>
-                        : question.options.map((option) => <li key={option.id} className={question.correctOptionIds.includes(option.id) ? "font-semibold text-green-700" : ""}>{question.correctOptionIds.includes(option.id) ? "✓ " : ""}{option.text}</li>)}
-                    </ul>
-                  </div>
-                ))}
+            <button type="button" onClick={() => setSelectedExamId("")} className="rounded-lg border px-3 py-2 text-sm">Close details</button>
+          </div>
+          <div className="flex gap-2 border-b">
+            {["questions", "attempts"].map((tab) => (
+              <button key={tab} type="button" onClick={() => setDetailTab(tab)} className={`border-b-2 px-3 py-2 text-sm font-medium capitalize ${
+                detailTab === tab ? "border-blue-600 text-blue-700" : "border-transparent text-gray-500"
+              }`}>{tab}</button>
+            ))}
+          </div>
+
+          {detailTab === "questions" ? (
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h4 className="font-semibold">Questions</h4>
+                <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm hover:bg-gray-50">
+                  <FileUp size={15} /> Import QTI item
+                  <input type="file" accept=".xml,text/xml,application/xml" onChange={importQuestion} className="sr-only" />
+                </label>
               </div>
-            )}
-          </article>
-        ))}
-      </section>
-      <p className="text-xs leading-5 text-gray-500">Prototype only: exams and attempts are stored in this browser's localStorage and use the demo class rosters. No real student identity verification, server timing, synchronization, or secure grading is active.</p>
+              {listedQuestions.length ? (
+                <div className="divide-y">
+                  {listedQuestions.map((question, index) => (
+                    <article key={question.id || index} className="py-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="font-medium">{question.order != null ? `${question.order + 1}. ` : ""}{question.question_text || "Question"}</p>
+                          <p className="mt-1 text-xs capitalize text-gray-500">{question.question_type || "Question"} · {question.marks ?? 1} mark(s)</p>
+                        </div>
+                      </div>
+                      {Array.isArray(question.options) && <ul className="mt-2 space-y-1 text-sm text-gray-600">
+                        {question.options.map((option, optionIndex) => <li key={option.id || optionIndex}>{option.option_text || option.text || "Option"}{option.is_correct ? " · Correct" : ""}</li>)}
+                      </ul>}
+                    </article>
+                  ))}
+                </div>
+              ) : <p className="rounded-lg bg-gray-50 p-4 text-sm text-gray-500">No questions have been added to this exam.</p>}
+              {questionPagination && (
+                <div className="flex items-center justify-between border-t pt-3">
+                  <span className="text-sm text-gray-500">{pageInfo(questionPagination)}</span>
+                  <div className="flex gap-2">
+                    <button type="button" className={pageButtonClass} disabled={!questionPagination.previous || questionPage <= 1} onClick={() => changeQuestionPage(questionPage - 1)}><ChevronLeft size={15} /> Previous</button>
+                    <button type="button" className={pageButtonClass} disabled={!questionPagination.next} onClick={() => changeQuestionPage(questionPage + 1)}>Next <ChevronRight size={15} /></button>
+                  </div>
+                </div>
+              )}
+              <form onSubmit={saveQuestion} className="space-y-3 rounded-lg border-t pt-4">
+                <h4 className="font-semibold">Add a question</h4>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <label className="text-sm font-medium sm:col-span-2">Question text
+                    <textarea required value={questionForm.question_text} onChange={(event) => setQuestionForm({ ...questionForm, question_text: event.target.value })} className="mt-1 w-full rounded-lg border p-3" rows="2" />
+                  </label>
+                  <div className="space-y-3">
+                    <label className="block text-sm font-medium">Question type
+                      <select value={questionForm.question_type} onChange={(event) => setQuestionForm({
+                        ...questionForm,
+                        question_type: event.target.value,
+                        options: event.target.value === "true_false"
+                          ? [{ option_text: "True", is_correct: false }, { option_text: "False", is_correct: false }]
+                          : ["mcq", "mcq_multi"].includes(event.target.value)
+                            ? makeInitialQuestion().options
+                            : []
+                      })} className="mt-1 w-full rounded-lg border p-3">
+                        {QUESTION_TYPES.map((type) => <option key={type} value={type}>{type.replace("_", " ")}</option>)}
+                      </select>
+                    </label>
+                    <label className="block text-sm font-medium">Marks
+                      <input type="number" min="0.01" step="0.01" value={questionForm.marks} onChange={(event) => setQuestionForm({ ...questionForm, marks: event.target.value })} className="mt-1 w-full rounded-lg border p-3" />
+                    </label>
+                  </div>
+                </div>
+                {questionForm.options.length > 0 && (
+                  <div className="space-y-2">
+                    {questionForm.options.map((option, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <input type={questionForm.question_type === "mcq" || questionForm.question_type === "true_false" ? "radio" : "checkbox"} name="cbt-correct-option" checked={option.is_correct} onChange={(event) => updateQuestionOption(index, "is_correct", event.target.checked)} aria-label={`Correct answer option ${index + 1}`} />
+                        <input required maxLength={500} value={option.option_text} onChange={(event) => updateQuestionOption(index, "option_text", event.target.value)} className="w-full rounded-lg border p-2" aria-label={`Answer option ${index + 1}`} />
+                        {questionForm.question_type !== "true_false" && <button type="button" onClick={() => setQuestionForm((current) => ({ ...current, options: current.options.filter((_, optionIndex) => optionIndex !== index) }))} aria-label={`Remove option ${index + 1}`} className="rounded p-2 text-gray-500 hover:bg-red-50 hover:text-red-700"><Trash2 size={15} /></button>}
+                      </div>
+                    ))}
+                    {questionForm.question_type !== "true_false" && <button type="button" onClick={() => setQuestionForm((current) => ({ ...current, options: [...current.options, { option_text: "", is_correct: false }] }))} className="inline-flex items-center gap-1 text-sm font-medium text-blue-700"><Plus size={15} /> Add option</button>}
+                  </div>
+                )}
+                <label className="block text-sm font-medium">Explanation (optional)
+                  <textarea value={questionForm.explanation} onChange={(event) => setQuestionForm({ ...questionForm, explanation: event.target.value })} className="mt-1 w-full rounded-lg border p-3" rows="2" />
+                </label>
+                <button type="submit" disabled={cbtApi.mutating} className="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white disabled:opacity-50">{cbtApi.mutating ? "Saving..." : "Add question"}</button>
+              </form>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <h4 className="font-semibold">Student attempts</h4>
+              {listedAttempts.length ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead><tr className="border-b text-xs uppercase text-gray-500"><th className="py-2 pr-3">Student</th><th className="py-2 pr-3">Status</th><th className="py-2 pr-3">Score</th><th className="py-2 pr-3">Submitted</th><th className="py-2">Review</th></tr></thead>
+                    <tbody className="divide-y">
+                      {listedAttempts.map((attempt) => (
+                        <tr key={attempt.id}>
+                          <td className="py-3 pr-3">{attempt.student_name || attempt.student_id}</td>
+                          <td className="py-3 pr-3 capitalize">{attempt.status}</td>
+                          <td className="py-3 pr-3">{attempt.score ?? "—"}{attempt.percentage != null ? ` (${attempt.percentage}%)` : ""}</td>
+                          <td className="py-3 pr-3">{attempt.submitted_at ? new Date(attempt.submitted_at).toLocaleString() : "—"}</td>
+                          <td className="py-3"><button type="button" onClick={() => cbtApi.fetchAttempt(attempt.id).catch((error) => setErrorMessage(error.message))} className="rounded border px-2 py-1 text-blue-700 hover:bg-blue-50">Review</button></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : <p className="rounded-lg bg-gray-50 p-4 text-sm text-gray-500">No student attempts found.</p>}
+              {attemptPagination && (
+                <div className="flex items-center justify-between border-t pt-3">
+                  <span className="text-sm text-gray-500">{pageInfo(attemptPagination)}</span>
+                  <div className="flex gap-2">
+                    <button type="button" className={pageButtonClass} disabled={!attemptPagination.previous || attemptPage <= 1} onClick={() => changeAttemptPage(attemptPage - 1)}><ChevronLeft size={15} /> Previous</button>
+                    <button type="button" className={pageButtonClass} disabled={!attemptPagination.next} onClick={() => changeAttemptPage(attemptPage + 1)}>Next <ChevronRight size={15} /></button>
+                  </div>
+                </div>
+              )}
+              {cbtApi.selectedAttempt && (
+                <div className="space-y-3 rounded-lg border-t pt-4">
+                  <div>
+                    <h5 className="font-semibold">Attempt review</h5>
+                    <p className="text-sm text-gray-500">{cbtApi.selectedAttempt.student_name || cbtApi.selectedAttempt.student?.name || "Student"} · {cbtApi.selectedAttempt.status}</p>
+                  </div>
+                  {Array.isArray(cbtApi.selectedAttempt.answers) && cbtApi.selectedAttempt.answers.length ? (
+                    cbtApi.selectedAttempt.answers.map((answer, index) => {
+                      const questionId = answer.question_id || answer.question?.id;
+                      const draft = gradingDraft[questionId] || {};
+                      return (
+                        <article key={answer.id || questionId || index} className="space-y-2 rounded-lg bg-gray-50 p-3">
+                          <p className="text-sm font-medium">{answer.question_text || answer.question?.question_text || `Answer ${index + 1}`}</p>
+                          <p className="text-sm text-gray-600">{answer.answer_text || answer.response_text || answer.selected_option_text || "No written response"}</p>
+                          {questionId && (
+                            <div className="grid gap-2 sm:grid-cols-[140px_1fr_auto]">
+                              <label className="text-xs font-medium">Marks awarded
+                                <input type="number" min="0" step="0.01" value={draft.marks_awarded ?? answer.marks_awarded ?? 0} onChange={(event) => updateGradeDraft(questionId, "marks_awarded", event.target.value)} className="mt-1 w-full rounded border p-2 text-sm" />
+                              </label>
+                              <label className="text-xs font-medium">Feedback
+                                <input value={draft.feedback ?? answer.feedback ?? ""} onChange={(event) => updateGradeDraft(questionId, "feedback", event.target.value)} className="mt-1 w-full rounded border p-2 text-sm" />
+                              </label>
+                              <button type="button" onClick={() => saveGrade(answer)} disabled={cbtApi.mutating} className="self-end rounded bg-blue-600 px-3 py-2 text-sm font-medium text-white disabled:opacity-50">Save grade</button>
+                            </div>
+                          )}
+                        </article>
+                      );
+                    })
+                  ) : <pre className="overflow-auto rounded-lg bg-gray-50 p-3 text-xs">{JSON.stringify(cbtApi.selectedAttempt, null, 2)}</pre>}
+                </div>
+              )}
+            </div>
+          )}
+        </section>
+      )}
     </div>
   );
 }

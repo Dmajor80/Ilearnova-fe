@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Eye, FileQuestion, Plus, Trash2 } from "lucide-react";
+import { Eye, FileQuestion, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { useTeacherBankQuestions, useTeacherClasses, useTeacherExaminations } from "@/hooks/teacher";
 import { getTeacherList } from "@/hooks/teacher/teacherApiUtils";
 import CoursesComponent from "./components/CourseComponents";
@@ -31,6 +31,8 @@ export default function Examinations() {
   const [questionPayload, setQuestionPayload] = useState("{}");
   const [questionJsonError, setQuestionJsonError] = useState("");
   const [questionDetails, setQuestionDetails] = useState("");
+  const [examPage, setExamPage] = useState(1);
+  const [submissionPage, setSubmissionPage] = useState(1);
 
   const fetchSubjects = classesApi.fetchSubjects;
   useEffect(() => {
@@ -73,7 +75,7 @@ export default function Examinations() {
         duration_minutes: Number(form.duration_minutes),
         total_marks: Number(form.total_marks),
         num_of_questions: Number(form.num_of_questions)
-      }, editingExam?.id);
+      }, editingExam?.id, { page: examPage });
       setShowForm(false);
     } catch {
       // The API hook reports request failures.
@@ -84,11 +86,25 @@ export default function Examinations() {
     setSelectedExam(exam);
     setDetailView(view);
     try {
-      if (view === "submissions") await examsApi.fetchSubmissions(exam.id);
+      if (view === "submissions") {
+        setSubmissionPage(1);
+        await examsApi.fetchSubmissions(exam.id, { page: 1 });
+      }
       else await examsApi.fetchBankQuestions(exam.id);
     } catch {
       // The API hook reports request failures.
     }
+  };
+
+  const changeExamPage = (page) => {
+    setExamPage(page);
+    examsApi.refreshData({ page });
+  };
+
+  const changeSubmissionPage = (page) => {
+    if (!selectedExam) return;
+    setSubmissionPage(page);
+    examsApi.fetchSubmissions(selectedExam.id, { page }).catch(() => {});
   };
 
   const questions = getTeacherList(examsApi.bankQuestions, ["questions", "bank_questions"]);
@@ -124,9 +140,14 @@ export default function Examinations() {
       <section className="rounded-xl bg-white p-5 shadow-sm">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div><h2 className="text-2xl font-bold">Examinations</h2><p className="text-sm text-gray-600">Create exams, review submissions, and inspect linked question-bank items.</p></div>
-          <button onClick={() => openForm()} className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"><Plus size={17} /> Create examination</button>
+          <div className="flex gap-2">
+            <button type="button" onClick={() => examsApi.refreshData({ page: examPage }, true)} aria-label="Refresh examinations" className="rounded-lg border px-3 text-gray-700 hover:bg-gray-50"><RefreshCw size={17} /></button>
+            <button onClick={() => openForm()} className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"><Plus size={17} /> Create examination</button>
+          </div>
         </div>
         {examsApi.error && <p role="alert" className="mb-4 rounded-lg bg-red-50 p-3 text-red-700">{examsApi.error.message}</p>}
+        {classesApi.error && <p role="alert" className="mb-4 rounded-lg bg-red-50 p-3 text-red-700">{classesApi.error.message}</p>}
+        {questionApi.error && <p role="alert" className="mb-4 rounded-lg bg-red-50 p-3 text-red-700">{questionApi.error.message}</p>}
         {examsApi.loading && <p className="py-8 text-center text-gray-500">Loading examinations...</p>}
         {!examsApi.loading && !examsApi.examinations.length && <p className="rounded-lg bg-gray-50 p-6 text-center text-gray-600">No examinations found.</p>}
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -148,13 +169,22 @@ export default function Examinations() {
                 <button onClick={() => openForm(exam)} className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50">Edit</button>
                 <button onClick={async () => {
                   if (window.confirm(`Delete "${exam.title}"?`)) {
-                    try { await examsApi.removeExamination(exam.id); } catch { /* Hook reports failures. */ }
+                    try { await examsApi.removeExamination(exam.id, { page: examPage }); } catch { /* Hook reports failures. */ }
                   }
                 }} aria-label="Delete examination" className="rounded-lg border px-3 py-2 text-red-600 hover:bg-red-50"><Trash2 size={15} /></button>
               </div>
             </article>
           ))}
         </div>
+        {examsApi.examinationPagination && (
+          <div className="mt-4 flex items-center justify-between border-t pt-3">
+            <span className="text-sm text-gray-500">Page {examsApi.examinationPagination.page} · {examsApi.examinationPagination.total} exams</span>
+            <div className="flex gap-2">
+              <button type="button" disabled={!examsApi.examinationPagination.previous || examPage <= 1} onClick={() => changeExamPage(examPage - 1)} className="rounded-lg border px-3 py-2 text-sm disabled:opacity-40">Previous</button>
+              <button type="button" disabled={!examsApi.examinationPagination.next} onClick={() => changeExamPage(examPage + 1)} className="rounded-lg border px-3 py-2 text-sm disabled:opacity-40">Next</button>
+            </div>
+          </div>
+        )}
       </section>
 
       {selectedExam && (
@@ -176,6 +206,15 @@ export default function Examinations() {
                   <button disabled={examsApi.mutating} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">Send question request</button>
                 </form>
               </>
+            )}
+            {detailView === "submissions" && examsApi.submissionPagination && (
+              <div className="mt-4 flex items-center justify-between border-t pt-3">
+                <span className="text-sm text-gray-500">Page {examsApi.submissionPagination.page} · {examsApi.submissionPagination.total} submissions</span>
+                <div className="flex gap-2">
+                  <button type="button" disabled={!examsApi.submissionPagination.previous || submissionPage <= 1} onClick={() => changeSubmissionPage(submissionPage - 1)} className="rounded-lg border px-3 py-2 text-sm disabled:opacity-40">Previous</button>
+                  <button type="button" disabled={!examsApi.submissionPagination.next} onClick={() => changeSubmissionPage(submissionPage + 1)} className="rounded-lg border px-3 py-2 text-sm disabled:opacity-40">Next</button>
+                </div>
+              </div>
             )}
             {detailView === "questions" && questionDetails && <form onSubmit={saveQuestionDetails} className="mt-4 space-y-2 border-t pt-4">
               <label className="block text-sm font-medium">Update question (request JSON)

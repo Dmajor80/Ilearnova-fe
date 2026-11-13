@@ -8,13 +8,15 @@ import {
   patchTeacherAssignment,
   updateTeacherAssignment
 } from "@/api/teacher";
-import useTeacherApi, { getTeacherList } from "./teacherApiUtils";
+import useTeacherApi, { getTeacherList, getTeacherPagination } from "./teacherApiUtils";
 
 export default function useTeacherAssignments() {
   const { request, circuitBreaker, loading, mutating, error, lastUpdated, notification } = useTeacherApi();
   const { resetAllEndpoints } = circuitBreaker;
   const [assignments, setAssignments] = useState([]);
   const [submissions, setSubmissions] = useState([]);
+  const [assignmentPagination, setAssignmentPagination] = useState(null);
+  const [submissionPagination, setSubmissionPagination] = useState(null);
 
   const refreshData = useCallback(async (params = {}, resetFailures = false) => {
     if (resetFailures) resetAllEndpoints();
@@ -25,10 +27,15 @@ export default function useTeacherAssignments() {
         () => getTeacherAssignments(params),
         { failureMessage: "Assignments unavailable" }
       );
-      if (result !== null) setAssignments(getTeacherList(result, ["assignments"]));
+      if (result !== null) {
+        const rows = getTeacherList(result, ["assignments"]);
+        setAssignments(rows);
+        setAssignmentPagination(getTeacherPagination(result, params?.page, rows.length));
+      }
       return result;
     } catch {
       setAssignments([]);
+      setAssignmentPagination(null);
       return null;
     }
   }, [request, resetAllEndpoints]);
@@ -40,7 +47,11 @@ export default function useTeacherAssignments() {
       () => getTeacherAssignmentSubmissions(assignmentId, params),
       { failureMessage: "Assignment submissions unavailable" }
     );
-    if (result !== null) setSubmissions(getTeacherList(result, ["submissions"]));
+    if (result !== null) {
+      const rows = getTeacherList(result, ["submissions"]);
+      setSubmissions(rows);
+      setSubmissionPagination(getTeacherPagination(result, params?.page, rows.length));
+    }
     return result;
   }, [request]);
 
@@ -51,7 +62,7 @@ export default function useTeacherAssignments() {
     { failureMessage: "Assignment unavailable" }
   ), [request]);
 
-  const saveAssignment = useCallback(async (assignmentData, assignmentId) => {
+  const saveAssignment = useCallback(async (assignmentData, assignmentId, params = {}) => {
     const update = Boolean(assignmentId);
     const result = await request(
       update ? `teacherAssignment:${assignmentId}` : "teacherAssignments",
@@ -65,11 +76,11 @@ export default function useTeacherAssignments() {
         failureMessage: update ? "Failed to update assignment" : "Failed to create assignment"
       }
     );
-    await refreshData();
+    await refreshData(params);
     return result;
   }, [request, refreshData]);
 
-  const replaceAssignment = useCallback(async (assignmentId, assignmentData) => {
+  const replaceAssignment = useCallback(async (assignmentId, assignmentData, params = {}) => {
     const result = await request(
       `teacherAssignment:${assignmentId}`,
       "replace_teacher_assignment",
@@ -80,18 +91,18 @@ export default function useTeacherAssignments() {
         failureMessage: "Failed to update assignment"
       }
     );
-    await refreshData();
+    await refreshData(params);
     return result;
   }, [request, refreshData]);
 
-  const removeAssignment = useCallback(async (assignmentId) => {
+  const removeAssignment = useCallback(async (assignmentId, params = {}) => {
     const result = await request(
       `teacherAssignment:${assignmentId}`,
       "delete_teacher_assignment",
       () => deleteTeacherAssignment(assignmentId),
       { mutation: true, successMessage: "Assignment deleted successfully", failureMessage: "Failed to delete assignment" }
     );
-    await refreshData();
+    await refreshData(params);
     return result;
   }, [request, refreshData]);
 
@@ -104,6 +115,8 @@ export default function useTeacherAssignments() {
   return {
     assignments,
     submissions,
+    assignmentPagination,
+    submissionPagination,
     loading,
     mutating,
     error,
