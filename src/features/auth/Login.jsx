@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Mail, Lock, Check, BookOpen, GraduationCap } from "lucide-react";
+import { Mail, Lock, Check, BookOpen, GraduationCap, Building } from "lucide-react";
 import InputField from "@/components/ui/InputField";
 import NotificationBar from "@/components/ui/NotificationBar";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -167,6 +167,22 @@ export default function Login() {
                   placeholder="Enter your password"
                   icon={Lock}
                   showToggle={true}
+                  darkMode={darkMode}
+                  errors={errors}
+                  formData={formData}
+                  inputRefs={inputRefs}
+                  handleChange={handleInputChange}
+                  handleSubmit={handleSubmit}
+                  disabled={loading}
+                />
+
+                <InputField
+                  label="Organization Code (optional)"
+                  name="organization_code"
+                  type="text"
+                  placeholder="Enter organization code"
+                  icon={Building}
+                  nextField="password"
                   darkMode={darkMode}
                   errors={errors}
                   formData={formData}

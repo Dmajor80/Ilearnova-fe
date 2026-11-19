@@ -42,7 +42,7 @@ function LearningSidebar({ isMobileMenuOpen, setIsMobileMenuOpen }) {
       {/* Mobile Backdrop */}
       {isMobileMenuOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+          className="lg:hidden fixed inset-0 bg-white/10 backdrop-blur-[2px] z-40"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}

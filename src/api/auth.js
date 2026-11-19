@@ -66,6 +66,45 @@ export function clearAuth() {
   }
 }
 
+export function normalizeAuthResponse(response) {
+  const data = response?.data && typeof response.data === "object"
+    ? response.data
+    : response;
+
+  const access =
+    data?.access ||
+    data?.access_token ||
+    data?.token ||
+    response?.access ||
+    response?.access_token ||
+    response?.token ||
+    null;
+  const refresh =
+    data?.refresh ||
+    data?.refresh_token ||
+    response?.refresh ||
+    response?.refresh_token ||
+    null;
+  const user = data?.user || response?.user || null;
+
+  return { access, refresh, user, data };
+}
+
+export function persistAuthResponse(response, preferStore) {
+  const normalized = normalizeAuthResponse(response);
+  if (normalized.access || normalized.refresh) {
+    setTokens(
+      { access: normalized.access, refresh: normalized.refresh },
+      preferStore
+    );
+  }
+  if (normalized.user) {
+    const store = preferStore || getAuthStorage();
+    store?.setItem("user_data", JSON.stringify(normalized.user));
+  }
+  return normalized;
+}
+
 // Decode JWT payload safely
 function decodeJwt(token) {
   try {
@@ -83,8 +122,7 @@ export function isJwtExpired(token, skewSeconds = 15) {
   if (!token) return true;
   const payload = decodeJwt(token);
   if (!payload || typeof payload.exp !== "number") {
-    // If cannot decode or missing exp, assume not expired to avoid logouts for non-JWT tokens
-    return false;
+    return true;
   }
   const nowSec = Math.floor(Date.now() / 1000);
   return payload.exp <= nowSec + skewSeconds;
@@ -127,13 +165,16 @@ export async function refreshAccessToken() {
         try {
           const data = await res.json();
           errMsg = data?.detail || data?.message || data?.error || errMsg;
-        } catch {}
+        } catch {
+          errMsg = "Failed to refresh token";
+        }
         return { ok: false, error: errMsg };
       }
 
       const data = await res.json();
-      const newAccess = data.access || data.token || data.access_token;
-      const newRefresh = data.refresh; // some APIs may rotate refresh tokens
+      const normalized = normalizeAuthResponse(data);
+      const newAccess = normalized.access;
+      const newRefresh = normalized.refresh;
 
       if (!newAccess) {
         return { ok: false, error: "No access token in refresh response" };

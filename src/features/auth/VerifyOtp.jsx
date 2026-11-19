@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AlertCircle, Check, X, Loader2, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { http } from "../../api/baseClient";
+import { verifyOtp, resendOtp } from "../../api/authApi";
 
 const OtpInput = ({ value, onChange, onComplete, disabled, darkMode }) => {
   const inputsRef = useRef([]);
@@ -146,10 +147,7 @@ export default function VerifyOtp() {
     setErrors({});
 
     try {
-      const data = await http.post("/api/verify-otp/", {
-        body: { email, otp },
-        auth: false,
-      });
+      const data = await verifyOtp(email, otp);
       console.log(data)
       const prefillEmail = data?.prefill?.email || email;
       const prefillUsername = data?.prefill?.username || email;
@@ -181,10 +179,7 @@ export default function VerifyOtp() {
     if (!email) return;
     setResending(true);
     try {
-      await http.post("/api/resend-otp/", {
-        body: { email },
-        auth: false,
-      });
+      await resendOtp(email);
       notify("OTP resent. Please check your email.", "success", 3000);
     } catch (e) {
       notify(e.message || "Network error", "error");

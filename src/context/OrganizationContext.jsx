@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { getTokens } from "../api/auth";
+import { http } from "../api/baseClient";
 
 const OrganizationContext = createContext(null);
 
@@ -120,19 +121,7 @@ export function OrganizationProvider({ children }) {
 
   const refreshUser = useCallback(async () => {
     try {
-      // Fetch fresh user data from backend API
-      const token = localStorage.getItem('token') || '';
-      const response = await fetch('/api/auth/profile/', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      if (!response.ok) {
-        throw new Error(`Failed to fetch user data: ${response.status} ${response.statusText}`);
-      }
-      const userData = await response.json();
+      const userData = await http.get("/api/auth/profile/");
       if (userData) {
         const newUserData = { ...userData };
         setUser(newUserData);

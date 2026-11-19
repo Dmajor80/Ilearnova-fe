@@ -5,7 +5,7 @@ import { useOrganization } from "@/context/OrganizationContext";
 import useNotification from "@/hooks/useNotification";
 
 const Profile = () => {
-  const { user } = useOrganization();
+  const { user, refreshUser } = useOrganization();
   const [loading, setLoading] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [formData, setFormData] = useState({
@@ -58,8 +58,16 @@ const Profile = () => {
     console.log("Profile: Starting profile update with data:", formData);
 
     try {
-      const response = await http.put("/api/auth/profile", {
-        body: formData
+      const response = await http.put("/api/auth/profile/", {
+        body: {
+          username: formData.username || user.username,
+          email: formData.email,
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          phone_number: formData.phone,
+          date_of_birth: formData.date_of_birth || null,
+          address: formData.address,
+        }
       });
       console.log("Profile: Update response:", response);
 

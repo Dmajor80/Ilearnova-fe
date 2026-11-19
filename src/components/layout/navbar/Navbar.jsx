@@ -4,7 +4,7 @@ import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { CDN_BASE_URL, LOGO_URL } from "../../../api/config";
 import { http } from "../../../api/baseClient";
-import { clearAuth } from "../../../api/auth";
+import { clearAuth, getTokens } from "../../../api/auth";
 import ilearnova from "../../../assets/ilearnova-logo.png"
 
 const Navbar = () => {
@@ -77,7 +77,10 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      await http.post("/api/auth/logout/");
+      const { refresh } = getTokens();
+      await http.post("/api/auth/logout/", {
+        body: refresh ? { refresh_token: refresh } : {},
+      });
     } catch (error) {
       console.error("Logout API call failed:", error);
     } finally {

@@ -90,7 +90,7 @@ const OrganizationDashboard = () => {
       {/* Mobile overlay */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-60 z-40 md:hidden backdrop-blur-sm"
+          className="fixed inset-0 bg-white/10 z-40 md:hidden backdrop-blur-[2px]"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
@@ -99,7 +99,7 @@ const OrganizationDashboard = () => {
       <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-2xl transform transition-all duration-300 ease-in-out md:translate-x-0 border-r border-slate-200 ${
         isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
-        <div className="p-4 md:p-6 bg-gradient-to-b from-white via-slate-50 to-blue-50 h-full">
+        <div className="h-full overflow-y-auto overscroll-contain [scrollbar-gutter:stable] [scrollbar-width:thin] p-4 md:p-6 pb-8 bg-gradient-to-b from-white via-slate-50 to-blue-50">
           <div className="flex justify-between items-center mb-6 md:mb-8">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
