@@ -4,27 +4,16 @@ import { Link } from "react-router-dom"
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { http } from "../../../api/baseClient";
-import { setTokens } from "../../../api/auth";
+import { persistAuthResponse } from "../../../api/auth";
 
 const authenticateUser = async (email, password, organizationCode) => {
   try {
     const data = await http.post("/api/auth/login/", {
-      body: { email, password, organizationCode },
+      body: { username: email, password, organization_code: organizationCode },
       auth: false,
     });
-
-    // Persist tokens if backend returns them (optional but recommended)
-    const access = data.access || data.token || data.access_token;
-    const refresh = data.refresh;
-    if (access || refresh) {
-      setTokens({ access, refresh }, window.localStorage);
-      if (data.user) {
-        window.localStorage.setItem("user_data", JSON.stringify(data.user));
-      }
-    }
-
-    // If we reached here, http.post did not throw; treat as success
-    return data?.success === true || !!access || true;
+    const normalized = persistAuthResponse(data, window.localStorage);
+    return !!normalized.access || !!normalized.refresh || !!normalized.user;
   } catch (err) {
     return false;
   }

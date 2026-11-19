@@ -1,10 +1,37 @@
 import React, { useState } from "react";
 import logo from "../../assets/image 1.png";
 import teacherIllustration from "../../assets/girl-studying-university-library 1.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { schoolAdminLogin } from "@/api/authApi";
+import { persistAuthResponse } from "@/api/auth";
 
 const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [schoolCode, setSchoolCode] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setLoading(true);
+    setError("");
+    try {
+      const response = await schoolAdminLogin({
+        email,
+        password,
+        school_code: schoolCode,
+      });
+      persistAuthResponse(response, window.localStorage);
+      navigate("/post-login", { replace: true });
+    } catch (submitError) {
+      setError(submitError.message || "Unable to sign in.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex flex-col lg:flex-row min-h-screen bg-gray-50">
@@ -36,7 +63,7 @@ const AdminLogin = () => {
           </div>
 
           {/* Form with enhanced styling */}
-          <form className="w-full space-y-6">
+          <form className="w-full space-y-6" onSubmit={handleSubmit}>
             {/* Email input with modern design */}
             <div className="space-y-2">
               <label className="block text-sm font-semibold text-gray-700">
@@ -45,6 +72,9 @@ const AdminLogin = () => {
               <div className="relative">
                 <input
                   type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  required
                   placeholder="admin@ilearnova.com"
                   className="w-full h-12 sm:h-14 px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-700 text-sm sm:text-base placeholder-gray-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all duration-200"
                 />
@@ -74,6 +104,9 @@ const AdminLogin = () => {
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  required
                   placeholder="Enter your secure password"
                   className="w-full h-12 sm:h-14 px-4 py-3 pr-12 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-700 text-sm sm:text-base placeholder-gray-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all duration-200"
                 />
@@ -121,6 +154,25 @@ const AdminLogin = () => {
               </div>
             </div>
 
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-gray-700">
+                School Code (optional)
+              </label>
+              <input
+                type="text"
+                value={schoolCode}
+                onChange={(event) => setSchoolCode(event.target.value)}
+                placeholder="Enter your school code"
+                className="w-full h-12 sm:h-14 px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-700"
+              />
+            </div>
+
+            {error && (
+              <p className="text-sm font-medium text-red-600" role="alert">
+                {error}
+              </p>
+            )}
+
             {/* Remember password and Forgot password with enhanced styling */}
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
               <div className="flex items-center">
@@ -145,14 +197,13 @@ const AdminLogin = () => {
             </div>
 
             {/* Enhanced Login button */}
-            <Link to="/dashboard">
               <button
                 type="submit"
+                disabled={loading}
                 className="w-full h-12 sm:h-14 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold text-sm sm:text-base shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-blue-200"
               >
-                Access Admin Portal
+                {loading ? "Signing in..." : "Access Admin Portal"}
               </button>
-            </Link>
 
             {/* Sign up link with enhanced styling */}
             <div className="text-center text-sm pt-4 border-t border-gray-200">

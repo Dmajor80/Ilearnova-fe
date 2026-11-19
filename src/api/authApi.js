@@ -1,12 +1,13 @@
 import { http } from "./baseClient";
+import { getTokens } from "./auth";
 
 /**
  * Authentication API functions for login, registration, logout, refresh, and user info.
  */
 
-export async function login({ username, password }) {
+export async function login({ username, password, organization_code }) {
   return await http.post("/api/auth/login/", {
-    body: { username, password },
+    body: { username, password, ...(organization_code ? { organization_code } : {}) },
     auth: false,
   });
 }
@@ -20,7 +21,7 @@ export async function register(data) {
 }
 
 export async function registerSuperAdmin(data) {
-  return await http.post("/api/auth/register/super-admin/", {
+  return await http.post("/api/auth/register/", {
     body: data,
     auth: false,
   });
@@ -29,6 +30,13 @@ export async function registerSuperAdmin(data) {
 export async function registerOrgAdmin(data) {
   return await http.post("/api/auth/register/org-admin/", {
     body: data,
+    auth: false,
+  });
+}
+
+export async function schoolAdminLogin({ email, password, school_code }) {
+  return await http.post("/api/auth/school-admin/login/", {
+    body: { email, password, ...(school_code ? { school_code } : {}) },
     auth: false,
   });
 }
@@ -64,11 +72,46 @@ export async function registerIndividualLearner(data) {
 }
 
 export async function logout() {
-  return await http.post("/api/auth/logout/");
+  const { refresh } = getTokens();
+  return await http.post("/api/auth/logout/", {
+    body: refresh ? { refresh_token: refresh } : {},
+  });
 }
 
 export async function refreshToken() {
-  return await http.post("/api/auth/refresh/");
+  const { refresh } = getTokens();
+  return await http.post("/api/auth/refresh/", {
+    body: refresh ? { refresh } : {},
+    auth: false,
+  });
+}
+
+export async function forgotPassword(email) {
+  return await http.post("/api/forgot-password/", {
+    body: { email },
+    auth: false,
+  });
+}
+
+export async function resendOtp(email) {
+  return await http.post("/api/resend-otp/", {
+    body: { email },
+    auth: false,
+  });
+}
+
+export async function verifyOtp(email, otp) {
+  return await http.post("/api/verify-otp/", {
+    body: { email, otp },
+    auth: false,
+  });
+}
+
+export async function resetPassword(reset_token, new_password, confirm_password) {
+  return await http.post("/api/reset-password/", {
+    body: { reset_token, new_password, confirm_password },
+    auth: false,
+  });
 }
 
 export async function getCurrentUser() {
@@ -77,12 +120,6 @@ export async function getCurrentUser() {
 
 export async function updateProfile(data) {
   return await http.put("/api/auth/profile/", { body: data });
-}
-
-export async function changePassword(current_password, password, password_confirmation) {
-  return await http.post("/api/auth/change-password/", {
-    body: { current_password, password, password_confirmation },
-  });
 }
 
 export async function getOrganizations() {

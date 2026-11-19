@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Lock, AlertCircle, Check, X, Eye, EyeOff, ArrowLeft, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { http } from "../../api/baseClient";
+import { resetPassword } from "../../api/authApi";
 
 
 const PasswordField = React.memo(function PasswordField({
@@ -150,10 +151,7 @@ export default function ResetPassword() {
         confirm_password: passwordConfirm,
       };
 
-      await http.post("/api/reset-password/", {
-        body: payload,
-        auth: false,
-      });
+      await resetPassword(payload.reset_token, payload.new_password, payload.confirm_password);
 
       // Cleanup and redirect to login with prefilled username
       const prefill =

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { http } from "@/api/baseClient";
-import { setTokens } from "@/api/auth";
+import { persistAuthResponse } from "@/api/auth";
 import useNotification from "@/hooks/useNotification";
 import usePrefersDarkMode from "@/hooks/usePrefersDarkMode";
 import { parseError, getUserFriendlyMessage, getNotificationType, withRetry } from "@/lib/errorHandler";
@@ -15,6 +15,7 @@ export default function useLogin({ onSuccess } = {}) {
   const [formData, setFormData] = useState({
     username: "",
     password: "",
+    organization_code: "",
   });
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -269,26 +270,20 @@ export default function useLogin({ onSuccess } = {}) {
         const loginData = {
           username: formData.username,
           password: formData.password,
+          ...(formData.organization_code ? { organization_code: formData.organization_code } : {}),
         };
 
         const response = await submitLogin(loginData);
 
         // Store tokens and user
         const storage = rememberMe ? window.localStorage : window.sessionStorage;
-        const access = response.data?.token || response.access || response.token || response.access_token;
-        const refresh = response.data?.refresh_token || response.refresh;
-        setTokens({ access, refresh }, storage);
+        const normalized = persistAuthResponse(response, storage);
 
-        console.log("useLogin: Login response:", response);
-        console.log("useLogin: User data from response:", response.data?.user);
-
-        if (response.data?.user) {
-          console.log("useLogin: Storing user data in storage:", response.data.user);
-          storage?.setItem("user_data", JSON.stringify(response.data.user));
-          if (response.data.user.username || response.data.user.email) {
+        if (normalized.user) {
+          if (normalized.user.username || normalized.user.email) {
             storage?.setItem(
               "prefill_username",
-              response.data.user.username || response.data.user.email
+              normalized.user.username || normalized.user.email
             );
           }
         } else {

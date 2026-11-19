@@ -200,7 +200,7 @@ const SchoolAdmin = React.memo(function SchoolAdmin() {
       {/* Mobile Overlay */}
       {mobileSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          className="fixed inset-0 bg-white/10 z-40 md:hidden backdrop-blur-[2px]"
           onClick={closeMobileSidebar}
           aria-hidden="true"
         />

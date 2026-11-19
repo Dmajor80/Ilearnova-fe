@@ -6,6 +6,7 @@ import useRegister from "@/hooks/useRegister";
 import InputField from "@/components/ui/InputField";
 import NotificationBar from "@/components/ui/NotificationBar";
 import { getOrganizations } from "@/api/authApi";
+import { resendOtp } from "@/api/authApi";
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center">
@@ -46,14 +47,11 @@ export default function SignupForm() {
     notification,
   } = useRegister({
     onSuccess: (response) => {
-      setUserEmail(response.user?.email || formData.email);
+      const registeredUser = response?.data?.user || response?.user;
+      setUserEmail(registeredUser?.email || formData.email);
       setShowEmailVerification(true);
-      console.log(response)
-      // If email verification is not required, redirect to post-login immediately
-      if (!response.user.is_verified) {
-        // Delay a bit to show success notification
+      if (registeredUser && registeredUser.is_verified === false) {
         setTimeout(() => {
-          // window.location.href = "/post-login";
           navigate("/login", {
             state :{
               info:"first_time_user"
@@ -171,9 +169,14 @@ export default function SignupForm() {
               >
                 Didn't receive the email?{" "}
                 <button
-                  onClick={() =>
-                    notification.notify("Verification email resent!", "success", 4000)
-                  }
+                  onClick={async () => {
+                    try {
+                      await resendOtp(userEmail);
+                      notification.notify("Verification email resent!", "success", 4000);
+                    } catch (error) {
+                      notification.notify(error.message || "Unable to resend verification email.", "error", 5000);
+                    }
+                  }}
                   className="text-blue-600 hover:text-blue-700 font-semibold hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-1 py-1 transition-all duration-200"
                 >
                   Resend verification email
@@ -405,6 +408,34 @@ export default function SignupForm() {
                     formData={formData}
                     handleChange={handleInputChange}
                   />
+                )}
+
+                {formData.role === "student" && (
+                  <>
+                    <InputField
+                      label="Student ID"
+                      name="student_id"
+                      placeholder="Enter student ID"
+                      required
+                      icon={UserCheck}
+                      darkMode={darkMode}
+                      errors={errors}
+                      formData={formData}
+                      handleChange={handleInputChange}
+                    />
+                    <InputField
+                      label="Parent Email"
+                      name="parent_email"
+                      type="email"
+                      placeholder="Enter parent email"
+                      required
+                      icon={Mail}
+                      darkMode={darkMode}
+                      errors={errors}
+                      formData={formData}
+                      handleChange={handleInputChange}
+                    />
+                  </>
                 )}
 
                 <InputField

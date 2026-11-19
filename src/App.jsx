@@ -19,6 +19,7 @@ import VerifyFailure from "@/features/auth/confirm/VerifyFailure";
 import SelectUserType from "@/features/auth/onboarding/SelectUserType";
 import OrganizationDetails from "@/features/auth/onboarding/OrganizationDetails";
 import Profile from "@/features/auth/Profile";
+import AdminLogin from "@/features/admin/AdminLogin";
 
 // Dashboard Components
 import IdCard from "@/features/student/IdCard";
@@ -116,31 +117,31 @@ const AppContent = () => {
       <Route path="/" element={<HomePage />} />
       {/* <Route path="/" element={<HomePageRefresh />} /> */}
       <Route path="/home" element={<RegisteredHomePage />} />
-      {/* Authentication Routes - Temporarily disabled for development */}
+      {/* Public authentication routes */}
       <Route path="/new-login" element={<Navigate to="/login" replace />} />
       <Route path="/signup" element={<SignupForm />} />
       <Route path="/verify-success" element={<VerifySuccess />} />
       <Route path="/verify-failure" element={<VerifyFailure />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/post-login" element={<PostLoginRedirect />} />
+      <Route path="/post-login" element={<RequireAuth><PostLoginRedirect /></RequireAuth>} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/verify-otp" element={<VerifyOtp />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/forbidden" element={<Forbidden />} />
-      <Route path="/select-user-type" element={<SelectUserType />} />
-      <Route path="/organization-details" element={<OrganizationDetails />} />
+      <Route path="/select-user-type" element={<RequireAuth><SelectUserType /></RequireAuth>} />
+      <Route path="/organization-details" element={<RequireAuth><OrganizationDetails /></RequireAuth>} />
       {/* Legacy Login Routes */}
       <Route path="/student-login" element={<Navigate to="/login" replace />} />
       <Route path="/parent-login" element={<Navigate to="/login" replace />} />
-      <Route path="/Admin-login" element={<Navigate to="/login" replace />} />
-      {/* Dashboard Routes - Authentication temporarily disabled for development */}
+      <Route path="/Admin-login" element={<AdminLogin />} />
+      {/* Authenticated account and dashboard routes */}
 
-      <Route path="/profile" element={<Profile />} />
+      <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
 
-      <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
+      <Route path="/teacher-dashboard" element={<RequireAuth><TeacherDashboard /></RequireAuth>} />
 
       {/* Student Dashboard with nested routes */}
-      <Route path="/student-dashboard" element={<StudentDashboard />}>
+      <Route path="/student-dashboard" element={<RequireAuth><StudentDashboard /></RequireAuth>}>
         <Route index element={<Overview />} />
         <Route path="overview" element={<Overview />} />
         <Route path="IDcard" element={<IdCard />} />
@@ -158,7 +159,7 @@ const AppContent = () => {
       </Route>
       
       {/* Admin Dashboard */}
-      <Route path="/admin-dashboard" element={<AdminDashboard />}>
+      <Route path="/admin-dashboard" element={<RequireAuth><AdminDashboard /></RequireAuth>}>
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="users" element={<Users />} />
         <Route path="users/new-user" element={<NewUser />} />
@@ -167,10 +168,10 @@ const AppContent = () => {
         <Route path="reports" element={<Report />} />
         <Route path="*" element={<Error />} />
       </Route>
-      {/* School Admin Dashboard - Authentication temporarily disabled */}
-      <Route path="/dashboard" element={<SchoolAdmin />} />
-      {/* Organization Dashboard - Authentication temporarily disabled */}
-      <Route path="/organization-dashboard" element={<OrganizationDashboard />}>
+      {/* School Admin Dashboard */}
+      <Route path="/dashboard" element={<RequireAuth><SchoolAdmin /></RequireAuth>} />
+      {/* Organization Dashboard */}
+      <Route path="/organization-dashboard" element={<RequireAuth><OrganizationDashboard /></RequireAuth>}>
         <Route index element={<Navigate to="/organization-dashboard/overview" replace />} />
         <Route path="overview" element={<OrganizationOverview />} />
         <Route path="students" element={<OrganizationStudents />} />
@@ -185,24 +186,24 @@ const AppContent = () => {
         <Route path="messages" element={<DirectMessages />} />
       </Route>
       {/* Parent Dashboard */}
-      <Route path="/parent-dashboard" element={<ParentDashboard />} />
+      <Route path="/parent-dashboard" element={<RequireAuth><ParentDashboard /></RequireAuth>} />
       {/* Parent Attendance */}
-      <Route path="/parent-attendance" element={<ParentAttendance />} />
-      <Route path="/parent-attendance/:id" element={<ParentAttendance />} />
+      <Route path="/parent-attendance" element={<RequireAuth><ParentAttendance /></RequireAuth>} />
+      <Route path="/parent-attendance/:id" element={<RequireAuth><ParentAttendance /></RequireAuth>} />
       {/* Individual Learner Dashboard */}
-      <Route path="/individual-dashboard" element={<IndividualLearnerPersonalDashboard />} />
+      <Route path="/individual-dashboard" element={<RequireAuth><IndividualLearnerPersonalDashboard /></RequireAuth>} />
       {/* New Features - Test Routes */}
-      <Route path="/birthday-dashboard" element={<BirthdayDashboard />} />
-      <Route path="/learning-dashboard" element={<VirtualLearningDashboard />} />
+      <Route path="/birthday-dashboard" element={<RequireAuth><BirthdayDashboard /></RequireAuth>} />
+      <Route path="/learning-dashboard" element={<RequireAuth><VirtualLearningDashboard /></RequireAuth>} />
       {/* Communication Features */}
-      <Route path="/forums" element={<ForumList />} />
-      <Route path="/forums/:forumId" element={<ForumDetail />} />
-      <Route path="/video-calls" element={<VideoCallList />} />
-      <Route path="/video-calls/:callId" element={<VideoCallRoom />} />
+      <Route path="/forums" element={<RequireAuth><ForumList /></RequireAuth>} />
+      <Route path="/forums/:forumId" element={<RequireAuth><ForumDetail /></RequireAuth>} />
+      <Route path="/video-calls" element={<RequireAuth><VideoCallList /></RequireAuth>} />
+      <Route path="/video-calls/:callId" element={<RequireAuth><VideoCallRoom /></RequireAuth>} />
       {/* Analytics Features */}
-      <Route path="/analytics" element={<LearningAnalytics />} />
-      <Route path="/transcripts" element={<TranscriptViewer />} />
-      <Route path="/xapi-statements" element={<XAPIStatementViewer />} />
+      <Route path="/analytics" element={<RequireAuth><LearningAnalytics /></RequireAuth>} />
+      <Route path="/transcripts" element={<RequireAuth><TranscriptViewer /></RequireAuth>} />
+      <Route path="/xapi-statements" element={<RequireAuth><XAPIStatementViewer /></RequireAuth>} />
 
       {/* <Route path="/parent-list" element={<ParentListContentNew/>} /> */}
       {/* <Route path="/teacher-list" element={<TeacherListContentNew/>} /> */}

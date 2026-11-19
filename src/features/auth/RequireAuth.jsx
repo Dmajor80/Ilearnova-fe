@@ -11,45 +11,38 @@ export default function RequireAuth({ children }) {
     let cancelled = false;
 
     async function checkAuth() {
-      const { access, refresh } = getTokens();
+      try {
+        const { access, refresh } = getTokens();
 
-      // No tokens at all -> redirect to login
-      if (!access && !refresh) {
+        if (access && !isJwtExpired(access)) {
+          if (!cancelled) setStatus("ok");
+          return;
+        }
+
+        if (refresh) {
+          const res = await refreshAccessToken();
+          if (!cancelled) {
+            if (res.ok) {
+              setStatus("ok");
+            } else {
+              clearAuth();
+              setRedirectTo("/login");
+              setStatus("redirect");
+            }
+          }
+          return;
+        }
+
         if (!cancelled) {
           setRedirectTo("/login");
           setStatus("redirect");
         }
-        return;
-      }
-
-      // Access token present and still valid -> allow
-      if (access && !isJwtExpired(access)) {
-        if (!cancelled) setStatus("ok");
-        return;
-      }
-
-      // Access missing or expired: try to refresh if we have a refresh token
-      if (refresh) {
-        const res = await refreshAccessToken();
+      } catch {
+        clearAuth();
         if (!cancelled) {
-          if (res.ok) {
-            setStatus("ok");
-          } else {
-            // Refresh failed -> clear and redirect to login
-            try {
-              clearAuth();
-            } catch {}
-            setRedirectTo("/login");
-            setStatus("redirect");
-          }
+          setRedirectTo("/login");
+          setStatus("redirect");
         }
-        return;
-      }
-
-      // Fallback: no usable tokens
-      if (!cancelled) {
-        setRedirectTo("/login");
-        setStatus("redirect");
       }
     }
 

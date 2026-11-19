@@ -101,7 +101,7 @@ export default function PostLoginRedirect() {
       // Role precedence: super_admin > org_admin > teacher > student > parent > individual_learner
       const has = (r) => roles.includes(r);
       console.log(roles)
-      if (has("super_admin")) {
+      if (has("super_admin") || has("superadmin")) {
         console.log("PostLoginRedirect: Super admin role detected, redirecting to /admin-dashboard/dashboard");
         navigate("/admin-dashboard/dashboard", { replace: true });
         return;

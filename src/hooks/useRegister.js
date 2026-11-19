@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import * as authApi from "@/api/authApi";
-import { setTokens } from "@/api/auth";
+import { persistAuthResponse } from "@/api/auth";
 import useNotification from "@/hooks/useNotification";
 import usePrefersDarkMode from "@/hooks/usePrefersDarkMode";
 import { parseError, getUserFriendlyMessage, getNotificationType } from "@/lib/errorHandler";
@@ -27,6 +27,9 @@ export default function useRegister({ onSuccess } = {}) {
     role: "individual_learner",
     organization_name: "",
     organization_id: "",
+    student_id: "",
+    parent_email: "",
+    id_document: null,
   });
 
   const [loading, setLoading] = useState(false);
@@ -83,6 +86,14 @@ export default function useRegister({ onSuccess } = {}) {
         newErrors.organization_id = "Please select an organization";
       }
     }
+    if (formData.role === "student") {
+      if (!formData.student_id.trim()) newErrors.student_id = "Student ID is required";
+      if (!formData.parent_email.trim()) {
+        newErrors.parent_email = "Parent email is required";
+      } else if (!/\S+@\S+\.\S+/.test(formData.parent_email)) {
+        newErrors.parent_email = "Please enter a valid parent email";
+      }
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -109,12 +120,14 @@ export default function useRegister({ onSuccess } = {}) {
           email: formData.email,
           password: formData.password,
           phone_number: formData.phone || undefined,
-          organization_code:formData.organization_id,
-          bio:"string",
-          date_of_birth: formData.date_of_birth,
-          address:"string",
-          additional_data:"string"
+          organization_code: formData.organization_id,
+          date_of_birth: formData.date_of_birth || undefined,
+          additional_data:{}
         };
+        if (formData.role === "student") {
+          registrationData.student_id = formData.student_id;
+          registrationData.parent_email = formData.parent_email;
+        }
       } else {
         registrationData = {
           first_name: formData.first_name,
@@ -122,12 +135,11 @@ export default function useRegister({ onSuccess } = {}) {
           username: formData.username,
           email: formData.email,
           password: formData.password,
-          date_of_birth: formData.date_of_birth,
+          date_of_birth: formData.date_of_birth || undefined,
           phone_number: formData.phone || undefined,
-          bio:"string",
-          date_of_birth: "2026-01-01",
-          address:"string",
-          additional_data:"string"
+          bio:"",
+          address:"",
+          additional_data:{}
         };
         }
         
@@ -172,17 +184,7 @@ export default function useRegister({ onSuccess } = {}) {
             response = await authApi.register(registrationData);
         }
 
-        // Store tokens if provided (for immediate login)
-        const access = response.data?.token || response.token || response.access || response.access_token;
-        if (access) {
-          const storage = window.localStorage; // Always use localStorage for new registrations
-          setTokens({ access, refresh: null }, storage);
-
-          const user = response.data?.user || response.user;
-          if (user) {
-            storage.setItem("user_data", JSON.stringify(user));
-          }
-        }
+        persistAuthResponse(response, window.localStorage);
         notification.notify("Registration successful!", "success", 3000);
 
         if (typeof onSuccess === "function") {

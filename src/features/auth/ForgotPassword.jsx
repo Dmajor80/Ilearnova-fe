@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Mail, ArrowLeft, AlertCircle, Check, X, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { http } from "@/api/baseClient";
+import { forgotPassword } from "@/api/authApi";
 
 const InputField = React.memo(function InputField({
   label,
@@ -120,10 +121,7 @@ export default function ForgotPassword() {
     setErrors({});
 
     try {
-      await http.post("/api/forgot-password/", {
-        body: { email },
-        auth: false,
-      });
+      await forgotPassword(email);
 
       // Persist email for OTP verify + prefill login later
       sessionStorage.setItem("otp_email", email);

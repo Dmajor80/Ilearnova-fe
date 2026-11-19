@@ -63,7 +63,7 @@ export default function IndividualLearnerPersonalDashboard() {
       {/* Mobile overlay */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-60 z-40 md:hidden backdrop-blur-sm"
+          className="fixed inset-0 bg-white/10 z-40 md:hidden backdrop-blur-[2px]"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
