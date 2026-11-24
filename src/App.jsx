@@ -72,6 +72,7 @@ import GradingPolicyPage from "@/features/results/GradingPolicyPage";
 import SubscriptionBanner from "@/features/billing/SubscriptionBanner";
 import BillingPage from "@/features/billing/BillingPage";
 import PaymentCallback from "@/features/billing/PaymentCallback";
+import PricingPage from "@/features/billing/PricingPage";
 import SchoolFeesPage from "@/features/billing/SchoolFeesPage";
 import MyFees from "@/features/billing/MyFees";
 import Exam from "@/features/student/Exam";
@@ -126,6 +127,8 @@ const AppContent = () => {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/payments/callback" element={<PaymentCallback />} />
+      <Route path="/pricing" element={<PricingPage />} />
+      <Route path="/register/school" element={<SignupForm />} />
       {/* <Route path="/" element={<HomePageRefresh />} /> */}
       <Route path="/home" element={<RegisteredHomePage />} />
       {/* Public authentication routes */}

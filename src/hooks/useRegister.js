@@ -9,8 +9,10 @@ import { useNavigate } from "react-router-dom";
 /**
  * Hook that encapsulates registration form state, validation, notifications, and submit logic.
  * Pass an onSuccess callback to handle navigation after successful registration.
+ * `initial` pre-fills fields, e.g. from an invite link:
+ * { role: "org_admin", email, access_code }.
  */
-export default function useRegister({ onSuccess } = {}) {
+export default function useRegister({ onSuccess, initial } = {}) {
   const navigate = useNavigate();
   const darkMode = usePrefersDarkMode();
   const notification = useNotification("success");
@@ -30,6 +32,8 @@ export default function useRegister({ onSuccess } = {}) {
     student_id: "",
     parent_email: "",
     id_document: null,
+    access_code: "",
+    ...(initial || {}),
   });
 
   const [loading, setLoading] = useState(false);
@@ -154,6 +158,9 @@ export default function useRegister({ onSuccess } = {}) {
             break;
           case "org_admin":
             registrationData.organization_name = formData.organization_name;
+            if (formData.access_code?.trim()) {
+              registrationData.access_code = formData.access_code.trim();
+            }
             response = await authApi.registerOrgAdmin(registrationData);
             break;
           case "teacher":
@@ -198,8 +205,19 @@ export default function useRegister({ onSuccess } = {}) {
         const userMessage = getUserFriendlyMessage(appError);
         const notificationType = getNotificationType(appError);
 
-        notification.notify(userMessage, notificationType, 8000);
-        setErrors({ general: userMessage });
+        // Show the backend's per-field reasons (e.g. "This access code was
+        // issued to a different email address.") next to the fields.
+        const fieldErrors = error?.data?.field_errors || {};
+        const byField = Object.fromEntries(
+          Object.entries(fieldErrors).map(([field, list]) => [
+            field,
+            String(Array.isArray(list) ? list[0] : list),
+          ])
+        );
+        const general = byField.subscription || byField.access_code || userMessage;
+
+        notification.notify(general, notificationType, 8000);
+        setErrors({ ...byField, general });
       } finally {
         setLoading(false);
       }

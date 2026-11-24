@@ -11,6 +11,18 @@ const data = (payload) => (payload && "data" in payload ? payload.data : payload
 
 
 export const billingApi = {
+  /** Is this code usable (by this email)? Does not redeem it. */
+  checkAccessCode: async (code, email) =>
+    data(
+      await http.post(
+        `${BILLING}/access-codes/check/`,
+        { code, ...(email ? { email } : {}) },
+        { auth: false }
+      )
+    ),
+  /** Buy a plan for a new school; the payer is emailed an access code. */
+  checkout: async (plan, email) =>
+    data(await http.post(`${BILLING}/subscriptions/checkout/`, { plan, email }, { auth: false })),
   status: async () => data(await http.get(`${BILLING}/subscription/status/`, { auth: true })),
   plans: async () => data(await http.get(`${BILLING}/plans/`, { auth: false })),
   schoolSubscription: async () =>
