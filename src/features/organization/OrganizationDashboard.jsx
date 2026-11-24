@@ -24,7 +24,11 @@ import {
   SlidersHorizontal,
   MessageCircle,
   Award,
+  CreditCard,
+  Lock,
 } from "lucide-react";
+import useSubscriptionStatus from "@/features/billing/useSubscriptionStatus";
+import { BILLING_PATH, MODES } from "@/features/billing/subscriptionUtils";
 
 const OrganizationDashboard = () => {
   const navigate = useNavigate();
@@ -35,6 +39,9 @@ const OrganizationDashboard = () => {
   const alertsApi = useOrganizationAlerts();
   const pendingStaffApi = useOrganizationPendingStaff();
   const pendingStudentsApi = useOrganizationPendingStaff("student");
+  const { status: subscription } = useSubscriptionStatus(location.pathname);
+  // Locked school: admins may only use billing (and their profile).
+  const locked = subscription?.mode === MODES.BILLING_ONLY && location.pathname !== BILLING_PATH;
   const { totalNotifications, loading: alertsLoading } = alertsApi;
 
   const handleLogout = async () => {
@@ -82,6 +89,7 @@ const OrganizationDashboard = () => {
     { id: "alerts", label: "Alerts", icon: AlertTriangle, path: "/organization-dashboard/alerts" },
     { id: "operations", label: "Operations", icon: SlidersHorizontal, path: "/organization-dashboard/operations" },
     { id: "messages", label: "Messages", icon: MessageCircle, path: "/organization-dashboard/messages" },
+    { id: "billing", label: "Billing", icon: CreditCard, path: BILLING_PATH },
   ];
 
   const pendingCounts = {
@@ -261,7 +269,20 @@ const OrganizationDashboard = () => {
         </div>
 
         <main className="flex-1 m-4 md:m-6 mt-0 p-6 md:p-8">
-          <Outlet context={{ alertsApi, pendingStaffApi, pendingStudentsApi }} />
+          {locked ? (
+            <section className="mx-auto max-w-lg space-y-4 rounded-xl bg-white p-8 text-center shadow-sm">
+              <Lock className="mx-auto h-10 w-10 text-red-500" />
+              <h2 className="text-xl font-bold text-gray-900">Your subscription has expired</h2>
+              <p className="text-gray-600">
+                Renew to restore access. Teachers, students and parents can still view your school, but nobody can make changes.
+              </p>
+              <button type="button" onClick={() => navigate(BILLING_PATH)} className="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700">
+                Go to billing
+              </button>
+            </section>
+          ) : (
+            <Outlet context={{ alertsApi, pendingStaffApi, pendingStudentsApi }} />
+          )}
         </main>
       </div>
     </div>

@@ -1,6 +1,8 @@
 import { API_BASE_URL } from "./config";
 import { authorizedFetch } from "./auth";
 
+export const SUBSCRIPTION_BLOCKED_EVENT = "ilearnova:subscription-blocked";
+
 /**
  * Build absolute URL from a relative API path, avoiding double slashes.
  * Examples:
@@ -94,6 +96,11 @@ async function request(method, path, {
   }
 
   if (!res.ok) {
+    if (res.status === 402 && typeof window !== "undefined") {
+      // School subscription lapsed (read-only or locked): let the banner and
+      // dashboards react. See billing_app/middleware.py.
+      window.dispatchEvent(new CustomEvent(SUBSCRIPTION_BLOCKED_EVENT, { detail: data }));
+    }
     const message =
       (data && (data.detail || data.message || data.error)) ||
       res.statusText ||

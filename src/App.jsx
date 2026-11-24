@@ -69,6 +69,9 @@ import CoursePage from "@/features/student/CoursePage";
 import Result from "@/features/student/Result";
 import TeacherResults from "@/features/results/TeacherResults";
 import GradingPolicyPage from "@/features/results/GradingPolicyPage";
+import SubscriptionBanner from "@/features/billing/SubscriptionBanner";
+import BillingPage from "@/features/billing/BillingPage";
+import PaymentCallback from "@/features/billing/PaymentCallback";
 import Exam from "@/features/student/Exam";
 import StudentCbt from "@/features/student/StudentCbt";
 import DirectMessages from "@/features/communication/DirectMessages";
@@ -116,8 +119,11 @@ const AppContent = () => {
   }
 
   return (
+    <>
+    <SubscriptionBanner />
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route path="/payments/callback" element={<PaymentCallback />} />
       {/* <Route path="/" element={<HomePageRefresh />} /> */}
       <Route path="/home" element={<RegisteredHomePage />} />
       {/* Public authentication routes */}
@@ -185,6 +191,7 @@ const AppContent = () => {
         <Route path="exams" element={<OrganizationExams />} />
         <Route path="results" element={<TeacherResults />} />
         <Route path="grading" element={<GradingPolicyPage />} />
+        <Route path="billing" element={<BillingPage />} />
         <Route path="analytics" element={<OrganizationAnalytics />} />
         <Route path="reports" element={<OrganizationReports />} />
         <Route path="alerts" element={<OrganizationAlerts />} />
@@ -217,6 +224,7 @@ const AppContent = () => {
       {/* Catch-all route for 404 errors */}
       <Route path="*" element={<Error />} />
     </Routes>
+    </>
   );
 };
 
