@@ -72,6 +72,8 @@ import GradingPolicyPage from "@/features/results/GradingPolicyPage";
 import SubscriptionBanner from "@/features/billing/SubscriptionBanner";
 import BillingPage from "@/features/billing/BillingPage";
 import PaymentCallback from "@/features/billing/PaymentCallback";
+import SchoolFeesPage from "@/features/billing/SchoolFeesPage";
+import MyFees from "@/features/billing/MyFees";
 import Exam from "@/features/student/Exam";
 import StudentCbt from "@/features/student/StudentCbt";
 import DirectMessages from "@/features/communication/DirectMessages";
@@ -161,6 +163,7 @@ const AppContent = () => {
         <Route path="courses" element={<CoursesComponent />} />
         <Route path="courses/:courseId" element={<CoursePage />} />
         <Route path="result" element={<Result />} />
+        <Route path="fees" element={<MyFees />} />
         <Route path="exam" element={<Exam />} />
         <Route path="cbt" element={<StudentCbt />} />
         <Route path="messages" element={<StudentMessages />} />
@@ -192,6 +195,7 @@ const AppContent = () => {
         <Route path="results" element={<TeacherResults />} />
         <Route path="grading" element={<GradingPolicyPage />} />
         <Route path="billing" element={<BillingPage />} />
+        <Route path="fees" element={<SchoolFeesPage />} />
         <Route path="analytics" element={<OrganizationAnalytics />} />
         <Route path="reports" element={<OrganizationReports />} />
         <Route path="alerts" element={<OrganizationAlerts />} />

@@ -7,7 +7,7 @@ import QuickActionsGrid from "@/components/dashboard/QuickActionsGrid";
 import { useParentChildProgress, useParentChildren } from "@/hooks/parent";
 import ParentAttendance from "./ParentAttendance";
 import ParentMessages from "./ParentMessages";
-import ParentPayment from "./ParentPayment";
+import MyFees from "@/features/billing/MyFees";
 import ParentResult from "./ParentResult";
 import ParentTimetable from "./ParentTimetable";
 import ParentTranscript from "./ParentTranscript";
@@ -177,7 +177,7 @@ export default function ParentDashboard() {
           {activeTab === "attendance" && <ParentAttendance isStandalone={false} />}
           {activeTab === "grades" && <ParentResult isStandalone={false} />}
           {activeTab === "messages" && <ParentMessages />}
-          {activeTab === "fees" && <ParentPayment />}
+          {activeTab === "fees" && <MyFees />}
           {activeTab === "timetable" && <ParentTimetable />}
           {activeTab === "reports" && <ParentTranscript />}
         </main>

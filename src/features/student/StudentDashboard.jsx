@@ -75,6 +75,12 @@ const navLinks = [
     air: "result",
   },
   {
+    id: "fees",
+    icon: <CreditCard size={20} />,
+    label: "Fees",
+    air: "fees",
+  },
+  {
     id: "exam",
     icon: <BookOpen size={20} />,
     label: "Exam",

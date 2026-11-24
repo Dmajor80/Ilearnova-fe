@@ -85,3 +85,11 @@ export function planLength(days) {
   if (days % 30 === 0) return days === 30 ? "1 month" : `${days / 30} months`;
   return `${days} days`;
 }
+
+/** Problem with a part-payment amount ("" if fine). */
+export function amountProblem(value, balance) {
+  const n = Number(value);
+  if (!value || !Number.isFinite(n) || n <= 0) return "Enter an amount above ₦0.";
+  if (n > Number(balance)) return `The most you can pay is ${naira(balance)}.`;
+  return "";
+}

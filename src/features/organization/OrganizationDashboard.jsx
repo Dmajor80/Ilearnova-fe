@@ -26,6 +26,7 @@ import {
   Award,
   CreditCard,
   Lock,
+  Banknote,
 } from "lucide-react";
 import useSubscriptionStatus from "@/features/billing/useSubscriptionStatus";
 import { BILLING_PATH, MODES } from "@/features/billing/subscriptionUtils";
@@ -89,6 +90,7 @@ const OrganizationDashboard = () => {
     { id: "alerts", label: "Alerts", icon: AlertTriangle, path: "/organization-dashboard/alerts" },
     { id: "operations", label: "Operations", icon: SlidersHorizontal, path: "/organization-dashboard/operations" },
     { id: "messages", label: "Messages", icon: MessageCircle, path: "/organization-dashboard/messages" },
+    { id: "fees", label: "Fees", icon: Banknote, path: "/organization-dashboard/fees" },
     { id: "billing", label: "Billing", icon: CreditCard, path: BILLING_PATH },
   ];
 
