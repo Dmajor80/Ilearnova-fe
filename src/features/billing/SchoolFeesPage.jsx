@@ -5,11 +5,15 @@ import { resultsApi } from "@/api/resultsApi";
 import { apiErrorDetails } from "@/lib/apiHelpers";
 import { TERMS, currentSession, sessionOptions } from "@/features/results/resultsUtils";
 import { amountProblem, formatDate, naira } from "./subscriptionUtils";
+import StudentPicker from "./StudentPicker";
 
 const PAGE_SIZE = 20;
 const STATUSES = ["pending", "partial", "paid", "overdue", "waived"];
 
-function BillClassForm({ classes, onBilled }) {
+/** Bill a whole class, or one student (e.g. transport for Bayo only). */
+function BillForm({ classes, onBilled }) {
+  const [target, setTarget] = useState("class");
+  const [student, setStudent] = useState(null);
   const [form, setForm] = useState({
     class_id: "",
     fee_type: "tuition",
@@ -22,19 +26,28 @@ function BillClassForm({ classes, onBilled }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState(null);
   const set = (field) => (e) => setForm({ ...form, [field]: e.target.value });
-  const ready = form.class_id && Number(form.total_amount) > 0 && form.due_date;
+  const oneStudent = target === "student";
+  const ready =
+    (oneStudent ? student : form.class_id) && Number(form.total_amount) > 0 && form.due_date;
 
   const submit = async (event) => {
     event.preventDefault();
     setBusy(true);
     setMessage(null);
+    const { class_id: classId, ...fee } = form;
     try {
-      const result = await billingApi.billClass({ ...form, semester: form.semester || null });
-      const name = classes.find((c) => String(c.id) === String(form.class_id))?.name;
-      setMessage({
-        type: "success",
-        text: `Billed ${result.created.length} student(s) in ${name}.${result.skipped ? ` ${result.skipped} already had this fee.` : ""}`,
-      });
+      if (oneStudent) {
+        await billingApi.createFee({ ...fee, student: student.id, semester: fee.semester || null });
+        setMessage({ type: "success", text: `Billed ${student.full_name || student.email}.` });
+        setStudent(null);
+      } else {
+        const result = await billingApi.billClass({ ...fee, class_id: classId, semester: fee.semester || null });
+        const name = classes.find((c) => String(c.id) === String(classId))?.name;
+        setMessage({
+          type: "success",
+          text: `Billed ${result.created.length} student(s) in ${name}.${result.skipped ? ` ${result.skipped} already had this fee.` : ""}`,
+        });
+      }
       onBilled();
     } catch (err) {
       setMessage({ type: "error", text: apiErrorDetails(err).messages.join(" ") });
@@ -45,15 +58,33 @@ function BillClassForm({ classes, onBilled }) {
 
   return (
     <form onSubmit={submit} className="space-y-3 rounded-lg border p-4">
-      <h3 className="font-semibold text-gray-900">Bill a class</h3>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h3 className="font-semibold text-gray-900">Bill a fee</h3>
+        <fieldset className="flex gap-4 text-sm">
+          <legend className="sr-only">Who to bill</legend>
+          <label className="flex items-center gap-2">
+            <input type="radio" name="bill-target" checked={!oneStudent} onChange={() => setTarget("class")} /> A whole class
+          </label>
+          <label className="flex items-center gap-2">
+            <input type="radio" name="bill-target" checked={oneStudent} onChange={() => setTarget("student")} /> One student
+          </label>
+        </fieldset>
+      </div>
       <div className="grid gap-3 sm:grid-cols-3">
-        <label className="text-sm font-medium text-gray-700">
-          Class
-          <select value={form.class_id} onChange={set("class_id")} className="mt-1 w-full rounded-lg border px-3 py-2">
-            <option value="">Choose a class</option>
-            {classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
-        </label>
+        {oneStudent ? (
+          <div className="text-sm font-medium text-gray-700">
+            Student
+            <StudentPicker selected={student} onSelect={setStudent} />
+          </div>
+        ) : (
+          <label className="text-sm font-medium text-gray-700">
+            Class
+            <select value={form.class_id} onChange={set("class_id")} className="mt-1 w-full rounded-lg border px-3 py-2">
+              <option value="">Choose a class</option>
+              {classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+          </label>
+        )}
         <label className="text-sm font-medium text-gray-700">
           Fee
           <select value={form.fee_type} onChange={set("fee_type")} className="mt-1 w-full rounded-lg border px-3 py-2">
@@ -61,7 +92,7 @@ function BillClassForm({ classes, onBilled }) {
           </select>
         </label>
         <label className="text-sm font-medium text-gray-700">
-          Amount per student (₦)
+          {oneStudent ? "Amount (₦)" : "Amount per student (₦)"}
           <input type="number" min="1" step="0.01" value={form.total_amount} onChange={set("total_amount")} className="mt-1 w-full rounded-lg border px-3 py-2" />
         </label>
         <label className="text-sm font-medium text-gray-700">
@@ -93,7 +124,7 @@ function BillClassForm({ classes, onBilled }) {
       )}
       <div className="flex justify-end">
         <button type="submit" disabled={busy || !ready} className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 disabled:opacity-50">
-          <Plus className="h-4 w-4" /> {busy ? "Billing…" : "Bill class"}
+          <Plus className="h-4 w-4" /> {busy ? "Billing…" : oneStudent ? "Bill student" : "Bill class"}
         </button>
       </div>
     </form>
@@ -326,7 +357,7 @@ export default function SchoolFeesPage() {
           Bill a class, follow balances, and record cash or transfer payments. Online payments settle to the account set under Billing.
         </p>
       </header>
-      <BillClassForm classes={classes} onBilled={() => setRefreshKey((k) => k + 1)} />
+      <BillForm classes={classes} onBilled={() => setRefreshKey((k) => k + 1)} />
       <div role="tablist" className="flex gap-2 border-b">
         {[["fees", "Fees"], ["payments", "Online payments"]].map(([id, label]) => (
           <button

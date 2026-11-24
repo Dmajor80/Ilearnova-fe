@@ -41,6 +41,9 @@ export const billingApi = {
 
   // School fees: lists are paginated as { count, next, previous, results }.
   schoolFees: (params) => http.get(`${BILLING}/school/fees/`, { auth: true, params }),
+  /** One fee for one student: `student` is their user id. */
+  createFee: async (fee) =>
+    data(await http.post(`${BILLING}/school/fees/`, fee, { auth: true })),
   updateFee: (id, changes) => http.patch(`${BILLING}/school/fees/${id}/`, changes, { auth: true }),
   billClass: async (body) =>
     data(await http.post(`${BILLING}/school/fees/assign-class/`, body, { auth: true })),

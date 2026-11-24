@@ -97,6 +97,41 @@ describe("SchoolFeesPage", () => {
     expect(body).toMatchObject({ class_id: "c1", fee_type: "tuition", total_amount: "150000", semester: "First Term" });
   });
 
+  it("bills one student found by search", async () => {
+    http.get.mockImplementation((path, opts) => {
+      if (path === "/api/admin/school/students/") {
+        expect(opts.params.search).toBe("Bay");
+        return Promise.resolve({
+          success: true,
+          data: {
+            students: [
+              { id: "bayo-user", full_name: "Bayo Ade", email: "bayo@x.ng", student_id: "ADM-002", class_name: "JSS2A" },
+            ],
+          },
+        });
+      }
+      return routes(path);
+    });
+    http.post.mockResolvedValue({ id: "fee-9" });
+    render(<SchoolFeesPage />);
+
+    fireEvent.click(await screen.findByLabelText("One student"));
+    fireEvent.change(screen.getByLabelText("Find student"), { target: { value: "Bay" } });
+    fireEvent.click(await screen.findByRole("option", { name: /Bayo Ade/ }));
+    expect(screen.getByText(/ADM-002/)).toBeTruthy();
+
+    fireEvent.change(screen.getByLabelText("Fee"), { target: { value: "transport" } });
+    fireEvent.change(screen.getByLabelText("Amount (₦)"), { target: { value: "12000" } });
+    fireEvent.change(screen.getByLabelText("Due date"), { target: { value: "2027-01-15" } });
+    fireEvent.click(screen.getByRole("button", { name: /Bill student/ }));
+
+    expect(await screen.findByText("Billed Bayo Ade.")).toBeTruthy();
+    const [path, body] = http.post.mock.calls[0];
+    expect(path).toBe("/api/billing/school/fees/");
+    expect(body).toMatchObject({ student: "bayo-user", fee_type: "transport", total_amount: "12000", due_date: "2027-01-15" });
+    expect(body).not.toHaveProperty("class_id");
+  });
+
   it("records a cash payment on top of what was already paid", async () => {
     http.get.mockImplementation(routes);
     http.patch.mockResolvedValue({});
