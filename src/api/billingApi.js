@@ -73,3 +73,20 @@ export const FEE_TYPES = [
 
 export const feeTypeLabel = (value) =>
   (FEE_TYPES.find(([key]) => key === value) || [null, value])[1];
+
+const SUPER = `${BILLING}/superadmin`;
+
+/** Platform owner (superadmin): onboard schools, grant/renew, codes, plans. */
+export const superBillingApi = {
+  schools: (params) => http.get(`${SUPER}/schools/`, { auth: true, params }),
+  /** Email an access code (optionally locked to that email) with a sign-up link. */
+  invite: (body) => http.post(`${SUPER}/access-codes/`, { count: 1, ...body }, { auth: true }),
+  /** Grant to an email (new school) or with `organization` (renew a school). */
+  grant: (body) => http.post(`${SUPER}/subscriptions/`, body, { auth: true }),
+  codes: (params) => http.get(`${SUPER}/access-codes/`, { auth: true, params }),
+  sendCode: (id, body = {}) => http.post(`${SUPER}/access-codes/${id}/send/`, body, { auth: true }),
+  deactivateCode: (id) => http.del(`${SUPER}/access-codes/${id}/`, { auth: true }),
+  plans: (params) => http.get(`${SUPER}/plans/`, { auth: true, params }),
+  createPlan: (plan) => http.post(`${SUPER}/plans/`, plan, { auth: true }),
+  deactivatePlan: (id) => http.del(`${SUPER}/plans/${id}/`, { auth: true }),
+};

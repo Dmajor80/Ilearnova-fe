@@ -30,6 +30,7 @@ import NewUser from "@/features/admin/NewUser";
 import Report from "@/features/admin/Report";
 import Organizations from "@/features/admin/Organizations";
 import EmailLogs from "@/features/admin/EmailLogs";
+import Subscriptions from "@/features/admin/Subscriptions";
 import SchoolAdmin from "@/features/school-admin/SchoolAdmin";
 import TeacherDashboard from "@/features/teacher/TeacherDashboard";
 import StudentDashboard from "@/features/student/StudentDashboard";
@@ -180,6 +181,7 @@ const AppContent = () => {
         <Route path="users/new-user" element={<NewUser />} />
         <Route path="organizations" element={<Organizations />} />
         <Route path="emails" element={<EmailLogs />} />
+        <Route path="subscriptions" element={<Subscriptions />} />
         <Route path="reports" element={<Report />} />
         <Route path="*" element={<Error />} />
       </Route>
