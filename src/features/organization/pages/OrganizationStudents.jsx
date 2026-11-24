@@ -4,7 +4,8 @@ import useOrganizationStudents from "@/hooks/organization/useStudentData";
 import useOrganizationClasses from "@/hooks/organization/useOrganizationClasses";
 import GenericModal from "../components/GenericModal";
 import DeleteConfirmModal from "../components/DeleteConfirmModal";
-import { GraduationCap, Users, UserCheck, AlertTriangle, RefreshCw } from "lucide-react";
+import ImportStudentsModal from "../components/ImportStudentsModal";
+import { GraduationCap, Users, UserCheck, AlertTriangle, RefreshCw, Upload } from "lucide-react";
 
 const getStudentName = (student) =>
   student.full_name ||
@@ -30,6 +31,7 @@ const OrganizationStudents = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [showImport, setShowImport] = useState(false);
 
   const rows = useMemo(() => studentsApi.students.map((student) => ({
     ...student,
@@ -88,6 +90,12 @@ const OrganizationStudents = () => {
             Add Student
           </button>
           <button
+            onClick={() => setShowImport(true)}
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border px-4 py-2 text-gray-700 hover:bg-gray-50"
+          >
+            <Upload className="h-4 w-4" /> Import
+          </button>
+          <button
             onClick={() => studentsApi.refreshData(true)}
             aria-label="Refresh students"
             className="min-h-[44px] rounded-lg border px-3 text-gray-700 hover:bg-gray-50"
@@ -141,6 +149,7 @@ const OrganizationStudents = () => {
       )}
 
       {showModal && <GenericModal item={editingStudent} type="student" saving={studentsApi.mutating} availableClasses={classesApi.classes} onSave={saveStudent} onClose={() => { setShowModal(false); setEditingStudent(null); }} />}
+      {showImport && <ImportStudentsModal onClose={() => setShowImport(false)} onImported={() => studentsApi.refreshData(true)} />}
       {deleteConfirm && <DeleteConfirmModal item={deleteConfirm} type="student" onConfirm={removeStudent} onCancel={() => setDeleteConfirm(null)} />}
     </div>
   );

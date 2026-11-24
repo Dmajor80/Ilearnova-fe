@@ -38,6 +38,7 @@ import OrganizationOverview from "@/features/organization/pages/OrganizationOver
 import OrganizationStudents from "@/features/organization/pages/OrganizationStudents";
 import OrganizationTeachers from "@/features/organization/pages/OrganizationTeachers";
 import OrganizationPendingTeachers from "@/features/organization/pages/OrganizationPendingTeachers";
+import OrganizationPendingStudents from "@/features/organization/pages/OrganizationPendingStudents";
 import OrganizationClasses from "@/features/organization/pages/OrganizationClasses";
 import OrganizationExams from "@/features/organization/pages/OrganizationExams";
 import OrganizationAnalytics from "@/features/organization/pages/OrganizationAnalytics";
@@ -179,6 +180,7 @@ const AppContent = () => {
         <Route path="students" element={<OrganizationStudents />} />
         <Route path="teachers" element={<OrganizationTeachers />} />
         <Route path="pending-teachers" element={<OrganizationPendingTeachers />} />
+        <Route path="pending-students" element={<OrganizationPendingStudents />} />
         <Route path="classes" element={<OrganizationClasses />} />
         <Route path="exams" element={<OrganizationExams />} />
         <Route path="results" element={<TeacherResults />} />

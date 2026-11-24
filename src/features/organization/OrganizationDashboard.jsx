@@ -34,6 +34,7 @@ const OrganizationDashboard = () => {
   const dropdownRef = useRef(null);
   const alertsApi = useOrganizationAlerts();
   const pendingStaffApi = useOrganizationPendingStaff();
+  const pendingStudentsApi = useOrganizationPendingStaff("student");
   const { totalNotifications, loading: alertsLoading } = alertsApi;
 
   const handleLogout = async () => {
@@ -71,6 +72,7 @@ const OrganizationDashboard = () => {
     { id: "students", label: "Students", icon: GraduationCap, path: "/organization-dashboard/students" },
     { id: "teachers", label: "Teachers", icon: UserCheck, path: "/organization-dashboard/teachers" },
     { id: "pending-teachers", label: "Pending Teachers", icon: UserCheck, path: "/organization-dashboard/pending-teachers" },
+    { id: "pending-students", label: "Pending Students", icon: UserCheck, path: "/organization-dashboard/pending-students" },
     { id: "classes", label: "Classes", icon: BookOpen, path: "/organization-dashboard/classes" },
     { id: "exams", label: "Exams", icon: FileText, path: "/organization-dashboard/exams" },
     { id: "results", label: "Results", icon: Award, path: "/organization-dashboard/results" },
@@ -81,6 +83,11 @@ const OrganizationDashboard = () => {
     { id: "operations", label: "Operations", icon: SlidersHorizontal, path: "/organization-dashboard/operations" },
     { id: "messages", label: "Messages", icon: MessageCircle, path: "/organization-dashboard/messages" },
   ];
+
+  const pendingCounts = {
+    "pending-teachers": pendingStaffApi.totalPendingStaff,
+    "pending-students": pendingStudentsApi.totalPendingStaff,
+  };
 
   const getCurrentSection = () => {
     const currentPath = location.pathname;
@@ -148,11 +155,11 @@ const OrganizationDashboard = () => {
                       ${isSidebarOpen ? "" : "hidden md:flex"}
                     `}>
                       {item.label}
-                      {item.id === "pending-teachers" && pendingStaffApi.totalPendingStaff > 0 && (
+                      {pendingCounts[item.id] > 0 && (
                         <span className={`ml-auto rounded-full px-2 py-0.5 text-xs ${
                           isActive ? "bg-white/20 text-white" : "bg-amber-100 text-amber-800"
                         }`}>
-                          {pendingStaffApi.totalPendingStaff > 99 ? "99+" : pendingStaffApi.totalPendingStaff}
+                          {pendingCounts[item.id] > 99 ? "99+" : pendingCounts[item.id]}
                         </span>
                       )}
                     </span>
@@ -254,7 +261,7 @@ const OrganizationDashboard = () => {
         </div>
 
         <main className="flex-1 m-4 md:m-6 mt-0 p-6 md:p-8">
-          <Outlet context={{ alertsApi, pendingStaffApi }} />
+          <Outlet context={{ alertsApi, pendingStaffApi, pendingStudentsApi }} />
         </main>
       </div>
     </div>

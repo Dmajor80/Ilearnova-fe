@@ -10,7 +10,13 @@ const unwrapResponse = (payload) => {
   return response?.data ?? response;
 };
 
-export default function usePendingStaffData() {
+/**
+ * Pending people for this school, by role: "teacher" (default), "student" or
+ * "parent". Students who self-register stay pending until verified.
+ */
+export default function usePendingStaffData(role = "teacher") {
+  const noun = role;
+  const label = role.charAt(0).toUpperCase() + role.slice(1);
   const { notify } = useNotification("info", 5000);
   const [pendingStaff, setPendingStaff] = useState([]);
   const [pagination, setPagination] = useState({
@@ -35,7 +41,7 @@ export default function usePendingStaffData() {
     try {
       const payload = await http.get(pendingStaffPath, {
         auth: true,
-        params: { page: currentPage, page_size: 20, role: "teacher" }
+        params: { page: currentPage, page_size: 20, role }
       });
       const data = unwrapResponse(payload);
 
@@ -57,38 +63,39 @@ export default function usePendingStaffData() {
       }
     } catch (err) {
       if (request !== requestId.current) return;
-      const appError = parseError(err, { action: "fetch_pending_teachers" });
+      const appError = parseError(err, { action: `fetch_pending_${noun}s` });
       const message = getUserFriendlyMessage(appError);
       setError(appError);
       setPendingStaff([]);
       setPagination((current) => ({ ...current, total: 0, pages: 0, has_next: false, has_prev: false }));
-      notify(`Pending teachers unavailable: ${message}`, getNotificationType(appError));
-      console.warn("Failed to fetch pending teachers:", err);
+      notify(`Pending ${noun}s unavailable: ${message}`, getNotificationType(appError));
+      console.warn(`Failed to fetch pending ${noun}s:`, err);
     } finally {
       if (request === requestId.current) setLoading(false);
     }
-  }, [currentPage, notify]);
+  }, [currentPage, notify, role, noun]);
 
   const refreshDataRef = useRef(refreshData);
   refreshDataRef.current = refreshData;
 
+  // Load on mount and whenever the page changes (Previous / Next).
   useEffect(() => {
     refreshDataRef.current();
-  }, []);
+  }, [currentPage]);
 
   const fetchPendingStaffDetails = useCallback(async (staffId) => {
     try {
       const payload = await http.get(`${pendingStaffPath}${staffId}/`, { auth: true });
       return unwrapResponse(payload);
     } catch (err) {
-      const appError = parseError(err, { action: "fetch_pending_teacher_details" });
+      const appError = parseError(err, { action: `fetch_pending_${noun}_details` });
       notify(
-        `Unable to load teacher details: ${getUserFriendlyMessage(appError)}`,
+        `Unable to load ${noun} details: ${getUserFriendlyMessage(appError)}`,
         getNotificationType(appError)
       );
       throw appError;
     }
-  }, [notify]);
+  }, [notify, noun]);
 
   const runMutation = useCallback(async (staffId, action, successMessage) => {
     setMutating(true);
@@ -111,32 +118,51 @@ export default function usePendingStaffData() {
       }
       return unwrapResponse(payload);
     } catch (err) {
-      const appError = parseError(err, { action: `pending_teacher_${action.name}` });
+      const appError = parseError(err, { action: `pending_${noun}_${action.name}` });
       notify(
-        `Unable to ${action.name} teacher request: ${getUserFriendlyMessage(appError)}`,
+        `Unable to ${action.name} ${noun} request: ${getUserFriendlyMessage(appError)}`,
         getNotificationType(appError)
       );
       throw appError;
     } finally {
       setMutating(false);
     }
-  }, [currentPage, notify, pendingStaff.length, refreshData]);
+  }, [currentPage, notify, noun, pendingStaff.length, refreshData]);
 
   const updatePendingStaff = useCallback((staffId, data) =>
-    runMutation(staffId, { method: "PUT", data, name: "update" }, "Teacher request updated."),
-  [runMutation]);
+    runMutation(staffId, { method: "PUT", data, name: "update" }, `${label} request updated.`),
+  [label, runMutation]);
 
   const deletePendingStaff = useCallback((staffId) =>
-    runMutation(staffId, { method: "DELETE", name: "delete" }, "Teacher request deleted."),
-  [runMutation]);
+    runMutation(staffId, { method: "DELETE", name: "delete" }, `${label} request deleted.`),
+  [label, runMutation]);
 
   const verifyPendingStaff = useCallback((staffId) =>
-    runMutation(staffId, { method: "POST", path: "verify", name: "verify" }, "Teacher verified successfully."),
-  [runMutation]);
+    runMutation(staffId, { method: "POST", path: "verify", name: "verify" }, `${label} verified successfully.`),
+  [label, runMutation]);
 
   const rejectPendingStaff = useCallback((staffId) =>
-    runMutation(staffId, { method: "POST", path: "reject", name: "reject" }, "Teacher request rejected."),
-  [runMutation]);
+    runMutation(staffId, { method: "POST", path: "reject", name: "reject" }, `${label} request rejected.`),
+  [label, runMutation]);
+
+  /** Verify several at once, e.g. a whole intake. Returns { verified, not_found }. */
+  const bulkVerifyPendingStaff = useCallback(async (ids) => {
+    setMutating(true);
+    try {
+      const payload = await http.post(`${pendingStaffPath}bulk-verify/`, { ids }, { auth: true });
+      const result = unwrapResponse(payload) || {};
+      notify(`Verified ${result.verified ?? ids.length} ${noun}(s).`, "success");
+      if (currentPage > 1) setCurrentPage(1);
+      else await refreshData();
+      return result;
+    } catch (err) {
+      const appError = parseError(err, { action: `pending_${noun}_bulk_verify` });
+      notify(`Unable to verify ${noun}s: ${getUserFriendlyMessage(appError)}`, getNotificationType(appError));
+      throw appError;
+    } finally {
+      setMutating(false);
+    }
+  }, [currentPage, notify, noun, refreshData]);
 
   return {
     pendingStaff,
@@ -155,6 +181,7 @@ export default function usePendingStaffData() {
     updatePendingStaff,
     deletePendingStaff,
     verifyPendingStaff,
-    rejectPendingStaff
+    rejectPendingStaff,
+    bulkVerifyPendingStaff
   };
 }
