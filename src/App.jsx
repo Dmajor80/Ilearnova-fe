@@ -66,6 +66,8 @@ import Grade from "@/features/student/Grade";
 import { CoursesComponent } from "@/features/student/CoursesComponent";
 import CoursePage from "@/features/student/CoursePage";
 import Result from "@/features/student/Result";
+import TeacherResults from "@/features/results/TeacherResults";
+import GradingPolicyPage from "@/features/results/GradingPolicyPage";
 import Exam from "@/features/student/Exam";
 import StudentCbt from "@/features/student/StudentCbt";
 import DirectMessages from "@/features/communication/DirectMessages";
@@ -179,6 +181,8 @@ const AppContent = () => {
         <Route path="pending-teachers" element={<OrganizationPendingTeachers />} />
         <Route path="classes" element={<OrganizationClasses />} />
         <Route path="exams" element={<OrganizationExams />} />
+        <Route path="results" element={<TeacherResults />} />
+        <Route path="grading" element={<GradingPolicyPage />} />
         <Route path="analytics" element={<OrganizationAnalytics />} />
         <Route path="reports" element={<OrganizationReports />} />
         <Route path="alerts" element={<OrganizationAlerts />} />

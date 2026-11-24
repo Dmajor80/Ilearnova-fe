@@ -25,7 +25,7 @@ import Attendance from "./Attendance";
 import Assignments from "./Assignments";
 import ClassManagement from "./ClassManagement";
 import Examinations from "./Examinations";
-import Grade from "./Grade";
+import TeacherResults from "@/features/results/TeacherResults";
 import Messages from "./Messages";
 import Resources from "./Resources";
 import TeacherDashboardOverview from "./TeacherDashboardOverview";
@@ -45,7 +45,7 @@ const navigation = [
   { id: "cbt", label: "CBT exams", Icon: MonitorPlay },
   { id: "resources", label: "Resources", Icon: FolderOpen },
   { id: "timetable", label: "Timetable", Icon: Clock3 },
-  { id: "grade", label: "Grade", Icon: Award },
+  { id: "grade", label: "Results", Icon: Award },
   { id: "analytics", label: "Analytics", Icon: BarChart3 },
   { id: "transcripts", label: "Transcripts", Icon: FileBarChart }
 ];
@@ -89,7 +89,7 @@ export default function TeacherDashboard() {
       case "timetable":
         return <Timetable />;
       case "grade":
-        return <Grade onNavigate={setActiveTab} />;
+        return <TeacherResults />;
       case "analytics":
         return <TeacherAnalytics />;
       case "transcripts":

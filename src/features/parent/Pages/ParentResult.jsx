@@ -5,6 +5,7 @@ import {
   useParentChildren
 } from "@/hooks/parent";
 import { getParentChildName } from "../components/parentDisplayUtils";
+import ReportCards from "@/features/results/ReportCards";
 
 const getDisplayValue = (value) => {
   if (value == null) return "—";
@@ -134,6 +135,16 @@ function ParentResult({ isStandalone = true }) {
           <p className="mt-3 text-sm text-red-700" role="alert">Could not load linked children.</p>
         )}
       </div>
+
+      {selectedChild && (
+        <div className="space-y-3">
+          <h3 className="text-lg font-semibold text-slate-800">Term report cards</h3>
+          <ReportCards
+            childId={selectedChild.id}
+            emptyText="No term results have been published for this child yet."
+          />
+        </div>
+      )}
 
       <div className="overflow-hidden rounded-xl bg-white shadow">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b p-5">

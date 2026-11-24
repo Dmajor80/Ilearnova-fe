@@ -23,6 +23,7 @@ import {
   User,
   SlidersHorizontal,
   MessageCircle,
+  Award,
 } from "lucide-react";
 
 const OrganizationDashboard = () => {
@@ -72,6 +73,8 @@ const OrganizationDashboard = () => {
     { id: "pending-teachers", label: "Pending Teachers", icon: UserCheck, path: "/organization-dashboard/pending-teachers" },
     { id: "classes", label: "Classes", icon: BookOpen, path: "/organization-dashboard/classes" },
     { id: "exams", label: "Exams", icon: FileText, path: "/organization-dashboard/exams" },
+    { id: "results", label: "Results", icon: Award, path: "/organization-dashboard/results" },
+    { id: "grading", label: "Grading", icon: SlidersHorizontal, path: "/organization-dashboard/grading" },
     { id: "analytics", label: "Analytics", icon: TrendingUp, path: "/organization-dashboard/analytics" },
     { id: "reports", label: "Reports", icon: FileText, path: "/organization-dashboard/reports" },
     { id: "alerts", label: "Alerts", icon: AlertTriangle, path: "/organization-dashboard/alerts" },
