@@ -84,7 +84,12 @@ export default function StudentPicker({ selected, onSelect }) {
                 type="button"
                 role="option"
                 aria-selected="false"
-                onClick={() => onSelect(s)}
+                onClick={() => {
+                  onSelect(s);
+                  // Start empty next time (e.g. after the fee is billed and
+                  // the form resets), instead of re-running the old search.
+                  setQuery("");
+                }}
                 className="w-full px-3 py-2 text-left text-sm hover:bg-blue-50"
               >
                 <span className="font-medium">{s.full_name || s.email}</span>

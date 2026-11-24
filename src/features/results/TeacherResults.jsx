@@ -113,7 +113,13 @@ export default function TeacherResults() {
         if (row) errors[row.student_id] = problems;
       }
       setRowErrors(errors);
-      say("error", "Nothing was saved. Fix the highlighted rows and try again.", messages);
+      say(
+        "error",
+        Object.keys(errors).length
+          ? "Nothing was saved. Fix the highlighted rows and try again."
+          : "Nothing was saved.",
+        messages
+      );
     } finally {
       setBusy(false);
     }

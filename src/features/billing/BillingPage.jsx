@@ -165,6 +165,7 @@ function PayoutAccountSection() {
   const [account, setAccount] = useState(null);
   const [form, setForm] = useState(EMPTY_ACCOUNT);
   const [banks, setBanks] = useState([]);
+  const [banksFailed, setBanksFailed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState(null);
 
@@ -179,7 +180,10 @@ function PayoutAccountSection() {
     billingApi
       .banks()
       .then((list) => setBanks(Array.isArray(list) ? list : []))
-      .catch(() => setBanks([]));
+      .catch(() => {
+        setBanks([]);
+        setBanksFailed(true);
+      });
   }, []);
 
   const valid = form.business_name.trim() && form.settlement_bank && /^\d{10}$/.test(form.account_number);
@@ -235,9 +239,16 @@ function PayoutAccountSection() {
         <label className="text-sm font-medium text-gray-700 sm:col-span-2">
           Bank
           <select value={form.settlement_bank} onChange={(e) => setForm({ ...form, settlement_bank: e.target.value })} className="mt-1 w-full rounded-lg border px-3 py-2">
-            <option value="">{banks.length ? "Choose a bank" : "Loading banks…"}</option>
+            <option value="">
+              {banks.length ? "Choose a bank" : banksFailed ? "Bank list unavailable" : "Loading banks…"}
+            </option>
             {banks.map((b) => <option key={b.code} value={b.code}>{b.name}</option>)}
           </select>
+          {banksFailed && (
+            <span className="mt-1 block text-xs font-normal text-amber-700">
+              Couldn't load banks from Paystack. Online payments may not be set up yet — try again later.
+            </span>
+          )}
         </label>
         <label className="text-sm font-medium text-gray-700">
           Account number

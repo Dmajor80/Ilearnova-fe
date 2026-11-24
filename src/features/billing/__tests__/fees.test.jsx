@@ -126,6 +126,10 @@ describe("SchoolFeesPage", () => {
     fireEvent.click(screen.getByRole("button", { name: /Bill student/ }));
 
     expect(await screen.findByText("Billed Bayo Ade.")).toBeTruthy();
+    // Found clicking through: after billing, the search box still said "Bay"
+    // and its results list reopened over the form.
+    expect(screen.getByLabelText("Find student").value).toBe("");
+    expect(screen.queryByRole("listbox")).toBeNull();
     const [path, body] = http.post.mock.calls[0];
     expect(path).toBe("/api/billing/school/fees/");
     expect(body).toMatchObject({ student: "bayo-user", fee_type: "transport", total_amount: "12000", due_date: "2027-01-15" });

@@ -7,7 +7,17 @@ import { MAX_COMPONENTS, componentsTotal, fmt } from "./resultsUtils";
  */
 export default function ComponentsEditor({ components, onChange, disabled = false }) {
   const update = (index, field, value) =>
-    onChange(components.map((c, i) => (i === index ? { ...c, [field]: value } : c)));
+    onChange(
+      components.map((c, i) => {
+        if (i !== index) return c;
+        const next = { ...c, [field]: value };
+        // A renamed component gets a fresh key from its new name (the
+        // backend derives it). Keeping the old one left "CA 2" keyed "exam",
+        // clashing with a new "Exam" and mislabelling upload columns.
+        if (field === "label") delete next.key;
+        return next;
+      })
+    );
   const remove = (index) => onChange(components.filter((_, i) => i !== index));
   const add = () => onChange([...components, { label: "", max: "" }]);
   const total = componentsTotal(components);

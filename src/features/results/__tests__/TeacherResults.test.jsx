@@ -98,6 +98,26 @@ describe("TeacherResults", () => {
     expect(bayoRow.textContent).toContain("not enrolled");
   });
 
+  it("does not blame the rows when the school is read-only", async () => {
+    // Found clicking through a lapsed school: the message said "Fix the
+    // highlighted rows" although nothing was highlighted.
+    const error = new Error("Payment Required");
+    error.status = 402;
+    error.data = {
+      success: false,
+      code: "SUBSCRIPTION_READ_ONLY",
+      error: "This school's subscription has expired, so it is read-only. An admin can renew it under Billing.",
+    };
+    http.post.mockRejectedValue(error);
+
+    render(<TeacherResults />);
+    fireEvent.change(await screen.findByLabelText("Ada Obi CA 1"), { target: { value: "8" } });
+    fireEvent.click(screen.getByRole("button", { name: /Save \(1\)/ }));
+
+    const alert = await screen.findByText(/subscription has expired/);
+    expect(alert.closest('[role="alert"]').textContent).not.toMatch(/highlighted rows/);
+  });
+
   it("blocks saving a score above the component maximum", async () => {
     render(<TeacherResults />);
     fireEvent.change(await screen.findByLabelText("Ada Obi CA 1"), { target: { value: "51" } });

@@ -119,3 +119,22 @@ describe("BillingPage", () => {
     vi.unstubAllGlobals();
   });
 });
+
+describe("Payout account bank list", () => {
+  // Found clicking through: with Paystack not configured the bank list
+  // request fails (503) and the dropdown said "Loading banks…" forever.
+  it("explains when the bank list cannot load", async () => {
+    http.get.mockImplementation((path) => {
+      if (path === "/api/billing/school/banks/") {
+        const error = new Error("Service Unavailable");
+        error.status = 503;
+        return Promise.reject(error);
+      }
+      if (path === "/api/billing/plans/") return Promise.resolve([]);
+      return Promise.resolve({ success: true, data: null });
+    });
+    render(<BillingPage />);
+    expect(await screen.findByText(/Bank list unavailable/)).toBeTruthy();
+    expect(screen.queryByText("Loading banks…")).toBeNull();
+  });
+});
