@@ -3,6 +3,7 @@ import { User, Mail, Phone, MapPin, Calendar, Camera, Save, X } from "lucide-rea
 import { http } from "@/api/baseClient";
 import { useOrganization } from "@/context/OrganizationContext";
 import useNotification from "@/hooks/useNotification";
+import StudentIdCard from "@/features/student/StudentIdCard";
 
 const Profile = () => {
   const { user, refreshUser } = useOrganization();
@@ -165,6 +166,9 @@ const Profile = () => {
               </div>
             </div>
           </div>
+
+          {/* Students: their school ID card(s) */}
+          <StudentIdCard user={user} className="border-b px-6 py-6" />
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="p-6 space-y-6">

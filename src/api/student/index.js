@@ -113,3 +113,7 @@ export const createStudentSubmissionAt = (submissionId, submissionData) =>
     submissionData,
     { auth: true }
   );
+
+/** Graded online (CBT) exam scores grouped by term and subject. */
+export const getStudentTranscript = (params) =>
+  http.get(`${STUDENT_API}/transcript/`, { auth: true, params });

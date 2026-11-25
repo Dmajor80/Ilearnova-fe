@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { Download } from "lucide-react";
 import { resultsApi } from "@/api/resultsApi";
-import { apiErrorDetails, averageText, fmt, safeName, saveBlob } from "./resultsUtils";
+import { apiErrorDetails, averageText, fmt, safeName, saveBlob, scoreColumns } from "./resultsUtils";
 
 function ReportCard({ report, onDownload, downloading }) {
+  const { headings, cells } = scoreColumns(report.subjects);
   return (
     <article className="rounded-xl border bg-white p-4 shadow-sm md:p-6">
       <header className="flex flex-col justify-between gap-3 border-b pb-3 sm:flex-row sm:items-start">
@@ -31,7 +32,9 @@ function ReportCard({ report, onDownload, downloading }) {
           <thead className="bg-gray-50">
             <tr>
               <th scope="col" className="px-3 py-2 text-left font-semibold text-gray-700">Subject</th>
-              <th scope="col" className="px-3 py-2 text-left font-semibold text-gray-700">Scores</th>
+              {headings.map((h) => (
+                <th key={h} scope="col" className="whitespace-nowrap px-3 py-2 text-center font-semibold text-gray-700">{h}</th>
+              ))}
               <th scope="col" className="px-3 py-2 text-center font-semibold text-gray-700">Total</th>
               <th scope="col" className="px-3 py-2 text-center font-semibold text-gray-700">%</th>
               <th scope="col" className="px-3 py-2 text-center font-semibold text-gray-700">Grade</th>
@@ -39,12 +42,12 @@ function ReportCard({ report, onDownload, downloading }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {report.subjects.map((s) => (
+            {report.subjects.map((s, i) => (
               <tr key={s.id}>
                 <td className="px-3 py-2 font-medium text-gray-900">{s.subject_name}</td>
-                <td className="px-3 py-2 text-gray-600">
-                  {(s.scores || []).map((c) => `${c.label} ${fmt(c.score) || "-"}/${fmt(c.max)}`).join(", ")}
-                </td>
+                {cells[i].map((cell, j) => (
+                  <td key={headings[j]} className="whitespace-nowrap px-3 py-2 text-center text-gray-700">{cell}</td>
+                ))}
                 <td className="whitespace-nowrap px-3 py-2 text-center">
                   {fmt(s.total)}/{fmt(s.max_total)}
                 </td>

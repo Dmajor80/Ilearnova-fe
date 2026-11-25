@@ -140,3 +140,32 @@ export function bandsProblem(bands) {
   if (!mins.includes(0)) return "The lowest band must start at 0%.";
   return "";
 }
+
+/**
+ * Report card columns: one per CA / exam across all subjects, in the order
+ * they first appear (same rule as the PDF). A maximum every subject shares
+ * goes in the heading ("CA 1 (50)") and cells hold the score; otherwise each
+ * cell shows its own ("20/30"). A subject without that component shows "-".
+ */
+export function scoreColumns(subjects = []) {
+  const columns = new Map();
+  for (const s of subjects) {
+    for (const c of s.scores || []) {
+      if (!columns.has(c.key)) columns.set(c.key, { label: c.label, maxes: new Set() });
+      columns.get(c.key).maxes.add(fmt(c.max));
+    }
+  }
+  const headings = [...columns.values()].map((col) =>
+    col.maxes.size === 1 ? `${col.label} (${[...col.maxes][0]})` : col.label
+  );
+  const cells = subjects.map((s) => {
+    const byKey = new Map((s.scores || []).map((c) => [c.key, c]));
+    return [...columns.entries()].map(([key, col]) => {
+      const c = byKey.get(key);
+      if (!c) return "-";
+      const score = fmt(c.score) || "-";
+      return col.maxes.size === 1 ? score : `${score}/${fmt(c.max)}`;
+    });
+  });
+  return { headings, cells };
+}

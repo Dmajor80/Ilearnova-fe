@@ -1,22 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
   User,
-  BookOpen,
-  Calendar,
-  FileText,
-  Clock,
-  Award,
-  ChevronRight,
-  Star,
-  ClipboardList,
-  TrendingUp,
-  BarChart3,
-  FileBarChart,
   Menu,
-  X,
-  Users,
-  AlertTriangle,
-  CheckCircle,
   Bell,
   Settings,
   ChevronDown,
@@ -25,6 +10,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import { logout } from "@/api/authApi";
 import { clearAuth } from "@/api/auth";
+import { tabOf } from "@/components/navigation/navGroups";
+import { PARENT_GROUPS } from "../parentNav";
 
 function ParentHeader({ activeTab, setIsMobileMenuOpen, dashboardData }) {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
@@ -60,18 +47,6 @@ function ParentHeader({ activeTab, setIsMobileMenuOpen, dashboardData }) {
     }
   };
 
-  // Navigation links data
-  const navLinks = [
-    { id: "dashboard", icon: <ClipboardList size={20} />, label: "Dashboard" },
-    { id: "children", icon: <Users size={20} />, label: "My Children" },
-    { id: "attendance", icon: <Calendar size={20} />, label: "Attendance" },
-    { id: "grades", icon: <Star size={20} />, label: "Grades & Results" },
-    { id: "messages", icon: <FileText size={20} />, label: "Messages" },
-    { id: "fees", icon: <TrendingUp size={20} />, label: "Fees & Payments" },
-    { id: "timetable", icon: <Clock size={20} />, label: "Timetable" },
-    { id: "reports", icon: <BarChart3 size={20} />, label: "Reports" },
-    { id: "profile", icon: <User size={20} />, label: "Profile" },
-  ];
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 m-4 md:m-6 mb-0 border border-slate-200">
@@ -86,7 +61,7 @@ function ParentHeader({ activeTab, setIsMobileMenuOpen, dashboardData }) {
           <div>
             <p className="text-slate-500 text-sm mb-2 font-medium">Dashboard / Parent</p>
             <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent capitalize">
-              {navLinks.find(link => link.id === activeTab)?.label || 'Parent Dashboard'}
+              {tabOf(PARENT_GROUPS, activeTab)?.label || 'Parent Dashboard'}
             </h1>
           </div>
         </div>

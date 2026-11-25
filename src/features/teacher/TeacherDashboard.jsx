@@ -1,20 +1,14 @@
 import { useState } from "react";
 import {
   Award,
-  BarChart3,
   BookOpen,
-  CalendarCheck,
   ChevronDown,
   ClipboardList,
-  Clock3,
-  FileBarChart,
   FileText,
-  FolderOpen,
   LayoutDashboard,
   LogOut,
   Menu,
   MessageCircle,
-  MonitorPlay,
   User,
   X
 } from "lucide-react";
@@ -33,21 +27,58 @@ import Timetable from "./Timetable";
 import TeacherCbt from "../cbt/TeacherCbt";
 import TeacherAnalytics from "./TeacherAnalytics";
 import DirectMessages from "@/features/communication/DirectMessages";
+import SectionTabs from "@/components/navigation/SectionTabs";
+import { groupOf, tabOf } from "@/components/navigation/navGroups";
 
-const navigation = [
-  { id: "dashboard", label: "Dashboard", Icon: LayoutDashboard },
-  { id: "courses", label: "Class management", Icon: BookOpen },
-  { id: "messages", label: "Announcements", Icon: MessageCircle },
-  { id: "direct-messages", label: "Direct messages", Icon: MessageCircle },
-  { id: "attendance", label: "Attendance", Icon: CalendarCheck },
-  { id: "assignments", label: "Assignments", Icon: ClipboardList },
-  { id: "examinations", label: "Examinations", Icon: FileText },
-  { id: "cbt", label: "CBT exams", Icon: MonitorPlay },
-  { id: "resources", label: "Resources", Icon: FolderOpen },
-  { id: "timetable", label: "Timetable", Icon: Clock3 },
-  { id: "grade", label: "Results", Icon: Award },
-  { id: "analytics", label: "Analytics", Icon: BarChart3 },
-  { id: "transcripts", label: "Transcripts", Icon: FileBarChart }
+/** Sidebar groups; pages in a group are tabs of one another. */
+const TEACHER_GROUPS = [
+  { id: "dashboard", label: "Dashboard", Icon: LayoutDashboard, tabs: [{ id: "dashboard", label: "Dashboard" }] },
+  {
+    id: "classes",
+    label: "Classes",
+    Icon: BookOpen,
+    tabs: [
+      { id: "courses", label: "Class management" },
+      { id: "attendance", label: "Attendance" },
+      { id: "timetable", label: "Timetable" },
+    ],
+  },
+  {
+    id: "coursework",
+    label: "Assignments",
+    Icon: ClipboardList,
+    tabs: [
+      { id: "assignments", label: "Assignments" },
+      { id: "resources", label: "Resources" },
+    ],
+  },
+  {
+    id: "exams",
+    label: "Exams",
+    Icon: FileText,
+    tabs: [
+      { id: "examinations", label: "Examinations" },
+      { id: "cbt", label: "CBT exams" },
+    ],
+  },
+  {
+    id: "results",
+    label: "Results",
+    Icon: Award,
+    tabs: [
+      { id: "grade", label: "Results" },
+      { id: "analytics", label: "Analytics" },
+    ],
+  },
+  {
+    id: "messages",
+    label: "Messages",
+    Icon: MessageCircle,
+    tabs: [
+      { id: "messages", label: "Announcements" },
+      { id: "direct-messages", label: "Direct messages" },
+    ],
+  },
 ];
 
 export default function TeacherDashboard() {
@@ -56,6 +87,7 @@ export default function TeacherDashboard() {
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [logoutError, setLogoutError] = useState("");
   const navigate = useNavigate();
+  const activeGroup = groupOf(TEACHER_GROUPS, activeTab);
 
   const handleLogout = async () => {
     setLogoutError("");
@@ -92,15 +124,6 @@ export default function TeacherDashboard() {
         return <TeacherResults />;
       case "analytics":
         return <TeacherAnalytics />;
-      case "transcripts":
-        return (
-          <section className="rounded-xl bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-semibold text-gray-900">Student transcripts</h2>
-            <p className="mt-2 text-sm text-gray-600">
-              The API documentation does not define a teacher transcript endpoint, so transcript data cannot be loaded here.
-            </p>
-          </section>
-        );
       default:
         return <TeacherDashboardOverview onNavigate={setActiveTab} />;
     }
@@ -127,17 +150,17 @@ export default function TeacherDashboard() {
           </button>
         </div>
         <nav className="flex-1 space-y-1 overflow-y-auto p-3" aria-label="Teacher dashboard">
-          {navigation.map((item) => (
+          {TEACHER_GROUPS.map((item) => (
             <button
               key={item.id}
               type="button"
-              aria-current={activeTab === item.id ? "page" : undefined}
+              aria-current={activeGroup?.id === item.id ? "page" : undefined}
               onClick={() => {
-                setActiveTab(item.id);
+                setActiveTab(item.tabs[0].id);
                 setMobileMenuOpen(false);
               }}
               className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition ${
-                activeTab === item.id ? "bg-blue-50 text-blue-700" : "text-gray-600 hover:bg-gray-50 hover:text-blue-700"
+                activeGroup?.id === item.id ? "bg-blue-50 text-blue-700" : "text-gray-600 hover:bg-gray-50 hover:text-blue-700"
               }`}
             >
               <item.Icon size={18} />
@@ -161,7 +184,7 @@ export default function TeacherDashboard() {
             </button>
             <div>
               <p className="text-xs text-gray-500">Teacher workspace</p>
-              <h1 className="text-lg font-semibold text-gray-900">{navigation.find(({ id }) => id === activeTab)?.label}</h1>
+              <h1 className="text-lg font-semibold text-gray-900">{tabOf(TEACHER_GROUPS, activeTab)?.label}</h1>
             </div>
           </div>
           <div className="relative">
@@ -189,6 +212,7 @@ export default function TeacherDashboard() {
           </div>
         </header>
         <main className="p-4 sm:p-6">
+          <SectionTabs group={activeGroup} activeId={activeTab} onSelect={setActiveTab} className="mb-6" />
           {renderActivePage()}
         </main>
       </div>

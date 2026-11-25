@@ -22,7 +22,6 @@ import Profile from "@/features/auth/Profile";
 import AdminLogin from "@/features/admin/AdminLogin";
 
 // Dashboard Components
-import IdCard from "@/features/student/IdCard";
 import AdminDashboard from "@/features/admin/AdminDashboard";
 import Dashboard from "@/features/admin/Dashboard";
 import Users from "@/features/admin/Users";
@@ -62,7 +61,7 @@ import Overview from "@/features/student/Overview";
 import Attendance from "@/features/student/Attendance";
 import Assignments from "@/features/student/Assignments";
 import Timetable from "@/features/student/Timetable";
-import Grade from "@/features/student/Grade";
+import OnlineExamScores from "@/features/student/OnlineExamScores";
 import { CoursesComponent } from "@/features/student/CoursesComponent";
 import CoursePage from "@/features/student/CoursePage";
 import Result from "@/features/student/Result";
@@ -157,11 +156,12 @@ const AppContent = () => {
       <Route path="/student-dashboard" element={<RequireAuth><StudentDashboard /></RequireAuth>}>
         <Route index element={<Overview />} />
         <Route path="overview" element={<Overview />} />
-        <Route path="IDcard" element={<IdCard />} />
+        {/* The ID card lives on the profile page now. */}
+        <Route path="IDcard" element={<Navigate to="/profile" replace />} />
         <Route path="attendance" element={<Attendance />} />
         <Route path="assignment" element={<Assignments />} />
         <Route path="timetable" element={<Timetable />} />
-        <Route path="transcript" element={<Grade />} />
+        <Route path="transcript" element={<OnlineExamScores />} />
         <Route path="courses" element={<CoursesComponent />} />
         <Route path="courses/:courseId" element={<CoursePage />} />
         <Route path="result" element={<Result />} />

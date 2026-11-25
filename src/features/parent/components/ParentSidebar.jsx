@@ -1,68 +1,22 @@
 import React from "react";
-import {
-  User,
-  BookOpen,
-  Calendar,
-  FileText,
-  Clock,
-  Award,
-  ChevronRight,
-  Star,
-  ClipboardList,
-  TrendingUp,
-  BarChart3,
-  FileBarChart,
-  Menu,
-  X,
-  Users,
-  AlertTriangle,
-  CheckCircle,
-  Bell,
-  Settings,
-  ChevronDown,
-  LogOut,
-} from "lucide-react";
+import { X } from "lucide-react";
+import { groupOf } from "@/components/navigation/navGroups";
+import { PARENT_GROUPS } from "../parentNav";
 import { useNavigate } from "react-router-dom";
 
 function ParentSidebar({ activeTab, setActiveTab, isMobileMenuOpen, setIsMobileMenuOpen }) {
   const navigate = useNavigate();
 
+  const activeGroup = groupOf(PARENT_GROUPS, activeTab);
+
+  // Every parent page is a tab of the dashboard.
   const handleTabClick = (tabId) => {
     setActiveTab(tabId);
-    const routes = {
-      dashboard: '/parent-dashboard',
-      children: '/parent-dashboard',
-      announcement: '/parent-dashboard',
-      attendance: '/parent-attendance',
-      grades: '/parent-dashboard',
-      messages: '/parent-dashboard',
-      fees: '/parent-dashboard',
-      timetable: '/parent-dashboard',
-      reports: '/parent-dashboard',
-    };
-    const route = routes[tabId] || '/parent-dashboard';
-    if (route === '/parent-dashboard') {
-      navigate(route, { state: { activeTab: tabId } });
-    } else {
-      navigate(route);
-    }
+    navigate("/parent-dashboard", { state: { activeTab: tabId } });
     if (window.innerWidth < 768) {
       setIsMobileMenuOpen(false);
     }
   };
-
-  // Navigation links data based on available page files
-  const navLinks = [
-    { id: "dashboard", icon: <ClipboardList size={20} />, label: "Dashboard" },
-    { id: "children", icon: <Users size={20} />, label: "My Children" },
-    { id: "announcement", icon: <Bell size={20} />, label: "Announcements" },
-    { id: "attendance", icon: <Calendar size={20} />, label: "Attendance" },
-    { id: "grades", icon: <Star size={20} />, label: "Grades & Results" },
-    { id: "messages", icon: <FileText size={20} />, label: "Messages" },
-    { id: "fees", icon: <TrendingUp size={20} />, label: "Fees & Payments" },
-    { id: "timetable", icon: <Clock size={20} />, label: "Timetable" },
-    { id: "reports", icon: <BarChart3 size={20} />, label: "Reports" },
-  ];
 
   return (
     <>
@@ -91,26 +45,28 @@ function ParentSidebar({ activeTab, setActiveTab, isMobileMenuOpen, setIsMobileM
             </div>
             <button
               onClick={() => setIsMobileMenuOpen(false)}
+              aria-label="Close menu"
               className="md:hidden p-2 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:bg-slate-50 border border-slate-200"
             >
               <X className="w-5 h-5 text-slate-600" />
             </button>
           </div>
-          <nav className="space-y-1">
-            {navLinks.map((link) => (
+          <nav className="space-y-1" aria-label="Parent dashboard">
+            {PARENT_GROUPS.map((link) => (
               <div key={link.id} className="relative group">
                 <button
-                  onClick={() => handleTabClick(link.id)}
+                  onClick={() => handleTabClick(link.tabs[0].id)}
+                  aria-current={activeGroup?.id === link.id ? "page" : undefined}
                   className={`w-full flex items-center px-4 py-3 text-left rounded-xl transition-all duration-200 min-h-[48px] group ${
-                    activeTab === link.id
+                    activeGroup?.id === link.id
                       ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg transform scale-[1.02] border border-blue-500"
                       : "text-slate-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-700 hover:shadow-md border border-transparent hover:border-blue-200"
                   }`}
                   title={link.label}
                 >
                   <span className={`mr-4 flex-shrink-0 transition-colors duration-200 ${
-                    activeTab === link.id ? "text-white" : "text-slate-500 group-hover:text-blue-600"
-                  }`}>{link.icon}</span>
+                    activeGroup?.id === link.id ? "text-white" : "text-slate-500 group-hover:text-blue-600"
+                  }`}><link.icon size={20} /></span>
                   <span className={`
                     transition-all duration-300 font-medium
                     ${isMobileMenuOpen ? "block" : "hidden md:block"}

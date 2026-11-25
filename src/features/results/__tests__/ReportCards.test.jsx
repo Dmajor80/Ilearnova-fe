@@ -53,7 +53,11 @@ describe("ReportCards", () => {
 
     expect(await screen.findByText("First Term, 2026/2027")).toBeTruthy();
     expect(http.get).toHaveBeenCalledWith("/api/results/me/", { auth: true, params: undefined });
-    expect(screen.getByText("CA 1 40/50, Exam 110/150")).toBeTruthy();
+    // One column per CA / exam, maxima in the headings.
+    const headings = screen.getAllByRole("columnheader").map((th) => th.textContent);
+    expect(headings).toEqual(["Subject", "CA 1 (50)", "Exam (150)", "Total", "%", "Grade", "Remark"]);
+    const row = screen.getByText("Mathematics").closest("tr");
+    expect([...row.cells].map((td) => td.textContent)).toEqual(["Mathematics", "40", "110", "150/200", "75", "A", "Well done"]);
     expect(screen.getByText("75% (150 / 200)")).toBeTruthy();
     expect(screen.queryByText(/position|rank/i)).toBeNull();
     expect(screen.getByRole("button", { name: /Download PDF/ })).toBeTruthy();

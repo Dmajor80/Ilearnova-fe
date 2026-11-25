@@ -9,6 +9,7 @@ import {
   gradeFor,
   rowTotals,
   rowsToSave,
+  scoreColumns,
   scoreProblem,
   sessionOptions,
 } from "../resultsUtils";
@@ -105,5 +106,35 @@ describe("average text", () => {
       "80% (160 / 200)"
     );
     expect(averageText({ average: "65.00", average_score: null, average_out_of: null })).toBe("65%");
+  });
+});
+
+describe("scoreColumns", () => {
+  const maths = {
+    scores: [
+      { key: "ca_1", label: "CA 1", max: "50.00", score: "40.00" },
+      { key: "ca_2", label: "CA 2", max: "50.00", score: "35.00" },
+      { key: "exam", label: "Exam", max: "100.00", score: "75.00" },
+    ],
+  };
+  // English: one CA out of 30 and an exam out of 70.
+  const english = {
+    scores: [
+      { key: "ca_1", label: "CA 1", max: "30.00", score: "20.00" },
+      { key: "exam", label: "Exam", max: "70.00", score: null },
+    ],
+  };
+
+  it("puts a shared maximum in the heading", () => {
+    const { headings, cells } = scoreColumns([maths, maths]);
+    expect(headings).toEqual(["CA 1 (50)", "CA 2 (50)", "Exam (100)"]);
+    expect(cells[0]).toEqual(["40", "35", "75"]);
+  });
+
+  it("gives every component a column even when subjects differ", () => {
+    const { headings, cells } = scoreColumns([maths, english]);
+    expect(headings).toEqual(["CA 1", "CA 2 (50)", "Exam"]);
+    expect(cells[0]).toEqual(["40/50", "35", "75/100"]);
+    expect(cells[1]).toEqual(["20/30", "-", "-/70"]);
   });
 });
