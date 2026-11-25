@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLinkParentStudent } from "@/hooks/parent";
 import { getParentChildClass, getParentChildName } from "./parentDisplayUtils";
+import { ListSkeleton } from "@/components/ui/Skeleton";
 
 export default function ParentChildrenPanel({
   children,
@@ -77,7 +78,7 @@ export default function ParentChildrenPanel({
           </button>
         </div>
 
-        {loading && <p className="py-6 text-center text-slate-600">Loading linked students…</p>}
+        {loading && <ListSkeleton rows={2} label="Loading linked students" />}
         {!loading && error && (
           <div className="rounded-lg bg-red-50 p-4 text-sm text-red-700" role="alert">
             Could not load linked students.

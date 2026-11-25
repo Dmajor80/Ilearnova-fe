@@ -18,6 +18,7 @@ import ParentHeader from "../components/ParentHeader";
 import Announcement from "./Announcement";
 import ParentChildrenPanel from "../components/ParentChildrenPanel";
 import { getParentChildName } from "../components/parentDisplayUtils";
+import { ListSkeleton } from "@/components/ui/Skeleton";
 
 export default function ParentDashboard() {
   const location = useLocation();
@@ -117,7 +118,7 @@ export default function ParentDashboard() {
                             ))}
                           </div>
                         </div>
-                        {progressLoading && <p className="py-5 text-slate-600">Loading progress…</p>}
+                        {progressLoading && <ListSkeleton rows={3} label="Loading progress" />}
                         {!progressLoading && progressError && (
                           <div className="rounded-lg bg-red-50 p-4 text-sm text-red-700" role="alert">
                             Progress is currently unavailable.

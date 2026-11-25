@@ -101,5 +101,6 @@ describe("OrganizationDashboard navigation", () => {
     // Found clicking through a locked school: the page itself rendered for a
     // moment and fired requests the API refused (402) before the lock screen.
     expect(screen.queryByTestId("where")).toBeNull();
+    expect(screen.getByRole("status", { name: "Loading your school" })).toBeTruthy();
   });
 });

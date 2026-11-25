@@ -1,149 +1,100 @@
-import { useState, useEffect } from "react";
-import { getCourses } from "@/api/academicApi";
+import { useEffect, useState } from "react";
+import { resultsApi } from "@/api/resultsApi";
+import { CardGridSkeleton } from "@/components/ui/Skeleton";
 
+const marks = (value) => Number(value).toString();
+
+/** One subject the teacher teaches, in one class. */
 function CourseCard({ course }) {
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-      <div className="flex justify-between items-start mb-4">
+    <article className="rounded-lg bg-white p-6 shadow-md transition-shadow hover:shadow-lg">
+      <h3 className="mb-1 text-lg font-semibold text-gray-900">{course.name}</h3>
+      <p className="text-sm text-gray-600">{course.organization_name}</p>
+      <dl className="mt-4 grid grid-cols-2 gap-4">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">{course.name}</h3>
-          <p className="text-sm text-gray-600 mb-2">{course.description}</p>
-          <div className="flex items-center text-sm text-gray-500">
-            <span className="mr-4">Code: {course.code}</span>
-            <span>Status: {course.status}</span>
-          </div>
-        </div>
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-          course.status === 'active' ? 'bg-green-100 text-green-800' :
-          course.status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
-          'bg-gray-100 text-gray-800'
-        }`}>
-          {course.status}
-        </span>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div>
-          <p className="text-sm text-gray-500">Class</p>
-          <p className="font-medium">{course.class?.name}</p>
+          <dt className="text-sm text-gray-500">Class</dt>
+          <dd className="font-medium">{course.class_name}</dd>
         </div>
         <div>
-          <p className="text-sm text-gray-500">Subject</p>
-          <p className="font-medium">{course.subject?.name}</p>
+          <dt className="text-sm text-gray-500">Marked out of</dt>
+          <dd className="font-medium">{marks(course.total)}</dd>
         </div>
-        <div>
-          <p className="text-sm text-gray-500">Teacher</p>
-          <p className="font-medium">{course.teacher?.name}</p>
-        </div>
-        <div>
-          <p className="text-sm text-gray-500">Max Students</p>
-          <p className="font-medium">{course.max_students || 'N/A'}</p>
-        </div>
-      </div>
-
-      <div className="flex justify-between items-center">
-        <div className="text-sm text-gray-500">
-          {course.start_date && (
-            <span>Starts: {new Date(course.start_date).toLocaleDateString()}</span>
-          )}
-        </div>
-        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-          View Details
-        </button>
-      </div>
-    </div>
+      </dl>
+      <p className="mt-4 text-sm text-gray-500">
+        {(course.components || []).map((c) => `${c.label} ${marks(c.max)}`).join(" · ")}
+      </p>
+    </article>
   );
 }
 
+/**
+ * The subjects (and classes) the signed-in teacher teaches, from
+ * GET /api/results/subjects/. Shown at the foot of several teacher pages.
+ */
 function CoursesComponent({ page }) {
-  const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [courses, setCourses] = useState(null);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        setLoading(true);
-        const response = await getCourses();
-        setCourses(response.data.data || []);
-        setError(null);
-      } catch (err) {
-        console.error('Failed to fetch courses:', err);
-        setError('Failed to load courses. Please try again.');
-      } finally {
-        setLoading(false);
-      }
+    let active = true;
+    resultsApi
+      .mySubjects()
+      .then((data) => active && setCourses(data || []))
+      .catch(() => active && setError("Your subjects could not be loaded. Refresh to try again."));
+    return () => {
+      active = false;
     };
-
-    fetchCourses();
   }, []);
 
-  const filteredCourses = courses.filter(course =>
-    course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    course.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    course.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  const term = searchTerm.trim().toLowerCase();
+  const filteredCourses = (courses || []).filter(
+    (course) =>
+      course.name.toLowerCase().includes(term) || course.class_name?.toLowerCase().includes(term)
   );
 
   return (
     <div>
-      {/* dashboard nav */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-gray-500 text-xs mt-1">Page/Teacher Portal</p>
-          <h2 className="font-medium mt-2">{page}</h2>
+          <p className="mt-1 text-xs text-gray-500">Page/Teacher Portal</p>
+          <h2 className="mt-2 font-medium">{page}</h2>
         </div>
-        <div className="flex items-center">
-          <div className="relative w-64">
-            <input
-              type="text"
-              placeholder="Search courses..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="border border-gray-300 rounded-full w-full py-2 px-4 pl-10"
-            />
-            <svg
-              className="w-5 h-5 text-gray-400 absolute left-3 top-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              ></path>
-            </svg>
-          </div>
+        <div className="relative w-64 max-w-full">
+          <input
+            type="search"
+            aria-label="Search your subjects"
+            placeholder="Search subjects or classes..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full rounded-full border border-gray-300 px-4 py-2 pl-10"
+          />
+          <svg
+            className="absolute left-3 top-2 h-5 w-5 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
         </div>
       </div>
-      {/* end of dashboard nav */}
 
-      {loading && (
-        <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="ml-2 text-gray-600">Loading courses...</span>
-        </div>
-      )}
-
-
-
-      {!loading && !error && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {error ? (
+        <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>
+      ) : courses === null ? (
+        <CardGridSkeleton count={3} label="Loading your subjects" />
+      ) : (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filteredCourses.length > 0 ? (
-            filteredCourses.map((course) => (
-              <CourseCard key={course.id} course={course} />
-            ))
+            filteredCourses.map((course) => <CourseCard key={course.id} course={course} />)
           ) : (
-            <div className="col-span-3 text-center py-12">
-              <p className="text-gray-500 text-lg">No courses found</p>
-              {searchTerm && (
-                <p className="text-gray-400 mt-2">
-                  Try adjusting your search terms
-                </p>
-              )}
+            <div className="col-span-full py-12 text-center">
+              <p className="text-lg text-gray-500">
+                {term ? "No subjects match your search" : "You have not been assigned any subjects yet"}
+              </p>
+              {!term && <p className="mt-2 text-gray-400">Your school admin assigns subjects to teachers.</p>}
             </div>
           )}
         </div>

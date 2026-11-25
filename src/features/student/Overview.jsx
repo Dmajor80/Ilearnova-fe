@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { getStudentDashboard } from "@/api/dashboardApi";
+import { useNavigate } from "react-router-dom";
+import useStudentOverview, { summariseCourses } from "./useStudentOverview";
+import { ListSkeleton, Skeleton, SkeletonRegion } from "@/components/ui/Skeleton";
 import Profile from "../auth/Profile";
 import {
   Bell,
@@ -33,9 +35,11 @@ import { useStudentAnnouncements, useStudentAssignments } from "@/hooks/student"
 const Overview = () => {
   const studentAnnouncements = useStudentAnnouncements();
   const studentAssignments = useStudentAssignments();
-  const [dashboardData, setDashboardData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+  const { courses, attendance, transcript } = useStudentOverview();
+  const courseSummary = summariseCourses(courses.data || []);
+  const attendancePercent = Math.round(attendance.data?.summary?.attendance_percentage || 0);
+  const latestTerm = transcript.data?.terms?.[0];
   const [progress, setProgress] = useState(0);
   const [showProfile, setShowProfile] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
@@ -43,29 +47,11 @@ const Overview = () => {
   const chartRef = useRef(null);
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true);
-        const response = await getStudentDashboard();
-        setDashboardData(response.data);
-        setError(null);
-      } catch (err) {
-        console.error('Failed to fetch student dashboard:', err);
-        setError('Failed to load dashboard data');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDashboardData();
-  }, []);
-
-  useEffect(() => {
-    if (dashboardData) {
+    if (!attendance.loading) {
       const timer = setTimeout(() => {
         // Animate progress to attendance percentage
         let startProgress = 0;
-        const targetProgress = dashboardData.attendance_stats?.percentage || 0;
+        const targetProgress = attendancePercent;
         const interval = setInterval(() => {
           if (startProgress >= targetProgress) {
             clearInterval(interval);
@@ -78,7 +64,7 @@ const Overview = () => {
 
       return () => clearTimeout(timer);
     }
-  }, [dashboardData]);
+  }, [attendance.loading, attendancePercent]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -137,8 +123,11 @@ const Overview = () => {
         </div>
       </div>
 
-      {loading && <p role="status" className="mb-4 text-slate-600">Loading dashboard data…</p>}
-      {error && <p role="alert" className="mb-4 text-red-700">{error}</p>}
+      {(courses.error || attendance.error || transcript.error) && (
+        <p role="alert" className="mb-4 rounded-lg bg-red-50 p-3 text-red-700">
+          Part of your dashboard could not be loaded. Refresh the page to try again.
+        </p>
+      )}
 
       {/* Profile Modal */}
       {showProfile && (
@@ -168,7 +157,11 @@ const Overview = () => {
         >
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              {dashboardData?.quick_stats?.courses_completed || 0}
+              {courses.loading ? (
+                <SkeletonRegion label="Loading courses"><Skeleton className="h-10 w-12" /></SkeletonRegion>
+              ) : (
+                courseSummary.completed
+              )}
             </h2>
             <div className="p-3 bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl shadow-md">
               <img src={completed} alt="Completed courses" className="w-6 h-6" />
@@ -186,7 +179,11 @@ const Overview = () => {
         >
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              {dashboardData?.quick_stats?.courses_in_progress || 0}
+              {courses.loading ? (
+                <SkeletonRegion label="Loading courses"><Skeleton className="h-10 w-12" /></SkeletonRegion>
+              ) : (
+                courseSummary.inProgress.length
+              )}
             </h2>
             <div className="p-3 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl shadow-md">
               <img src={pro} alt="Courses in progress" className="w-6 h-6" />
@@ -204,9 +201,9 @@ const Overview = () => {
         >
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              {studentAssignments.loading
-                ? "…"
-                : studentAssignments.error
+              {studentAssignments.loading ? (
+                <SkeletonRegion label="Loading assignments"><Skeleton className="h-10 w-12" /></SkeletonRegion>
+              ) : studentAssignments.error
                   ? "—"
                   : studentAssignments.pendingAssignments.length}
             </h2>
@@ -229,13 +226,19 @@ const Overview = () => {
               <h3 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
                 Courses In Progress
               </h3>
-              <button className="text-blue-600 hover:text-blue-700 font-semibold text-lg transition-colors hover:scale-105">
+              <button
+                type="button"
+                onClick={() => navigate("/student-dashboard/courses")}
+                className="text-blue-600 hover:text-blue-700 font-semibold text-lg transition-colors hover:scale-105"
+              >
                 View All →
               </button>
             </div>
 
-            {dashboardData?.courses_in_progress?.map((course, index) => (
-              <div key={index} className="mb-4 bg-gradient-to-r from-slate-50 to-blue-50 p-4 rounded-xl border border-slate-200 hover:shadow-md transition-all duration-200 hover:scale-[1.01]">
+            {courses.loading ? (
+              <ListSkeleton rows={3} label="Loading courses in progress" />
+            ) : courseSummary.inProgress.length ? courseSummary.inProgress.map((course, index) => (
+              <div key={course.course_id} className="mb-4 bg-gradient-to-r from-slate-50 to-blue-50 p-4 rounded-xl border border-slate-200 hover:shadow-md transition-all duration-200 hover:scale-[1.01]">
                 <div className="flex items-center gap-4">
                   <div className="p-3 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl shadow-md">
                     <img src={completed} alt="Course icon" className="w-6 h-6" />
@@ -244,15 +247,15 @@ const Overview = () => {
                     <div className="flex justify-between items-center mb-3">
                       <div>
                         <h4 className="text-lg font-bold text-slate-800 mb-1">
-                          {course.name}
+                          {course.course_name}
                         </h4>
                         <p className="text-slate-600 font-medium">
-                          {course.lessons_count} Lessons • {course.duration}
+                          {course.completed_lessons} of {course.total_lessons} lessons done
                         </p>
                       </div>
                       <div className="text-right">
                         <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                          {course.progress_percentage}%
+                          {Math.round(course.completion_percentage)}%
                         </span>
                         <div className="flex items-center gap-1 mt-1">
                           <img src={mask} alt="Progress" className="w-4 h-4" />
@@ -264,7 +267,7 @@ const Overview = () => {
                       <div
                         className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full shadow-sm"
                         style={{
-                          width: `${course.progress_percentage}%`,
+                          width: `${Math.round(course.completion_percentage)}%`,
                           animation: `growWidth 1s ease-out ${
                             0.7 + index * 0.2
                           }s forwards`,
@@ -276,7 +279,7 @@ const Overview = () => {
                   </div>
                 </div>
               </div>
-            )) || (
+            )) : (
               <div className="text-center text-slate-500 py-8">
                 <div className="text-4xl mb-2">📚</div>
                 <p className="text-lg font-medium">No courses in progress</p>
@@ -502,13 +505,15 @@ const Overview = () => {
         >
           <div className="flex justify-between items-center mb-4">
             <h3 className=" text-[12px] lg:text-[16px] font-semibold text-gray-800">
-              Performance
+              Attendance
             </h3>
-            <button className=" text-[12px] lg:text-[16px] text-gray-500 flex items-center">
-              This Week <ChevronDown size={14} />
-            </button>
           </div>
 
+          {attendance.loading ? (
+            <SkeletonRegion label="Loading attendance" className="flex justify-center pt-4 pb-3">
+              <Skeleton className="h-32 w-32 rounded-full" />
+            </SkeletonRegion>
+          ) : (
           <div className="relative pt-4">
             <div className="flex justify-center items-center flex-col mb-3">
               <div className="relative h-32 w-32">
@@ -523,12 +528,15 @@ const Overview = () => {
                 <div className="absolute top-0 left-0 h-32 w-32 flex items-center justify-center">
                   <div className="text-center">
                     <span className="text-3xl font-bold">{progress}%</span>
-                    <p className="text-xs text-gray-500">Completion</p>
+                    <p className="text-xs text-gray-500">
+                      {attendance.data?.summary?.total ? "Present" : "No records yet"}
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
+          )}
         </div>
 
         <div
@@ -573,114 +581,88 @@ const Overview = () => {
         </div>
       </div>
 
-      {/* Transcript Section */}
-      {dashboardData?.transcript && (
-        <div className="bg-white p-6 rounded-xl shadow-sm mb-6" style={fadeInUp(0.9)}>
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-[18px] lg:text-[20px] font-semibold text-gray-800">
-              Academic Transcript
-            </h3>
-            <div className="text-sm text-gray-500">
-              Last updated: {dashboardData.transcript.last_updated}
-            </div>
-          </div>
+      {/* Online exam scores: graded CBT exams, latest term first */}
+      <section className="bg-white p-6 rounded-xl shadow-sm mb-6" style={fadeInUp(0.9)} aria-labelledby="exam-scores-heading">
+        <div className="flex justify-between items-center mb-6">
+          <h3 id="exam-scores-heading" className="text-[18px] lg:text-[20px] font-semibold text-gray-800">
+            Online exam scores
+          </h3>
+          <button
+            type="button"
+            onClick={() => navigate("/student-dashboard/transcript")}
+            className="text-sm font-medium text-blue-700 hover:underline"
+          >
+            See all terms →
+          </button>
+        </div>
 
-          {/* GPA Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600">
-                {dashboardData.transcript.overall_gpa}
-              </div>
-              <div className="text-sm text-gray-600">Overall GPA</div>
+        {transcript.loading ? (
+          <SkeletonRegion label="Loading exam scores" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="rounded-lg bg-gray-50 p-4">
+                  <Skeleton className="h-7 w-16" />
+                  <Skeleton className="mt-2 h-3 w-24" />
+                </div>
+              ))}
             </div>
-            <div className="bg-green-50 p-4 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">
-                {dashboardData.transcript.total_subjects}
+            <ListSkeleton rows={2} label="Loading subjects" />
+          </SkeletonRegion>
+        ) : latestTerm ? (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <div className="text-2xl font-bold text-blue-600">
+                  {transcript.data.overall_average}% ({transcript.data.overall_grade})
+                </div>
+                <div className="text-sm text-gray-600">Overall average</div>
               </div>
-              <div className="text-sm text-gray-600">Total Subjects</div>
-            </div>
-            <div className="bg-purple-50 p-4 rounded-lg">
-              <div className="text-2xl font-bold text-purple-600">
-                {dashboardData.transcript.recent_grades?.length || 0}
+              <div className="bg-green-50 p-4 rounded-lg">
+                <div className="text-2xl font-bold text-green-600">{latestTerm.subjects.length}</div>
+                <div className="text-sm text-gray-600">Subjects this term</div>
               </div>
-              <div className="text-sm text-gray-600">Recent Grades</div>
+              <div className="bg-purple-50 p-4 rounded-lg">
+                <div className="text-2xl font-bold text-purple-600">
+                  {latestTerm.subjects.reduce((n, subject) => n + subject.exams_taken, 0)}
+                </div>
+                <div className="text-sm text-gray-600">Exams graded this term</div>
+              </div>
             </div>
-          </div>
 
-          {/* Subject Averages */}
-          <div className="mb-6">
-            <h4 className="text-lg font-medium text-gray-800 mb-4">Subject Performance</h4>
+            <h4 className="text-lg font-medium text-gray-800 mb-4">
+              {latestTerm.term === "unassigned"
+                ? "Exams without a term"
+                : `${latestTerm.term.charAt(0).toUpperCase()}${latestTerm.term.slice(1)} term`}
+            </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {dashboardData.transcript.subject_averages?.map((subject, index) => (
-                <div key={index} className="bg-gray-50 p-4 rounded-lg">
+              {latestTerm.subjects.map((subject) => (
+                <div key={subject.subject_id} className="bg-gray-50 p-4 rounded-lg">
                   <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <h5 className="font-medium text-gray-800">{subject.subject}</h5>
-                      <p className="text-sm text-gray-600">{subject.academic_year}</p>
-                    </div>
+                    <h5 className="font-medium text-gray-800">{subject.subject_name}</h5>
                     <div className="text-right">
-                      <div className="text-lg font-bold text-blue-600">
-                        {subject.average_score}
-                      </div>
-                      <div className="text-xs text-gray-500">Average</div>
+                      <div className="text-lg font-bold text-blue-600">{subject.average_percentage}%</div>
+                      <div className="text-xs text-gray-500">Grade {subject.grade}</div>
                     </div>
                   </div>
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>{subject.total_grades} grades</span>
-                    <span>Latest: {subject.latest_grade}</span>
-                  </div>
+                  <p className="text-sm text-gray-600">
+                    {subject.exams_taken} exam{subject.exams_taken === 1 ? "" : "s"}
+                  </p>
                   <div className="mt-2 bg-gray-200 rounded-full h-2">
                     <div
                       className="bg-blue-500 h-2 rounded-full"
-                      style={{ width: `${(subject.average_score / 100) * 100}%` }}
+                      style={{ width: `${Math.min(subject.average_percentage, 100)}%` }}
                     ></div>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
-
-          {/* Recent Grades */}
-          <div>
-            <h4 className="text-lg font-medium text-gray-800 mb-4">Recent Grades</h4>
-            <div className="space-y-3">
-              {dashboardData.transcript.recent_grades?.map((grade, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
-                      grade.grade === 'A' ? 'bg-green-500' :
-                      grade.grade === 'B' ? 'bg-blue-500' :
-                      grade.grade === 'C' ? 'bg-yellow-500' :
-                      grade.grade === 'D' ? 'bg-orange-500' : 'bg-red-500'
-                    }`}>
-                      {grade.grade}
-                    </div>
-                    <div>
-                      <div className="font-medium text-gray-800">{grade.subject}</div>
-                      <div className="text-sm text-gray-600">
-                        {grade.teacher} • {grade.type} • {grade.date}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-lg font-bold text-gray-800">{grade.score}</div>
-                    <div className="text-sm text-gray-500">Score</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Generate Transcript Button */}
-          {dashboardData.transcript.can_generate_transcript && (
-            <div className="mt-6 text-center">
-              <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                Generate Full Transcript
-              </button>
-            </div>
-          )}
-        </div>
-      )}
+          </>
+        ) : (
+          !transcript.error && (
+            <p className="text-center text-gray-500 py-6">No online exams have been graded yet.</p>
+          )
+        )}
+      </section>
 
       {/* Team Performance */}
       <StudentsTable />

@@ -10,6 +10,7 @@ import { BILLING_PATH, MODES } from "@/features/billing/subscriptionUtils";
 import SectionTabs from "@/components/navigation/SectionTabs";
 import { groupOf, tabOf } from "@/components/navigation/navGroups";
 import { ADMIN_BASE as BASE, ADMIN_GROUPS as GROUPS } from "./adminNav";
+import { StatCardsSkeleton } from "@/components/ui/Skeleton";
 
 const OrganizationDashboard = () => {
   const navigate = useNavigate();
@@ -242,7 +243,7 @@ const OrganizationDashboard = () => {
           {!subscriptionLoaded ? (
             // Pages wait for the subscription answer: a locked school's page
             // would otherwise load data the API refuses.
-            <p className="py-12 text-center text-slate-500">Loading…</p>
+            <StatCardsSkeleton label="Loading your school" />
           ) : locked ? (
             <section className="mx-auto max-w-lg space-y-4 rounded-xl bg-white p-8 text-center shadow-sm">
               <Lock className="mx-auto h-10 w-10 text-red-500" />

@@ -4,11 +4,6 @@ import { http } from "@/api/baseClient";
  * Dashboard API functions for different user roles
  */
 
-// Student Dashboard
-export const getStudentDashboard = async () => {
-  return await http.get("/api/dashboard/student", { auth: true });
-};
-
 // Student-specific API functions
 export const getStudentCourses = async () => {
   return await http.get("/api/students/profile", { auth: true });

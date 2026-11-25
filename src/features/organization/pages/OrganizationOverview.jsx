@@ -17,6 +17,7 @@ import {
   useOrganizationCalendar,
   useOrganizationOverview,
 } from "@/hooks/organization";
+import { ListSkeleton, Skeleton } from "@/components/ui/Skeleton";
 
 const readMetric = (metrics, key, nestedKey = "total") => {
   const value = metrics?.[key];
@@ -125,10 +126,11 @@ const OrganizationOverview = () => {
           <div key={label} className="flex items-center justify-between rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
             <div>
               <p className="text-sm text-gray-500">{label}</p>
-              <p className="mt-1 text-2xl font-bold text-gray-900">{value}</p>
-              <p className="mt-1 text-xs text-gray-400">
-                {overview.loading ? "Loading live data…" : ""}
-              </p>
+              {overview.loading ? (
+                <Skeleton className="mt-2 h-7 w-14" />
+              ) : (
+                <p className="mt-1 text-2xl font-bold text-gray-900">{value}</p>
+              )}
             </div>
             <span className={`rounded-lg p-3 ${theme === "blue" ? "bg-blue-100 text-blue-600" : theme === "green" ? "bg-green-100 text-green-600" : theme === "purple" ? "bg-purple-100 text-purple-600" : "bg-orange-100 text-orange-600"}`}>
               {React.createElement(icon, { className: "h-6 w-6" })}
@@ -144,7 +146,7 @@ const OrganizationOverview = () => {
               <h3 className="text-lg font-semibold text-gray-900">Recent activities</h3>
               <Activity className="h-5 w-5 text-gray-400" />
             </div>
-            {overview.loading ? <p className="text-sm text-gray-500">Loading activities…</p> : activities.length ? (
+            {overview.loading ? <ListSkeleton label="Loading activities" /> : activities.length ? (
               <div className="divide-y">
                 {activities.slice(0, 8).map((activity, index) => (
                   <div key={activity.id || index} className="flex items-start gap-3 py-3">
@@ -164,7 +166,7 @@ const OrganizationOverview = () => {
               <h3 className="text-lg font-semibold text-gray-900">Upcoming events</h3>
               <Calendar className="h-5 w-5 text-gray-400" />
             </div>
-            {calendar.loading ? <p className="text-sm text-gray-500">Loading events…</p> : upcomingEvents.length ? (
+            {calendar.loading ? <ListSkeleton rows={3} label="Loading events" /> : upcomingEvents.length ? (
               <div className="space-y-2">
                 {upcomingEvents.map((event, index) => (
                   <div key={event.id || index} className="flex items-center gap-3 rounded-lg bg-gray-50 p-3">
@@ -186,7 +188,7 @@ const OrganizationOverview = () => {
               <h3 className="text-lg font-semibold text-gray-900">Alerts</h3>
               <AlertTriangle className="h-5 w-5 text-gray-400" />
             </div>
-            {alerts.loading ? <p className="text-sm text-gray-500">Loading alerts…</p> : notifications.length ? (
+            {alerts.loading ? <ListSkeleton rows={2} label="Loading alerts" /> : notifications.length ? (
               <div className="space-y-3">
                 {notifications.slice(0, 4).map((alert, index) => (
                   <div key={alert.id || index} className="rounded-lg border border-amber-100 bg-amber-50 p-3">
