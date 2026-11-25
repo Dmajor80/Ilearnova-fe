@@ -239,7 +239,11 @@ const OrganizationDashboard = () => {
 
         <main className="flex-1 m-4 md:m-6 mt-0 p-6 md:p-8">
           <SectionTabs group={activeGroup} activeId={activeTab} onSelect={(id) => navigate(pathOf(id))} className="mb-6" />
-          {locked ? (
+          {!subscriptionLoaded ? (
+            // Pages wait for the subscription answer: a locked school's page
+            // would otherwise load data the API refuses.
+            <p className="py-12 text-center text-slate-500">Loading…</p>
+          ) : locked ? (
             <section className="mx-auto max-w-lg space-y-4 rounded-xl bg-white p-8 text-center shadow-sm">
               <Lock className="mx-auto h-10 w-10 text-red-500" />
               <h2 className="text-xl font-bold text-gray-900">Your subscription has expired</h2>

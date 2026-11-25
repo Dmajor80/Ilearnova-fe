@@ -98,5 +98,8 @@ describe("OrganizationDashboard navigation", () => {
     subscription.loaded = false;
     show("/organization-dashboard/overview");
     expect(alerts).toHaveBeenCalledWith({ enabled: false });
+    // Found clicking through a locked school: the page itself rendered for a
+    // moment and fired requests the API refused (402) before the lock screen.
+    expect(screen.queryByTestId("where")).toBeNull();
   });
 });
