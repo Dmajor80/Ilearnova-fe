@@ -11,7 +11,8 @@ import useApiCircuitBreaker from "@/hooks/useApiCircuitBreaker";
  * The API documents Notification and BroadcastRequest schemas. The bulk-operation
  * request schema should be confirmed against the backend contract.
  */
-export default function useNotificationsData() {
+/** `enabled: false` holds off loading, e.g. while the school is locked. */
+export default function useNotificationsData({ enabled = true } = {}) {
   const notification = useNotification("info", 5000);
 
   const circuitBreaker = useApiCircuitBreaker({
@@ -256,11 +257,11 @@ export default function useNotificationsData() {
   }, []);
 
   useEffect(() => {
-    refreshData();
-  }, []);
+    if (enabled) refreshData();
+  }, [enabled]);
 
   useEffect(() => {
-    if (!loading) {
+    if (enabled && !loading) {
       fetchNotifications();
     }
   }, [currentPage, searchQuery]);

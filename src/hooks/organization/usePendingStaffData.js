@@ -14,7 +14,7 @@ const unwrapResponse = (payload) => {
  * Pending people for this school, by role: "teacher" (default), "student" or
  * "parent". Students who self-register stay pending until verified.
  */
-export default function usePendingStaffData(role = "teacher") {
+export default function usePendingStaffData(role = "teacher", { enabled = true } = {}) {
   const noun = role;
   const label = role.charAt(0).toUpperCase() + role.slice(1);
   const { notify } = useNotification("info", 5000);
@@ -78,10 +78,11 @@ export default function usePendingStaffData(role = "teacher") {
   const refreshDataRef = useRef(refreshData);
   refreshDataRef.current = refreshData;
 
-  // Load on mount and whenever the page changes (Previous / Next).
+  // Load on mount and whenever the page changes (Previous / Next);
+  // `enabled: false` holds off, e.g. while the school is locked.
   useEffect(() => {
-    refreshDataRef.current();
-  }, [currentPage]);
+    if (enabled) refreshDataRef.current();
+  }, [currentPage, enabled]);
 
   const fetchPendingStaffDetails = useCallback(async (staffId) => {
     try {

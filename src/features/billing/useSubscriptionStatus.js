@@ -21,10 +21,14 @@ function selectedOrgId() {
  */
 export default function useSubscriptionStatus(refreshKey) {
   const [status, setStatus] = useState(null);
+  // False until the first answer, so callers can wait before loading data
+  // a locked school would refuse.
+  const [loaded, setLoaded] = useState(false);
 
   const load = useCallback(async () => {
     if (!getTokens()?.access) {
       setStatus(null);
+      setLoaded(true);
       return;
     }
     try {
@@ -32,6 +36,8 @@ export default function useSubscriptionStatus(refreshKey) {
       setStatus(pickStatus(Array.isArray(rows) ? rows : [], selectedOrgId()));
     } catch {
       // Status is advisory; the API still enforces access on its own.
+    } finally {
+      setLoaded(true);
     }
   }, []);
 
@@ -44,5 +50,5 @@ export default function useSubscriptionStatus(refreshKey) {
     return () => window.removeEventListener(SUBSCRIPTION_BLOCKED_EVENT, load);
   }, [load]);
 
-  return { status, reload: load };
+  return { status, loaded, reload: load };
 }
