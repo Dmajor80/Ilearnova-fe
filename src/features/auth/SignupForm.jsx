@@ -333,12 +333,13 @@ export default function SignupForm() {
                 />
                 
                 <div>
-                  <label className={`block text-sm font-medium mb-3 ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
-                    Date of Birth
+                  <label htmlFor="date_of_birth" className={`block text-sm font-medium mb-3 ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                    Date of Birth <span className="text-red-500 ml-1">*</span>
                   </label>
                   <div className="relative">
                     <input
                       type="date"
+                      id="date_of_birth"
                       name="date_of_birth"
                       value={formData.date_of_birth || ""}
                       onChange={(e) => handleInputChange("date_of_birth", e.target.value)}
