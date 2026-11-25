@@ -125,3 +125,11 @@ export const getStudentCourseProgress = () =>
 /** Attendance records and a summary with `attendance_percentage`. */
 export const getStudentAttendanceSummary = (params) =>
   http.get(`${STUDENT_API}/attendance/`, { auth: true, params });
+
+/** Classes ("courses") in the student's school; `enrolled: "true"` for their own. */
+export const getStudentCourseCatalogue = (params) =>
+  http.get(`${STUDENT_API}/courses/`, { auth: true, params });
+
+/** Marks a lesson done (safe to repeat). Feeds course progress. */
+export const completeStudentMaterial = (materialId) =>
+  http.post(`${STUDENT_API}/materials/${resourceId(materialId)}/complete/`, {}, { auth: true });

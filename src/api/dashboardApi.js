@@ -4,15 +4,6 @@ import { http } from "@/api/baseClient";
  * Dashboard API functions for different user roles
  */
 
-// Student-specific API functions
-export const getStudentCourses = async () => {
-  return await http.get("/api/students/profile", { auth: true });
-};
-
-export const getStudentAttendance = async () => {
-  return await http.get("/api/students/profile/attendance", { auth: true });
-};
-
 // Attendance API functions
 export const getAttendanceRecords = async (params = {}) => {
   const queryString = new URLSearchParams(params).toString();
