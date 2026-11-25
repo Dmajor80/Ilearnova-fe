@@ -4,26 +4,12 @@ import { logout } from "@/api/authApi";
 import { clearAuth } from "@/api/auth";
 import useOrganizationAlerts from "@/hooks/organization/useNotificationsData";
 import { useOrganizationPendingStaff } from "@/hooks/organization";
-import {
-  Bell,
-  ChevronDown,
-  MoreHorizontal,
-  Settings,
-  Home,
-  BookOpen,
-  UserCheck,
-  TrendingUp,
-  AlertTriangle,
-  FileText,
-  GraduationCap,
-  Building,
-  LogOut,
-  Menu,
-  X,
-  User,
-  SlidersHorizontal,
-  MessageCircle,
-} from "lucide-react";
+import { Bell, ChevronDown, Settings, LogOut, Menu, X, User, Lock } from "lucide-react";
+import useSubscriptionStatus from "@/features/billing/useSubscriptionStatus";
+import { BILLING_PATH, MODES } from "@/features/billing/subscriptionUtils";
+import SectionTabs from "@/components/navigation/SectionTabs";
+import { groupOf, tabOf } from "@/components/navigation/navGroups";
+import { ADMIN_BASE as BASE, ADMIN_GROUPS as GROUPS } from "./adminNav";
 
 const OrganizationDashboard = () => {
   const navigate = useNavigate();
@@ -31,8 +17,16 @@ const OrganizationDashboard = () => {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const alertsApi = useOrganizationAlerts();
-  const pendingStaffApi = useOrganizationPendingStaff();
+  const { status: subscription, loaded: subscriptionLoaded } = useSubscriptionStatus(location.pathname);
+  const schoolLocked = subscription?.mode === MODES.BILLING_ONLY;
+  // Locked school: admins may only use billing (and their profile).
+  const locked = schoolLocked && location.pathname !== BILLING_PATH;
+  // Wait for the subscription answer, and load nothing a locked school
+  // would refuse (the alert bell and pending badges).
+  const canLoad = subscriptionLoaded && !schoolLocked;
+  const alertsApi = useOrganizationAlerts({ enabled: canLoad });
+  const pendingStaffApi = useOrganizationPendingStaff("teacher", { enabled: canLoad });
+  const pendingStudentsApi = useOrganizationPendingStaff("student", { enabled: canLoad });
   const { totalNotifications, loading: alertsLoading } = alertsApi;
 
   const handleLogout = async () => {
@@ -65,25 +59,13 @@ const OrganizationDashboard = () => {
     };
   }, [isProfileDropdownOpen]);
 
-  const sidebarItems = [
-    { id: "overview", label: "Overview", icon: Home, path: "/organization-dashboard/overview" },
-    { id: "students", label: "Students", icon: GraduationCap, path: "/organization-dashboard/students" },
-    { id: "teachers", label: "Teachers", icon: UserCheck, path: "/organization-dashboard/teachers" },
-    { id: "pending-teachers", label: "Pending Teachers", icon: UserCheck, path: "/organization-dashboard/pending-teachers" },
-    { id: "classes", label: "Classes", icon: BookOpen, path: "/organization-dashboard/classes" },
-    { id: "exams", label: "Exams", icon: FileText, path: "/organization-dashboard/exams" },
-    { id: "analytics", label: "Analytics", icon: TrendingUp, path: "/organization-dashboard/analytics" },
-    { id: "reports", label: "Reports", icon: FileText, path: "/organization-dashboard/reports" },
-    { id: "alerts", label: "Alerts", icon: AlertTriangle, path: "/organization-dashboard/alerts" },
-    { id: "operations", label: "Operations", icon: SlidersHorizontal, path: "/organization-dashboard/operations" },
-    { id: "messages", label: "Messages", icon: MessageCircle, path: "/organization-dashboard/messages" },
-  ];
-
-  const getCurrentSection = () => {
-    const currentPath = location.pathname;
-    const item = sidebarItems.find(item => item.path === currentPath);
-    return item ? item.label : "Organization";
+  const activeTab = location.pathname.slice(BASE.length).split("/")[0] || "overview";
+  const activeGroup = groupOf(GROUPS, activeTab);
+  const pendingCounts = {
+    teachers: pendingStaffApi.totalPendingStaff,
+    students: pendingStudentsApi.totalPendingStaff,
   };
+  const pathOf = (tabId) => `${BASE}${tabId}`;
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
@@ -118,18 +100,20 @@ const OrganizationDashboard = () => {
             </button>
           </div>
           <nav className="space-y-1">
-            {sidebarItems.map((item) => {
+            {GROUPS.map((item) => {
               const Icon = item.icon;
-              const isActive = location.pathname === item.path;
+              const isActive = activeGroup?.id === item.id;
+              const pending = pendingCounts[item.id];
               return (
                 <div key={item.id} className="relative group">
                   <button
                     onClick={() => {
-                      navigate(item.path);
+                      navigate(pathOf(item.tabs[0].id));
                       if (window.innerWidth < 768) {
                         setIsSidebarOpen(false);
                       }
                     }}
+                    aria-current={isActive ? "page" : undefined}
                     className={`w-full flex items-center px-4 py-3 text-left rounded-xl transition-all duration-200 min-h-[48px] group ${
                       isActive
                         ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg transform scale-[1.02] border border-blue-500"
@@ -145,11 +129,14 @@ const OrganizationDashboard = () => {
                       ${isSidebarOpen ? "" : "hidden md:flex"}
                     `}>
                       {item.label}
-                      {item.id === "pending-teachers" && pendingStaffApi.totalPendingStaff > 0 && (
-                        <span className={`ml-auto rounded-full px-2 py-0.5 text-xs ${
-                          isActive ? "bg-white/20 text-white" : "bg-amber-100 text-amber-800"
-                        }`}>
-                          {pendingStaffApi.totalPendingStaff > 99 ? "99+" : pendingStaffApi.totalPendingStaff}
+                      {pending > 0 && (
+                        <span
+                          title={`${pending} waiting for verification`}
+                          className={`ml-auto rounded-full px-2 py-0.5 text-xs ${
+                            isActive ? "bg-white/20 text-white" : "bg-amber-100 text-amber-800"
+                          }`}
+                        >
+                          {pending > 99 ? "99+" : pending}
                         </span>
                       )}
                     </span>
@@ -189,7 +176,7 @@ const OrganizationDashboard = () => {
               <div>
                 <p className="text-slate-500 text-sm mb-2 font-medium">Dashboard / Organization</p>
                 <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent capitalize">
-                  {getCurrentSection()}
+                  {tabOf(GROUPS, activeTab)?.label || "Organization"}
                 </h1>
               </div>
             </div>
@@ -251,7 +238,25 @@ const OrganizationDashboard = () => {
         </div>
 
         <main className="flex-1 m-4 md:m-6 mt-0 p-6 md:p-8">
-          <Outlet context={{ alertsApi, pendingStaffApi }} />
+          <SectionTabs group={activeGroup} activeId={activeTab} onSelect={(id) => navigate(pathOf(id))} className="mb-6" />
+          {!subscriptionLoaded ? (
+            // Pages wait for the subscription answer: a locked school's page
+            // would otherwise load data the API refuses.
+            <p className="py-12 text-center text-slate-500">Loading…</p>
+          ) : locked ? (
+            <section className="mx-auto max-w-lg space-y-4 rounded-xl bg-white p-8 text-center shadow-sm">
+              <Lock className="mx-auto h-10 w-10 text-red-500" />
+              <h2 className="text-xl font-bold text-gray-900">Your subscription has expired</h2>
+              <p className="text-gray-600">
+                Renew to restore access. Teachers, students and parents can still view your school, but nobody can make changes.
+              </p>
+              <button type="button" onClick={() => navigate(BILLING_PATH)} className="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700">
+                Go to billing
+              </button>
+            </section>
+          ) : (
+            <Outlet context={{ alertsApi, pendingStaffApi, pendingStudentsApi }} />
+          )}
         </main>
       </div>
     </div>

@@ -2,12 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import {
   BookOpen,
   MessageCircle,
-  Calendar,
   FileText,
   ClipboardCheck,
-  Clock,
   Award,
-  ChevronRight,
   LayoutDashboard,
   CreditCard,
   Menu,
@@ -22,118 +19,71 @@ import {
 } from "lucide-react";
 
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
+import SectionTabs from "@/components/navigation/SectionTabs";
+import { groupOf, tabOf } from "@/components/navigation/navGroups";
 import { logout } from "@/api/authApi";
 import { clearAuth } from "@/api/auth";
 
-const navLinks = [
+const BASE = "/student-dashboard/";
+
+/** Sidebar groups; pages in a group are tabs of one another. */
+const STUDENT_GROUPS = [
+  { id: "overview", label: "Overview", icon: LayoutDashboard, tabs: [{ id: "overview", label: "Overview" }] },
+  { id: "courses", label: "Courses", icon: BookOpen, tabs: [{ id: "courses", label: "Courses" }] },
   {
-    id: "overview",
-    icon: <LayoutDashboard size={20} />,
-    label: "Overview",
-    air: "overview",
+    id: "classwork",
+    label: "Classwork",
+    icon: FileText,
+    tabs: [
+      { id: "assignment", label: "Assignments" },
+      { id: "timetable", label: "Timetable" },
+      { id: "attendance", label: "Attendance" },
+    ],
   },
   {
-    id: "courses",
-    icon: <BookOpen size={20} />,
-    label: "Courses",
-    air: "courses",
+    id: "exams",
+    label: "Exams",
+    icon: ClipboardCheck,
+    tabs: [
+      { id: "exam", label: "Exams" },
+      { id: "cbt", label: "CBT exams" },
+    ],
   },
   {
-    id: "id card",
-    icon: <CreditCard size={20} />,
-    label: "ID Card",
-    air: "IDcard",
+    id: "results",
+    label: "Results",
+    icon: Award,
+    tabs: [
+      { id: "result", label: "Report cards" },
+      { id: "transcript", label: "Online exam scores" },
+    ],
   },
-  {
-    id: "attendance",
-    icon: <Calendar size={20} />,
-    label: "Attendance",
-    air: "attendance",
-  },
-  {
-    id: "assignments",
-    icon: <FileText size={20} />,
-    label: "Assignments",
-    air: "assignment",
-  },
-  {
-    id: "timetable",
-    icon: <Clock size={20} />,
-    label: "Timetable",
-    air: "timetable",
-  },
-  {
-    id: "transcript",
-    icon: <Award size={20} />,
-    label: "Transcript",
-    air: "transcript",
-  },
-  {
-    id: "result",
-    icon: <BookOpen size={20} />,
-    label: "Result",
-    air: "result",
-  },
-  {
-    id: "exam",
-    icon: <BookOpen size={20} />,
-    label: "Exam",
-    air: "exam",
-  },
-  {
-    id: "cbt",
-    icon: <ClipboardCheck size={20} />,
-    label: "CBT Exams",
-    air: "cbt",
-  },
-  {
-    id: "messages",
-    icon: <MessageCircle size={20} />,
-    label: "Messages",
-    air: "messages",
-  },
-  {
-    id: "forums",
-    icon: <MessageCircle size={20} />,
-    label: "Forums",
-    air: "/forums",
-    external: true,
-  },
-  {
-    id: "video-calls",
-    icon: <Video size={20} />,
-    label: "Video Calls",
-    air: "/video-calls",
-    external: true,
-  },
+  { id: "fees", label: "Fees", icon: CreditCard, tabs: [{ id: "fees", label: "Fees" }] },
+  { id: "messages", label: "Messages", icon: MessageCircle, tabs: [{ id: "messages", label: "Messages" }] },
+];
+
+/** Community pages outside the dashboard. */
+const EXTERNAL_LINKS = [
+  { id: "forums", label: "Forums", icon: Users, to: "/forums" },
+  { id: "video-calls", label: "Video Calls", icon: Video, to: "/video-calls" },
 ];
 
 // Main application component
 export default function StudentDashboard() {
-  const [activeTab, setActiveTab] = useState("overview");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
 
 
-  // Mock dashboard data - replace with actual API call
-  // const [dashboardData, setDashboardData] = useState({
-  //   user: {
-  //     profile_pic: "/default-profile.png"
-  //   }
-  // });
-
-  // Sync activeTab with current route
-  useEffect(() => {
-    const currentPath = location.pathname.split('/').pop();
-    const matchingLink = navLinks.find(link => link.air === currentPath);
-    if (matchingLink) {
-      setActiveTab(matchingLink.id);
-    }
-  }, [location.pathname]);
+  const activeTab = location.pathname.startsWith(BASE)
+    ? location.pathname.slice(BASE.length).split("/")[0] || "overview"
+    : "overview";
+  const activeGroup = groupOf(STUDENT_GROUPS, activeTab);
+  const closeOnMobile = () => {
+    if (window.innerWidth < 768) setIsMobileMenuOpen(false);
+  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -201,49 +151,37 @@ export default function StudentDashboard() {
             </button>
           </div>
           <nav className="space-y-1">
-            {navLinks.map((link) => (
-              <div key={link.id} className="relative group">
-                <Link
-                  to={link.air}
-                  onClick={() => {
-                    setActiveTab(link.id);
-                    if (window.innerWidth < 768) {
-                      setIsMobileMenuOpen(false);
-                    }
-                  }}
-                  className={`w-full flex items-center px-4 py-3 text-left rounded-xl transition-all duration-200 min-h-[48px] group ${
-                    activeTab === link.id
-                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg transform scale-[1.02] border border-blue-500"
-                      : "text-slate-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-700 hover:shadow-md border border-transparent hover:border-blue-200"
-                  }`}
-                  title={link.label}
-                >
-                  <span className={`mr-4 flex-shrink-0 transition-colors duration-200 ${
-                    activeTab === link.id ? "text-white" : "text-slate-500 group-hover:text-blue-600"
-                  }`}>{link.icon}</span>
-                  <span className={`
-                    transition-all duration-300 font-medium
-                    ${isMobileMenuOpen ? "block" : "hidden md:block"}
-                  `}>
-                    {link.label}
-                  </span>
-                </Link>
-
-                {/* Tooltip for collapsed state */}
-                <div
-                  className={`
-                  absolute left-full top-1/2 transform -translate-y-1/2 ml-3
-                  bg-slate-900 text-white text-sm px-3 py-2 rounded-lg whitespace-nowrap shadow-lg
-                  opacity-0 pointer-events-none transition-opacity duration-200 z-50
-                  group-hover:opacity-100
-                  ${isMobileMenuOpen ? "hidden" : "block md:hidden"}
-                `}
-                >
-                  {link.label}
-                  <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 border-4 border-transparent border-r-slate-900"></div>
+            {[
+              ...STUDENT_GROUPS.map((g) => ({ ...g, to: g.tabs[0].id, active: activeGroup?.id === g.id })),
+              ...EXTERNAL_LINKS,
+            ].map((link) => {
+              const Icon = link.icon;
+              return (
+                <div key={link.id} className="relative group">
+                  <Link
+                    to={link.to}
+                    onClick={closeOnMobile}
+                    aria-current={link.active ? "page" : undefined}
+                    className={`w-full flex items-center px-4 py-3 text-left rounded-xl transition-all duration-200 min-h-[48px] group ${
+                      link.active
+                        ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg transform scale-[1.02] border border-blue-500"
+                        : "text-slate-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-700 hover:shadow-md border border-transparent hover:border-blue-200"
+                    }`}
+                    title={link.label}
+                  >
+                    <span className={`mr-4 flex-shrink-0 transition-colors duration-200 ${
+                      link.active ? "text-white" : "text-slate-500 group-hover:text-blue-600"
+                    }`}><Icon size={20} /></span>
+                    <span className={`
+                      transition-all duration-300 font-medium
+                      ${isMobileMenuOpen ? "block" : "hidden md:block"}
+                    `}>
+                      {link.label}
+                    </span>
+                  </Link>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </nav>
         </div>
       </div>
@@ -254,7 +192,8 @@ export default function StudentDashboard() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4 md:space-x-6">
               <button
-                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                onClick={() => setIsMobileMenuOpen(true)}
+                aria-label="Open menu"
                 className="p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 md:hidden border border-slate-200"
               >
                 <Menu className="w-5 h-5 text-slate-600" />
@@ -262,7 +201,7 @@ export default function StudentDashboard() {
               <div>
                 <p className="text-slate-500 text-sm mb-2 font-medium">Dashboard / Student</p>
                 <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent capitalize">
-                  {navLinks.find(link => link.id === activeTab)?.label}
+                  {tabOf(STUDENT_GROUPS, activeTab)?.label}
                 </h1>
               </div>
             </div>
@@ -332,6 +271,7 @@ export default function StudentDashboard() {
         </div>
 
         <main className="flex-1 m-4 md:m-6 mt-0 p-6 md:p-8">
+          <SectionTabs group={activeGroup} activeId={activeTab} onSelect={(id) => navigate(`${BASE}${id}`)} className="mb-6" />
           <Outlet /> {/* Display nested routes */}
         </main>
       </div>

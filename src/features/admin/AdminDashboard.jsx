@@ -84,6 +84,12 @@ export default function AdminDashboard() {
       air: "organizations",
     },
     {
+      id: "Subscriptions",
+      icon: <CreditCard size={20} />,
+      label: "Subscriptions",
+      air: "subscriptions",
+    },
+    {
       id: "EmailLogs",
       icon: <Mail size={20} />,
       label: "Email Logs",

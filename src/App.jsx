@@ -22,7 +22,6 @@ import Profile from "@/features/auth/Profile";
 import AdminLogin from "@/features/admin/AdminLogin";
 
 // Dashboard Components
-import IdCard from "@/features/student/IdCard";
 import AdminDashboard from "@/features/admin/AdminDashboard";
 import Dashboard from "@/features/admin/Dashboard";
 import Users from "@/features/admin/Users";
@@ -30,6 +29,7 @@ import NewUser from "@/features/admin/NewUser";
 import Report from "@/features/admin/Report";
 import Organizations from "@/features/admin/Organizations";
 import EmailLogs from "@/features/admin/EmailLogs";
+import Subscriptions from "@/features/admin/Subscriptions";
 import SchoolAdmin from "@/features/school-admin/SchoolAdmin";
 import TeacherDashboard from "@/features/teacher/TeacherDashboard";
 import StudentDashboard from "@/features/student/StudentDashboard";
@@ -37,7 +37,6 @@ import OrganizationDashboard from "@/features/organization/OrganizationDashboard
 import OrganizationOverview from "@/features/organization/pages/OrganizationOverview";
 import OrganizationStudents from "@/features/organization/pages/OrganizationStudents";
 import OrganizationTeachers from "@/features/organization/pages/OrganizationTeachers";
-import OrganizationPendingTeachers from "@/features/organization/pages/OrganizationPendingTeachers";
 import OrganizationClasses from "@/features/organization/pages/OrganizationClasses";
 import OrganizationExams from "@/features/organization/pages/OrganizationExams";
 import OrganizationAnalytics from "@/features/organization/pages/OrganizationAnalytics";
@@ -62,10 +61,18 @@ import Overview from "@/features/student/Overview";
 import Attendance from "@/features/student/Attendance";
 import Assignments from "@/features/student/Assignments";
 import Timetable from "@/features/student/Timetable";
-import Grade from "@/features/student/Grade";
+import OnlineExamScores from "@/features/student/OnlineExamScores";
 import { CoursesComponent } from "@/features/student/CoursesComponent";
 import CoursePage from "@/features/student/CoursePage";
 import Result from "@/features/student/Result";
+import TeacherResults from "@/features/results/TeacherResults";
+import GradingPolicyPage from "@/features/results/GradingPolicyPage";
+import SubscriptionBanner from "@/features/billing/SubscriptionBanner";
+import BillingPage from "@/features/billing/BillingPage";
+import PaymentCallback from "@/features/billing/PaymentCallback";
+import PricingPage from "@/features/billing/PricingPage";
+import SchoolFeesPage from "@/features/billing/SchoolFeesPage";
+import MyFees from "@/features/billing/MyFees";
 import Exam from "@/features/student/Exam";
 import StudentCbt from "@/features/student/StudentCbt";
 import DirectMessages from "@/features/communication/DirectMessages";
@@ -113,8 +120,13 @@ const AppContent = () => {
   }
 
   return (
+    <>
+    <SubscriptionBanner />
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route path="/payments/callback" element={<PaymentCallback />} />
+      <Route path="/pricing" element={<PricingPage />} />
+      <Route path="/register/school" element={<SignupForm />} />
       {/* <Route path="/" element={<HomePageRefresh />} /> */}
       <Route path="/home" element={<RegisteredHomePage />} />
       {/* Public authentication routes */}
@@ -144,14 +156,16 @@ const AppContent = () => {
       <Route path="/student-dashboard" element={<RequireAuth><StudentDashboard /></RequireAuth>}>
         <Route index element={<Overview />} />
         <Route path="overview" element={<Overview />} />
-        <Route path="IDcard" element={<IdCard />} />
+        {/* The ID card lives on the profile page now. */}
+        <Route path="IDcard" element={<Navigate to="/profile" replace />} />
         <Route path="attendance" element={<Attendance />} />
         <Route path="assignment" element={<Assignments />} />
         <Route path="timetable" element={<Timetable />} />
-        <Route path="transcript" element={<Grade />} />
+        <Route path="transcript" element={<OnlineExamScores />} />
         <Route path="courses" element={<CoursesComponent />} />
         <Route path="courses/:courseId" element={<CoursePage />} />
         <Route path="result" element={<Result />} />
+        <Route path="fees" element={<MyFees />} />
         <Route path="exam" element={<Exam />} />
         <Route path="cbt" element={<StudentCbt />} />
         <Route path="messages" element={<StudentMessages />} />
@@ -165,6 +179,7 @@ const AppContent = () => {
         <Route path="users/new-user" element={<NewUser />} />
         <Route path="organizations" element={<Organizations />} />
         <Route path="emails" element={<EmailLogs />} />
+        <Route path="subscriptions" element={<Subscriptions />} />
         <Route path="reports" element={<Report />} />
         <Route path="*" element={<Error />} />
       </Route>
@@ -176,9 +191,15 @@ const AppContent = () => {
         <Route path="overview" element={<OrganizationOverview />} />
         <Route path="students" element={<OrganizationStudents />} />
         <Route path="teachers" element={<OrganizationTeachers />} />
-        <Route path="pending-teachers" element={<OrganizationPendingTeachers />} />
+        {/* Pending sign-ups live under the Pending pill now. */}
+        <Route path="pending-teachers" element={<Navigate to="/organization-dashboard/teachers?status=pending" replace />} />
+        <Route path="pending-students" element={<Navigate to="/organization-dashboard/students?status=pending" replace />} />
         <Route path="classes" element={<OrganizationClasses />} />
         <Route path="exams" element={<OrganizationExams />} />
+        <Route path="results" element={<TeacherResults />} />
+        <Route path="grading" element={<GradingPolicyPage />} />
+        <Route path="billing" element={<BillingPage />} />
+        <Route path="fees" element={<SchoolFeesPage />} />
         <Route path="analytics" element={<OrganizationAnalytics />} />
         <Route path="reports" element={<OrganizationReports />} />
         <Route path="alerts" element={<OrganizationAlerts />} />
@@ -211,6 +232,7 @@ const AppContent = () => {
       {/* Catch-all route for 404 errors */}
       <Route path="*" element={<Error />} />
     </Routes>
+    </>
   );
 };
 

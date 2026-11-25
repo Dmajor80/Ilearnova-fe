@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Building2, Mail, Phone, MapPin, User as UserIcon, Check, X } from "lucide-react";
 import { http } from "../../../api/baseClient";
+import AccessCodeField from "@/features/billing/AccessCodeField";
 
 // Memoized, focus-stable input similar to login/signup InputField
 const InputField = React.memo(function InputField({
@@ -95,6 +96,10 @@ export default function OrganizationDetails() {
     email: "",
     phone_number: "",
   });
+  // Creating a school needs a subscription: an access code, or one set up
+  // for the signed-in user's email (then the code can stay blank).
+  const [accessCode, setAccessCode] = useState("");
+  const [accessError, setAccessError] = useState("");
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -189,8 +194,10 @@ export default function OrganizationDetails() {
         address: form.address.trim(),
         email: form.email.trim(),
         phone_number: form.phone_number.trim(),
+        ...(accessCode.trim() ? { access_code: accessCode.trim() } : {}),
       };
 
+      setAccessError("");
       const response = await http.post("/api/user-type/", {
         body,
       });
@@ -206,7 +213,12 @@ export default function OrganizationDetails() {
       showNotification("Organization profile saved. Redirecting...", "success");
       setTimeout(() => navigate("/home", { replace: true }), 700);
     } catch (e) {
-      showNotification(e.message || "Network error", "error");
+      const fieldErrors = e?.data?.field_errors || e?.data || {};
+      const reason = [fieldErrors.access_code, fieldErrors.subscription]
+        .flat()
+        .find(Boolean);
+      if (reason) setAccessError(String(reason));
+      showNotification(reason ? String(reason) : e.message || "Network error", "error");
     } finally {
       setLoading(false);
     }
@@ -338,6 +350,16 @@ export default function OrganizationDetails() {
               handleChange={handleChange}
               handleSubmit={onSubmit}
               disabled={loading}
+            />
+
+            <AccessCodeField
+              value={accessCode}
+              onChange={(value) => {
+                setAccessCode(value);
+                setAccessError("");
+              }}
+              error={accessError}
+              darkMode={darkMode}
             />
 
             <div className="flex items-center justify-between mt-6">

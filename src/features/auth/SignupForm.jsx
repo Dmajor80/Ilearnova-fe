@@ -1,8 +1,9 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
 import { Mail, User, Lock, CheckCircle, Building, Users, GraduationCap, UserCheck, Heart, BookOpen, Calendar } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import useRegister from "@/hooks/useRegister";
+import AccessCodeField from "@/features/billing/AccessCodeField";
 import InputField from "@/components/ui/InputField";
 import NotificationBar from "@/components/ui/NotificationBar";
 import { getOrganizations } from "@/api/authApi";
@@ -36,6 +37,20 @@ export default function SignupForm() {
   const [userEmail, setUserEmail] = useState("");
   const [organizations, setOrganizations] = useState([]);
   const [organizationsLoading, setOrganizationsLoading] = useState(false);
+  // Invite / paid-code emails link to /register/school?code=…&email=…
+  const [searchParams] = useSearchParams();
+  const { pathname } = useLocation();
+  const inviteCode = searchParams.get("code");
+  const inviteEmail = searchParams.get("email");
+  const [initial] = useState(() =>
+    inviteCode || inviteEmail || pathname === "/register/school"
+      ? {
+          role: "org_admin",
+          ...(inviteEmail ? { email: inviteEmail } : {}),
+          ...(inviteCode ? { access_code: inviteCode.toUpperCase() } : {}),
+        }
+      : undefined
+  );
 
   const {
     formData,
@@ -46,6 +61,7 @@ export default function SignupForm() {
     handleSubmit,
     notification,
   } = useRegister({
+    initial,
     onSuccess: (response) => {
       const registeredUser = response?.data?.user || response?.user;
       setUserEmail(registeredUser?.email || formData.email);
@@ -317,12 +333,13 @@ export default function SignupForm() {
                 />
                 
                 <div>
-                  <label className={`block text-sm font-medium mb-3 ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
-                    Date of Birth
+                  <label htmlFor="date_of_birth" className={`block text-sm font-medium mb-3 ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                    Date of Birth <span className="text-red-500 ml-1">*</span>
                   </label>
                   <div className="relative">
                     <input
                       type="date"
+                      id="date_of_birth"
                       name="date_of_birth"
                       value={formData.date_of_birth || ""}
                       onChange={(e) => handleInputChange("date_of_birth", e.target.value)}
@@ -355,6 +372,18 @@ export default function SignupForm() {
                     errors={errors}
                     formData={formData}
                     handleChange={handleInputChange}
+                  />
+                )}
+
+                {/* Creating a school needs a subscription: an access code, or
+                    one iLearnova set up for this email. */}
+                {formData.role === "org_admin" && (
+                  <AccessCodeField
+                    value={formData.access_code}
+                    email={formData.email}
+                    onChange={(value) => handleInputChange("access_code", value)}
+                    error={errors.access_code || errors.subscription}
+                    darkMode={darkMode}
                   />
                 )}
 

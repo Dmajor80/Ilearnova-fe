@@ -7,10 +7,12 @@ import QuickActionsGrid from "@/components/dashboard/QuickActionsGrid";
 import { useParentChildProgress, useParentChildren } from "@/hooks/parent";
 import ParentAttendance from "./ParentAttendance";
 import ParentMessages from "./ParentMessages";
-import ParentPayment from "./ParentPayment";
+import MyFees from "@/features/billing/MyFees";
 import ParentResult from "./ParentResult";
 import ParentTimetable from "./ParentTimetable";
-import ParentTranscript from "./ParentTranscript";
+import SectionTabs from "@/components/navigation/SectionTabs";
+import { groupOf } from "@/components/navigation/navGroups";
+import { PARENT_GROUPS } from "../parentNav";
 import ParentSidebar from "../components/ParentSidebar";
 import ParentHeader from "../components/ParentHeader";
 import Announcement from "./Announcement";
@@ -67,6 +69,7 @@ export default function ParentDashboard() {
           dashboardData={dashboardData}
         />
         <main className="m-4 mt-0 flex-1 p-6 md:m-6 md:mt-0 md:p-8">
+          <SectionTabs group={groupOf(PARENT_GROUPS, activeTab)} activeId={activeTab} onSelect={setActiveTab} className="mb-6" />
           {(activeTab === "dashboard" || activeTab === "children") && (
             <div className="space-y-6">
               {activeTab === "dashboard" && (
@@ -177,9 +180,8 @@ export default function ParentDashboard() {
           {activeTab === "attendance" && <ParentAttendance isStandalone={false} />}
           {activeTab === "grades" && <ParentResult isStandalone={false} />}
           {activeTab === "messages" && <ParentMessages />}
-          {activeTab === "fees" && <ParentPayment />}
+          {activeTab === "fees" && <MyFees />}
           {activeTab === "timetable" && <ParentTimetable />}
-          {activeTab === "reports" && <ParentTranscript />}
         </main>
       </div>
     </div>
