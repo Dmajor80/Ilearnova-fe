@@ -5,7 +5,7 @@ import { fmt, gradeFor, rowTotals, scoreProblem } from "./resultsUtils";
  * `drafts` maps student_id -> { scores: {key: value}, remark }.
  * `rowErrors` maps student_id -> [problems] from the last save.
  */
-export default function ScoreSheet({ sheet, drafts, onEdit, rowErrors = {}, bands = [], disabled }) {
+export default function ScoreSheet({ sheet, drafts, onEdit, rowErrors = {}, bands = [], disabled, republish = new Set() }) {
   const { components, students } = sheet;
 
   if (!students.length) {
@@ -86,6 +86,10 @@ export default function ScoreSheet({ sheet, drafts, onEdit, rowErrors = {}, band
                     <span className="text-gray-400">Not saved</span>
                   ) : result.is_published ? (
                     <span className="rounded-full bg-green-100 px-2 py-0.5 text-green-800">Published</span>
+                  ) : republish.has(student.student_id) ? (
+                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-amber-800" title="Students and parents see this once you publish again">
+                      Edited, publish again
+                    </span>
                   ) : totals.complete ? (
                     <span className="rounded-full bg-blue-100 px-2 py-0.5 text-blue-800">Draft</span>
                   ) : (

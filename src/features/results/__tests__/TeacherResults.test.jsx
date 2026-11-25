@@ -118,6 +118,44 @@ describe("TeacherResults", () => {
     expect(alert.closest('[role="alert"]').textContent).not.toMatch(/highlighted rows/);
   });
 
+  it("tells the teacher an edited published result needs publishing again", async () => {
+    const result = (published) => ({
+      id: "r-ada",
+      scores: { ca_1: "40", ca_2: "35", exam: "75" },
+      remark: "",
+      is_published: published,
+    });
+    let adaPublished = true;
+    http.get.mockImplementation((path) =>
+      path.endsWith("/scores/")
+        ? Promise.resolve({
+            success: true,
+            data: {
+              ...SHEET,
+              students: [
+                { ...SHEET.students[0], result: result(adaPublished) },
+                { ...SHEET.students[1], result: { ...result(true), id: "r-bayo" } },
+              ],
+            },
+          })
+        : respond(path)
+    );
+    http.post.mockImplementation(() => {
+      adaPublished = false; // the backend unpublished Ada's edited result
+      return Promise.resolve({ success: true, message: "Saved 1 result(s).", unpublished: 1, data: [] });
+    });
+
+    render(<TeacherResults />);
+    fireEvent.change(await screen.findByLabelText("Ada Obi CA 1"), { target: { value: "45" } });
+    fireEvent.click(screen.getByRole("button", { name: /Save \(1\)/ }));
+
+    expect(await screen.findByText(/won't see the change until you publish again/)).toBeTruthy();
+    const adaRow = (await screen.findByLabelText("Ada Obi CA 1")).closest("tr");
+    await waitFor(() => expect(adaRow.textContent).toContain("Edited, publish again"));
+    expect(screen.getByLabelText("Bayo Ade CA 1").closest("tr").textContent).toContain("Published");
+    expect(screen.getByText(/1 result is hidden from students and parents/)).toBeTruthy();
+  });
+
   it("blocks saving a score above the component maximum", async () => {
     render(<TeacherResults />);
     fireEvent.change(await screen.findByLabelText("Ada Obi CA 1"), { target: { value: "51" } });

@@ -9,6 +9,11 @@ const RESULTS = "/api/results";
 /** Most responses are `{ success, data }`; return the `data` part. */
 export const unwrap = (payload) => (payload && "data" in payload ? payload.data : payload);
 
+const savedScores = (payload) => ({
+  results: unwrap(payload) || [],
+  unpublished: payload?.unpublished ?? 0,
+});
+
 const get = async (path, params) => unwrap(await http.get(path, { auth: true, params }));
 
 export const resultsApi = {
@@ -29,8 +34,10 @@ export const resultsApi = {
   mySubjects: () => get(`${RESULTS}/subjects/`),
   myClasses: () => get(`${RESULTS}/classes/`),
   scoreSheet: (subjectId, period) => get(`${RESULTS}/subjects/${subjectId}/scores/`, period),
+  /** Returns { results, unpublished }: `unpublished` counts published
+   * results this edit hid again until the teacher republishes. */
   saveScores: async (subjectId, period, results) =>
-    unwrap(
+    savedScores(
       await http.post(`${RESULTS}/subjects/${subjectId}/scores/`, { ...period, results }, { auth: true })
     ),
   uploadScores: async (subjectId, period, file) => {
@@ -38,7 +45,7 @@ export const resultsApi = {
     form.append("session", period.session);
     form.append("term", period.term);
     form.append("file", file);
-    return unwrap(await http.post(`${RESULTS}/subjects/${subjectId}/upload/`, form, { auth: true }));
+    return savedScores(await http.post(`${RESULTS}/subjects/${subjectId}/upload/`, form, { auth: true }));
   },
   scoreTemplate: (subjectId, period, fileFormat = "xlsx") =>
     http.get(`${RESULTS}/subjects/${subjectId}/template/`, {

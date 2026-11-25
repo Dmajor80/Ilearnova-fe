@@ -42,6 +42,8 @@ export default function TeacherResults() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState(null); // { type: "error"|"success", lines: [] }
   const [editingComponents, setEditingComponents] = useState(null);
+  // Students whose published result was edited and is hidden until republished.
+  const [republish, setRepublish] = useState(() => new Set());
 
   const subject = useMemo(() => subjects.find((s) => String(s.id) === String(subjectId)), [subjects, subjectId]);
 
@@ -75,6 +77,7 @@ export default function TeacherResults() {
       setDrafts(draftsFromSheet(data));
       setChanged(new Set());
       setRowErrors({});
+      return data;
     } catch (err) {
       setSheet(null);
       say("error", apiErrorDetails(err).messages);
@@ -85,8 +88,26 @@ export default function TeacherResults() {
 
   useEffect(() => {
     setMessage(null);
+    setRepublish(new Set());
     loadSheet();
   }, [loadSheet]);
+
+  /** Reload, and remember who was published before but is not any more. */
+  const reloadAfterSave = async (publishedBefore) => {
+    const data = await loadSheet();
+    const hidden = (data?.students || [])
+      .filter((s) => publishedBefore.has(s.student_id) && !s.result?.is_published)
+      .map((s) => s.student_id);
+    if (hidden.length) setRepublish((current) => new Set([...current, ...hidden]));
+  };
+
+  const publishedIds = () =>
+    new Set((sheet?.students || []).filter((s) => s.result?.is_published).map((s) => s.student_id));
+
+  const republishNote = (count) =>
+    count
+      ? `${count} of them had been published, so students and parents won't see the change until you publish again.`
+      : "";
 
   const edit = (studentId, patch) => {
     setDrafts((current) => ({ ...current, [studentId]: { ...current[studentId], ...patch } }));
@@ -102,9 +123,10 @@ export default function TeacherResults() {
     if (!rows.length) return say("success", "Nothing has changed.");
     setBusy(true);
     try {
-      await resultsApi.saveScores(subjectId, period, rows);
-      await loadSheet();
-      say("success", `Saved ${rows.length} student(s).`);
+      const before = publishedIds();
+      const { unpublished } = await resultsApi.saveScores(subjectId, period, rows);
+      await reloadAfterSave(before);
+      say("success", `Saved ${rows.length} student(s).`, republishNote(unpublished));
     } catch (err) {
       const { messages, rows: byNumber } = apiErrorDetails(err);
       const errors = {};
@@ -131,9 +153,10 @@ export default function TeacherResults() {
     if (!file) return;
     setBusy(true);
     try {
-      const saved = await resultsApi.uploadScores(subjectId, period, file);
-      await loadSheet();
-      say("success", `Uploaded ${saved?.length ?? 0} student(s) from ${file.name}.`);
+      const before = publishedIds();
+      const { results, unpublished } = await resultsApi.uploadScores(subjectId, period, file);
+      await reloadAfterSave(before);
+      say("success", `Uploaded ${results.length} student(s) from ${file.name}.`, republishNote(unpublished));
     } catch (err) {
       const { messages, rows } = apiErrorDetails(err);
       say(
@@ -162,6 +185,7 @@ export default function TeacherResults() {
     try {
       const res = await resultsApi.publish(subjectId, period, value);
       await loadSheet();
+      if (value) setRepublish(new Set());
       say("success", value ? `Published ${res?.updated ?? 0} result(s).` : "Results hidden from students and parents.");
     } catch (err) {
       say("error", value ? "Could not publish." : "Could not unpublish.", apiErrorDetails(err).messages);
@@ -207,6 +231,8 @@ export default function TeacherResults() {
   }
 
   const published = sheet?.students.filter((s) => s.result?.is_published).length || 0;
+  // Saved but not visible to students, e.g. edited after publishing.
+  const hidden = sheet?.students.filter((s) => s.result && !s.result.is_published).length || 0;
   const componentsError = editingComponents ? componentsProblem(editingComponents) : "";
 
   return (
@@ -311,7 +337,12 @@ export default function TeacherResults() {
           <p className="text-sm text-gray-600">
             {sheet.students.length} student(s) · {published} published. Blank boxes are fine until you publish.
           </p>
-          <ScoreSheet sheet={sheet} drafts={drafts} onEdit={edit} rowErrors={rowErrors} bands={bands} disabled={busy} />
+          {published > 0 && hidden > 0 && (
+            <p role="note" className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
+              {hidden === 1 ? "1 result is" : `${hidden} results are`} hidden from students and parents until you publish again.
+            </p>
+          )}
+          <ScoreSheet sheet={sheet} drafts={drafts} onEdit={edit} rowErrors={rowErrors} bands={bands} disabled={busy} republish={republish} />
         </>
       ) : (
         busy && <p className="py-8 text-center text-gray-500">Loading scores…</p>
