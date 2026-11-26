@@ -46,9 +46,8 @@ describe("StudentDashboard navigation", () => {
       "Results",
       "Fees",
       "Messages",
-      "Forums",
-      "Video Calls",
     ]);
+    // Forums and video calls have no backend yet, so they aren't linked.
     // ID card moved to the profile; transcript and CBT are tabs.
     expect(screen.queryByRole("link", { name: /ID Card|Transcript|CBT/ })).toBeNull();
   });

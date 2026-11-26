@@ -26,3 +26,9 @@ export const getParentChildProgress = (childId) =>
 
 export const linkParentStudent = (requestData) =>
   http.post(`${PARENT_API}/link-student/`, requestData, { auth: true });
+
+export const getParentChildTimetable = (childId) =>
+  http.get(`${PARENT_API}/children/${resourceId(childId)}/timetable/`, { auth: true });
+
+export const getParentAnnouncements = () =>
+  http.get(`${PARENT_API}/announcements/`, { auth: true });

@@ -133,3 +133,5 @@ export const getStudentCourseCatalogue = (params) =>
 /** Marks a lesson done (safe to repeat). Feeds course progress. */
 export const completeStudentMaterial = (materialId) =>
   http.post(`${STUDENT_API}/materials/${resourceId(materialId)}/complete/`, {}, { auth: true });
+
+export const getStudentTimetable = () => http.get(`${STUDENT_API}/timetable/`, { auth: true });
