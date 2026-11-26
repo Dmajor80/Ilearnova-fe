@@ -52,6 +52,8 @@ export default function useTeacherApi() {
   const [lastUpdated, setLastUpdated] = useState(null);
   const activeRequests = useRef(0);
   const activeMutations = useRef(0);
+  // `notification` is a new object every render; its notify is stable.
+  const { notify } = notification;
 
   const request = useCallback(async (
     endpoint,
@@ -66,7 +68,7 @@ export default function useTeacherApi() {
       );
       const message = getUserFriendlyMessage(appError);
       setError(appError);
-      notification.notify(`${failureMessage}: ${message}`, getNotificationType(appError));
+      notify(`${failureMessage}: ${message}`, getNotificationType(appError));
       throw appError;
     }
 
@@ -79,21 +81,21 @@ export default function useTeacherApi() {
     try {
       const data = unwrapTeacherResponse(await operation());
       setLastUpdated(new Date());
-      if (successMessage) notification.notify(successMessage, "success");
+      if (successMessage) notify(successMessage, "success");
       return data;
     } catch (requestError) {
       const appError = parseError(requestError, { action });
       const message = getUserFriendlyMessage(appError);
       markEndpointFailed(endpoint, message);
       setError(appError);
-      notification.notify(`${failureMessage}: ${message}`, getNotificationType(appError));
+      notify(`${failureMessage}: ${message}`, getNotificationType(appError));
       console.warn(`Teacher API request failed (${endpoint}):`, requestError);
       throw appError;
     } finally {
       counter.current -= 1;
       setActive(counter.current > 0);
     }
-  }, [markEndpointFailed, notification, shouldCallEndpoint]);
+  }, [markEndpointFailed, notify, shouldCallEndpoint]);
 
   return {
     request,
