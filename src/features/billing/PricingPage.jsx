@@ -61,7 +61,7 @@ export default function PricingPage() {
         {loading ? (
           <p className="text-center text-gray-500">Loading plans…</p>
         ) : plans.length ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {plans.map((plan) => {
               const selected = chosen?.code === plan.code;
               return (
@@ -70,15 +70,15 @@ export default function PricingPage() {
                   type="button"
                   onClick={() => setChosen(plan)}
                   aria-pressed={selected}
-                  className={`rounded-2xl border-2 bg-white p-6 text-left shadow-sm transition hover:shadow-md ${selected ? "border-blue-600" : "border-transparent"}`}
+                  className={`flex h-full flex-col items-stretch justify-start rounded-2xl border-2 bg-white p-6 text-left shadow-sm transition hover:shadow-md ${selected ? "border-blue-600" : "border-transparent"}`}
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex min-h-6 items-center justify-between gap-2">
                     <h2 className="text-lg font-semibold text-gray-900">{plan.name}</h2>
-                    {selected && <Check className="h-5 w-5 text-blue-600" />}
+                    {selected && <Check className="h-5 w-5 flex-shrink-0 text-blue-600" />}
                   </div>
                   <p className="mt-3 text-3xl font-bold text-gray-900">{naira(plan.amount)}</p>
-                  <p className="text-sm text-gray-500">{planLength(plan.duration_days)}</p>
-                  {plan.description && <p className="mt-3 text-sm text-gray-600">{plan.description}</p>}
+                  <p className="mt-1 text-sm text-gray-500">{planLength(plan.duration_days)}</p>
+                  {plan.description && <p className="mt-4 border-t border-gray-100 pt-4 text-sm text-gray-600">{plan.description}</p>}
                 </button>
               );
             })}
