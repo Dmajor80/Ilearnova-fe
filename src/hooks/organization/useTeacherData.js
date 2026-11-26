@@ -24,7 +24,7 @@ const fetchPendingTeacherRecords = async () => {
     const data = unwrapApiData(payload);
 
     if (!Array.isArray(data?.pending_staff)) {
-      throw new Error("The pending staff endpoint returned an unexpected response.");
+      throw new Error("We couldn't load pending staff. Please try again.");
     }
 
     records.push(...data.pending_staff);

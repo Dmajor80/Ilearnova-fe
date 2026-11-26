@@ -84,7 +84,7 @@ export function parseError(error, context = {}) {
     } else if (status >= 500) {
       type = ERROR_TYPES.SERVER;
       severity = ERROR_SEVERITY.HIGH;
-      message = 'Server error. Please try again later.';
+      message = 'Something went wrong on our side. Please try again in a moment.';
     }
   }
 
@@ -107,9 +107,9 @@ export function getUserFriendlyMessage(error) {
   const messages = {
     [ERROR_TYPES.NETWORK]: 'Connection problem. Please check your internet and try again.',
     [ERROR_TYPES.AUTHENTICATION]: 'Please check your login credentials and try again.',
-    [ERROR_TYPES.AUTHORIZATION]: 'You don\'t have permission to access this resource.',
+    [ERROR_TYPES.AUTHORIZATION]: 'You don\'t have permission to do this. Ask your school admin if you need access.',
     [ERROR_TYPES.VALIDATION]: 'Please check your input and try again.',
-    [ERROR_TYPES.SERVER]: 'Server is temporarily unavailable. Please try again later.',
+    [ERROR_TYPES.SERVER]: 'Something went wrong on our side. Please try again in a moment.',
     [ERROR_TYPES.CLIENT]: 'Something went wrong. Please try again.',
     [ERROR_TYPES.UNKNOWN]: 'An unexpected error occurred. Please try again.'
   };

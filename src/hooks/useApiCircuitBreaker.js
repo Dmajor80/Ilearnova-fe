@@ -199,7 +199,7 @@ export default function useApiCircuitBreaker(options = {}) {
       console.warn(message);
       
       if (throwOnFailure) {
-        throw new Error(message);
+        throw new Error("This section is temporarily unavailable. Please try again in a minute.");
       }
       return null;
     }

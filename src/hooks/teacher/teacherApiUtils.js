@@ -57,11 +57,11 @@ export default function useTeacherApi() {
     endpoint,
     action,
     operation,
-    { mutation = false, successMessage, failureMessage = "Request failed" } = {}
+    { mutation = false, successMessage, failureMessage = "That didn't work" } = {}
   ) => {
     if (!shouldCallEndpoint(endpoint)) {
       const appError = parseError(
-        new Error("This endpoint is temporarily unavailable after repeated failures."),
+        new Error("This section is temporarily unavailable. Please try again in a minute."),
         { action }
       );
       const message = getUserFriendlyMessage(appError);

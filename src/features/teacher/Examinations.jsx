@@ -118,7 +118,7 @@ export default function Examinations() {
       await examsApi.fetchBankQuestions(selectedExam.id);
       setQuestionJsonError("");
     } catch (error) {
-      if (error instanceof SyntaxError) setQuestionJsonError("Enter valid JSON for the endpoint request body.");
+      if (error instanceof SyntaxError) setQuestionJsonError("The question details aren't in the right format. Please check them and try again.");
     }
   };
 
@@ -130,7 +130,7 @@ export default function Examinations() {
       await questionApi.updateQuestion(questionApi.question.id, payload);
       setQuestionJsonError("");
     } catch (error) {
-      if (error instanceof SyntaxError) setQuestionJsonError("Enter valid JSON for the question update.");
+      if (error instanceof SyntaxError) setQuestionJsonError("The question update isn't in the right format. Please check it and try again.");
     }
   };
 
@@ -200,10 +200,10 @@ export default function Examinations() {
               <>
                 {questions.length ? <div className="divide-y">{questions.map((question) => <article key={question.id} className="flex items-center justify-between gap-4 py-3"><div><p className="font-medium">{question.question || question.text || question.title || question.id}</p><p className="text-xs text-gray-500">{question.question_type || question.type || ""}</p></div><div className="flex gap-2"><button onClick={async () => { try { const data = await questionApi.fetchQuestion(question.id); setQuestionDetails(JSON.stringify(data, null, 2)); setQuestionJsonError(""); } catch { /* Hook reports failures. */ } }} className="rounded border px-3 py-1.5 text-sm">Load details</button><button onClick={async () => { if (window.confirm("Delete this question?")) { try { await questionApi.removeQuestion(question.id); await examsApi.fetchBankQuestions(selectedExam.id); } catch { /* Hook reports failures. */ } } }} className="rounded border px-3 py-1.5 text-sm text-red-600">Delete</button></div></article>)}</div> : <p className="text-gray-600">No linked bank questions found for this examination.</p>}
                 <form onSubmit={submitQuestionPayload} className="mt-5 space-y-2 border-t pt-4">
-                  <label className="block text-sm font-medium">Add/link questions (request JSON)
+                  <label className="block text-sm font-medium">Add or link questions (JSON)
                     <textarea value={questionPayload} onChange={(event) => setQuestionPayload(event.target.value)} className="mt-1 w-full rounded-lg border p-3 font-mono text-sm" rows="3" />
                   </label>
-                  <button disabled={examsApi.mutating} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">Send question request</button>
+                  <button disabled={examsApi.mutating} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">Add questions</button>
                 </form>
               </>
             )}
@@ -217,7 +217,7 @@ export default function Examinations() {
               </div>
             )}
             {detailView === "questions" && questionDetails && <form onSubmit={saveQuestionDetails} className="mt-4 space-y-2 border-t pt-4">
-              <label className="block text-sm font-medium">Update question (request JSON)
+              <label className="block text-sm font-medium">Update question (JSON)
                 <textarea value={questionDetails} onChange={(event) => setQuestionDetails(event.target.value)} className="mt-1 w-full rounded-lg border p-3 font-mono text-xs" rows="8" />
               </label>
               <button disabled={questionApi.mutating} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">Update question</button>

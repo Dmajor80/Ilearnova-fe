@@ -537,7 +537,7 @@ function FinancePanel() {
         <div className="flex items-center justify-between gap-3">
           <div>
             <h3 className="text-xl font-semibold">Unpaid tuition</h3>
-            <p className="text-sm text-gray-600">{tuition.totalStudents} students returned by the tuition endpoint</p>
+            <p className="text-sm text-gray-600">{tuition.totalStudents} students with unpaid tuition</p>
           </div>
           <button type="button" onClick={() => tuition.refreshData(true)} className="rounded-lg border px-3 py-2">Refresh</button>
         </div>

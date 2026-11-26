@@ -96,7 +96,7 @@ export default function useStudentData() {
         setStudents(data || []);
         setTotalStudents(data?.length || 0);
       } else {
-        throw new Error("The students endpoint returned an unexpected response.");
+        throw new Error("We couldn't load the student list. Please try again.");
       }
 
       if (request === requestId.current) setError(null);

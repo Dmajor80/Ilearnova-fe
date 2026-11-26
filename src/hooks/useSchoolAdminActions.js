@@ -194,7 +194,7 @@ export default function useSchoolAdminActions() {
         
         notification.notify("Student data exported successfully", "success");
       } else {
-        throw new Error(`Export failed: ${response.status}`);
+        throw new Error("We couldn't export the data. Please try again.");
       }
     } catch (err) {
       const appError = parseError(err, { action: "export_student_data" });
@@ -232,7 +232,7 @@ export default function useSchoolAdminActions() {
         
         notification.notify("Teacher data exported successfully", "success");
       } else {
-        throw new Error(`Export failed: ${response.status}`);
+        throw new Error("We couldn't export the data. Please try again.");
       }
     } catch (err) {
       const appError = parseError(err, { action: "export_teacher_data" });

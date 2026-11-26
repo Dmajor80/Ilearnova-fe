@@ -27,7 +27,7 @@ export default function Messages() {
           <span className="rounded-lg bg-blue-50 p-2 text-blue-700"><Megaphone size={20} /></span>
           <div>
             <h2 className="text-2xl font-bold text-gray-900">Announcements</h2>
-            <p className="mt-1 text-sm text-gray-600">Publish an announcement to your school using the teacher announcements API.</p>
+            <p className="mt-1 text-sm text-gray-600">Publish an announcement to your school.</p>
           </div>
         </div>
         {(errorMessage || announcementsApi.error) && (
@@ -69,7 +69,7 @@ export default function Messages() {
           <p className="mt-2 whitespace-pre-wrap text-sm text-green-800">{publishedAnnouncement.message || "The announcement was published."}</p>
         </section>
       )}
-      <p className="text-xs text-gray-500">The API does not provide an announcement history endpoint, so only the most recent announcement is shown here.</p>
+      <p className="text-xs text-gray-500">Only your most recent announcement is shown here.</p>
     </div>
   );
 }

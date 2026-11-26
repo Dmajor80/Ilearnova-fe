@@ -29,7 +29,7 @@ function readList(payload, key) {
           : null;
 
   if (!list) {
-    throw new Error(`The messaging ${key} endpoint returned an unexpected response.`);
+    throw new Error("We couldn't load your messages. Please try again.");
   }
   return list;
 }
@@ -46,7 +46,7 @@ function readMessages(payload) {
           ? data.data
           : null;
   if (!messages) {
-    throw new Error("The conversation endpoint returned an unexpected response.");
+    throw new Error("We couldn't load this conversation. Please try again.");
   }
   return messages.sort((left, right) => (
     new Date(left.created_at).getTime() - new Date(right.created_at).getTime()

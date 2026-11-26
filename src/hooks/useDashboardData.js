@@ -52,7 +52,7 @@ export default function useDashboardData() {
         }));
         setError(null);
       } else {
-        throw new Error(`Failed to fetch metrics: ${response.status}`);
+        throw new Error("We couldn't load the dashboard figures. Please try again.");
       }
     } catch (err) {
       const appError = parseError(err, { action: "fetch_dashboard_metrics" });
@@ -80,7 +80,7 @@ export default function useDashboardData() {
         const data = await response.json();
         setChartData(data);
       } else {
-        throw new Error(`Failed to fetch chart data: ${response.status}`);
+        throw new Error("We couldn't load the chart. Please try again.");
       }
     } catch (err) {
       console.warn("Failed to fetch chart data:", err);
@@ -102,7 +102,7 @@ export default function useDashboardData() {
         const data = await response.json();
         setRecentActivities(data.activities || []);
       } else {
-        throw new Error(`Failed to fetch activities: ${response.status}`);
+        throw new Error("We couldn't load recent activity. Please try again.");
       }
     } catch (err) {
       console.warn("Failed to fetch recent activities:", err);
