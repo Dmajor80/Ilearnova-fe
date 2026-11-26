@@ -13,6 +13,8 @@ import { getTokens } from "@/api/auth";
 import SubscriptionBanner from "../SubscriptionBanner";
 import PaymentCallback from "../PaymentCallback";
 import BillingPage from "../BillingPage";
+import { TOAST_EVENT } from "@/lib/toast";
+import { formatDate } from "../subscriptionUtils";
 
 const LOCKED = {
   organization_id: "org-1",
@@ -104,7 +106,7 @@ describe("BillingPage", () => {
       data: { reference: "ILN-3", authorization_url: "https://checkout.paystack.com/abc" },
     });
 
-    render(<BillingPage />);
+    render(<MemoryRouter><BillingPage /></MemoryRouter>);
     const pay = await screen.findByRole("button", { name: /Pay ₦120,000 with Paystack/ });
     expect(screen.queryByText(/Free/)).toBeNull(); // free plans are not on sale
     expect(screen.getByText("Locked")).toBeTruthy();
@@ -133,8 +135,67 @@ describe("Payout account bank list", () => {
       if (path === "/api/billing/plans/") return Promise.resolve([]);
       return Promise.resolve({ success: true, data: null });
     });
-    render(<BillingPage />);
+    render(<MemoryRouter><BillingPage /></MemoryRouter>);
     expect(await screen.findByText(/Bank list unavailable/)).toBeTruthy();
     expect(screen.queryByText("Loading banks…")).toBeNull();
+  });
+});
+
+describe("BillingPage access code", () => {
+  const subscriptionGets = (subscription) =>
+    http.get.mockImplementation((path) => {
+      if (path === "/api/billing/school/subscription/")
+        return Promise.resolve({ success: true, data: subscription });
+      if (path === "/api/billing/plans/") return Promise.resolve([]);
+      return Promise.resolve({ success: true, data: null });
+    });
+  const showAt = (url) =>
+    render(
+      <MemoryRouter initialEntries={[url]}>
+        <BillingPage />
+      </MemoryRouter>
+    );
+
+  it("prefills the code from ?code=, applies it, toasts and shows the new end date", async () => {
+    subscriptionGets({ ...LOCKED, history: [] });
+    const extended = { ...LOCKED, state: "active", expires_at: "2028-03-31T00:00:00Z", days_left: 490, history: [] };
+    http.post.mockResolvedValue({ success: true, data: extended });
+    const toasts = [];
+    const onToast = (e) => toasts.push(e.detail);
+    window.addEventListener(TOAST_EVENT, onToast);
+
+    showAt("/organization-dashboard/billing?code=iln-aaaa-bbbb-cccc");
+    const input = await screen.findByLabelText("Access code");
+    expect(input.value).toBe("ILN-AAAA-BBBB-CCCC");
+    await waitFor(() => expect(document.activeElement).toBe(input));
+
+    fireEvent.click(screen.getByRole("button", { name: "Apply code" }));
+    await waitFor(() =>
+      expect(http.post).toHaveBeenCalledWith(
+        "/api/billing/school/subscription/redeem/",
+        { code: "ILN-AAAA-BBBB-CCCC" },
+        { auth: true }
+      )
+    );
+    await waitFor(() => expect(toasts).toEqual([{ message: `Subscription extended to ${formatDate("2028-03-31T00:00:00Z")}`, type: "success" }]));
+    expect(screen.getByText("Active")).toBeTruthy();
+    expect(screen.getByLabelText("Access code").value).toBe("");
+    window.removeEventListener(TOAST_EVENT, onToast);
+  });
+
+  it("shows the server's reason when the code is refused", async () => {
+    subscriptionGets({ ...LOCKED, history: [] });
+    const error = new Error("Bad Request");
+    error.status = 400;
+    error.data = { error: "This code has already been used." };
+    http.post.mockRejectedValue(error);
+
+    showAt("/organization-dashboard/billing");
+    const input = await screen.findByLabelText("Access code");
+    expect(screen.getByRole("button", { name: "Apply code" }).disabled).toBe(true);
+    fireEvent.change(input, { target: { value: "iln-used-code-0000" } });
+    fireEvent.click(screen.getByRole("button", { name: "Apply code" }));
+    expect(await screen.findByText("This code has already been used.")).toBeTruthy();
+    expect(screen.getByText("Locked")).toBeTruthy();
   });
 });
