@@ -117,3 +117,19 @@ export const createStudentSubmissionAt = (submissionId, submissionData) =>
 /** Graded online (CBT) exam scores grouped by term and subject. */
 export const getStudentTranscript = (params) =>
   http.get(`${STUDENT_API}/transcript/`, { auth: true, params });
+
+/** Lesson completion per enrolled class ("course"). */
+export const getStudentCourseProgress = () =>
+  http.get(`${STUDENT_API}/courses/progress/`, { auth: true });
+
+/** Attendance records and a summary with `attendance_percentage`. */
+export const getStudentAttendanceSummary = (params) =>
+  http.get(`${STUDENT_API}/attendance/`, { auth: true, params });
+
+/** Classes ("courses") in the student's school; `enrolled: "true"` for their own. */
+export const getStudentCourseCatalogue = (params) =>
+  http.get(`${STUDENT_API}/courses/`, { auth: true, params });
+
+/** Marks a lesson done (safe to repeat). Feeds course progress. */
+export const completeStudentMaterial = (materialId) =>
+  http.post(`${STUDENT_API}/materials/${resourceId(materialId)}/complete/`, {}, { auth: true });

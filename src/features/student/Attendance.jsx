@@ -1,355 +1,195 @@
-import { useState, useEffect } from "react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-} from "recharts";
-import { Calendar, ChevronDown, Download, Filter } from "lucide-react";
-import { getStudentAttendance } from "@/api/dashboardApi";
+import { useEffect, useMemo, useState } from "react";
+import { getStudentAttendanceSummary } from "@/api/student";
+import { apiErrorDetails } from "@/lib/apiHelpers";
+import { ListSkeleton, StatCardsSkeleton } from "@/components/ui/Skeleton";
+import { attendanceBy } from "./attendanceUtils";
 
-// WeeklyAttendanceChart Component
-function WeeklyAttendanceChart() {
-  const [animate, setAnimate] = useState(true);
-  const [attendanceData, setAttendanceData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const unwrap = (payload) => (payload && "data" in payload ? payload.data : payload);
 
-  useEffect(() => {
-    const fetchAttendanceData = async () => {
-      try {
-        setLoading(true);
-        const response = await getStudentAttendance();
-        // Transform the data to match the expected format
-        const transformedData = response.data?.weeklyAttendance?.map(item => ({
-          name: item.subject?.name || item.subject,
-          score: item.percentage || item.score,
-          color: item.percentage >= 80 ? "#4ade80" : item.percentage >= 70 ? "#facc15" : "#f87171"
-        })) || [];
-        setAttendanceData(transformedData);
-        setError(null);
-      } catch (err) {
-        console.error("Error fetching attendance data:", err);
-        setError("Failed to load attendance data");
-        // Fallback to sample data if API fails
-        setAttendanceData([
-          { name: "Maths", score: 80, color: "#4ade80" },
-          { name: "Eng", score: 85, color: "#4ade80" },
-          { name: "Sci", score: 62, color: "#facc15" },
-          { name: "Phy", score: 70, color: "#facc15" },
-          { name: "Chem", score: 83, color: "#4ade80" },
-          { name: "Bio", score: 67, color: "#facc15" },
-          { name: "Geo", score: 48, color: "#f87171" },
-          { name: "Hist", score: 50, color: "#f87171" },
-          { name: "Econ", score: 90, color: "#4ade80" },
-          { name: "Stat", score: 77, color: "#4ade80" },
-        ]);
-      } finally {
-        setLoading(false);
-      }
-    };
+const STATUS = {
+  present: { label: "Present", pill: "bg-green-100 text-green-800" },
+  late: { label: "Late", pill: "bg-amber-100 text-amber-800" },
+  absent: { label: "Absent", pill: "bg-red-100 text-red-800" },
+  excused: { label: "Excused", pill: "bg-slate-100 text-slate-700" },
+};
+const PAGE = 20;
 
-    fetchAttendanceData();
-  }, []);
+const monthKey = (record) => String(record.date).slice(0, 7);
+const monthLabel = (record) =>
+  new Date(`${monthKey(record)}-01T00:00:00`).toLocaleDateString(undefined, { month: "short", year: "numeric" });
+const dayLabel = (date) =>
+  new Date(`${date}T00:00:00`).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
 
-  useEffect(() => {
-    // Disable animation after initial render
-    const timer = setTimeout(() => setAnimate(false), 3000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Custom tooltip to show score
-  const CustomTooltip = ({ active, payload }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white p-2 border border-gray-200 shadow-md rounded">
-          <p className="font-semibold">{`${payload[0].payload.name}: ${payload[0].value}`}</p>
-        </div>
-      );
-    }
-    return null;
-  };
-
-  // Custom bar that uses the color from the data
-  const CustomBar = (props) => {
-    const { x, y, width, height, data, index } = props;
-    const color = data[index].color;
-    return (
-      <rect
-        x={x}
-        y={y}
-        width={width}
-        height={height}
-        fill={color}
-        radius={[4, 4, 0, 0]}
-      />
-    );
-  };
-
+/** One labelled bar per group; the number sits beside it, so colour carries nothing alone. */
+function Bars({ title, rows, empty }) {
   return (
-    <div className="w-full lg:w-[600px] xl:ml-8 bg-white p-4 sm:p-6 rounded-lg shadow-md mb-4 lg:mb-16">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
-        <h2 className="font-bold text-lg">Weekly Attendance</h2>
-        <div className="flex items-center text-sm text-gray-500 cursor-pointer">
-          <span>Performance view</span>
-          <ChevronDown size={16} className="ml-1" />
-        </div>
-      </div>
-
-      <div className="h-[300px] sm:h-[400px] lg:h-[569px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={attendanceData}
-            margin={{ top: 10, right: 10, left: -20, bottom: 20 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-            <XAxis
-              dataKey="name"
-              axisLine={false}
-              tickLine={false}
-              tick={{ fontSize: 12 }}
-            />
-            <YAxis
-              axisLine={false}
-              tickLine={false}
-              domain={[0, 100]}
-              ticks={[0, 20, 40, 60, 80, 100]}
-              tick={{ fontSize: 12 }}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Bar
-              dataKey="score"
-              shape={<CustomBar data={attendanceData} />}
-              isAnimationActive={animate}
-              animationDuration={1500}
-              radius={[4, 4, 0, 0]}
-            />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-
-      <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mt-4">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-          <span className="text-xs sm:text-sm text-gray-600">Above 80%</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
-          <span className="text-xs sm:text-sm text-gray-600">
-            Between 70% - 80%
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-red-400 rounded-full"></div>
-          <span className="text-xs sm:text-sm text-gray-600">Below 70%</span>
-        </div>
-      </div>
-    </div>
+    <section className="rounded-xl bg-white p-5 shadow-sm" aria-label={title}>
+      <h3 className="mb-4 text-lg font-semibold text-gray-900">{title}</h3>
+      {rows.length ? (
+        <ul className="space-y-3">
+          {rows.map((row) => (
+            <li key={row.key} className="grid grid-cols-[minmax(6rem,10rem)_1fr_auto] items-center gap-3 text-sm">
+              <span className="truncate text-gray-700" title={row.label}>{row.label}</span>
+              <span className="h-2.5 overflow-hidden rounded-full bg-slate-100" aria-hidden="true">
+                <span className="block h-full rounded-full bg-blue-600" style={{ width: `${row.percentage}%` }} />
+              </span>
+              <span className="w-28 text-right tabular-nums text-gray-900">
+                {row.percentage}% <span className="text-gray-500">({row.attended}/{row.total})</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-sm text-gray-500">{empty}</p>
+      )}
+    </section>
   );
 }
 
-// Monthly Attendance Chart Component
-function MonthlyAttendanceChart() {
-  const [monthlyData, setMonthlyData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchMonthlyData = async () => {
-      try {
-        setLoading(true);
-        const response = await getStudentAttendance();
-        // Transform the data to match the expected format
-        const transformedData = response.data?.monthlyAttendance?.map(item => ({
-          name: item.month,
-          percentage: item.percentage
-        })) || [];
-        setMonthlyData(transformedData);
-        setError(null);
-      } catch (err) {
-        console.error("Error fetching monthly attendance data:", err);
-        setError("Failed to load monthly attendance data");
-        // Fallback to sample data if API fails
-        setMonthlyData([
-          { name: "Jan", percentage: 90 },
-          { name: "Feb", percentage: 85 },
-          { name: "Mar", percentage: 75 },
-          { name: "Apr", percentage: 72 },
-          { name: "May", percentage: 88 },
-          { name: "Jun", percentage: 65 },
-          { name: "Jul", percentage: 55 },
-          { name: "Aug", percentage: 52 },
-          { name: "Sep", percentage: 82 },
-          { name: "Oct", percentage: 78 },
-          { name: "Nov", percentage: 85 },
-          { name: "Dec", percentage: 90 },
-        ]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMonthlyData();
-  }, []);
-
-  return (
-    <Card className="mt-6 lg:mt-0">
-      <h2 className="font-bold mb-4 text-lg sm:text-xl">Percentage</h2>
-      <div className="h-[300px] sm:h-[400px] lg:h-[579px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={monthlyData}
-            margin={{ top: 5, right: 10, left: -20, bottom: 5 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-            <XAxis dataKey="name" axisLine={false} tickLine={false} />
-            <YAxis axisLine={false} tickLine={false} />
-            <Tooltip />
-            <Legend />
-            <Bar
-              dataKey="percentage"
-              name="Month"
-              radius={[4, 4, 0, 0]}
-              animationDuration={2000}
-            >
-              {monthlyData.map((entry, index) => (
-                <cell
-                  key={`cell-${index}`}
-                  fill={
-                    entry.percentage >= 80
-                      ? "#4ade80"
-                      : entry.percentage >= 70
-                      ? "#facc15"
-                      : "#f87171"
-                  }
-                />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-      <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mt-2">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-          <span className="text-xs sm:text-sm text-gray-600">
-            Above 80%
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-          <span className="text-xs sm:text-sm text-gray-600">
-            70%-80%
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-          <span className="text-xs sm:text-sm text-gray-600">
-            Below 70%
-          </span>
-        </div>
-      </div>
-    </Card>
-  );
-}
-
-// Card component
-const Card = ({ children, className = "" }) => {
-  return (
-    <div
-      className={`bg-white w-full rounded-lg shadow-md p-4 sm:p-6 ${className}`}
-    >
-      {children}
-    </div>
-  );
-};
-
-// Button component
-const Button = ({ children, primary, className = "" }) => {
-  return (
-    <button
-      className={`px-3 py-2 sm:px-4 sm:py-2 rounded-md flex items-center gap-2 text-sm sm:text-base ${
-        primary ? "bg-blue-600 text-white" : "border border-gray-300 bg-white"
-      } ${className}`}
-    >
-      {children}
-    </button>
-  );
-};
-
+/**
+ * The student's own attendance from GET /api/student/attendance/:
+ * a summary, % by subject and by month, and the day-by-day records.
+ * Filters (dates, subject) are passed to the API.
+ */
 export default function Attendance() {
-  const [animate, setAnimate] = useState(false);
+  const [filters, setFilters] = useState({ from: "", to: "", subject_id: "" });
+  const [state, setState] = useState({ loading: true, data: null, error: "" });
+  const [subjects, setSubjects] = useState([]);
+  const [shown, setShown] = useState(PAGE);
 
   useEffect(() => {
-    // Start animation after component loads
-    setAnimate(true);
-  }, []);
+    let active = true;
+    const params = Object.fromEntries(Object.entries(filters).filter(([, v]) => v));
+    setState((s) => ({ ...s, loading: true, error: "" }));
+    getStudentAttendanceSummary(params)
+      .then((payload) => {
+        if (!active) return;
+        const data = unwrap(payload);
+        setState({ loading: false, data, error: "" });
+        setShown(PAGE);
+        // Keep the subject list from the unfiltered view so choosing one doesn't empty it.
+        if (!params.subject_id) {
+          setSubjects(attendanceBy(data.records || [], (r) => r.subject_id, (r) => `${r.subject_name} (${r.course_name})`));
+        }
+      })
+      .catch((err) => active && setState({ loading: false, data: null, error: apiErrorDetails(err).messages.join(" ") }));
+    return () => {
+      active = false;
+    };
+  }, [filters]);
+
+  const records = useMemo(() => state.data?.records || [], [state.data]);
+  const bySubject = useMemo(
+    () => attendanceBy(records, (r) => r.subject_id, (r) => r.subject_name).sort((a, b) => a.label.localeCompare(b.label)),
+    [records]
+  );
+  const byMonth = useMemo(() => attendanceBy(records, monthKey, monthLabel).sort((a, b) => a.key.localeCompare(b.key)), [records]);
+  const summary = state.data?.summary;
+  const setFilter = (name) => (e) => setFilters((f) => ({ ...f, [name]: e.target.value }));
+  const filtered = Object.values(filters).some(Boolean);
 
   return (
-    <div className="bg-gray-100 min-h-screen p-2 sm:p-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 gap-3">
-          <h1 className="text-xl sm:text-2xl font-bold">Attendance</h1>
-          <div className="flex flex-wrap gap-2">
-            <Button>
-              <Filter size={16} />
-              <span className="hidden sm:inline">Filter</span>
-            </Button>
-            <Button>
-              <Calendar size={16} />
-              <span className="hidden sm:inline">Date</span>
-            </Button>
-            <Button primary>
-              <Download size={16} />
-              <span className="hidden sm:inline">Download</span>
-            </Button>
+    <div className="mx-auto max-w-6xl space-y-6 p-2 sm:p-4">
+      <header className="flex flex-wrap items-end justify-end gap-4">
+        <form className="flex flex-wrap items-end gap-3" onSubmit={(e) => e.preventDefault()}>
+          <div className="text-sm text-gray-600">
+            <label htmlFor="att-from">From</label>
+            <input id="att-from" type="date" value={filters.from} onChange={setFilter("from")} className="mt-1 block rounded-lg border px-3 py-2" />
           </div>
-        </div>
+          <div className="text-sm text-gray-600">
+            <label htmlFor="att-to">To</label>
+            <input id="att-to" type="date" value={filters.to} onChange={setFilter("to")} className="mt-1 block rounded-lg border px-3 py-2" />
+          </div>
+          <div className="text-sm text-gray-600">
+            <label htmlFor="att-subject">Subject</label>
+            <select id="att-subject" value={filters.subject_id} onChange={setFilter("subject_id")} className="mt-1 block rounded-lg border bg-white px-3 py-2">
+              <option value="">All subjects</option>
+              {subjects.map((s) => (
+                <option key={s.key} value={s.key}>{s.label}</option>
+              ))}
+            </select>
+          </div>
+          {filtered && (
+            <button type="button" onClick={() => setFilters({ from: "", to: "", subject_id: "" })} className="py-2 text-sm font-medium text-blue-700 hover:underline">
+              Clear
+            </button>
+          )}
+        </form>
+      </header>
 
-        {/* Dashboard Grid */}
-        <div className="space-y-6 lg:space-y-0">
-          {/* Main Chart and Action Panel */}
-          <div className="flex flex-col lg:flex-row gap-4 lg:gap-8 mt-4 lg:mt-20">
-            <WeeklyAttendanceChart />
+      {state.error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{state.error}</p>}
 
-            {/* Action Panel */}
-            <div className="w-full lg:w-[300px] xl:w-[300px]">
-              <h2 className="text-base sm:text-lg font-medium mb-4 flex items-center justify-between">
-                Performance view <Calendar size={16} />
-              </h2>
-              <div className="space-y-2">
-                {[...Array(4)].map((_, index) => (
-                  <button
-                    key={index}
-                    className="w-full py-2 text-white rounded-md font-medium h-20 sm:h-[104px]"
-                    style={{ backgroundColor: "rgba(245, 248, 254, 1)" }}
-                  >
-                    <div className="text-xs sm:text-sm text-black flex items-center gap-2 mb-4 sm:mb-8 px-2">
-                      <div className="w-3 h-3 bg-red-500 rounded-full flex-shrink-0"></div>
-                      <span className="text-left">
-                        John Doe's Math score dropped to 45%.
-                      </span>
-                    </div>
-                    <button
-                      className="text-sm sm:text-lg w-full h-8 sm:h-[42px] rounded-2xl text-white px-4 py-2 hover:opacity-90 transition-opacity"
-                      style={{ backgroundColor: "rgba(18, 40, 164, 1)" }}
-                    >
-                      Dismiss
-                    </button>
-                  </button>
-                ))}
-              </div>
+      {state.loading ? (
+        <>
+          <StatCardsSkeleton count={5} label="Loading attendance summary" className="xl:grid-cols-5" />
+          <div className="rounded-xl bg-white p-5 shadow-sm">
+            <ListSkeleton rows={5} label="Loading attendance records" />
+          </div>
+        </>
+      ) : summary ? (
+        <>
+          <dl className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-5">
+            <div className="rounded-xl border border-blue-100 bg-blue-50 p-5">
+              <dt className="text-sm text-gray-600">Attendance</dt>
+              <dd className="mt-1 text-2xl font-bold text-gray-900">{summary.attendance_percentage}%</dd>
             </div>
-          </div>
+            {Object.entries(STATUS).map(([key, { label }]) => (
+              <div key={key} className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+                <dt className="text-sm text-gray-600">{label}</dt>
+                <dd className="mt-1 text-2xl font-bold text-gray-900">{summary[key] ?? 0}</dd>
+              </div>
+            ))}
+          </dl>
 
-          {/* Monthly Chart */}
-          <MonthlyAttendanceChart />
-        </div>
-      </div>
+          {records.length ? (
+            <>
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <Bars title="By subject" rows={bySubject} empty="No subjects." />
+                <Bars title="By month" rows={byMonth} empty="No months." />
+              </div>
+
+              <section className="rounded-xl bg-white p-5 shadow-sm">
+                <h3 className="mb-3 text-lg font-semibold text-gray-900">Days</h3>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200 text-sm">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th scope="col" className="px-3 py-2 text-left font-semibold text-gray-700">Date</th>
+                        <th scope="col" className="px-3 py-2 text-left font-semibold text-gray-700">Subject</th>
+                        <th scope="col" className="px-3 py-2 text-left font-semibold text-gray-700">Class</th>
+                        <th scope="col" className="px-3 py-2 text-left font-semibold text-gray-700">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {records.slice(0, shown).map((r) => (
+                        <tr key={`${r.date}-${r.subject_id}`}>
+                          <td className="whitespace-nowrap px-3 py-2 text-gray-900">{dayLabel(r.date)}</td>
+                          <td className="px-3 py-2 text-gray-900">{r.subject_name}</td>
+                          <td className="px-3 py-2 text-gray-600">{r.course_name}</td>
+                          <td className="px-3 py-2">
+                            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS[r.status]?.pill || "bg-slate-100"}`}>
+                              {STATUS[r.status]?.label || r.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {records.length > shown && (
+                  <button type="button" onClick={() => setShown((n) => n + PAGE)} className="mt-3 text-sm font-medium text-blue-700 hover:underline">
+                    Show {Math.min(PAGE, records.length - shown)} more of {records.length - shown} left
+                  </button>
+                )}
+              </section>
+            </>
+          ) : (
+            <p className="rounded-xl bg-white p-6 text-center text-gray-500 shadow-sm">
+              {filtered ? "No attendance in this range." : "Your teachers haven't taken attendance yet."}
+            </p>
+          )}
+        </>
+      ) : null}
     </div>
   );
 }

@@ -8,6 +8,7 @@ import {
 } from "@/hooks/teacher";
 import QuickStatsCard from "@/components/dashboard/QuickStatsCard";
 import { RefreshCw } from "lucide-react";
+import { ListSkeleton, Skeleton, StatCardsSkeleton } from "@/components/ui/Skeleton";
 
 export default function TeacherDashboardOverview({ onNavigate = () => {} }) {
   const classesApi = useTeacherClasses();
@@ -39,7 +40,21 @@ export default function TeacherDashboardOverview({ onNavigate = () => {} }) {
     timetableApi.refreshData(true)
   ]);
 
-  if (loading) return <div className="p-8 text-center text-gray-600">Loading teacher dashboard...</div>;
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <StatCardsSkeleton label="Loading teacher dashboard" />
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          {["Loading your classes", "Loading recent assignments"].map((label) => (
+            <section key={label} className="rounded-xl bg-white p-6 shadow-sm">
+              <Skeleton className="mb-4 h-5 w-40" />
+              <ListSkeleton rows={4} label={label} />
+            </section>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -122,7 +137,7 @@ export default function TeacherDashboardOverview({ onNavigate = () => {} }) {
             <h2 className="text-lg font-semibold">Performance analytics</h2>
             <button type="button" onClick={() => onNavigate("analytics")} className="text-sm font-medium text-blue-700 hover:underline">View analytics</button>
           </div>
-          {analyticsApi.loading ? <p className="text-sm text-gray-500">Loading analytics...</p>
+          {analyticsApi.loading ? <ListSkeleton rows={2} label="Loading analytics" />
             : analyticsMetrics.length ? (
               <dl className="grid grid-cols-2 gap-3">
                 {analyticsMetrics.map(([key, value]) => (
@@ -140,7 +155,7 @@ export default function TeacherDashboardOverview({ onNavigate = () => {} }) {
             <h2 className="text-lg font-semibold">Weekly timetable</h2>
             <button type="button" onClick={() => onNavigate("timetable")} className="text-sm font-medium text-blue-700 hover:underline">View timetable</button>
           </div>
-          {timetableApi.loading ? <p className="text-sm text-gray-500">Loading timetable...</p>
+          {timetableApi.loading ? <ListSkeleton rows={3} label="Loading timetable" />
             : timetableDays.length ? (
               <ul className="divide-y">
                 {timetableDays.slice(0, 5).map((day, index) => (
