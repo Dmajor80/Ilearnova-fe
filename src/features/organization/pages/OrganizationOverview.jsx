@@ -38,8 +38,12 @@ const getLabel = (item) =>
   item.name ||
   JSON.stringify(item);
 
-const getTimestamp = (item) =>
-  item.timestamp || item.created_at || item.date || item.start_datetime || item.start_time || "";
+const getTimestamp = (item) => {
+  const raw = item.timestamp || item.created_at || item.date || item.start_datetime || item.start_time || "";
+  const when = new Date(raw);
+  if (!raw || Number.isNaN(when.getTime())) return raw;
+  return when.toLocaleString(undefined, { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
+};
 
 const OrganizationOverview = () => {
   const navigate = useNavigate();

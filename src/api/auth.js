@@ -254,3 +254,16 @@ export async function authorizedFetch(input, init = {}) {
 
   return res;
 }
+
+/** The signed-in user as saved at login, or null. */
+export function getStoredUser() {
+  try {
+    const raw =
+      getAuthStorage()?.getItem("user_data") ||
+      window.localStorage.getItem("user_data") ||
+      window.sessionStorage.getItem("user_data");
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}

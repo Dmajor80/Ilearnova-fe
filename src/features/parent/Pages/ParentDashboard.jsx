@@ -1,10 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Users } from "lucide-react";
-import RecentActivityFeed from "@/components/dashboard/RecentActivityFeed";
-import StudentAlertsPanel from "@/components/dashboard/StudentAlertsPanel";
-import QuickActionsGrid from "@/components/dashboard/QuickActionsGrid";
-import { useParentChildProgress, useParentChildren } from "@/hooks/parent";
+import { useParentAnnouncements, useParentChildProgress, useParentChildren } from "@/hooks/parent";
 import ParentAttendance from "./ParentAttendance";
 import ParentMessages from "./ParentMessages";
 import MyFees from "@/features/billing/MyFees";
@@ -142,21 +139,26 @@ export default function ParentDashboard() {
                           </p>
                         )}
                       </section>
-                      <section className="rounded-xl bg-white p-6 shadow-lg">
-                        <h3 className="mb-4 text-xl font-semibold text-gray-800">Recent Activity</h3>
-                        <RecentActivityFeed />
-                      </section>
                     </div>
                     <div className="space-y-8">
                       <section className="rounded-xl bg-white p-6 shadow-lg">
-                        <h3 className="mb-4 text-xl font-semibold text-gray-800">
-                          Alerts &amp; Notifications
-                        </h3>
-                        <StudentAlertsPanel />
+                        <h3 className="mb-4 text-xl font-semibold text-gray-800">From the school</h3>
+                        <LatestAnnouncements onSeeAll={() => setActiveTab("announcement")} />
                       </section>
                       <section className="rounded-xl bg-white p-6 shadow-lg">
-                        <h3 className="mb-4 text-xl font-semibold text-gray-800">Quick Actions</h3>
-                        <QuickActionsGrid />
+                        <h3 className="mb-4 text-xl font-semibold text-gray-800">Quick links</h3>
+                        <div className="grid grid-cols-2 gap-3">
+                          {QUICK_LINKS.map((link) => (
+                            <button
+                              key={link.tab}
+                              type="button"
+                              onClick={() => setActiveTab(link.tab)}
+                              className="rounded-lg border border-slate-200 px-3 py-3 text-sm font-medium text-slate-700 hover:bg-blue-50"
+                            >
+                              {link.label}
+                            </button>
+                          ))}
+                        </div>
                       </section>
                     </div>
                   </div>
@@ -189,30 +191,105 @@ export default function ParentDashboard() {
   );
 }
 
-function ProgressSummary({ progress }) {
-  const metrics = Object.entries(progress).filter(([key, value]) =>
-    !/^(id|child|student)$/i.test(key)
-    && ["string", "number", "boolean"].includes(typeof value)
-  );
+const attended = (row) => (row.present || 0) + (row.late || 0);
+const counted = (row) => attended(row) + (row.absent || 0) + (row.excused || 0);
+const pct = (num, den) => (den ? Math.round((num / den) * 1000) / 10 : 0);
 
-  if (!metrics.length) {
-    return (
-      <pre className="overflow-auto rounded-lg bg-slate-50 p-4 text-sm">
-        {JSON.stringify(progress, null, 2)}
-      </pre>
-    );
+/** The child's attendance by subject, latest exam scores and graded work. */
+export function ProgressSummary({ progress }) {
+  const subjects = progress.attendance_summary || [];
+  const exams = progress.exam_results || [];
+  const graded = progress.graded_submissions || [];
+  const total = subjects.reduce((n, row) => n + counted(row), 0);
+  const present = subjects.reduce((n, row) => n + attended(row), 0);
+  const absent = subjects.reduce((n, row) => n + (row.absent || 0), 0);
+
+  if (!subjects.length && !exams.length && !graded.length) {
+    return <p className="py-5 text-slate-600">Nothing recorded yet. Attendance and scores appear here as teachers add them.</p>;
   }
-
   return (
-    <dl className="grid gap-3 sm:grid-cols-2">
-      {metrics.map(([key, value]) => (
-        <div key={key} className="rounded-lg bg-slate-50 p-4">
-          <dt className="text-sm capitalize text-slate-500">{key.replaceAll("_", " ")}</dt>
-          <dd className="mt-1 text-lg font-semibold text-slate-800">
-            {typeof value === "boolean" ? (value ? "Yes" : "No") : value}
-          </dd>
+    <div className="space-y-6">
+      <dl className="grid grid-cols-3 gap-3">
+        <div className="rounded-lg bg-blue-50 p-4">
+          <dt className="text-sm text-slate-600">Attendance</dt>
+          <dd className="mt-1 text-2xl font-bold text-slate-900">{pct(present, total)}%</dd>
         </div>
-      ))}
-    </dl>
+        <div className="rounded-lg bg-slate-50 p-4">
+          <dt className="text-sm text-slate-600">Lessons missed</dt>
+          <dd className="mt-1 text-2xl font-bold text-slate-900">{absent}</dd>
+        </div>
+        <div className="rounded-lg bg-slate-50 p-4">
+          <dt className="text-sm text-slate-600">Graded work</dt>
+          <dd className="mt-1 text-2xl font-bold text-slate-900">{graded.length + exams.length}</dd>
+        </div>
+      </dl>
+      {subjects.length > 0 && (
+        <div>
+          <h4 className="mb-3 font-semibold text-slate-800">Attendance by subject</h4>
+          <ul className="space-y-3">
+            {subjects.map((row) => {
+              const value = pct(attended(row), counted(row));
+              return (
+                <li key={row.subject_name} className="grid grid-cols-[minmax(6rem,10rem)_1fr_auto] items-center gap-3 text-sm">
+                  <span className="truncate text-slate-700">{row.subject_name}</span>
+                  <span className="h-2.5 overflow-hidden rounded-full bg-slate-100" aria-hidden="true">
+                    <span className="block h-full rounded-full bg-blue-600" style={{ width: `${value}%` }} />
+                  </span>
+                  <span className="w-28 text-right tabular-nums text-slate-900">
+                    {value}% <span className="text-slate-500">({attended(row)}/{counted(row)})</span>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+      {exams.length > 0 && (
+        <div>
+          <h4 className="mb-2 font-semibold text-slate-800">Online exams</h4>
+          <ul className="divide-y text-sm">
+            {exams.map((exam) => (
+              <li key={exam.exam} className="flex justify-between py-2">
+                <span className="text-slate-700">{exam.title}</span>
+                <span className="tabular-nums text-slate-900">{exam.score}/{exam.total_marks}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
   );
 }
+
+const formatDate = (value) =>
+  new Date(value).toLocaleDateString(undefined, { day: "numeric", month: "short" });
+
+/** The three newest school announcements. */
+function LatestAnnouncements({ onSeeAll }) {
+  const { announcements, loading } = useParentAnnouncements();
+  if (loading) return <ListSkeleton rows={3} label="Loading announcements" />;
+  if (!announcements.length) return <p className="text-sm text-slate-500">No announcements yet.</p>;
+  return (
+    <>
+      <ul className="space-y-4">
+        {announcements.slice(0, 3).map((a) => (
+          <li key={a.id}>
+            <p className="font-medium text-slate-900">{a.title}</p>
+            <p className="text-xs text-slate-500">{formatDate(a.created_at)}</p>
+            <p className="mt-1 line-clamp-2 text-sm text-slate-600">{a.message}</p>
+          </li>
+        ))}
+      </ul>
+      <button type="button" onClick={onSeeAll} className="mt-4 text-sm font-medium text-blue-700 hover:underline">
+        All announcements
+      </button>
+    </>
+  );
+}
+
+const QUICK_LINKS = [
+  { tab: "attendance", label: "Attendance" },
+  { tab: "grades", label: "Results" },
+  { tab: "timetable", label: "Timetable" },
+  { tab: "fees", label: "Pay school fees" },
+];

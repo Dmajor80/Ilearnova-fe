@@ -4,3 +4,5 @@ export { default as useParentChildExamResult } from "./useParentChildExamResult"
 export { default as useParentChildGrades } from "./useParentChildGrades";
 export { default as useParentChildProgress } from "./useParentChildProgress";
 export { default as useLinkParentStudent } from "./useLinkParentStudent";
+export { default as useParentChildTimetable } from "./useParentChildTimetable";
+export { default as useParentAnnouncements } from "./useParentAnnouncements";

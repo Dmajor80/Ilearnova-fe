@@ -9,8 +9,6 @@ import {
   CreditCard,
   Menu,
   X,
-  Users,
-  Video,
   Bell,
   Settings,
   ChevronDown,
@@ -60,12 +58,6 @@ const STUDENT_GROUPS = [
   },
   { id: "fees", label: "Fees", icon: CreditCard, tabs: [{ id: "fees", label: "Fees" }] },
   { id: "messages", label: "Messages", icon: MessageCircle, tabs: [{ id: "messages", label: "Messages" }] },
-];
-
-/** Community pages outside the dashboard. */
-const EXTERNAL_LINKS = [
-  { id: "forums", label: "Forums", icon: Users, to: "/forums" },
-  { id: "video-calls", label: "Video Calls", icon: Video, to: "/video-calls" },
 ];
 
 // Main application component
@@ -151,10 +143,7 @@ export default function StudentDashboard() {
             </button>
           </div>
           <nav className="space-y-1">
-            {[
-              ...STUDENT_GROUPS.map((g) => ({ ...g, to: g.tabs[0].id, active: activeGroup?.id === g.id })),
-              ...EXTERNAL_LINKS,
-            ].map((link) => {
+            {STUDENT_GROUPS.map((g) => ({ ...g, to: g.tabs[0].id, active: activeGroup?.id === g.id })).map((link) => {
               const Icon = link.icon;
               return (
                 <div key={link.id} className="relative group">

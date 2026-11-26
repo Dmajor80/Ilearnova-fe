@@ -37,8 +37,8 @@ function ParentAttendance({ isStandalone = true }) {
     String(child.id) === String(routeChildId || selectedChildId)
   );
   const params = useMemo(() => ({
-    date_from: dateFrom || undefined,
-    date_to: dateTo || undefined
+    from: dateFrom || undefined,
+    to: dateTo || undefined
   }), [dateFrom, dateTo]);
   const {
     attendance,
