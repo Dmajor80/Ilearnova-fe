@@ -12,6 +12,7 @@ import { groupOf, tabOf } from "@/components/navigation/navGroups";
 import { ADMIN_BASE as BASE, ADMIN_GROUPS as GROUPS } from "./adminNav";
 import { StatCardsSkeleton } from "@/components/ui/Skeleton";
 import ManagingSchoolBanner from "@/components/admin/ManagingSchoolBanner";
+import Toaster from "@/components/ui/Toast";
 import { useManagedSchool } from "@/lib/manageSchool";
 
 /** The school this dashboard is for: the managed one, else the admin's own. */
@@ -91,6 +92,7 @@ const OrganizationDashboard = () => {
   return (
     <>
     <ManagingSchoolBanner />
+    <Toaster />
     <div className={`flex min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 ${managed ? "pt-11" : ""}`}>
       {/* Mobile overlay */}
       {isSidebarOpen && (

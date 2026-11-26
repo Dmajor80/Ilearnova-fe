@@ -46,6 +46,7 @@ import OrganizationExams from "@/features/organization/pages/OrganizationExams";
 import OrganizationAnalytics from "@/features/organization/pages/OrganizationAnalytics";
 import OrganizationReports from "@/features/organization/pages/OrganizationReports";
 import OrganizationAlerts from "@/features/organization/pages/OrganizationAlerts";
+import OrganizationAnnouncements from "@/features/organization/pages/OrganizationAnnouncements";
 import OrganizationOperations from "@/features/organization/pages/OrganizationOperations";
 /* Removed duplicate imports of ParentDashboard and IndividualLearnerPersonalDashboard */
 import ParentDashboard from "@/features/parent/Pages/ParentDashboard";
@@ -212,6 +213,7 @@ const AppContent = () => {
         <Route path="analytics" element={<OrganizationAnalytics />} />
         <Route path="reports" element={<OrganizationReports />} />
         <Route path="alerts" element={<OrganizationAlerts />} />
+        <Route path="announcements" element={<OrganizationAnnouncements />} />
         <Route path="operations" element={<OrganizationOperations />} />
         <Route path="messages" element={<DirectMessages />} />
       </Route>

@@ -334,3 +334,19 @@ export const getAdminSubjects = () =>
  *   ]
  * }
  */
+
+/* Announcements a school admin posts to everyone at the school (students,
+ * parents and teachers read them on their own Announcements pages). */
+const ANNOUNCEMENTS = "/api/admin/school/announcements/";
+const unwrapList = (payload) => {
+  const body = payload && typeof payload === "object" && "data" in payload ? payload.data : payload;
+  return Array.isArray(body) ? body : body?.results || [];
+};
+const unwrapOne = (payload) =>
+  payload && typeof payload === "object" && "data" in payload && !("id" in payload) ? payload.data : payload;
+
+export const schoolAnnouncementsApi = {
+  list: async () => unwrapList(await http.get(ANNOUNCEMENTS, { auth: true })),
+  create: async (body) => unwrapOne(await http.post(ANNOUNCEMENTS, body, { auth: true })),
+  remove: (id) => http.del(`${ANNOUNCEMENTS}${encodeURIComponent(id)}/`, { auth: true }),
+};

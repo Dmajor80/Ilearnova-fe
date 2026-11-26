@@ -4,6 +4,7 @@ import {
   BookOpen,
   GraduationCap,
   Home,
+  Megaphone,
   MessageCircle,
   SlidersHorizontal,
   TrendingUp,
@@ -46,6 +47,7 @@ export const ADMIN_GROUPS = [
       { id: "alerts", label: "Alerts" },
     ],
   },
+  { id: "announcements", label: "Announcements", icon: Megaphone, tabs: [{ id: "announcements", label: "Announcements" }] },
   { id: "operations", label: "Operations", icon: SlidersHorizontal, tabs: [{ id: "operations", label: "Operations" }] },
   {
     id: "money",
