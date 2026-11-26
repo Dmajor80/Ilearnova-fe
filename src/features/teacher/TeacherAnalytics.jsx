@@ -2,12 +2,7 @@ import { useState } from "react";
 import { BarChart3, RefreshCw } from "lucide-react";
 import { useTeacherAnalytics, useTeacherClasses } from "@/hooks/teacher";
 
-const labelFor = (value) => value.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
-const formatValue = (value) => {
-  if (value === null || value === undefined || value === "") return "—";
-  if (typeof value === "object") return JSON.stringify(value);
-  return String(value);
-};
+const percent = (value) => (value === null || value === undefined ? "—" : `${value}%`);
 
 export default function TeacherAnalytics() {
   const analyticsApi = useTeacherAnalytics();
@@ -16,12 +11,8 @@ export default function TeacherAnalytics() {
   const data = analyticsApi.analytics && typeof analyticsApi.analytics === "object"
     ? analyticsApi.analytics
     : {};
-  const metrics = Object.entries(data).filter(([, value]) =>
-    value === null || ["string", "number", "boolean"].includes(typeof value)
-  );
-  const collections = Object.entries(data).filter(([, value]) =>
-    value && typeof value === "object"
-  );
+  const summary = data.summary || {};
+  const subjects = Array.isArray(data.subjects) ? data.subjects : [];
 
   const refresh = () => analyticsApi.refreshData(selectedClassId || undefined, true);
 
@@ -57,24 +48,47 @@ export default function TeacherAnalytics() {
         </section>
       ) : (
         <>
-          {metrics.length > 0 && (
-            <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              {metrics.map(([key, value]) => (
-                <article key={key} className="rounded-xl bg-white p-4 shadow-sm">
-                  <p className="text-sm text-gray-500">{labelFor(key)}</p>
-                  <p className="mt-2 break-words text-xl font-semibold text-gray-900">{formatValue(value)}</p>
-                </article>
-              ))}
-            </section>
-          )}
-          {collections.map(([key, value]) => (
-            <section key={key} className="rounded-xl bg-white p-5 shadow-sm">
-              <h3 className="mb-3 text-lg font-semibold text-gray-900">{labelFor(key)}</h3>
-              <pre className="max-h-[28rem] overflow-auto rounded-lg bg-gray-50 p-4 text-xs leading-5 text-gray-700">
-                {JSON.stringify(value, null, 2)}
-              </pre>
-            </section>
-          ))}
+          <dl className="grid gap-3 sm:grid-cols-2">
+            <div className="rounded-xl bg-white p-4 shadow-sm">
+              <dt className="text-sm text-gray-500">Subjects you teach</dt>
+              <dd className="mt-2 text-2xl font-semibold text-gray-900">{summary.subject_count ?? subjects.length}</dd>
+            </div>
+            <div className="rounded-xl bg-white p-4 shadow-sm">
+              <dt className="text-sm text-gray-500">Students</dt>
+              <dd className="mt-2 text-2xl font-semibold text-gray-900">{summary.student_count ?? "—"}</dd>
+            </div>
+          </dl>
+          <section className="rounded-xl bg-white p-5 shadow-sm">
+            <h3 className="mb-3 text-lg font-semibold text-gray-900">By subject</h3>
+            {subjects.length ? (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200 text-sm">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      {["Subject", "Class", "Students", "Attendance", "Exam average", "Exam pass rate", "Assignments handed in"].map((h) => (
+                        <th key={h} scope="col" className="px-3 py-2 text-left font-semibold text-gray-700">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {subjects.map((row) => (
+                      <tr key={row.subject_id}>
+                        <th scope="row" className="px-3 py-2 text-left font-medium text-gray-900">{row.subject_name}</th>
+                        <td className="px-3 py-2 text-gray-700">{row.class_name}</td>
+                        <td className="px-3 py-2 tabular-nums text-gray-700">{row.student_count}</td>
+                        <td className="px-3 py-2 tabular-nums text-gray-900">{percent(row.attendance_rate)}</td>
+                        <td className="px-3 py-2 tabular-nums text-gray-700">{percent(row.exams?.average_percentage)}</td>
+                        <td className="px-3 py-2 tabular-nums text-gray-700">{percent(row.exams?.pass_rate)}</td>
+                        <td className="px-3 py-2 tabular-nums text-gray-700">{percent(row.assignments?.submission_rate)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">No subjects yet.</p>
+            )}
+          </section>
         </>
       )}
     </div>

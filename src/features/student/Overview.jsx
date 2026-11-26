@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import useStudentOverview, { summariseCourses } from "./useStudentOverview";
 import { ListSkeleton, Skeleton, SkeletonRegion } from "@/components/ui/Skeleton";
 import Profile from "../auth/Profile";
+import { getStoredUser } from "@/api/auth";
 import {
   Bell,
   Calendar,
@@ -37,6 +38,7 @@ const Overview = () => {
   const studentAssignments = useStudentAssignments();
   const navigate = useNavigate();
   const { courses, attendance, transcript } = useStudentOverview();
+  const firstName = getStoredUser()?.first_name;
   const courseSummary = summariseCourses(courses.data || []);
   const attendancePercent = Math.round(attendance.data?.summary?.attendance_percentage || 0);
   const latestTerm = transcript.data?.terms?.[0];
@@ -112,7 +114,7 @@ const Overview = () => {
       <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-8 mb-8 text-white shadow-2xl">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-2">Welcome back, Student! 👋</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-2">Welcome back{firstName ? `, ${firstName}` : ""}! 👋</h2>
             <p className="text-blue-100 text-lg">Ready to continue your learning journey? Let's explore what's new today.</p>
           </div>
           <div className="hidden md:block">

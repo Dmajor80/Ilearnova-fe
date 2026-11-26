@@ -82,11 +82,18 @@ function ParentHeader({ activeTab, setIsMobileMenuOpen, dashboardData }) {
               aria-haspopup="true"
               aria-expanded={isProfileDropdownOpen}
             >
-              <img
-                src={dashboardData?.user?.profile_pic || "/default-profile.png"}
-                alt="Profile"
-                className="w-10 h-10 rounded-full object-cover border-2 border-gradient-to-r from-blue-500 to-indigo-500 shadow-md"
-              />
+              {dashboardData?.user?.profile_pic ? (
+                <img
+                  src={dashboardData.user.profile_pic}
+                  alt="Profile"
+                  className="w-10 h-10 rounded-full object-cover border-2 border-blue-500 shadow-md"
+                />
+              ) : (
+                <span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-blue-500 text-blue-600">
+                  <User className="h-5 w-5" aria-hidden="true" />
+                  <span className="sr-only">Profile</span>
+                </span>
+              )}
               <ChevronDown className="w-4 h-4 text-slate-600" />
             </button>
             {/* Dropdown menu */}

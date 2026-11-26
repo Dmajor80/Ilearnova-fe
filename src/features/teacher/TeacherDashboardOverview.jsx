@@ -10,6 +10,23 @@ import QuickStatsCard from "@/components/dashboard/QuickStatsCard";
 import { RefreshCw } from "lucide-react";
 import { ListSkeleton, Skeleton, StatCardsSkeleton } from "@/components/ui/Skeleton";
 
+const shortTime = (value) => {
+  const [h, m] = String(value || "").split(":");
+  const hour = Number(h);
+  return m && !Number.isNaN(hour) ? `${hour % 12 || 12}:${m.slice(0, 2)} ${hour >= 12 ? "PM" : "AM"}` : value || "";
+};
+
+/** Today's lessons, or the next school day's if there are none today. */
+function upcomingDay(days, now = new Date()) {
+  const today = (now.getDay() + 6) % 7; // backend weeks start Monday = 0
+  for (let ahead = 0; ahead < 7; ahead += 1) {
+    const dow = (today + ahead) % 7;
+    const day = days.find((d) => d.day_of_week === dow && d.entries?.length);
+    if (day) return { label: ahead === 0 ? "Today" : ahead === 1 ? "Tomorrow" : day.day_name, entries: day.entries };
+  }
+  return null;
+}
+
 export default function TeacherDashboardOverview({ onNavigate = () => {} }) {
   const classesApi = useTeacherClasses();
   const studentsApi = useTeacherStudents();
@@ -27,6 +44,7 @@ export default function TeacherDashboardOverview({ onNavigate = () => {} }) {
   const timetableDays = Array.isArray(timetableApi.timetable?.days)
     ? timetableApi.timetable.days
     : [];
+  const nextDay = upcomingDay(timetableDays);
   const submissions = assignmentsApi.assignments.reduce(
     (sum, assignment) => sum + Number(assignment.submission_count || 0),
     0
@@ -156,14 +174,20 @@ export default function TeacherDashboardOverview({ onNavigate = () => {} }) {
             <button type="button" onClick={() => onNavigate("timetable")} className="text-sm font-medium text-blue-700 hover:underline">View timetable</button>
           </div>
           {timetableApi.loading ? <ListSkeleton rows={3} label="Loading timetable" />
-            : timetableDays.length ? (
-              <ul className="divide-y">
-                {timetableDays.slice(0, 5).map((day, index) => (
-                  <li key={day.id || day.day_of_week || index} className="py-2 text-sm text-gray-700">
-                    {day.day_name || day.day || day.name || `Day ${index + 1}`}
-                  </li>
-                ))}
-              </ul>
+            : nextDay ? (
+              <>
+                <p className="mb-2 text-sm font-medium text-gray-500">{nextDay.label}</p>
+                <ul className="divide-y">
+                  {nextDay.entries.map((slot) => (
+                    <li key={slot.id} className="flex gap-3 py-2 text-sm">
+                      <span className="w-20 flex-shrink-0 tabular-nums text-blue-700">{shortTime(slot.start_time)}</span>
+                      <span className="text-gray-900">
+                        {slot.subject_name || "Class"} <span className="text-gray-500">· {slot.class_name}{slot.room ? ` · ${slot.room}` : ""}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </>
             ) : <p className="text-sm text-gray-500">No timetable is available.</p>}
         </section>
       </div>
