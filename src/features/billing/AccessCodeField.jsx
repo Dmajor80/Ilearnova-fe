@@ -60,7 +60,7 @@ export default function AccessCodeField({ value, email, onChange, error, darkMod
           <p className={muted}>Checking code…</p>
         ) : check?.valid ? (
           <p className="text-green-700">
-            Valid code{check.plan ? ` · ${check.plan}` : ""} · {planLength(check.duration_days)}
+            Valid code{check.plan_name || check.plan ? ` · ${check.plan_name || check.plan}` : ""} · {planLength(check.duration_days)}
             {check.school_name ? ` · for ${check.school_name}` : ""}
           </p>
         ) : check ? (

@@ -35,9 +35,9 @@ const inRouter = (ui, path = "/") => (
 
 describe("AccessCodeField", () => {
   it("checks the code as it is typed without redeeming it", async () => {
-    http.post.mockResolvedValue({ success: true, data: { valid: true, plan: "annual", duration_days: 365, school_name: "Sunrise College" } });
+    http.post.mockResolvedValue({ success: true, data: { valid: true, plan: "annual", plan_name: "School annual", duration_days: 365, school_name: "Sunrise College" } });
     render(inRouter(<AccessCodeField value="ILN-AAAA-BBBB-CCCC" email="head@sunrise.ng" onChange={() => {}} />));
-    expect(await screen.findByText(/Valid code · annual · 1 year · for Sunrise College/)).toBeTruthy();
+    expect(await screen.findByText(/Valid code · School annual · 1 year · for Sunrise College/)).toBeTruthy();
     expect(http.post).toHaveBeenCalledWith(
       "/api/billing/access-codes/check/",
       { code: "ILN-AAAA-BBBB-CCCC", email: "head@sunrise.ng" },
