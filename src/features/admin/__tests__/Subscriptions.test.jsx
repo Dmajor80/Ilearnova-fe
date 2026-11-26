@@ -39,6 +39,8 @@ beforeEach(() => {
     if (path.endsWith("/plans/")) return Promise.resolve({ count: 1, results: [ANNUAL] });
     if (path.endsWith("/schools/")) return Promise.resolve({ count: 1, results: [SCHOOL] });
     if (path.endsWith("/access-codes/")) return Promise.resolve({ count: 1, results: [CODE] });
+    if (path === "/api/superadmin/organizations/org-1/")
+      return Promise.resolve({ id: "org-1", name: "Sunrise College", admins: [{ id: "u1", email: "head@sunrise.ng", full_name: "Ada Head" }] });
     return Promise.resolve({});
   });
   http.post.mockResolvedValue({});
@@ -168,5 +170,50 @@ describe("Superadmin subscriptions", () => {
     await menuItem("Annual", "Deactivate");
     fireEvent.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: "Deactivate" }));
     await waitFor(() => expect(http.del).toHaveBeenCalledWith("/api/billing/superadmin/plans/p1/", { auth: true }));
+  });
+
+  it("explains both routes and emails the school's admin a code instead of extending", async () => {
+    renderPage();
+    await menuItem("Sunrise College", "Renew");
+    const dialog = screen.getByRole("dialog");
+    expect(within(dialog).getByLabelText("Extend now").checked).toBe(true);
+    expect(within(dialog).getByText(/Adds the time straight away/)).toBeTruthy();
+    fireEvent.click(within(dialog).getByLabelText("Email them a code"));
+    expect(within(dialog).getByText(/They apply it on their Billing page/)).toBeTruthy();
+    const email = within(dialog).getByLabelText("Send the code to");
+    await waitFor(() => expect(email.value).toBe("head@sunrise.ng"));
+    fireEvent.change(email, { target: { value: "bursar@sunrise.ng" } });
+    await within(dialog).findByRole("option", { name: /Annual/ });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Email code" }));
+
+    await waitFor(() => expect(http.post).toHaveBeenCalled());
+    const [path, body] = http.post.mock.calls[0];
+    expect(path).toBe("/api/billing/superadmin/access-codes/");
+    expect(body).toMatchObject({ count: 1, organization: "org-1", issued_to: "bursar@sunrise.ng", plan: "annual" });
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(http.post).not.toHaveBeenCalledWith("/api/billing/superadmin/subscriptions/", expect.anything(), expect.anything());
+  });
+
+  it("shows plan names in the access codes table", async () => {
+    http.get.mockImplementation((path) => {
+      if (path.endsWith("/plans/")) return Promise.resolve({ count: 1, results: [ANNUAL] });
+      if (path.endsWith("/access-codes/"))
+        return Promise.resolve({
+          count: 3,
+          results: [
+            { ...CODE, id: "a", code: "ILN-NAME-0000-0001", plan: "term", plan_name: "Term Plan" },
+            { ...CODE, id: "b", code: "ILN-LOOK-0000-0002", plan: "annual" },
+            { ...CODE, id: "c", code: "ILN-RAWC-0000-0003", plan: "legacy" },
+            { ...CODE, id: "d", code: "ILN-DAYS-0000-0004", plan: null, plan_name: null, duration_days: 30 },
+          ],
+        });
+      return Promise.resolve({});
+    });
+    renderPage("/admin-dashboard/subscriptions?tab=codes");
+    const row = async (code) => (await screen.findByText(code)).closest("tr");
+    expect(within(await row("ILN-NAME-0000-0001")).getByText("Term Plan")).toBeTruthy();
+    await waitFor(async () => expect(within(await row("ILN-LOOK-0000-0002")).getByText("Annual")).toBeTruthy());
+    expect(within(await row("ILN-RAWC-0000-0003")).getByText("legacy")).toBeTruthy();
+    expect(within(await row("ILN-DAYS-0000-0004")).getByText("30 days, no plan")).toBeTruthy();
   });
 });

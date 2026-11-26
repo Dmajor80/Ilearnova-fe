@@ -240,7 +240,14 @@ function InviteTab({ plans, onInvited }) {
 
 /* ------------------------------------------------------------ Access codes */
 
-function CodesTab({ refreshKey }) {
+/** Plan name for an access code: from the row, else the plans list, else its code or length. */
+const codePlanName = (code, plans) =>
+  code.plan_name ||
+  (code.plan && (plans || []).find((p) => p.code === code.plan)?.name) ||
+  code.plan ||
+  (code.duration_days ? `${code.duration_days} days, no plan` : "—");
+
+function CodesTab({ refreshKey, plans }) {
   const [filter, setFilter] = useState("false");
   const [search, setSearch] = useState("");
   const [confirm, setConfirm] = useState(null);
@@ -316,7 +323,7 @@ function CodesTab({ refreshKey }) {
                       {c.email_locked && <span className="ml-1 text-xs text-gray-500">(locked)</span>}
                       {c.school_name && <span className="block text-xs text-gray-500">{c.school_name}</span>}
                     </td>
-                    <td className="px-3 py-3">{c.plan || "—"}</td>
+                    <td className="px-3 py-3">{codePlanName(c, plans)}</td>
                     <td className="px-3 py-3 text-xs">
                       {c.redeemed_at ? (
                         <span className="text-gray-700">Used by {c.redeemed_by_email} on {formatDate(c.redeemed_at)}</span>
@@ -565,7 +572,7 @@ export default function Subscriptions() {
       <div role="tabpanel" aria-labelledby={`sub-tab-${tab}`}>
         {tab === "schools" && <SchoolsTab plans={allPlans ? activePlans : undefined} />}
         {tab === "invite" && <InviteTab plans={activePlans} onInvited={() => setCodesKey((k) => k + 1)} />}
-        {tab === "codes" && <CodesTab refreshKey={codesKey} />}
+        {tab === "codes" && <CodesTab refreshKey={codesKey} plans={allPlans} />}
         {tab === "plans" && (
           <PlansTab
             plans={allPlans}
