@@ -103,6 +103,18 @@ describe("DeleteDialog", () => {
     expect(onDeleted).not.toHaveBeenCalled();
   });
 
+  it("uses singular labels for a count of one", async () => {
+    renderDialog({
+      loadCheck: () =>
+        Promise.resolve({ ...CHECK, related: { "school roles": 1, classes: 1, "timetable entries": 1, admins: 1 } }),
+    });
+    const list = await screen.findByRole("list", { name: "What will be deleted" });
+    expect(within(list).getByText("1 school role")).toBeTruthy();
+    expect(within(list).getByText("1 class")).toBeTruthy();
+    expect(within(list).getByText("1 timetable entry")).toBeTruthy();
+    expect(within(list).getByText("1 admin")).toBeTruthy();
+  });
+
   it("works without a check or typing gate (plans, codes)", async () => {
     const onDelete = vi.fn().mockResolvedValue({});
     render(<DeleteDialog open title="Delete Annual?" message="Schools will no longer see this plan." onDelete={onDelete} onClose={vi.fn()} />);

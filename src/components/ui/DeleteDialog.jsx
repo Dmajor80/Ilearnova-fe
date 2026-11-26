@@ -6,6 +6,16 @@ import { Skeleton, SkeletonRegion } from "./Skeleton";
 const errorReason = (err) => err?.data?.error || err?.data?.detail || err?.message || "That didn't work. Try again.";
 const countList = (counts) => Object.entries(counts || {}).filter(([, n]) => n > 0);
 
+/** "1 school role", "1 class", "1 timetable entry"; plural labels come from the API. */
+function countLabel(n, label) {
+  if (n !== 1) return `${n} ${label}`;
+  let one = label;
+  if (/ies$/.test(label)) one = label.replace(/ies$/, "y");
+  else if (/(ss|ch|sh|x)es$/.test(label)) one = label.replace(/es$/, "");
+  else if (/s$/.test(label)) one = label.replace(/s$/, "");
+  return `${n} ${one}`;
+}
+
 /**
  * Permanent-delete confirmation.
  *
@@ -155,7 +165,7 @@ export default function DeleteDialog({
             <ul aria-label="What will be deleted" className="grid grid-cols-1 gap-x-4 gap-y-0.5 sm:grid-cols-2">
               {related.map(([label, n]) => (
                 <li key={label} className="tabular-nums">
-                  {n} {label}
+                  {countLabel(n, label)}
                 </li>
               ))}
             </ul>
@@ -170,7 +180,7 @@ export default function DeleteDialog({
             {countList(blocked.blockers).length > 0 && (
               <ul className="list-inside list-disc">
                 {countList(blocked.blockers).map(([label, n]) => (
-                  <li key={label}>{`${n} ${label}`}</li>
+                  <li key={label}>{countLabel(n, label)}</li>
                 ))}
               </ul>
             )}
