@@ -1,105 +1,98 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { useSuperAdminEmails, useSuperAdminOrganizations } from "@/hooks/superadmin";
-import EmailLogs from "../EmailLogs";
-import Organizations from "../Organizations";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+import { paginated, routeGets } from "./testUtils";
 
-vi.mock("@/hooks/superadmin", () => ({
-  useSuperAdminEmails: vi.fn(),
-  useSuperAdminOrganizations: vi.fn()
+vi.mock("@/api/baseClient", () => ({
+  SUBSCRIPTION_BLOCKED_EVENT: "ilearnova:subscription-blocked",
+  http: { get: vi.fn(), post: vi.fn(), put: vi.fn(), patch: vi.fn(), del: vi.fn() },
 }));
 
-const notification = {
-  show: false,
-  message: "",
-  type: "info"
+import { http } from "@/api/baseClient";
+import EmailLogs from "../EmailLogs";
+
+const EMAIL = {
+  id: "email-1",
+  to: "person@example.com",
+  subject: "Welcome",
+  status: "failed",
+  attempts: 2,
+  can_resend: true,
+  created_at: "2026-11-12T10:00:00Z",
+  sent_at: null,
 };
 
-const createOrganization = vi.fn();
-const fetchOrganizations = vi.fn();
-const updateOrganization = vi.fn();
-const fetchOrganizationDetails = vi.fn();
-const deactivateOrganization = vi.fn();
-
-const resendEmail = vi.fn();
-const fetchEmails = vi.fn();
-const fetchEmailDetails = vi.fn();
-
 beforeEach(() => {
-  vi.clearAllMocks();
-  useSuperAdminOrganizations.mockReturnValue({
-    loading: false,
-    error: null,
-    organizations: [],
-    totalOrganizations: 0,
-    mutating: false,
-    fetchOrganizations,
-    fetchOrganizationDetails,
-    createOrganization,
-    updateOrganization,
-    deactivateOrganization,
-    notification
+  routeGets(http, {
+    "/api/superadmin/emails/email-1/": { ...EMAIL, last_error: "Temporary delivery failure" },
+    "/api/superadmin/emails/": paginated([EMAIL]),
   });
-  useSuperAdminEmails.mockReturnValue({
-    loading: false,
-    error: null,
-    emails: [{
-      id: "email-1",
-      to: "person@example.com",
-      subject: "Welcome",
-      status: "failed",
-      attempts: 2,
-      can_resend: true,
-      created_at: "2026-11-12T10:00:00Z",
-      sent_at: null
-    }],
-    totalEmails: 1,
-    mutating: false,
-    fetchEmails,
-    fetchEmailDetails,
-    resendEmail,
-    notification
+  http.post.mockResolvedValue({});
+});
+
+afterEach(() => {
+  cleanup();
+  vi.clearAllMocks();
+});
+
+const renderLogs = (url = "/admin-dashboard/emails") =>
+  render(
+    <MemoryRouter initialEntries={[url]}>
+      <EmailLogs />
+    </MemoryRouter>
+  );
+
+describe("Email logs", () => {
+  it("shows details from the actions menu", async () => {
+    renderLogs();
+    fireEvent.click(await screen.findByRole("button", { name: "Actions for email to person@example.com" }));
+    fireEvent.click(within(screen.getByRole("menu")).getByRole("menuitem", { name: "Details" }));
+    expect(await screen.findByText("Temporary delivery failure")).toBeTruthy();
+  });
+
+  it("resends only after confirming", async () => {
+    renderLogs();
+    fireEvent.click(await screen.findByRole("button", { name: "Actions for email to person@example.com" }));
+    fireEvent.click(within(screen.getByRole("menu")).getByRole("menuitem", { name: "Resend" }));
+    expect(http.post).not.toHaveBeenCalled();
+    fireEvent.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: "Resend" }));
+    await waitFor(() =>
+      expect(http.post).toHaveBeenCalledWith("/api/superadmin/emails/email-1/resend/", {}, { auth: true })
+    );
+  });
+
+  it("filters by status from the URL (dashboard's failed-email link)", async () => {
+    renderLogs("/admin-dashboard/emails?status=failed");
+    await screen.findByText("person@example.com");
+    const call = http.get.mock.calls.find(([path]) => path === "/api/superadmin/emails/");
+    expect(call[1].params).toMatchObject({ status: "failed", page: 1 });
+    expect(screen.getByLabelText("Filter by status").value).toBe("failed");
   });
 });
 
-afterEach(cleanup);
-
-describe("super-admin management pages", () => {
-  it("creates an organization using the form values", async () => {
-    render(<Organizations />);
-
-    fireEvent.click(screen.getByRole("button", { name: /add organization/i }));
-    fireEvent.change(screen.getByLabelText("Name *"), { target: { value: "North School" } });
-    fireEvent.change(screen.getByLabelText("Code *"), { target: { value: "NORTH" } });
-    fireEvent.click(screen.getByRole("button", { name: "Create organization" }));
-
-    await waitFor(() => {
-      expect(createOrganization).toHaveBeenCalledWith(expect.objectContaining({
-        name: "North School",
-        code: "NORTH",
-        organization_type: "private",
-        is_active: true
-      }));
-    });
+describe("ActionsMenu keyboard", () => {
+  it("opens with ArrowDown, moves with arrows and closes on Escape", async () => {
+    renderLogs();
+    const button = await screen.findByRole("button", { name: "Actions for email to person@example.com" });
+    fireEvent.keyDown(button, { key: "ArrowDown" });
+    const menu = screen.getByRole("menu");
+    const [details, resend] = within(menu).getAllByRole("menuitem");
+    expect(document.activeElement).toBe(details);
+    fireEvent.keyDown(menu, { key: "ArrowDown" });
+    expect(document.activeElement).toBe(resend);
+    fireEvent.keyDown(menu, { key: "ArrowDown" });
+    expect(document.activeElement).toBe(details);
+    fireEvent.keyDown(menu, { key: "Escape" });
+    expect(screen.queryByRole("menu")).toBeNull();
+    expect(document.activeElement).toBe(button);
+    expect(button.getAttribute("aria-haspopup")).toBe("menu");
   });
 
-  it("shows email log details and allows a resend when permitted", async () => {
-    fetchEmailDetails.mockResolvedValue({
-      id: "email-1",
-      to: "person@example.com",
-      subject: "Welcome",
-      status: "failed",
-      attempts: 2,
-      last_error: "Temporary delivery failure",
-      created_at: "2026-11-12T10:00:00Z",
-      sent_at: null
-    });
-
-    render(<EmailLogs />);
-    fireEvent.click(screen.getByRole("button", { name: /details/i }));
-    expect(await screen.findByText("Temporary delivery failure")).toBeTruthy();
-
-    fireEvent.click(screen.getByRole("button", { name: /resend/i }));
-    expect(resendEmail).toHaveBeenCalledWith("email-1");
+  it("closes on an outside click", async () => {
+    renderLogs();
+    fireEvent.click(await screen.findByRole("button", { name: "Actions for email to person@example.com" }));
+    expect(screen.getByRole("menu")).toBeTruthy();
+    fireEvent.mouseDown(document.body);
+    expect(screen.queryByRole("menu")).toBeNull();
   });
 });

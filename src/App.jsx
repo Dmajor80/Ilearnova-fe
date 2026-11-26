@@ -26,7 +26,11 @@ import AdminDashboard from "@/features/admin/AdminDashboard";
 import Dashboard from "@/features/admin/Dashboard";
 import Users from "@/features/admin/Users";
 import NewUser from "@/features/admin/NewUser";
-import Report from "@/features/admin/Report";
+import Reports from "@/features/admin/Reports";
+import AdminSettings from "@/features/admin/Settings";
+import OrganizationDetail from "@/features/admin/OrganizationDetail";
+import SuperAdminGate from "@/features/auth/SuperAdminGate";
+import OrgAdminGate from "@/features/auth/OrgAdminGate";
 import Organizations from "@/features/admin/Organizations";
 import EmailLogs from "@/features/admin/EmailLogs";
 import Subscriptions from "@/features/admin/Subscriptions";
@@ -173,20 +177,25 @@ const AppContent = () => {
       </Route>
       
       {/* Admin Dashboard */}
-      <Route path="/admin-dashboard" element={<RequireAuth><AdminDashboard /></RequireAuth>}>
+      <Route path="/admin-dashboard" element={<RequireAuth><SuperAdminGate><AdminDashboard /></SuperAdminGate></RequireAuth>}>
+        <Route index element={<Navigate to="/admin-dashboard/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="users" element={<Users />} />
         <Route path="users/new-user" element={<NewUser />} />
         <Route path="organizations" element={<Organizations />} />
+        <Route path="organizations/:organizationId" element={<OrganizationDetail />} />
         <Route path="emails" element={<EmailLogs />} />
         <Route path="subscriptions" element={<Subscriptions />} />
-        <Route path="reports" element={<Report />} />
+        <Route path="reports" element={<Reports />} />
+        <Route path="settings" element={<AdminSettings />} />
+        {/* Old sidebar links: analytics now lives on the dashboard. */}
+        <Route path="analytics" element={<Navigate to="/admin-dashboard/dashboard" replace />} />
         <Route path="*" element={<Error />} />
       </Route>
       {/* School Admin Dashboard */}
       <Route path="/dashboard" element={<RequireAuth><SchoolAdmin /></RequireAuth>} />
       {/* Organization Dashboard */}
-      <Route path="/organization-dashboard" element={<RequireAuth><OrganizationDashboard /></RequireAuth>}>
+      <Route path="/organization-dashboard" element={<RequireAuth><OrgAdminGate><OrganizationDashboard /></OrgAdminGate></RequireAuth>}>
         <Route index element={<Navigate to="/organization-dashboard/overview" replace />} />
         <Route path="overview" element={<OrganizationOverview />} />
         <Route path="students" element={<OrganizationStudents />} />

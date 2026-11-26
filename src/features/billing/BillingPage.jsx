@@ -125,6 +125,7 @@ function SubscriptionSection() {
         ) : (
           <p className="mt-2 text-sm text-gray-600">No plans are on sale right now. Contact iLearnova support to renew.</p>
         )}
+        {chosen?.description && <p className="mt-2 text-sm text-gray-600">{chosen.description}</p>}
         <p className="mt-2 text-xs text-gray-500">The new period starts when the current one ends, so renewing early loses nothing.</p>
       </div>
 
@@ -242,7 +243,7 @@ function PayoutAccountSection() {
             <option value="">
               {banks.length ? "Choose a bank" : banksFailed ? "Bank list unavailable" : "Loading banks…"}
             </option>
-            {banks.map((b) => <option key={b.code} value={b.code}>{b.name}</option>)}
+            {banks.map((b, i) => <option key={`${b.code}-${b.name}-${i}`} value={b.code}>{b.name}</option>)}
           </select>
           {banksFailed && (
             <span className="mt-1 block text-xs font-normal text-amber-700">

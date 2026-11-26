@@ -1,196 +1,143 @@
-import { useState } from "react";
-import { Eye, Mail, RefreshCw, RotateCw, Search, X } from "lucide-react";
-import { useSuperAdminEmails } from "@/hooks/superadmin";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { Eye, Mail, RefreshCw, RotateCw, Search } from "lucide-react";
+import { asPage, superAdminApi } from "@/api/superAdminApi";
+import { apiErrorDetails } from "@/lib/apiHelpers";
+import { toast } from "@/lib/toast";
+import ActionsMenu from "@/components/ui/ActionsMenu";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import Modal from "@/components/ui/Modal";
+import { Skeleton, TableSkeleton } from "@/components/ui/Skeleton";
+import { EmptyState, ErrorAlert, PageCard, Pagination, Pill, formatDateTime } from "@/components/admin/AdminUI";
+import useResource from "@/hooks/superadmin/useResource";
+import useDebouncedValue from "@/hooks/useDebouncedValue";
 
-function formatDate(value) {
-  if (!value) return "—";
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? "—" : date.toLocaleString();
-}
+const PAGE_SIZE = 20;
+const STATUS = { pending: ["Pending", "amber"], sent: ["Sent", "green"], failed: ["Failed", "red"] };
+const errorText = (err) => apiErrorDetails(err).messages.join(" ");
 
 function StatusBadge({ status }) {
-  const styles = {
-    pending: "bg-amber-50 text-amber-700",
-    sent: "bg-green-50 text-green-700",
-    failed: "bg-red-50 text-red-700"
-  };
+  const [label, tone] = STATUS[status] || [status || "Unknown", "gray"];
+  return <Pill tone={tone}>{label}</Pill>;
+}
+
+function EmailDetails({ email, onClose }) {
+  const details = useResource(() => superAdminApi.email(email.id), [email.id]);
+  const e = details.data || email;
   return (
-    <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${styles[status] ?? "bg-gray-100 text-gray-700"}`}>
-      {status || "Unknown"}
-    </span>
+    <Modal open onClose={onClose} title="Email details" description={e.subject} size="lg">
+      {details.loading && !details.data ? (
+        <div role="status" aria-label="Loading email" className="space-y-3">
+          {[0, 1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-4 w-full" />)}
+        </div>
+      ) : (
+        <>
+          {details.error && <ErrorAlert message={errorText(details.error)} onRetry={details.reload} />}
+          <dl className="grid gap-x-4 gap-y-3 text-sm sm:grid-cols-[120px_1fr]">
+            <dt className="text-gray-500">Recipient</dt><dd className="break-all text-gray-900">{e.to}</dd>
+            <dt className="text-gray-500">Subject</dt><dd className="text-gray-900">{e.subject}</dd>
+            <dt className="text-gray-500">Status</dt><dd><StatusBadge status={e.status} /></dd>
+            <dt className="text-gray-500">Attempts</dt><dd className="text-gray-900">{e.attempts ?? "—"}</dd>
+            <dt className="text-gray-500">Last error</dt><dd className="break-words text-gray-900">{e.last_error || "—"}</dd>
+            <dt className="text-gray-500">Created</dt><dd className="text-gray-900">{formatDateTime(e.created_at)}</dd>
+            <dt className="text-gray-500">Sent</dt><dd className="text-gray-900">{formatDateTime(e.sent_at)}</dd>
+          </dl>
+          {(e.body || e.text_body || e.html_body) && (
+            <pre className="mt-4 max-h-64 overflow-auto whitespace-pre-wrap rounded-lg bg-gray-50 p-3 text-xs text-gray-700">{e.body || e.text_body || e.html_body}</pre>
+          )}
+        </>
+      )}
+    </Modal>
   );
 }
 
 export default function EmailLogs() {
-  const {
-    loading,
-    error,
-    emails,
-    totalEmails,
-    mutating,
-    fetchEmails,
-    fetchEmailDetails,
-    resendEmail,
-    notification
-  } = useSuperAdminEmails();
-
+  const [params, setParams] = useSearchParams();
+  const status = params.get("status") || "";
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
-  const [selectedEmail, setSelectedEmail] = useState(null);
-  const [detailsLoading, setDetailsLoading] = useState(false);
-  const [detailsError, setDetailsError] = useState("");
-  const pageSize = 10;
-  const totalPages = Math.ceil(totalEmails / pageSize);
+  const [viewing, setViewing] = useState(null);
+  const [resending, setResending] = useState(null);
+  const query = useDebouncedValue(search.trim(), 300);
 
-  const loadPage = (nextPage, nextSearch = search, nextStatus = status) => {
-    setPage(nextPage);
-    fetchEmails({
-      search: nextSearch.trim(),
-      status: nextStatus,
-      page: nextPage
-    });
+  useEffect(() => setPage(1), [query, status]);
+
+  const list = useResource(
+    async () => asPage(await superAdminApi.emails({ page, page_size: PAGE_SIZE, search: query || undefined, status: status || undefined })),
+    [page, query, status]
+  );
+
+  const setStatus = (value) => {
+    const next = new URLSearchParams(params);
+    if (value) next.set("status", value);
+    else next.delete("status");
+    setParams(next, { replace: true });
   };
 
-  const showDetails = async (email) => {
-    setSelectedEmail(email);
-    setDetailsLoading(true);
-    setDetailsError("");
-    try {
-      setSelectedEmail(await fetchEmailDetails(email.id));
-    } catch (requestError) {
-      setDetailsError(requestError.message);
-    } finally {
-      setDetailsLoading(false);
-    }
-  };
-
-  const handleResend = async (email) => {
-    try {
-      await resendEmail(email.id);
-    } catch {
-      // The hook displays the API error in its notification.
-    }
-  };
+  const items = list.data?.items || [];
+  const total = list.data?.total || 0;
 
   return (
     <div className="space-y-5">
-      <section className="flex flex-col justify-between gap-4 rounded-xl border border-gray-100 bg-white p-5 shadow-sm sm:flex-row sm:items-center">
-        <div>
-          <div className="flex items-center gap-2">
-            <Mail className="h-5 w-5 text-blue-700" />
-            <h2 className="text-xl font-semibold text-gray-900">Email Logs</h2>
+      <PageCard title="Email Logs" icon={Mail} description="Every email the platform sends. Resend ones that failed.">
+        <div className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center">
+          <div className="relative flex-1 sm:max-w-sm">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
+            <label className="sr-only" htmlFor="email-search">Search recipients and subjects</label>
+            <input id="email-search" type="search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Recipient or subject" className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-3 text-sm" />
           </div>
-          <p className="mt-1 text-sm text-gray-600">Review outbound email delivery and retry eligible messages.</p>
-        </div>
-        <form
-          className="flex flex-wrap gap-2"
-          onSubmit={(event) => {
-            event.preventDefault();
-            loadPage(1);
-          }}
-        >
-          <label className="sr-only" htmlFor="email-search">Search recipients and subjects</label>
-          <input
-            id="email-search"
-            type="search"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search recipient or subject"
-            className="min-h-10 rounded-lg border px-3 text-sm"
-          />
           <label className="sr-only" htmlFor="email-status">Filter by status</label>
-          <select
-            id="email-status"
-            value={status}
-            onChange={(event) => setStatus(event.target.value)}
-            className="min-h-10 rounded-lg border px-3 text-sm"
-          >
+          <select id="email-status" value={status} onChange={(e) => setStatus(e.target.value)} className="rounded-lg border border-gray-300 px-3 py-2 text-sm">
             <option value="">All statuses</option>
             <option value="pending">Pending</option>
             <option value="sent">Sent</option>
             <option value="failed">Failed</option>
           </select>
-          <button type="submit" className="inline-flex items-center gap-2 rounded-lg bg-blue-700 px-3 text-sm font-medium text-white hover:bg-blue-800">
-            <Search className="h-4 w-4" /> Search
+          <button type="button" onClick={list.reload} disabled={list.loading} aria-label="Refresh email logs" className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 sm:ml-auto">
+            <RefreshCw className={`h-4 w-4 ${list.loading ? "animate-spin" : ""}`} aria-hidden="true" />
           </button>
-        </form>
-      </section>
-
-      {notification.show && (
-        <p role="status" className={`rounded-lg p-3 text-sm ${notification.type === "success" ? "bg-green-50 text-green-700" : "bg-blue-50 text-blue-700"}`}>
-          {notification.message}
-        </p>
-      )}
-
-      {error && (
-        <div role="alert" className="flex items-center justify-between gap-3 rounded-lg bg-red-50 p-4 text-sm text-red-700">
-          <span>{error.message}</span>
-          <button type="button" onClick={() => loadPage(page)} className="font-medium underline">Retry</button>
         </div>
-      )}
+      </PageCard>
+
+      <ErrorAlert message={list.error && errorText(list.error)} onRetry={list.reload} />
 
       <section className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
-        <div className="flex items-center justify-between border-b px-5 py-4">
-          <h3 className="font-semibold text-gray-900">{totalEmails} email{totalEmails === 1 ? "" : "s"}</h3>
-          <button
-            type="button"
-            onClick={() => fetchEmails({ search: search.trim(), status, page })}
-            disabled={loading}
-            aria-label="Refresh email logs"
-            className="rounded-lg border p-2 text-gray-600 hover:bg-gray-50 disabled:opacity-50"
-          >
-            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-          </button>
-        </div>
-        {loading && emails.length === 0 ? (
-          <p role="status" className="p-6 text-sm text-gray-600">Loading email logs…</p>
-        ) : emails.length === 0 ? (
-          <p className="p-6 text-sm text-gray-600">No email logs match these filters.</p>
+        {list.loading && !list.data ? (
+          <TableSkeleton columns={5} label="Loading email logs" />
+        ) : !items.length ? (
+          <EmptyState icon={Mail} title="No emails match these filters" />
         ) : (
-          <div className="overflow-x-auto">
+          <div className={`overflow-x-auto transition-opacity ${list.loading ? "opacity-60" : ""}`}>
             <table className="w-full min-w-[780px] text-left text-sm">
-              <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+              <thead className="bg-gray-50 text-xs font-medium uppercase tracking-wide text-gray-500">
                 <tr>
-                  <th className="px-5 py-3">Recipient / subject</th>
-                  <th className="px-5 py-3">Status</th>
-                  <th className="px-5 py-3">Attempts</th>
-                  <th className="px-5 py-3">Created</th>
-                  <th className="px-5 py-3">Sent</th>
-                  <th className="px-5 py-3">Actions</th>
+                  <th scope="col" className="px-5 py-3">Recipient / subject</th>
+                  <th scope="col" className="px-3 py-3">Status</th>
+                  <th scope="col" className="px-3 py-3 text-right">Attempts</th>
+                  <th scope="col" className="px-3 py-3">Created</th>
+                  <th scope="col" className="px-3 py-3">Sent</th>
+                  <th scope="col" className="px-3 py-3"><span className="sr-only">Actions</span></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {emails.map((email) => (
-                  <tr key={email.id}>
-                    <td className="max-w-sm px-5 py-4">
+                {items.map((email) => (
+                  <tr key={email.id} className="hover:bg-gray-50/60">
+                    <td className="max-w-sm px-5 py-3">
                       <p className="truncate font-medium text-gray-900">{email.to}</p>
                       <p className="truncate text-xs text-gray-500">{email.subject}</p>
                     </td>
-                    <td className="px-5 py-4"><StatusBadge status={email.status} /></td>
-                    <td className="px-5 py-4">{email.attempts}</td>
-                    <td className="px-5 py-4">{formatDate(email.created_at)}</td>
-                    <td className="px-5 py-4">{formatDate(email.sent_at)}</td>
-                    <td className="px-5 py-4">
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => showDetails(email)}
-                          className="inline-flex items-center gap-1 rounded border px-2 py-1 text-xs hover:bg-gray-50"
-                        >
-                          <Eye className="h-3 w-3" /> Details
-                        </button>
-                        {email.can_resend && (
-                          <button
-                            type="button"
-                            onClick={() => handleResend(email)}
-                            disabled={mutating}
-                            className="inline-flex items-center gap-1 rounded border border-blue-200 px-2 py-1 text-xs text-blue-700 hover:bg-blue-50 disabled:opacity-50"
-                          >
-                            <RotateCw className="h-3 w-3" /> Resend
-                          </button>
-                        )}
-                      </div>
+                    <td className="px-3 py-3"><StatusBadge status={email.status} /></td>
+                    <td className="px-3 py-3 text-right tabular-nums">{email.attempts}</td>
+                    <td className="whitespace-nowrap px-3 py-3 text-gray-600">{formatDateTime(email.created_at)}</td>
+                    <td className="whitespace-nowrap px-3 py-3 text-gray-600">{formatDateTime(email.sent_at)}</td>
+                    <td className="px-3 py-3 text-right">
+                      <ActionsMenu
+                        label={`Actions for email to ${email.to}`}
+                        items={[
+                          { id: "details", label: "Details", icon: Eye, onSelect: () => setViewing(email) },
+                          { id: "resend", label: "Resend", icon: RotateCw, hidden: !email.can_resend, onSelect: () => setResending(email) },
+                        ]}
+                      />
                     </td>
                   </tr>
                 ))}
@@ -198,47 +145,26 @@ export default function EmailLogs() {
             </table>
           </div>
         )}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between border-t px-5 py-3 text-sm">
-            <span className="text-gray-500">Page {page} of {totalPages}</span>
-            <div className="flex gap-2">
-              <button type="button" disabled={page <= 1 || loading} onClick={() => loadPage(page - 1)} className="rounded border px-3 py-1 disabled:opacity-50">Previous</button>
-              <button type="button" disabled={page >= totalPages || loading} onClick={() => loadPage(page + 1)} className="rounded border px-3 py-1 disabled:opacity-50">Next</button>
-            </div>
-          </div>
-        )}
+        <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPage={setPage} disabled={list.loading} />
       </section>
 
-      {selectedEmail && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="presentation">
-          <section className="w-full max-w-xl space-y-4 rounded-xl bg-white p-6 shadow-xl" role="dialog" aria-modal="true" aria-labelledby="email-detail-title">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h3 id="email-detail-title" className="text-lg font-semibold text-gray-900">Email details</h3>
-                <p className="mt-1 text-sm text-gray-500">{selectedEmail.id}</p>
-              </div>
-              <button type="button" onClick={() => setSelectedEmail(null)} aria-label="Close email details" className="rounded p-1 hover:bg-gray-100">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-            {detailsLoading ? (
-              <p role="status" className="text-sm text-gray-600">Loading email details…</p>
-            ) : detailsError ? (
-              <p role="alert" className="text-sm text-red-700">{detailsError}</p>
-            ) : (
-              <dl className="grid gap-3 text-sm sm:grid-cols-[120px_1fr]">
-                <dt className="text-gray-500">Recipient</dt><dd className="break-all">{selectedEmail.to}</dd>
-                <dt className="text-gray-500">Subject</dt><dd>{selectedEmail.subject}</dd>
-                <dt className="text-gray-500">Status</dt><dd><StatusBadge status={selectedEmail.status} /></dd>
-                <dt className="text-gray-500">Attempts</dt><dd>{selectedEmail.attempts}</dd>
-                <dt className="text-gray-500">Last error</dt><dd className="break-words">{selectedEmail.last_error || "—"}</dd>
-                <dt className="text-gray-500">Created</dt><dd>{formatDate(selectedEmail.created_at)}</dd>
-                <dt className="text-gray-500">Sent</dt><dd>{formatDate(selectedEmail.sent_at)}</dd>
-              </dl>
-            )}
-          </section>
-        </div>
-      )}
+      {viewing && <EmailDetails email={viewing} onClose={() => setViewing(null)} />}
+      <ConfirmDialog
+        open={Boolean(resending)}
+        title="Resend this email?"
+        message={resending ? `“${resending.subject}” will be sent to ${resending.to} again.` : ""}
+        confirmLabel="Resend"
+        onConfirm={async () => {
+          try {
+            await superAdminApi.resendEmail(resending.id);
+          } catch (err) {
+            throw new Error(errorText(err));
+          }
+          toast(`Email to ${resending.to} queued to resend.`);
+          list.reload();
+        }}
+        onClose={() => setResending(null)}
+      />
     </div>
   );
 }

@@ -14,10 +14,9 @@ export default defineConfig({
   logLevel: "info",  // may remove if you prefer
   test: {
     environment: "jsdom",
-    // ponytail: these two were written for Jest (never installed) and never ran; port when touched
+    // ponytail: this one was written for Jest (never installed) and never ran; port when touched
     exclude: [
       "**/node_modules/**",
-      "src/features/admin/__tests__/Dashboard.test.jsx",
       "src/features/school-admin/__tests__/SchoolAdmin.test.jsx",
     ],
   },

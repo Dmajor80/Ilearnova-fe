@@ -62,3 +62,41 @@ export function CardGridSkeleton({ count = 6, label = "Loading cards", className
     </SkeletonRegion>
   );
 }
+
+/** A table: header strip and `rows` lines of `columns` cells. */
+export function TableSkeleton({ rows = 6, columns = 5, label = "Loading table", className = "" }) {
+  return (
+    <SkeletonRegion label={label} className={`overflow-hidden ${className}`}>
+      <div className="flex gap-4 border-b bg-gray-50 px-5 py-3">
+        {Array.from({ length: columns }, (_, i) => (
+          <Skeleton key={i} className={`h-3 ${i === 0 ? "w-1/4" : "w-16"}`} />
+        ))}
+      </div>
+      {Array.from({ length: rows }, (_, r) => (
+        <div key={r} className="flex items-center gap-4 border-b border-gray-100 px-5 py-4 last:border-0">
+          <div className="w-1/4 space-y-2">
+            <Skeleton className={`h-4 ${r % 2 ? "w-2/3" : "w-4/5"}`} />
+            <Skeleton className="h-3 w-1/2" />
+          </div>
+          {Array.from({ length: columns - 1 }, (_, c) => (
+            <Skeleton key={c} className={`h-4 ${c % 2 ? "w-12" : "w-20"}`} />
+          ))}
+        </div>
+      ))}
+    </SkeletonRegion>
+  );
+}
+
+/** A form: label lines over input boxes, two per row. */
+export function FormSkeleton({ fields = 6, label = "Loading form", className = "" }) {
+  return (
+    <SkeletonRegion label={label} className={`grid gap-5 sm:grid-cols-2 ${className}`}>
+      {Array.from({ length: fields }, (_, i) => (
+        <div key={i} className="space-y-2">
+          <Skeleton className="h-3 w-24" />
+          <Skeleton className="h-10 w-full rounded-lg" />
+        </div>
+      ))}
+    </SkeletonRegion>
+  );
+}

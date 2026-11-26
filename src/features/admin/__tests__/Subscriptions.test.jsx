@@ -1,4 +1,5 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/api/baseClient", () => ({
@@ -8,6 +9,17 @@ vi.mock("@/api/baseClient", () => ({
 
 import { http } from "@/api/baseClient";
 import Subscriptions from "../Subscriptions";
+
+const renderPage = (url = "/admin-dashboard/subscriptions") =>
+  render(
+    <MemoryRouter initialEntries={[url]}>
+      <Subscriptions />
+    </MemoryRouter>
+  );
+const menuItem = async (rowLabel, item) => {
+  fireEvent.click(await screen.findByRole("button", { name: `Actions for ${rowLabel}` }));
+  fireEvent.click(within(screen.getByRole("menu")).getByRole("menuitem", { name: item }));
+};
 
 const ANNUAL = { id: "p1", code: "annual", name: "Annual", amount: "120000.00", duration_days: 365, is_active: true };
 const SCHOOL = { organization_id: "org-1", organization_name: "Sunrise College", state: "locked", expires_at: "2027-03-31T00:00:00Z" };
@@ -31,6 +43,7 @@ beforeEach(() => {
   });
   http.post.mockResolvedValue({});
   http.del.mockResolvedValue({});
+  http.patch.mockResolvedValue({});
 });
 afterEach(() => {
   cleanup();
@@ -39,11 +52,12 @@ afterEach(() => {
 
 describe("Superadmin subscriptions", () => {
   it("renews a locked school after a bank transfer", async () => {
-    render(<Subscriptions />);
-    fireEvent.click(await screen.findByRole("button", { name: "Renew" }));
-    await screen.findByRole("option", { name: /Annual/ });
-    fireEvent.change(screen.getByLabelText("Note"), { target: { value: "Transfer ref 123" } });
-    fireEvent.click(screen.getAllByRole("button", { name: "Renew" }).at(-1));
+    renderPage();
+    await menuItem("Sunrise College", "Renew");
+    const dialog = screen.getByRole("dialog");
+    await within(dialog).findByRole("option", { name: /Annual/ });
+    fireEvent.change(within(dialog).getByLabelText("Note"), { target: { value: "Transfer ref 123" } });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Renew" }));
 
     await waitFor(() =>
       expect(http.post).toHaveBeenCalledWith(
@@ -52,11 +66,11 @@ describe("Superadmin subscriptions", () => {
         { auth: true }
       )
     );
-    expect(await screen.findByText("Sunrise College renewed.")).toBeTruthy();
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   });
 
   it("invites a principal with a code only they can use", async () => {
-    render(<Subscriptions />);
+    renderPage();
     fireEvent.click(screen.getByRole("tab", { name: "Invite a school" }));
     await screen.findByRole("option", { name: /Annual/ });
     fireEvent.change(screen.getByLabelText("Email of the person setting up the school"), { target: { value: "principal@sunrise.ng" } });
@@ -78,7 +92,7 @@ describe("Superadmin subscriptions", () => {
   });
 
   it("can grant to an email instead of sending a code", async () => {
-    render(<Subscriptions />);
+    renderPage();
     fireEvent.click(screen.getByRole("tab", { name: "Invite a school" }));
     fireEvent.click(screen.getByLabelText("Grant to an email"));
     fireEvent.change(screen.getByLabelText("Email of the person setting up the school"), { target: { value: "owner@hill.ng" } });
@@ -95,15 +109,64 @@ describe("Superadmin subscriptions", () => {
   });
 
   it("resends and deactivates unused codes", async () => {
-    render(<Subscriptions />);
+    renderPage();
     fireEvent.click(screen.getByRole("tab", { name: "Access codes" }));
-    fireEvent.click(await screen.findByRole("button", { name: /Resend/ }));
+    await menuItem(CODE.code, "Resend");
+    expect(http.post).not.toHaveBeenCalled();
+    fireEvent.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: "Resend" }));
     await waitFor(() =>
       expect(http.post).toHaveBeenCalledWith("/api/billing/superadmin/access-codes/c1/send/", {}, { auth: true })
     );
-    fireEvent.click(screen.getByRole("button", { name: /Deactivate/ }));
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
+    await menuItem(CODE.code, "Deactivate");
+    fireEvent.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: "Deactivate" }));
     await waitFor(() =>
       expect(http.del).toHaveBeenCalledWith("/api/billing/superadmin/access-codes/c1/", { auth: true })
     );
+  });
+
+  it("lists plans in a table and creates one from a modal with an auto code", async () => {
+    renderPage("/admin-dashboard/subscriptions?tab=plans");
+    const row = (await screen.findByText("Annual")).closest("tr");
+    expect(within(row).getByText("₦120,000")).toBeTruthy();
+    expect(within(row).getByText("1 year")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Create plan" }));
+    const dialog = screen.getByRole("dialog", { name: "Create plan" });
+    fireEvent.change(within(dialog).getByLabelText(/^Name/), { target: { value: "Term Plan Plus" } });
+    expect(within(dialog).getByLabelText(/^Code/).value).toBe("term-plan-plus");
+    fireEvent.change(within(dialog).getByLabelText(/^Price/), { target: { value: "45000" } });
+    fireEvent.change(within(dialog).getByLabelText(/^Description/), { target: { value: "One term" } });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Create plan" }));
+    await waitFor(() =>
+      expect(http.post).toHaveBeenCalledWith(
+        "/api/billing/superadmin/plans/",
+        { name: "Term Plan Plus", code: "term-plan-plus", amount: "45000", duration_days: null, description: "One term" },
+        { auth: true }
+      )
+    );
+  });
+
+  it("opens the create-plan modal from ?new=1", async () => {
+    renderPage("/admin-dashboard/subscriptions?tab=plans&new=1");
+    expect(await screen.findByRole("dialog", { name: "Create plan" })).toBeTruthy();
+  });
+
+  it("edits and deactivates a plan through the actions menu", async () => {
+    renderPage("/admin-dashboard/subscriptions?tab=plans");
+    await menuItem("Annual", "Edit");
+    const dialog = screen.getByRole("dialog", { name: "Edit Annual" });
+    fireEvent.change(within(dialog).getByLabelText(/^Price/), { target: { value: "150000" } });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Save plan" }));
+    await waitFor(() =>
+      expect(http.patch).toHaveBeenCalledWith(
+        "/api/billing/superadmin/plans/p1/",
+        expect.objectContaining({ amount: "150000", code: "annual" }),
+        { auth: true }
+      )
+    );
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    await menuItem("Annual", "Deactivate");
+    fireEvent.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: "Deactivate" }));
+    await waitFor(() => expect(http.del).toHaveBeenCalledWith("/api/billing/superadmin/plans/p1/", { auth: true }));
   });
 });

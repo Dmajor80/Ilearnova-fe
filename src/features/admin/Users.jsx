@@ -1,240 +1,346 @@
-import { ArrowDown, Calendar, Search } from "lucide-react";
-import React from "react";
 import { useState } from "react";
-import { useSuperAdminUsers } from "@/hooks/superadmin";
+import { Link, useSearchParams } from "react-router-dom";
+import {
+  Download,
+  Eye,
+  KeyRound,
+  Pencil,
+  Power,
+  PowerOff,
+  RefreshCw,
+  Search,
+  ShieldCheck,
+  UserPlus,
+  Users as UsersIcon,
+} from "lucide-react";
+import { asPage, fetchAll, superAdminApi, userFullName } from "@/api/superAdminApi";
+import { apiErrorDetails } from "@/lib/apiHelpers";
+import { downloadCsv } from "@/lib/csv";
+import { ASSIGNABLE_ROLES } from "@/lib/roles";
+import { toast } from "@/lib/toast";
+import ActionsMenu from "@/components/ui/ActionsMenu";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import { InitialsAvatar } from "@/components/ui/Avatar";
+import { TableSkeleton } from "@/components/ui/Skeleton";
+import { ActivePill, EmptyState, ErrorAlert, PageCard, Pagination, Pill, formatDay } from "@/components/admin/AdminUI";
+import { UserDetailModal, UserEditModal, UserRolesModal, userRoleLabels, userSchools } from "@/components/admin/UserModals";
+import useResource from "@/hooks/superadmin/useResource";
+import useDebouncedValue from "@/hooks/useDebouncedValue";
 
-const Users = () => {
-  const { loading, error, users, totalUsers, fetchUsers } = useSuperAdminUsers();
-  const [showSearch, setShowSearch] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+const PAGE_SIZE = 20;
 
-  const handleSearch = (event) => {
-    event.preventDefault();
-    fetchUsers({ search: searchQuery.trim() });
+const CSV_COLUMNS = [
+  { header: "Name", value: (u) => userFullName(u) },
+  { header: "Email", value: (u) => u.email },
+  { header: "Username", value: (u) => u.username },
+  { header: "Roles", value: (u) => userRoleLabels(u).join("; ") },
+  { header: "Schools", value: (u) => userSchools(u).join("; ") },
+  { header: "Status", value: (u) => (u.is_active ? "Active" : "Inactive") },
+  { header: "Verified", value: (u) => (u.is_verified ? "Yes" : "No") },
+  { header: "Joined", value: (u) => (u.date_joined || u.created_at || "").slice(0, 10) },
+  { header: "Last sign-in", value: (u) => (u.last_login || "").slice(0, 10) },
+];
+
+const errorText = (err) => apiErrorDetails(err).messages.join(" ");
+
+export default function Users() {
+  const [params, setParams] = useSearchParams();
+  const organizationId = params.get("organization_id") || "";
+  const [search, setSearch] = useState("");
+  const [role, setRole] = useState(params.get("role") || "");
+  const [status, setStatus] = useState("");
+  const query = useDebouncedValue(search.trim(), 300);
+  const filters = {
+    search: query || undefined,
+    role: role || undefined,
+    organization_id: organizationId || undefined,
+    is_active: status || undefined,
+  };
+  const filtersKey = JSON.stringify(filters);
+  // The page resets to 1 whenever the filters change.
+  const [pageState, setPageState] = useState({ key: filtersKey, page: 1 });
+  const page = pageState.key === filtersKey ? pageState.page : 1;
+  const setPage = (next) => setPageState({ key: filtersKey, page: next });
+
+  const [viewing, setViewing] = useState(null);
+  const [editing, setEditing] = useState(null);
+  const [rolesFor, setRolesFor] = useState(null);
+  const [confirm, setConfirm] = useState(null);
+  const [exporting, setExporting] = useState(false);
+
+  const list = useResource(async () => {
+    const result = asPage(await superAdminApi.users({ ...filters, page, page_size: PAGE_SIZE }));
+    if (!result.paginated) {
+      // Unpaginated API: page through the array here.
+      return { ...result, items: result.items.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE) };
+    }
+    return result;
+  }, [filtersKey, page]);
+
+  const organizations = useResource(async () => {
+    try {
+      return await fetchAll(superAdminApi.organizations, { page_size: 100 });
+    } catch {
+      return [];
+    }
+  }, []);
+
+  const setSchool = (value) => {
+    const next = new URLSearchParams(params);
+    if (value) next.set("organization_id", value);
+    else next.delete("organization_id");
+    setParams(next, { replace: true });
   };
 
+  const exportCsv = async () => {
+    setExporting(true);
+    try {
+      const rows = await fetchAll(superAdminApi.users, { ...filters, page_size: 100 });
+      const school = organizations.data?.find((o) => String(o.id) === organizationId);
+      const slug = school ? `-${school.code || school.name}`.toLowerCase().replace(/[^a-z0-9-]+/g, "-") : "";
+      downloadCsv(`users${slug}-${new Date().toISOString().slice(0, 10)}.csv`, rows, CSV_COLUMNS);
+      toast(`Exported ${rows.length} user${rows.length === 1 ? "" : "s"}.`);
+    } catch (err) {
+      toast(`Export failed: ${errorText(err)}`, "error");
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const confirmAction = (user, kind) => {
+    const name = userFullName(user);
+    const configs = {
+      reset: {
+        title: `Send a password reset to ${name}?`,
+        message: `We'll email ${user.email} a link to choose a new password. Their current password keeps working until they do.`,
+        confirmLabel: "Send reset email",
+        run: () => superAdminApi.resetUserPassword(user.id),
+        done: `Password reset sent to ${user.email}.`,
+      },
+      deactivate: {
+        title: `Deactivate ${name}?`,
+        message: "They won't be able to sign in until you activate them again. Nothing is deleted.",
+        confirmLabel: "Deactivate",
+        variant: "danger",
+        run: () => superAdminApi.deactivateUser(user.id),
+        done: `${name} deactivated.`,
+      },
+      activate: {
+        title: `Activate ${name}?`,
+        message: "They'll be able to sign in again.",
+        confirmLabel: "Activate",
+        run: () => superAdminApi.activateUser(user.id),
+        done: `${name} activated.`,
+      },
+    };
+    const config = configs[kind];
+    setConfirm({
+      ...config,
+      action: async () => {
+        try {
+          await config.run();
+        } catch (err) {
+          throw new Error(errorText(err));
+        }
+        toast(config.done);
+        if (kind !== "reset") list.reload();
+      },
+    });
+  };
+
+  const itemsFor = (user) => [
+    { id: "view", label: "View", icon: Eye, onSelect: () => setViewing(user) },
+    { id: "edit", label: "Edit", icon: Pencil, onSelect: () => setEditing(user) },
+    { id: "roles", label: "Change role / add to school", icon: ShieldCheck, onSelect: () => setRolesFor(user) },
+    { id: "reset", label: "Send password reset", icon: KeyRound, disabled: !user.email, onSelect: () => confirmAction(user, "reset") },
+    user.is_active
+      ? { id: "deactivate", label: "Deactivate", icon: PowerOff, danger: true, separatorBefore: true, hidden: user.is_superuser, onSelect: () => confirmAction(user, "deactivate") }
+      : { id: "activate", label: "Activate", icon: Power, separatorBefore: true, onSelect: () => confirmAction(user, "activate") },
+  ];
+
+  const items = list.data?.items || [];
+  const total = list.data?.total || 0;
+  const filtered = Boolean(query || role || organizationId || status);
+  const selectClass = "rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30";
+
   return (
-    <>
-      <div>
-        {/* user nav */}
-        <div className="flex items-center justify-between max-w-[1250px] p-[5px]">
-          <p
-            className="text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px] font-medium"
-            style={{ color: "rgba(18, 40, 164, 1)" }}
-          >
-            User Management <br />
-            <span
-              className="text-[8px] sm:text-[10px] md:text-[12px] lg:text-[14px]"
-              style={{ color: "rgba(0, 0, 0, 1)" }}
-            >
-              Manage users across all roles efficiently.
-            </span>
-          </p>
-          <div className="flex items-center gap-4">
+    <div className="space-y-5">
+      <PageCard
+        title="Users"
+        icon={UsersIcon}
+        description="Everyone on the platform, across all schools."
+        actions={
+          <>
             <button
-              className="text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px] font-medium flex items-center justify-center gap-3.5 p-[5px] w-[125px] h-[46px] rounded-[8px]"
-              style={{
-                color: "rgba(18, 40, 164, 1)",
-                border: "1px  solid rgba(18, 40, 164, 1)",
-              }}
-              onClick={() => setShowSearch(!showSearch)}
+              type="button"
+              onClick={exportCsv}
+              disabled={exporting || !total}
+              className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-gray-300 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
             >
-              <Search size={20} style={{ color: "rgba(18, 40, 164, 1)" }} />{" "}
-              Search
+              <Download className="h-4 w-4" aria-hidden="true" /> {exporting ? "Exporting…" : "Export CSV"}
             </button>
-            {showSearch && (
-              <form className="flex items-center gap-2" onSubmit={handleSearch}>
-                <input
-                  type="search"
-                  aria-label="Search users"
-                  placeholder="Search users..."
-                  value={searchQuery}
-                  onChange={(event) => setSearchQuery(event.target.value)}
-                  className="border border-gray-300 rounded-full py-2 px-4 text-sm"
-                />
-                <button className="text-sm text-blue-700" type="submit">Apply</button>
-              </form>
-            )}
-            <button
-              className="text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px] font-medium flex items-center justify-center gap-3.5 p-[5px] w-[125px] h-[46px] rounded-[8px]"
-              style={{
-                color: "rgba(18, 40, 164, 1)",
-                border: "1px  solid rgba(18, 40, 164, 1)",
-              }}
+            <Link
+              to={`/admin-dashboard/users/new-user${organizationId ? `?organization_id=${organizationId}` : ""}`}
+              className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700"
             >
-              <ArrowDown size={20} style={{ color: "rgba(18, 40, 164, 1)" }} />{" "}
-              Export
-            </button>
-            <button
-              className="text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px] font-medium flex items-center justify-center gap-3.5 p-[5px] w-[125px] h-[46px] rounded-[8px]"
-              style={{
-                color: "rgba(18, 40, 164, 1)",
-                border: "1px  solid rgba(18, 40, 164, 1)",
-              }}
-            >
-              <Calendar size={20} style={{ color: "rgba(18, 40, 164, 1)" }} />
-              Date
-            </button>
+              <UserPlus className="h-4 w-4" aria-hidden="true" /> Add user
+            </Link>
+          </>
+        }
+      >
+        <div className="flex flex-col gap-3 px-5 py-4 lg:flex-row lg:items-end">
+          <div className="relative flex-1 lg:max-w-xs">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
+            <label htmlFor="user-search" className="sr-only">Search users</label>
+            <input
+              id="user-search"
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Name, email or username"
+              className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+            />
           </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:flex">
+            <label className="text-xs font-medium text-gray-500">
+              <span className="mb-1 block">School</span>
+              <select aria-label="School" value={organizationId} onChange={(e) => setSchool(e.target.value)} className={`${selectClass} w-full lg:w-52`}>
+                <option value="">All schools</option>
+                {(organizations.data || []).map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
+                {organizationId && organizations.data && !organizations.data.some((o) => String(o.id) === organizationId) && (
+                  <option value={organizationId}>Selected school</option>
+                )}
+              </select>
+            </label>
+            <label className="text-xs font-medium text-gray-500">
+              <span className="mb-1 block">Role</span>
+              <select aria-label="Role" value={role} onChange={(e) => setRole(e.target.value)} className={`${selectClass} w-full lg:w-44`}>
+                <option value="">All roles</option>
+                {ASSIGNABLE_ROLES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+              </select>
+            </label>
+            <label className="text-xs font-medium text-gray-500">
+              <span className="mb-1 block">Status</span>
+              <select aria-label="Status" value={status} onChange={(e) => setStatus(e.target.value)} className={`${selectClass} w-full lg:w-36`}>
+                <option value="">Any status</option>
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </select>
+            </label>
+          </div>
+          <button
+            type="button"
+            onClick={list.reload}
+            disabled={list.loading}
+            aria-label="Refresh users"
+            className="inline-flex h-10 w-10 items-center justify-center self-end rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 lg:ml-auto"
+          >
+            <RefreshCw className={`h-4 w-4 ${list.loading ? "animate-spin" : ""}`} aria-hidden="true" />
+          </button>
         </div>
-        {/* end of user nav */}
+      </PageCard>
 
-        {/* users */}
-        <div className="mt-8 flex flex-col gap-6 p-[5px]">
-          <p className="text-sm text-gray-600" aria-live="polite">
-            {totalUsers} user{totalUsers === 1 ? "" : "s"}
-          </p>
-          {loading && <p role="status">Loading users...</p>}
-          {error && (
-            <div role="alert" className="rounded-lg bg-red-50 p-4 text-red-700">
-              <p>{error.message}</p>
-              <button
-                type="button"
-                className="mt-2 underline"
-                onClick={() => fetchUsers({ search: searchQuery.trim() })}
-              >
-                Retry
-              </button>
-            </div>
-          )}
-          {!loading && !error && users.length === 0 && (
-            <p className="rounded-lg bg-white p-6 text-gray-600">No users found.</p>
-          )}
-          {users.map((user) => {
-            const name = [user.first_name, user.last_name].filter(Boolean).join(" ") || user.username;
-            const roles = Array.isArray(user.roles)
-              ? user.roles.map((role) => (
-                typeof role === "string" ? role : role.name ?? role.role ?? role.code
-              )).filter(Boolean).join(", ")
-              : "";
+      <ErrorAlert message={list.error && errorText(list.error)} onRetry={list.reload} />
 
-            return (
-            <div
-              key={user.id}
-              className="rounded-[10px] p-3"
-              style={{ backgroundColor: "rgba(255, 255, 255, 1)" }}
-            >
-              {/* user1 nav */}
-              <div className="flex items-center justify-between max-w-[1250px] p-[5px]">
-                <p
-                  className="text-[16px] sm:text-[18px] md:text-[20px] lg:text-[25px]"
-                  style={{ color: "rgba(51, 51, 51, 1)" }}
-                >
-                  {name}
-                </p>
-              </div>
-              {/*end of  user1 nav */}
-
-              {/* form generating */}
-              {/* name fetch */}
-              <div className="flex flex-col p-[10px]">
-                <label
-                  className="text-12px sm:text-[14px]  md:text-[16px] lg:text-[18px] font-medium mb-3"
-                  style={{ color: "rgba(51, 51, 51, 1)" }}
-                >
-                  {" "}
-                  Name
-                </label>
-                <p
-                  className=" p-[10px] h-[54px] p-[5px]text-12px sm:text-[14px]  md:text-[16px] lg:text-[18px] font-medium rounded-[8px]"
-                  style={{
-                    color: "rgba(51, 51, 51, 1)",
-                    border: "1.5px solid rgba(174, 174, 174, 1) ",
-                    backgroundColor: "rgba(235, 235, 235, 1)",
-                  }}
-                >
-                  {name}
-                </p>
-              </div>
-              {/*end of  name fetch */}
-
-              {/* email fetch */}
-
-              <div className="flex flex-col p-[10px]">
-                <label
-                  className="text-12px sm:text-[14px]  md:text-[16px] lg:text-[18px] font-medium mb-3"
-                  style={{ color: "rgba(51, 51, 51, 1)" }}
-                >
-                  Email Address
-                </label>
-                <p
-                  className=" p-[10px] h-[54px] p-[5px]text-12px sm:text-[14px]  md:text-[16px] lg:text-[18px] font-medium rounded-[8px]"
-                  type="text"
-                  style={{
-                    color: "rgba(51, 51, 51, 1)",
-                    border: "1.5px solid rgba(174, 174, 174, 1)",
-                    backgroundColor: "rgba(235, 235, 235, 1)",
-                  }}
-                >
-                  {user.email}
-                </p>
-              </div>
-              {/* end of  email fetch */}
-
-              <div className="flex items-center w-full">
-                {/* Role fetch */}
-                <div className="flex flex-col p-[10px]">
-                  <label
-                    className="text-12px sm:text-[14px]  md:text-[16px] lg:text-[18px] font-medium mb-3"
-                    style={{ color: "rgba(51, 51, 51, 1)" }}
-                  >
-                    Role
-                  </label>
-                  <p
-                    className=" p-[10px] w-[487px] h-[54px] p-[5px]text-12px sm:text-[14px]  md:text-[16px] lg:text-[18px] font-medium rounded-[8px]"
-                    type="text"
-                    style={{
-                      color: "rgba(51, 51, 51, 1)",
-                      border: "1.5px solid rgba(174, 174, 174, 1) ",
-                      backgroundColor: "rgba(235, 235, 235, 1)",
-                    }}
-                  >
-                    {roles || "—"}
-                  </p>
-                </div>
-                {/*end of  Role fetch */}
-
-                {/* Status fetch */}
-                <div className="flex flex-col p-[10px]">
-                  <label
-                    className="text-12px sm:text-[14px]  md:text-[16px] lg:text-[18px] font-medium mb-3"
-                    style={{ color: "rgba(51, 51, 51, 1)" }}
-                  >
-                    Status
-                  </label>
-                  <p
-                    className=" p-[10px] w-[487px] h-[54px] p-[5px]text-12px sm:text-[14px]  md:text-[16px] lg:text-[18px] font-medium rounded-[8px]"
-                    type="text"
-                    style={{
-                      color: user.is_active ? "green" : "rgba(107, 114, 128, 1)",
-                      border: "1.5px solid rgba(174, 174, 174, 1)",
-                      backgroundColor: "rgba(235, 235, 235, 1)",
-                    }}
-                  >
-                    {user.is_active ? "Active" : "Inactive"}
-                  </p>
-                </div>
-                {/* end of  Status fetch */}
-              </div>
-              {/* last login */}
-              <p
-                className="text-12px sm:text-[14px]  md:text-[16px] lg:text-[18px] font-medium mb-3 p-[10px]"
-                style={{ color: "rgba(51, 51, 51, 1)" }}
-              >
-                {user.created_at
-                  ? `Joined ${new Date(user.created_at).toLocaleDateString()}`
-                  : ""}
-              </p>
-              {/* end of  last login */}
-              {/* end of form generating */}
-            </div>
-            );
-          })}
+      <section className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
+        <div className="flex items-center justify-between border-b border-gray-100 px-5 py-3 text-sm text-gray-500">
+          <span aria-live="polite">{list.data ? `${total} user${total === 1 ? "" : "s"}${filtered ? " match" : ""}` : " "}</span>
         </div>
-        {/*end of  users */}
-      </div>
-    </>
+        {list.loading && !list.data ? (
+          <TableSkeleton columns={6} label="Loading users" />
+        ) : !items.length ? (
+          <EmptyState icon={UsersIcon} title={filtered ? "No users match these filters" : "No users yet"}>
+            {filtered ? "Try clearing a filter." : "Add the first one with “Add user”."}
+          </EmptyState>
+        ) : (
+          <div className={`overflow-x-auto transition-opacity ${list.loading ? "opacity-60" : ""}`}>
+            <table className="w-full min-w-[860px] text-left text-sm">
+              <thead className="bg-gray-50 text-xs font-medium uppercase tracking-wide text-gray-500">
+                <tr>
+                  <th scope="col" className="px-5 py-3">User</th>
+                  <th scope="col" className="px-3 py-3">School</th>
+                  <th scope="col" className="px-3 py-3">Role</th>
+                  <th scope="col" className="px-3 py-3">Status</th>
+                  <th scope="col" className="px-3 py-3">Joined</th>
+                  <th scope="col" className="px-3 py-3"><span className="sr-only">Actions</span></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {items.map((user) => {
+                  const name = userFullName(user);
+                  const schools = userSchools(user);
+                  const roles = userRoleLabels(user);
+                  return (
+                    <tr key={user.id} className="hover:bg-gray-50/60">
+                      <td className="px-5 py-3">
+                        <div className="flex items-center gap-3">
+                          <InitialsAvatar name={name} size="h-9 w-9" />
+                          <div className="min-w-0">
+                            <button type="button" onClick={() => setViewing(user)} className="truncate text-left font-medium text-gray-900 hover:text-blue-700 hover:underline">
+                              {name}
+                            </button>
+                            <p className="truncate text-xs text-gray-500">{user.email}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="max-w-[14rem] px-3 py-3 text-gray-700">
+                        {schools.length ? (
+                          <span title={schools.join(", ")} className="block truncate">
+                            {schools[0]}
+                            {schools.length > 1 && <span className="text-gray-500"> +{schools.length - 1}</span>}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400">—</span>
+                        )}
+                      </td>
+                      <td className="px-3 py-3">
+                        <div className="flex flex-wrap gap-1">
+                          {roles.length ? roles.map((label) => <Pill key={label} tone={label === "Platform admin" ? "blue" : "gray"}>{label}</Pill>) : <span className="text-gray-400">—</span>}
+                        </div>
+                      </td>
+                      <td className="px-3 py-3">
+                        <div className="flex flex-wrap gap-1">
+                          <ActivePill active={user.is_active} />
+                          {user.is_verified === false && <Pill tone="amber">Unverified</Pill>}
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-3 text-gray-600">{formatDay(user.date_joined || user.created_at)}</td>
+                      <td className="px-3 py-3 text-right">
+                        <ActionsMenu label={`Actions for ${name}`} items={itemsFor(user)} />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+        <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPage={setPage} disabled={list.loading} />
+      </section>
+
+      {viewing && <UserDetailModal user={viewing} onClose={() => setViewing(null)} />}
+      {editing && (
+        <UserEditModal
+          user={editing}
+          onClose={() => setEditing(null)}
+          onSaved={() => {
+            setEditing(null);
+            list.reload();
+          }}
+        />
+      )}
+      {rolesFor && (
+        <UserRolesModal user={rolesFor} organizations={organizations.data} onClose={() => setRolesFor(null)} onChanged={list.reload} />
+      )}
+      <ConfirmDialog
+        open={Boolean(confirm)}
+        title={confirm?.title}
+        message={confirm?.message}
+        confirmLabel={confirm?.confirmLabel}
+        variant={confirm?.variant}
+        onConfirm={confirm?.action}
+        onClose={() => setConfirm(null)}
+      />
+    </div>
   );
-};
-
-export default Users;
+}

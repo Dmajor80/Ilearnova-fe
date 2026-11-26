@@ -91,5 +91,6 @@ export const superBillingApi = {
   deactivateCode: (id) => http.del(`${SUPER}/access-codes/${id}/`, { auth: true }),
   plans: (params) => http.get(`${SUPER}/plans/`, { auth: true, params }),
   createPlan: (plan) => http.post(`${SUPER}/plans/`, plan, { auth: true }),
+  updatePlan: (id, changes) => http.patch(`${SUPER}/plans/${id}/`, changes, { auth: true }),
   deactivatePlan: (id) => http.del(`${SUPER}/plans/${id}/`, { auth: true }),
 };

@@ -139,7 +139,7 @@ const DashboardFooter = React.memo(function DashboardFooter({ className = "" }) 
     <footer className={`border-t border-gray-200 pt-6 ${className}`}>
       <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-600">
         <div className="mb-4 md:mb-0">
-          <p>© 2024 ILearnova Admin Dashboard. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} iLearnova Admin Dashboard. All rights reserved.</p>
         </div>
         
         <div className="flex items-center space-x-6">
