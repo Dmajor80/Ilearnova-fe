@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
   Building2,
@@ -75,7 +75,12 @@ export default function OrganizationDetail() {
     org.reload();
     billing.reload();
   };
-  const actions = useOrganizationActions({ onChanged: reload, showViewDetails: false });
+  const navigate = useNavigate();
+  const actions = useOrganizationActions({
+    onChanged: reload,
+    onDeleted: () => navigate("/admin-dashboard/organizations", { replace: true }),
+    showViewDetails: false,
+  });
 
   const billingById = useMemo(
     () => Object.fromEntries((billing.data || []).map((row) => [row.organization_id, row])),

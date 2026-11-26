@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CreditCard, Eye, LogIn, Pencil, Power, PowerOff, UserPlus, Users } from "lucide-react";
+import { CreditCard, Eye, LogIn, Pencil, Power, PowerOff, Trash2, UserPlus, Users } from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import DeleteDialog from "@/components/ui/DeleteDialog";
 import { superAdminApi } from "@/api/superAdminApi";
 import { startManagingSchool } from "@/lib/manageSchool";
 import { apiErrorDetails } from "@/lib/apiHelpers";
@@ -14,16 +15,28 @@ const errorText = (err) => apiErrorDetails(err).messages.join(" ");
 /**
  * Everything a superadmin can do to one school, as ActionsMenu items, plus
  * the dialogs those items open. Render `dialogs` once on the page.
+ * `onDeleted` runs after a permanent delete (default: `onChanged`).
  */
-export default function useOrganizationActions({ onChanged, showViewDetails = true } = {}) {
+export default function useOrganizationActions({ onChanged, onDeleted, showViewDetails = true } = {}) {
   const navigate = useNavigate();
   const [editing, setEditing] = useState(null);
   const [renewing, setRenewing] = useState(null);
   const [confirm, setConfirm] = useState(null);
+  const [deleting, setDeleting] = useState(null);
 
   const manage = (org) => {
     startManagingSchool({ id: org.id, name: org.name });
     navigate("/organization-dashboard/overview");
+  };
+
+  const deactivate = async (org) => {
+    try {
+      await superAdminApi.deactivateOrganization(org.id);
+    } catch (err) {
+      throw new Error(errorText(err));
+    }
+    toast(`${org.name} deactivated.`);
+    onChanged?.();
   };
 
   const itemsFor = (org) => [
@@ -51,15 +64,7 @@ export default function useOrganizationActions({ onChanged, showViewDetails = tr
               message: "Nobody at this school will be able to sign in until you reactivate it. Nothing is deleted.",
               confirmLabel: "Deactivate",
               variant: "danger",
-              action: async () => {
-                try {
-                  await superAdminApi.deactivateOrganization(org.id);
-                } catch (err) {
-                  throw new Error(errorText(err));
-                }
-                toast(`${org.name} deactivated.`);
-                onChanged?.();
-              },
+              action: () => deactivate(org),
             }),
         }
       : {
@@ -83,6 +88,14 @@ export default function useOrganizationActions({ onChanged, showViewDetails = tr
               },
             }),
         },
+    {
+      id: "delete",
+      label: "Delete permanently…",
+      icon: Trash2,
+      danger: true,
+      separatorBefore: true,
+      onSelect: () => setDeleting(org),
+    },
   ];
 
   const dialogs = (
@@ -109,6 +122,20 @@ export default function useOrganizationActions({ onChanged, showViewDetails = tr
           }}
         />
       )}
+      <DeleteDialog
+        open={Boolean(deleting)}
+        title={deleting ? `Delete ${deleting.name} permanently?` : ""}
+        message="The school and everything in it (classes, subjects, exams, results, attendance, fees…) will be removed."
+        confirmText={deleting?.name}
+        loadCheck={deleting ? () => superAdminApi.organizationDeleteCheck(deleting.id) : undefined}
+        onDelete={() => superAdminApi.deleteOrganization(deleting.id)}
+        onDeactivate={deleting?.is_active ? () => deactivate(deleting) : undefined}
+        onDeleted={() => {
+          toast(`${deleting.name} was deleted.`);
+          (onDeleted || onChanged)?.();
+        }}
+        onClose={() => setDeleting(null)}
+      />
       <ConfirmDialog
         open={Boolean(confirm)}
         title={confirm?.title}

@@ -122,6 +122,7 @@ export function Button({ variant = "secondary", loading = false, children, class
     primary: "bg-blue-600 text-white hover:bg-blue-700 focus-visible:ring-blue-500",
     danger: "bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500",
     secondary: "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus-visible:ring-blue-500",
+    "danger-outline": "border border-red-200 bg-white text-red-700 hover:bg-red-50 focus-visible:ring-red-500",
   };
   return (
     <button

@@ -19,10 +19,23 @@ export function userSchools(user) {
 }
 
 /** Read-only view of one user. */
-export function UserDetailModal({ user, onClose }) {
+export function UserDetailModal({ user, onClose, onDelete }) {
   const roles = user.roles || [];
   return (
-    <Modal open onClose={onClose} title={userFullName(user)} description={user.email} size="md">
+    <Modal
+      open
+      onClose={onClose}
+      title={userFullName(user)}
+      description={user.email}
+      size="md"
+      footer={
+        onDelete ? (
+          <Button variant="danger-outline" onClick={onDelete}>
+            <Trash2 className="h-4 w-4" aria-hidden="true" /> Delete permanently…
+          </Button>
+        ) : null
+      }
+    >
       <dl className="grid grid-cols-2 gap-4 text-sm">
         <div><dt className="text-xs text-gray-500">Username</dt><dd className="mt-0.5 break-all text-gray-900">{user.username || "—"}</dd></div>
         <div><dt className="text-xs text-gray-500">Status</dt><dd className="mt-1 flex flex-wrap gap-1"><ActivePill active={user.is_active} />{user.is_verified === false && <Pill tone="amber">Unverified</Pill>}</dd></div>
