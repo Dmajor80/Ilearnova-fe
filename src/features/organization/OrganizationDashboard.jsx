@@ -11,6 +11,25 @@ import SectionTabs from "@/components/navigation/SectionTabs";
 import { groupOf, tabOf } from "@/components/navigation/navGroups";
 import { ADMIN_BASE as BASE, ADMIN_GROUPS as GROUPS } from "./adminNav";
 import { StatCardsSkeleton } from "@/components/ui/Skeleton";
+import ManagingSchoolBanner from "@/components/admin/ManagingSchoolBanner";
+import Toaster from "@/components/ui/Toast";
+import { useManagedSchool } from "@/lib/manageSchool";
+
+/** The school this dashboard is for: the managed one, else the admin's own. */
+function schoolNameFor(managed) {
+  if (managed) return managed.name;
+  let user = null;
+  try {
+    const raw = window.sessionStorage.getItem("user_data") || window.localStorage.getItem("user_data");
+    user = raw ? JSON.parse(raw) : null;
+  } catch {
+    user = null;
+  }
+  const orgs = Array.isArray(user?.organizations) ? user.organizations : [];
+  const selected = user?.selectedOrgId;
+  const match = orgs.find((o) => String(o?.organization?.id ?? o?.id) === String(selected)) || orgs[0];
+  return match?.organization?.name || match?.name || "";
+}
 
 const OrganizationDashboard = () => {
   const navigate = useNavigate();
@@ -18,6 +37,8 @@ const OrganizationDashboard = () => {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const managed = useManagedSchool();
+  const schoolName = schoolNameFor(managed);
   const { status: subscription, loaded: subscriptionLoaded } = useSubscriptionStatus(location.pathname);
   const schoolLocked = subscription?.mode === MODES.BILLING_ONLY;
   // Locked school: admins may only use billing (and their profile).
@@ -69,7 +90,10 @@ const OrganizationDashboard = () => {
   const pathOf = (tabId) => `${BASE}${tabId}`;
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <>
+    <ManagingSchoolBanner />
+    <Toaster />
+    <div className={`flex min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 ${managed ? "pt-11" : ""}`}>
       {/* Mobile overlay */}
       {isSidebarOpen && (
         <div
@@ -79,7 +103,7 @@ const OrganizationDashboard = () => {
       )}
 
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-2xl transform transition-all duration-300 ease-in-out md:translate-x-0 border-r border-slate-200 ${
+      <div className={`fixed ${managed ? "top-11 bottom-0" : "inset-y-0"} left-0 z-50 w-64 bg-white shadow-2xl transform transition-all duration-300 ease-in-out md:translate-x-0 border-r border-slate-200 ${
         isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="h-full overflow-y-auto overscroll-contain [scrollbar-gutter:stable] [scrollbar-width:thin] p-4 md:p-6 pb-8 bg-gradient-to-b from-white via-slate-50 to-blue-50">
@@ -175,7 +199,7 @@ const OrganizationDashboard = () => {
                 <Menu className="w-5 h-5 text-slate-600" />
               </button>
               <div>
-                <p className="text-slate-500 text-sm mb-2 font-medium">Dashboard / Organization</p>
+                <p className="text-slate-500 text-sm mb-2 font-medium">{schoolName || "Organization"} / Dashboard</p>
                 <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent capitalize">
                   {tabOf(GROUPS, activeTab)?.label || "Organization"}
                 </h1>
@@ -261,6 +285,7 @@ const OrganizationDashboard = () => {
         </main>
       </div>
     </div>
+    </>
   );
 };
 

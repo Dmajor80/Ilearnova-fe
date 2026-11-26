@@ -1,316 +1,186 @@
-import { useState, Suspense, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
-  BookOpen,
-  MessageCircle,
-  Calendar,
-  FileText,
-  Clock,
-  Award,
-  ChevronRight,
-  LayoutDashboard,
-  CreditCard,
-  Menu,
-  X,
-  User,
-  Settings,
-  Wallet,
-  LogOut,
-  ChevronDown,
   Building2,
+  ChevronDown,
+  CreditCard,
+  FileBarChart,
+  LayoutDashboard,
+  LogOut,
   Mail,
+  Menu,
+  Settings,
+  Users,
+  X,
 } from "lucide-react";
-
-import { Link, Outlet, useNavigate } from "react-router-dom";
-import Loader from "@/components/Loader";
 import { logout } from "@/api/authApi";
-import { clearAuth } from "@/api/auth";
+import { clearAuth, getStoredUser } from "@/api/auth";
+import { InitialsAvatar } from "@/components/ui/Avatar";
+import Toaster from "@/components/ui/Toast";
+import AdminFooter from "@/components/admin/AdminFooter";
+import { getManagedSchool, stopManagingSchool } from "@/lib/manageSchool";
 
-// Main application component
+export const ADMIN_NAV = [
+  { to: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "organizations", label: "Organizations", icon: Building2 },
+  { to: "users", label: "Users", icon: Users },
+  { to: "subscriptions", label: "Subscriptions", icon: CreditCard },
+  { to: "emails", label: "Email Logs", icon: Mail },
+  { to: "reports", label: "Reports", icon: FileBarChart },
+  { to: "settings", label: "Settings", icon: Settings },
+];
+
+/** Header title (and breadcrumb) for the current admin path. */
+export function adminPageTitle(pathname) {
+  const rest = pathname.replace(/^\/admin-dashboard\/?/, "");
+  const [section, sub] = rest.split("/");
+  if (section === "users" && sub === "new-user") return { title: "Add user", parent: "Users" };
+  if (section === "organizations" && sub) return { title: "School details", parent: "Organizations" };
+  const item = ADMIN_NAV.find((n) => n.to === section);
+  return { title: item?.label || "Dashboard", parent: null };
+}
+
+function displayName(user) {
+  if (!user) return "Admin";
+  return [user.first_name, user.last_name].filter(Boolean).join(" ") || user.username || user.email || "Admin";
+}
+
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState("courses");
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const dropdownRef = useRef(null);
+  const user = getStoredUser();
+  const name = displayName(user);
+  const { title, parent } = adminPageTitle(location.pathname);
+
+  // Back in the platform area: stop acting as a school.
+  useEffect(() => {
+    if (getManagedSchool()) stopManagingSchool();
+  }, []);
+
+  useEffect(() => {
+    setMenuOpen(false);
+    setProfileOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    document.title = `${title} · iLearnova admin`;
+  }, [title]);
+
+  useEffect(() => {
+    if (!profileOpen) return undefined;
+    const onDown = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) setProfileOpen(false);
+    };
+    const onKey = (event) => event.key === "Escape" && setProfileOpen(false);
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [profileOpen]);
 
   const handleLogout = async () => {
     try {
       await logout();
-      clearAuth();
-      navigate("/login");
     } catch (error) {
       console.error("Logout failed:", error);
-      // Even if API call fails, clear local auth and redirect
-      clearAuth();
-      navigate("/login");
     }
+    clearAuth();
+    navigate("/login");
   };
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsProfileDropdownOpen(false);
-      }
-    };
-
-    if (isProfileDropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isProfileDropdownOpen]);
-
-  // Navigation links data
-  const navLinks = [
-    {
-      id: "Dashboard",
-      icon: <LayoutDashboard size={20} />,
-      label: "Dashboard",
-      air: "dashboard",
-    },
-    {
-      id: "Users",
-      icon: <User size={20} />,
-      label: "Users",
-      air: "users",
-    },
-    {
-      id: "Organizations",
-      icon: <Building2 size={20} />,
-      label: "Organizations",
-      air: "organizations",
-    },
-    {
-      id: "Subscriptions",
-      icon: <CreditCard size={20} />,
-      label: "Subscriptions",
-      air: "subscriptions",
-    },
-    {
-      id: "EmailLogs",
-      icon: <Mail size={20} />,
-      label: "Email Logs",
-      air: "emails",
-    },
-
-    {
-      id: "Messages",
-      icon: <MessageCircle size={20} />,
-      label: "messages",
-      air: "Messages",
-    },
-
-    {
-      id: "Reports",
-      icon: <Wallet size={20} />,
-      label: "Reports",
-      air: "reports",
-    },
-    {
-      id: "Analytics",
-      icon: <Award size={20} />,
-      label: "Analytics",
-      air: "analytics",
-    },
-    {
-      id: "Settings",
-      icon: <Settings size={20} />,
-      label: "Settings",
-      air: "settings",
-    },
-  ];
-
-  // Mock course data.
-
-  // side bar
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      {/* Mobile overlay */}
-      {isMobileMenuOpen && (
-        <div
-          className="fixed inset-0 bg-white/10 z-40 md:hidden backdrop-blur-[2px]"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
+    <div className="flex min-h-screen bg-slate-50">
+      {menuOpen && <div className="fixed inset-0 z-40 bg-slate-900/40 md:hidden" onClick={() => setMenuOpen(false)} aria-hidden="true" />}
 
-      <aside>
-        {/* Sidebar */}
-        <div
-          className={`
-          w-16 md:w-[246px] h-[100%] bg-white border-r border-gray-200 pt-4 
-          fixed md:static inset-y-0 left-0 z-50
-          transition-all duration-300 ease-in-out
-          ${isMobileMenuOpen ? "w-[246px]" : "w-16"}
-        `}
-        >
-          <div className="px-4 pb-6 border-b border-gray-200 relative">
-            <h1
-              className={`
-              font-bold text-[26px] text-blue-900 text-center transition-all duration-300
-              ${isMobileMenuOpen ? "block" : "hidden md:block"}
-            `}
-            >
-              ILEARNOVA
-            </h1>
-            <div
-              className={`
-              font-bold text-blue-900 text-center transition-all duration-300
-              ${isMobileMenuOpen ? "hidden" : "block md:hidden"}
-            `}
-            >
-              <span className="text-xl text-white">IL</span>
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-gray-200 bg-white transition-transform duration-200 md:sticky md:top-0 md:h-screen md:translate-x-0 ${
+          menuOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
+        }`}
+      >
+        <div className="flex items-center justify-between px-5 py-5">
+          <div className="flex items-center gap-3">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-lg font-bold text-white">I</span>
+            <div>
+              <p className="text-lg font-bold leading-tight text-blue-900">iLearnova</p>
+              <p className="text-xs text-gray-500">Platform admin</p>
             </div>
-
-            {/* Mobile menu toggle */}
-            <button
-              className="absolute top-0 right-2 md:hidden p-1 text-blue-900 hover:bg-blue-50 rounded"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
           </div>
-
-          <nav className="mt-4">
-            {navLinks.map((link) => (
-              <div key={link.id} className="relative group">
-                <button
-                  className={`flex items-center px-4 py-3 w-full text-left transition-all duration-200 ${
-                    activeTab === link.id
-                      ? "text-blue-600 bg-blue-50"
-                      : "text-gray-600 hover:text-blue-600 hover:bg-gray-50"
-                  }`}
-                  onClick={() => {
-                    setActiveTab(link.id);
-                    setIsMobileMenuOpen(false);
-                  }}
-                >
-                  <span className="mr-3 flex-shrink-0">{link.icon}</span>
-                  <Link
-                    to={link.air}
-                    className={`
-                    transition-all duration-300
-                    ${isMobileMenuOpen ? "block" : "hidden md:block"}
-                  `}
-                  >
-                    <span>{link.label}</span>
-                  </Link>
-                </button>
-
-                {/* Tooltip for mobile/collapsed state */}
-                <div
-                  className={`
-                  absolute left-full top-1/2 transform -translate-y-1/2 ml-2
-                  bg-gray-800 text-white text-sm px-2 py-1 rounded whitespace-nowrap
-                  opacity-0 pointer-events-none transition-opacity duration-200
-                  group-hover:opacity-100 z-50
-                  ${isMobileMenuOpen ? "hidden" : "block md:hidden"}
-                `}
-                >
-                  {link.label}
-                  <div
-                    className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 
-                                 border-4 border-transparent border-r-gray-800"
-                  ></div>
-                </div>
-              </div>
-            ))}
-          </nav>
+          <button type="button" onClick={() => setMenuOpen(false)} aria-label="Close menu" className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 md:hidden">
+            <X className="h-5 w-5" />
+          </button>
         </div>
+        <nav aria-label="Admin" className="flex-1 space-y-1 overflow-y-auto px-3 pb-4">
+          {ADMIN_NAV.map(({ to, label, icon: NavIcon }) => (
+            <NavLink
+              key={to}
+              to={to}
+              className={({ isActive }) =>
+                `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
+                  isActive ? "bg-blue-600 text-white shadow-sm" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"
+                }`
+              }
+            >
+              {NavIcon && <NavIcon className="h-5 w-5 flex-shrink-0" aria-hidden="true" />}
+              {label}
+            </NavLink>
+          ))}
+        </nav>
       </aside>
 
-      <div
-        className="ml-16 md:ml-0 flex-1"
-        style={{ backgroundColor: "rgba(245, 248, 254, 1)" }}
-      >
-        {/* adminnav */}
-        <div className="flex items-center justify-between mb-6 w-full max-w-[1024px] p-4 md:p-[2rem]">
-          <div>
-            <p className="text-gray-500 text-xs mt-1">Page/Student Portal</p>
-            <h1
-              className="text-[14px] sm:text-[16px] md:text-[20px] lg:text-[25px] font-semibold "
-              style={{ color: "rgba(51, 51, 51, 1)" }}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-gray-200 bg-white/90 px-4 py-3 backdrop-blur md:px-8">
+          <div className="flex min-w-0 items-center gap-3">
+            <button type="button" onClick={() => setMenuOpen(true)} aria-label="Open menu" className="rounded-lg border border-gray-200 p-2 text-gray-600 hover:bg-gray-50 md:hidden">
+              <Menu className="h-5 w-5" />
+            </button>
+            <div className="min-w-0">
+              <p className="truncate text-xs text-gray-500">Platform admin{parent ? ` / ${parent}` : ""}</p>
+              <h1 className="truncate text-lg font-semibold text-gray-900 md:text-xl">{title}</h1>
+            </div>
+          </div>
+
+          <div className="relative" ref={dropdownRef}>
+            <button
+              type="button"
+              onClick={() => setProfileOpen((v) => !v)}
+              className="flex items-center gap-2 rounded-lg p-1 pr-2 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              aria-haspopup="menu"
+              aria-expanded={profileOpen}
+              aria-label="Account menu"
             >
-              Admin Dashboard
-            </h1>
+              <InitialsAvatar name={name} size="h-9 w-9" />
+              <span className="hidden text-left sm:block">
+                <span className="block text-sm font-medium leading-tight text-gray-900">{name}</span>
+                <span className="block text-xs text-gray-500">Platform admin</span>
+              </span>
+              <ChevronDown className="h-4 w-4 text-gray-500" aria-hidden="true" />
+            </button>
+            {profileOpen && (
+              <div role="menu" className="absolute right-0 z-40 mt-2 w-52 rounded-xl border border-gray-200 bg-white py-1.5 shadow-lg">
+                <button role="menuitem" type="button" onClick={() => navigate("/admin-dashboard/settings")} className="flex w-full items-center gap-2.5 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50">
+                  <Settings className="h-4 w-4" aria-hidden="true" /> Account settings
+                </button>
+                <button role="menuitem" type="button" onClick={handleLogout} className="flex w-full items-center gap-2.5 px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50">
+                  <LogOut className="h-4 w-4" aria-hidden="true" /> Log out
+                </button>
+              </div>
+            )}
           </div>
+        </header>
 
-          <div className="flex items-center gap-2 md:gap-4">
-            <div className="relative w-32 sm:w-48 md:w-64">
-              <input
-                type="text"
-                placeholder="Search courses..."
-                className="border border-gray-300 rounded-full w-full py-2 px-4 pl-10 text-sm"
-              />
-              <svg
-                className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            </div>
-            {/* Profile dropdown */}
-            <div className="relative" ref={dropdownRef}>
-              <button
-                onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                className="flex items-center space-x-2 focus:outline-none"
-                aria-haspopup="true"
-                aria-expanded={isProfileDropdownOpen}
-              >
-                <img
-                  src="/api/placeholder/32/32"
-                  alt="User"
-                  className="w-8 h-8 rounded-full object-cover border-2 border-blue-600"
-                />
-                <ChevronDown className="w-4 h-4 text-gray-600" />
-              </button>
-
-              {/* Dropdown menu */}
-              {isProfileDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-20 border border-gray-200">
-                  <button
-                    onClick={() => {
-                      setIsProfileDropdownOpen(false);
-                      navigate("/profile");
-                    }}
-                    className="flex items-center w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
-                  >
-                    <User className="w-4 h-4 mr-3" />
-                    Edit Profile
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsProfileDropdownOpen(false);
-                      handleLogout();
-                    }}
-                    className="flex items-center w-full text-left px-4 py-2 text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
-                  >
-                    <LogOut className="w-4 h-4 mr-3" />
-                    Logout
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* end of adminnav */}
-        {/* <AdminNav /> */}
-        <main className="">
-          <Outlet /> {/* Display nested routes */}
+        <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 md:px-8">
+          <Outlet />
         </main>
+        <div className="mx-auto w-full max-w-7xl px-4 pb-6 md:px-8">
+          <AdminFooter />
+        </div>
       </div>
-      {/* Main content area */}
+      <Toaster />
     </div>
   );
-  // end of side bar
 }

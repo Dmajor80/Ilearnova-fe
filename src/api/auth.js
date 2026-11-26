@@ -61,6 +61,7 @@ export function clearAuth() {
     window.sessionStorage.removeItem("auth_access");
     window.sessionStorage.removeItem("auth_refresh");
     window.sessionStorage.removeItem("user_data");
+    window.sessionStorage.removeItem("ilearnova_managed_school");
   } catch {
     // no-op
   }
@@ -221,7 +222,8 @@ export async function authorizedFetch(input, init = {}) {
   const buildHeaders = (token, orgId) => {
     const base = (init && init.headers) ? init.headers : {};
     let headers = token ? { ...base, Authorization: `Bearer ${token}` } : { ...base };
-    if (orgId) {
+    const hasOrgHeader = Object.keys(headers).some((k) => k.toLowerCase() === "x-org-id");
+    if (orgId && !hasOrgHeader) {
       headers = { ...headers, "X-Org-Id": orgId };
     }
     return headers;

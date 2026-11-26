@@ -43,3 +43,36 @@ export function saveBlob(blob, filename) {
   link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+
+/**
+ * Field errors from a failed request as `{ field: "message" }`, plus
+ * `_general` for anything not tied to a field. Understands the backend's
+ * `{ field_errors, non_field_errors }` and plain DRF `{ field: [msgs] }`,
+ * and errors wrapped by lib/errorHandler (context.originalError).
+ */
+export function fieldErrorsOf(error) {
+  const data = error?.data ?? error?.context?.originalError?.data ?? null;
+  const out = {};
+  if (!data || typeof data !== "object") {
+    out._general = error?.message || "Something went wrong.";
+    return out;
+  }
+  const source = data.field_errors || data.errors || data;
+  const general = [];
+  Object.entries(source).forEach(([field, value]) => {
+    if (["success", "code", "status"].includes(field)) return;
+    const text = (Array.isArray(value) ? value.flat() : [value])
+      .filter((v) => v !== null && v !== undefined && typeof v !== "object")
+      .map(String)
+      .join(" ");
+    if (!text) return;
+    if (["non_field_errors", "detail", "error", "message"].includes(field)) general.push(text);
+    else out[field] = text;
+  });
+  (data.non_field_errors || []).forEach((m) => {
+    if (!general.includes(String(m))) general.push(String(m));
+  });
+  if (general.length) out._general = general.join(" ");
+  if (!Object.keys(out).length) out._general = error?.message || "Something went wrong.";
+  return out;
+}

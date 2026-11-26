@@ -9,7 +9,7 @@ import { planLength } from "./subscriptionUtils";
  * email already has a subscription or was sent the code. Checks the code as
  * it is typed, without using it up.
  */
-export default function AccessCodeField({ value, email, onChange, error, darkMode = false }) {
+export default function AccessCodeField({ value, email, onChange, error, darkMode = false, hint, inputRef, onKeyDown }) {
   const [check, setCheck] = useState(null); // null | "checking" | result
 
   useEffect(() => {
@@ -41,6 +41,8 @@ export default function AccessCodeField({ value, email, onChange, error, darkMod
       <div className="relative">
         <KeyRound className={`absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 ${muted}`} />
         <input
+          ref={inputRef}
+          onKeyDown={onKeyDown}
           id="access_code"
           name="access_code"
           value={value}
@@ -65,6 +67,8 @@ export default function AccessCodeField({ value, email, onChange, error, darkMod
           <p role="alert" className="text-red-600">
             This code is invalid, expired, used, or was issued to a different email.
           </p>
+        ) : hint ? (
+          <p className={muted}>{hint}</p>
         ) : (
           <p className={muted}>
             Leave blank if iLearnova set up a subscription for your email.{" "}

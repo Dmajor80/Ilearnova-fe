@@ -1,7 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Banknote, CreditCard, RefreshCw } from "lucide-react";
 import { billingApi } from "@/api/billingApi";
 import { apiErrorDetails } from "@/lib/apiHelpers";
+import { toast } from "@/lib/toast";
+import AccessCodeField from "./AccessCodeField";
 import { formatDate, naira, planLength } from "./subscriptionUtils";
 
 const STATE_LABEL = {
@@ -23,6 +26,90 @@ function Notice({ message }) {
 }
 
 const errorNotice = (err) => ({ type: "error", lines: apiErrorDetails(err).messages });
+
+/**
+ * Apply an access code iLearnova emailed the school. The email links here
+ * with ?code=, which fills the field in and brings it into view.
+ */
+function RedeemCode({ onRedeemed }) {
+  const [params, setParams] = useSearchParams();
+  const fromLink = (params.get("code") || "").trim().toUpperCase();
+  const [code, setCode] = useState(fromLink);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const boxRef = useRef(null);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (!fromLink) return;
+    boxRef.current?.scrollIntoView?.({ behavior: "smooth", block: "center" });
+    inputRef.current?.focus();
+    // Only on arrival from the email link.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const apply = async () => {
+    const value = code.trim();
+    if (!value || busy) return;
+    setBusy(true);
+    setError("");
+    try {
+      const updated = await billingApi.redeem(value);
+      setCode("");
+      if (params.has("code")) {
+        const next = new URLSearchParams(params);
+        next.delete("code");
+        setParams(next, { replace: true });
+      }
+      onRedeemed(updated);
+      toast(
+        updated?.expires_at
+          ? `Subscription extended to ${formatDate(updated.expires_at)}`
+          : "Access code applied."
+      );
+    } catch (err) {
+      setError(apiErrorDetails(err).messages.join(" "));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div ref={boxRef} className="rounded-lg border p-4">
+      <h3 className="font-semibold text-gray-900">Have an access code?</h3>
+      <p className="mt-1 text-sm text-gray-600">
+        If iLearnova sent you a code, apply it here to add its time to your subscription.
+      </p>
+      <form
+        className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-start"
+        onSubmit={(event) => {
+          event.preventDefault();
+          apply();
+        }}
+      >
+        <div className="flex-1">
+          <AccessCodeField
+            value={code}
+            inputRef={inputRef}
+            onChange={(value) => {
+              setCode(value);
+              setError("");
+            }}
+            error={error}
+            hint="Looks like ILN-XXXX-XXXX-XXXX. The time is added after your current period ends."
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={busy || !code.trim()}
+          className="rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-50 sm:mt-7"
+        >
+          {busy ? "Applying…" : "Apply code"}
+        </button>
+      </form>
+    </div>
+  );
+}
 
 function SubscriptionSection() {
   const [info, setInfo] = useState(null);
@@ -125,8 +212,16 @@ function SubscriptionSection() {
         ) : (
           <p className="mt-2 text-sm text-gray-600">No plans are on sale right now. Contact iLearnova support to renew.</p>
         )}
+        {chosen?.description && <p className="mt-2 text-sm text-gray-600">{chosen.description}</p>}
         <p className="mt-2 text-xs text-gray-500">The new period starts when the current one ends, so renewing early loses nothing.</p>
       </div>
+
+      <RedeemCode
+        onRedeemed={(updated) => {
+          if (updated) setInfo(updated);
+          else load();
+        }}
+      />
 
       {info?.history?.length > 0 && (
         <div className="overflow-x-auto">
@@ -242,7 +337,7 @@ function PayoutAccountSection() {
             <option value="">
               {banks.length ? "Choose a bank" : banksFailed ? "Bank list unavailable" : "Loading banks…"}
             </option>
-            {banks.map((b) => <option key={b.code} value={b.code}>{b.name}</option>)}
+            {banks.map((b, i) => <option key={`${b.code}-${b.name}-${i}`} value={b.code}>{b.name}</option>)}
           </select>
           {banksFailed && (
             <span className="mt-1 block text-xs font-normal text-amber-700">

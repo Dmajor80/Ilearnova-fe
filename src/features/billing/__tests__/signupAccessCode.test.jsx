@@ -120,3 +120,22 @@ describe("PricingPage", () => {
     );
   });
 });
+
+describe("PricingPage plan cards", () => {
+  // A plan without a description sat lower than its neighbours: button
+  // content is centred vertically by default.
+  it("top-aligns every card's content at equal heights", async () => {
+    http.get.mockResolvedValue([
+      { code: "annual", name: "Annual", amount: "120000.00", duration_days: 365, description: "Best value" },
+      { code: "term", name: "Term", amount: "45000.00", duration_days: 120, description: "" },
+    ]);
+    render(inRouter(<PricingPage />));
+    const term = await screen.findByRole("button", { name: /Term/ });
+    for (const card of [term, screen.getByRole("button", { name: /Annual/ })]) {
+      expect(card.className).toMatch(/\bflex\b/);
+      expect(card.className).toMatch(/\bflex-col\b/);
+      expect(card.className).toMatch(/\bjustify-start\b/);
+      expect(card.className).toMatch(/\bh-full\b/);
+    }
+  });
+});

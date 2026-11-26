@@ -2,8 +2,11 @@ import { useCallback, useEffect, useState } from "react";
 import { billingApi, SUBSCRIPTION_BLOCKED_EVENT } from "@/api/billingApi";
 import { getTokens } from "@/api/auth";
 import { pickStatus } from "./subscriptionUtils";
+import { getManagedSchool } from "@/lib/manageSchool";
 
 function selectedOrgId() {
+  const managed = getManagedSchool();
+  if (managed) return managed.id;
   try {
     const raw = window.localStorage.getItem("user_data") || window.sessionStorage.getItem("user_data");
     const user = raw ? JSON.parse(raw) : null;

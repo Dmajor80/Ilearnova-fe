@@ -1,5 +1,6 @@
 import { API_BASE_URL } from "./config";
 import { authorizedFetch } from "./auth";
+import { getManagedSchool } from "@/lib/manageSchool";
 
 export const SUBSCRIPTION_BLOCKED_EVENT = "ilearnova:subscription-blocked";
 
@@ -54,6 +55,12 @@ async function request(method, path, {
 
   if (isFormData) {
     delete baseHeaders["Content-Type"];
+  }
+
+  // Superadmin managing a school: act as that school's admin.
+  const managed = auth ? getManagedSchool() : null;
+  if (managed && !Object.keys(baseHeaders).some((k) => k.toLowerCase() === "x-org-id")) {
+    baseHeaders["X-Org-Id"] = managed.id;
   }
 
   const init = {

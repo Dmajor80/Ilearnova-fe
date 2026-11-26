@@ -27,6 +27,9 @@ export const billingApi = {
   plans: async () => data(await http.get(`${BILLING}/plans/`, { auth: false })),
   schoolSubscription: async () =>
     data(await http.get(`${BILLING}/school/subscription/`, { auth: true })),
+  /** Apply an access code to this school; returns the new subscription status. */
+  redeem: async (code) =>
+    data(await http.post(`${BILLING}/school/subscription/redeem/`, { code }, { auth: true })),
   renew: async (plan) =>
     data(await http.post(`${BILLING}/school/subscription/renew/`, { plan }, { auth: true })),
   verifyPayment: async (reference) =>
@@ -82,7 +85,11 @@ const SUPER = `${BILLING}/superadmin`;
 /** Platform owner (superadmin): onboard schools, grant/renew, codes, plans. */
 export const superBillingApi = {
   schools: (params) => http.get(`${SUPER}/schools/`, { auth: true, params }),
-  /** Email an access code (optionally locked to that email) with a sign-up link. */
+  /**
+   * Email an access code (optionally locked to that email). With
+   * `organization` it's for an existing school: the email links to its
+   * Billing page and `issued_to` defaults to the school's admin.
+   */
   invite: (body) => http.post(`${SUPER}/access-codes/`, { count: 1, ...body }, { auth: true }),
   /** Grant to an email (new school) or with `organization` (renew a school). */
   grant: (body) => http.post(`${SUPER}/subscriptions/`, body, { auth: true }),
@@ -91,5 +98,6 @@ export const superBillingApi = {
   deactivateCode: (id) => http.del(`${SUPER}/access-codes/${id}/`, { auth: true }),
   plans: (params) => http.get(`${SUPER}/plans/`, { auth: true, params }),
   createPlan: (plan) => http.post(`${SUPER}/plans/`, plan, { auth: true }),
+  updatePlan: (id, changes) => http.patch(`${SUPER}/plans/${id}/`, changes, { auth: true }),
   deactivatePlan: (id) => http.del(`${SUPER}/plans/${id}/`, { auth: true }),
 };

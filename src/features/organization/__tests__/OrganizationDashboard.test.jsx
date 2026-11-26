@@ -23,6 +23,8 @@ vi.mock("@/api/authApi", () => ({ logout: vi.fn() }));
 vi.mock("@/api/auth", () => ({ clearAuth: vi.fn() }));
 
 import OrganizationDashboard from "../OrganizationDashboard";
+import { act } from "react";
+import { toast } from "@/lib/toast";
 
 function Where() {
   return <p data-testid="where">{useLocation().pathname}</p>;
@@ -62,6 +64,7 @@ describe("OrganizationDashboard navigation", () => {
       "Exams & results",
       "Reports",
       "Messages",
+      "Announcements",
       "Operations",
       "Fees & billing",
     ]);
@@ -102,5 +105,11 @@ describe("OrganizationDashboard navigation", () => {
     // moment and fired requests the API refused (402) before the lock screen.
     expect(screen.queryByTestId("where")).toBeNull();
     expect(screen.getByRole("status", { name: "Loading your school" })).toBeTruthy();
+  });
+
+  it("shows toasts fired by its pages", () => {
+    show("/organization-dashboard/billing");
+    act(() => toast("Subscription extended."));
+    expect(screen.getByText("Subscription extended.")).toBeTruthy();
   });
 });
