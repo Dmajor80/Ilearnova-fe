@@ -12,6 +12,7 @@ import {
   PowerOff,
   RefreshCw,
   Send,
+  Trash2,
 } from "lucide-react";
 import { superBillingApi } from "@/api/billingApi";
 import { apiErrorDetails } from "@/lib/apiHelpers";
@@ -20,6 +21,7 @@ import { toast } from "@/lib/toast";
 import { formatDate, naira, planLength } from "@/features/billing/subscriptionUtils";
 import ActionsMenu from "@/components/ui/ActionsMenu";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import DeleteDialog from "@/components/ui/DeleteDialog";
 import { TableSkeleton } from "@/components/ui/Skeleton";
 import { ActivePill, EmptyState, ErrorAlert, Pill, SUBSCRIPTION_STATES, SubscriptionPill } from "@/components/admin/AdminUI";
 import RenewSubscriptionDialog from "@/components/admin/RenewSubscriptionDialog";
@@ -251,6 +253,7 @@ function CodesTab({ refreshKey, plans }) {
   const [filter, setFilter] = useState("false");
   const [search, setSearch] = useState("");
   const [confirm, setConfirm] = useState(null);
+  const [deleting, setDeleting] = useState(null);
   const list = useResource(
     async () => results(await superBillingApi.codes({ redeemed: filter || undefined, search: search || undefined })),
     [filter, search, refreshKey]
@@ -370,6 +373,15 @@ function CodesTab({ refreshKey, plans }) {
                                 done: `${c.code} deactivated.`,
                               }),
                           },
+                          {
+                            id: "delete",
+                            label: "Delete",
+                            icon: Trash2,
+                            danger: true,
+                            separatorBefore: !c.is_redeemable,
+                            hidden: Boolean(c.redeemed_at || c.payment_reference),
+                            onSelect: () => setDeleting(c),
+                          },
                         ]}
                       />
                     </td>
@@ -389,6 +401,17 @@ function CodesTab({ refreshKey, plans }) {
         onConfirm={confirm?.action}
         onClose={() => setConfirm(null)}
       />
+      <DeleteDialog
+        open={Boolean(deleting)}
+        title={deleting ? `Delete ${deleting.code}?` : ""}
+        message="The code disappears from this list and can never be used."
+        onDelete={() => superBillingApi.deleteCode(deleting.id)}
+        onDeleted={() => {
+          toast(`${deleting.code} deleted.`);
+          list.reload();
+        }}
+        onClose={() => setDeleting(null)}
+      />
     </div>
   );
 }
@@ -399,6 +422,7 @@ function PlansTab({ plans, loading, error, onChanged, startCreating, onCreateHan
   const [editing, setEditing] = useState(null);
   const [creating, setCreating] = useState(startCreating);
   const [confirm, setConfirm] = useState(null);
+  const [deleting, setDeleting] = useState(null);
 
   const closeCreate = () => {
     setCreating(false);
@@ -470,6 +494,7 @@ function PlansTab({ plans, loading, error, onChanged, startCreating, onCreateHan
                           p.is_active
                             ? { id: "deactivate", label: "Deactivate", icon: PowerOff, danger: true, separatorBefore: true, onSelect: () => toggle(p) }
                             : { id: "reactivate", label: "Reactivate", icon: Power, separatorBefore: true, onSelect: () => toggle(p) },
+                          { id: "delete", label: "Delete", icon: Trash2, danger: true, onSelect: () => setDeleting(p) },
                         ]}
                       />
                     </td>
@@ -508,6 +533,26 @@ function PlansTab({ plans, loading, error, onChanged, startCreating, onCreateHan
           onChanged();
         }}
         onClose={() => setConfirm(null)}
+      />
+      <DeleteDialog
+        open={Boolean(deleting)}
+        title={deleting ? `Delete ${deleting.name}?` : ""}
+        message="Only a plan nobody has used can be deleted. A plan with subscriptions, payments or access codes can only be deactivated."
+        onDelete={() => superBillingApi.deletePlan(deleting.id)}
+        onDeactivate={
+          deleting?.is_active
+            ? async () => {
+                await superBillingApi.deactivatePlan(deleting.id);
+                toast(`${deleting.name} is no longer on sale.`);
+                onChanged();
+              }
+            : undefined
+        }
+        onDeleted={() => {
+          toast(`${deleting.name} deleted.`);
+          onChanged();
+        }}
+        onClose={() => setDeleting(null)}
       />
     </div>
   );

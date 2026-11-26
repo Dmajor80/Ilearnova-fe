@@ -39,17 +39,27 @@ export const superAdminApi = {
   deactivateUser: (userId) => http.post(`${BASE}/users/${id(userId)}/deactivate/`, {}, { auth: true }),
   resetUserPassword: (userId) => http.post(`${BASE}/users/${id(userId)}/reset-password/`, {}, { auth: true }),
   addRole: (userId, body) => http.post(`${BASE}/users/${id(userId)}/roles/`, body, { auth: true }),
+  userDeleteCheck: async (userId) => unwrap(await http.get(`${BASE}/users/${id(userId)}/delete-check/`, { auth: true })),
+  /** Permanent. 409 `{ error, blockers }` when the user has payments, is you, or is the last superuser. */
+  deleteUser: (userId) => http.del(`${BASE}/users/${id(userId)}/`, { auth: true }),
   removeRole: (userId, roleId) => http.del(`${BASE}/users/${id(userId)}/roles/${id(roleId)}/`, { auth: true }),
 
   emails: (params) => http.get(`${BASE}/emails/`, { auth: true, params }),
   email: async (emailId) => unwrap(await http.get(`${BASE}/emails/${id(emailId)}/`, { auth: true })),
   resendEmail: (emailId) => http.post(`${BASE}/emails/${id(emailId)}/resend/`, {}, { auth: true }),
+  deleteEmail: (emailId) => http.del(`${BASE}/emails/${id(emailId)}/`, { auth: true }),
+  /** Delete sent/failed logs older than N days → `{ deleted }`. Omit `status` for both. */
+  purgeEmails: (body) => http.post(`${BASE}/emails/purge/`, body, { auth: true }),
 
   organizations: (params) => http.get(`${BASE}/organizations/`, { auth: true, params }),
   organization: async (orgId) => unwrap(await http.get(`${BASE}/organizations/${id(orgId)}/`, { auth: true })),
   createOrganization: async (body) => unwrap(await http.post(`${BASE}/organizations/`, body, { auth: true })),
   updateOrganization: async (orgId, body) => unwrap(await http.patch(`${BASE}/organizations/${id(orgId)}/`, body, { auth: true })),
-  deactivateOrganization: (orgId) => http.del(`${BASE}/organizations/${id(orgId)}/`, { auth: true }),
+  deactivateOrganization: (orgId) => http.post(`${BASE}/organizations/${id(orgId)}/deactivate/`, {}, { auth: true }),
+  organizationDeleteCheck: async (orgId) =>
+    unwrap(await http.get(`${BASE}/organizations/${id(orgId)}/delete-check/`, { auth: true })),
+  /** Permanent. 409 `{ error, blockers }` when the school has payments or is protected. */
+  deleteOrganization: (orgId) => http.del(`${BASE}/organizations/${id(orgId)}/`, { auth: true, params: { permanent: "true" } }),
   activateOrganization: (orgId) => http.post(`${BASE}/organizations/${id(orgId)}/activate/`, {}, { auth: true }),
 };
 

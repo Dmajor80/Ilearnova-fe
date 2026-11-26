@@ -96,8 +96,12 @@ export const superBillingApi = {
   codes: (params) => http.get(`${SUPER}/access-codes/`, { auth: true, params }),
   sendCode: (id, body = {}) => http.post(`${SUPER}/access-codes/${id}/send/`, body, { auth: true }),
   deactivateCode: (id) => http.del(`${SUPER}/access-codes/${id}/`, { auth: true }),
+  /** Permanent; 409 when the code was redeemed or paid for. */
+  deleteCode: (id) => http.del(`${SUPER}/access-codes/${id}/`, { auth: true, params: { permanent: "true" } }),
   plans: (params) => http.get(`${SUPER}/plans/`, { auth: true, params }),
   createPlan: (plan) => http.post(`${SUPER}/plans/`, plan, { auth: true }),
   updatePlan: (id, changes) => http.patch(`${SUPER}/plans/${id}/`, changes, { auth: true }),
   deactivatePlan: (id) => http.del(`${SUPER}/plans/${id}/`, { auth: true }),
+  /** Permanent; 409 when any subscription, payment or access code uses it. */
+  deletePlan: (id) => http.del(`${SUPER}/plans/${id}/`, { auth: true, params: { permanent: "true" } }),
 };

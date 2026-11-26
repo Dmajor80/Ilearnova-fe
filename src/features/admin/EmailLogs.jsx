@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Eye, Mail, RefreshCw, RotateCw, Search } from "lucide-react";
+import { Eraser, Eye, Mail, RefreshCw, RotateCw, Search, Trash2 } from "lucide-react";
 import { asPage, superAdminApi } from "@/api/superAdminApi";
 import { apiErrorDetails } from "@/lib/apiHelpers";
 import { toast } from "@/lib/toast";
@@ -58,6 +58,8 @@ export default function EmailLogs() {
   const [page, setPage] = useState(1);
   const [viewing, setViewing] = useState(null);
   const [resending, setResending] = useState(null);
+  const [deleting, setDeleting] = useState(null);
+  const [purge, setPurge] = useState(null);
   const query = useDebouncedValue(search.trim(), 300);
 
   useEffect(() => setPage(1), [query, status]);
@@ -93,7 +95,14 @@ export default function EmailLogs() {
             <option value="sent">Sent</option>
             <option value="failed">Failed</option>
           </select>
-          <button type="button" onClick={list.reload} disabled={list.loading} aria-label="Refresh email logs" className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 sm:ml-auto">
+          <button
+            type="button"
+            onClick={() => setPurge({ status: "", days: "30" })}
+            className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-gray-300 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 sm:ml-auto"
+          >
+            <Eraser className="h-4 w-4" aria-hidden="true" /> Clear old emails
+          </button>
+          <button type="button" onClick={list.reload} disabled={list.loading} aria-label="Refresh email logs" className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50">
             <RefreshCw className={`h-4 w-4 ${list.loading ? "animate-spin" : ""}`} aria-hidden="true" />
           </button>
         </div>
@@ -136,6 +145,7 @@ export default function EmailLogs() {
                         items={[
                           { id: "details", label: "Details", icon: Eye, onSelect: () => setViewing(email) },
                           { id: "resend", label: "Resend", icon: RotateCw, hidden: !email.can_resend, onSelect: () => setResending(email) },
+                          { id: "delete", label: "Delete", icon: Trash2, danger: true, separatorBefore: true, onSelect: () => setDeleting(email) },
                         ]}
                       />
                     </td>
@@ -164,6 +174,75 @@ export default function EmailLogs() {
           list.reload();
         }}
         onClose={() => setResending(null)}
+      />
+      <ConfirmDialog
+        open={Boolean(deleting)}
+        title="Delete this email log?"
+        message={deleting ? `The record of “${deleting.subject}” to ${deleting.to} will be removed. The email itself isn't recalled.` : ""}
+        confirmLabel="Delete"
+        variant="danger"
+        onConfirm={async () => {
+          try {
+            await superAdminApi.deleteEmail(deleting.id);
+          } catch (err) {
+            throw new Error(errorText(err));
+          }
+          toast("Email log deleted.");
+          list.reload();
+        }}
+        onClose={() => setDeleting(null)}
+      />
+      <ConfirmDialog
+        open={Boolean(purge)}
+        title="Clear old emails?"
+        variant="danger"
+        confirmLabel="Clear emails"
+        message={
+          purge && (
+            <div className="space-y-3">
+              <p>Permanently delete old email records. Pending emails are never cleared.</p>
+              <label className="block">
+                <span className="mb-1 block text-xs font-medium text-gray-600">Which emails</span>
+                <select
+                  aria-label="Which emails"
+                  value={purge.status}
+                  onChange={(e) => setPurge({ ...purge, status: e.target.value })}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                >
+                  <option value="">Sent and failed</option>
+                  <option value="sent">Sent only</option>
+                  <option value="failed">Failed only</option>
+                </select>
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-xs font-medium text-gray-600">Older than (days)</span>
+                <input
+                  aria-label="Older than (days)"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={purge.days}
+                  onChange={(e) => setPurge({ ...purge, days: e.target.value })}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                />
+              </label>
+            </div>
+          )
+        }
+        onConfirm={async () => {
+          const days = Number(purge.days);
+          if (!Number.isInteger(days) || days < 0) throw new Error("Enter a whole number of days (0 or more).");
+          let result;
+          try {
+            result = await superAdminApi.purgeEmails({ ...(purge.status ? { status: purge.status } : {}), older_than_days: days });
+          } catch (err) {
+            throw new Error(errorText(err));
+          }
+          const n = result?.deleted ?? 0;
+          toast(`Cleared ${n} email${n === 1 ? "" : "s"}.`);
+          list.reload();
+        }}
+        onClose={() => setPurge(null)}
       />
     </div>
   );

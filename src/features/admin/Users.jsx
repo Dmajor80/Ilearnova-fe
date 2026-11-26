@@ -10,16 +10,19 @@ import {
   RefreshCw,
   Search,
   ShieldCheck,
+  Trash2,
   UserPlus,
   Users as UsersIcon,
 } from "lucide-react";
 import { asPage, fetchAll, superAdminApi, userFullName } from "@/api/superAdminApi";
+import { getStoredUser } from "@/api/auth";
 import { apiErrorDetails } from "@/lib/apiHelpers";
 import { downloadCsv } from "@/lib/csv";
 import { ASSIGNABLE_ROLES } from "@/lib/roles";
 import { toast } from "@/lib/toast";
 import ActionsMenu from "@/components/ui/ActionsMenu";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import DeleteDialog from "@/components/ui/DeleteDialog";
 import { InitialsAvatar } from "@/components/ui/Avatar";
 import { TableSkeleton } from "@/components/ui/Skeleton";
 import { ActivePill, EmptyState, ErrorAlert, PageCard, Pagination, Pill, formatDay } from "@/components/admin/AdminUI";
@@ -42,6 +45,18 @@ const CSV_COLUMNS = [
 ];
 
 const errorText = (err) => apiErrorDetails(err).messages.join(" ");
+
+/** The signed-in superadmin themselves (never deletable from here). */
+const isMe = (user) => {
+  const me = getStoredUser();
+  const myId = me?.id ?? me?.user_id ?? me?.user?.id;
+  if (myId != null && String(myId) === String(user.id)) return true;
+  const myEmail = me?.email ?? me?.user?.email;
+  return Boolean(myEmail && user.email && myEmail.toLowerCase() === user.email.toLowerCase());
+};
+
+/** Superusers and yourself can only be deactivated, never deleted here. */
+const canOfferDelete = (user) => !user.is_superuser && !isMe(user);
 
 export default function Users() {
   const [params, setParams] = useSearchParams();
@@ -66,6 +81,7 @@ export default function Users() {
   const [editing, setEditing] = useState(null);
   const [rolesFor, setRolesFor] = useState(null);
   const [confirm, setConfirm] = useState(null);
+  const [deleting, setDeleting] = useState(null);
   const [exporting, setExporting] = useState(false);
 
   const list = useResource(async () => {
@@ -156,6 +172,15 @@ export default function Users() {
     user.is_active
       ? { id: "deactivate", label: "Deactivate", icon: PowerOff, danger: true, separatorBefore: true, hidden: user.is_superuser, onSelect: () => confirmAction(user, "deactivate") }
       : { id: "activate", label: "Activate", icon: Power, separatorBefore: true, onSelect: () => confirmAction(user, "activate") },
+    {
+      id: "delete",
+      label: "Delete permanently…",
+      icon: Trash2,
+      danger: true,
+      separatorBefore: true,
+      hidden: !canOfferDelete(user),
+      onSelect: () => setDeleting(user),
+    },
   ];
 
   const items = list.data?.items || [];
@@ -318,7 +343,42 @@ export default function Users() {
         <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPage={setPage} disabled={list.loading} />
       </section>
 
-      {viewing && <UserDetailModal user={viewing} onClose={() => setViewing(null)} />}
+      {viewing && (
+        <UserDetailModal
+          user={viewing}
+          onClose={() => setViewing(null)}
+          onDelete={
+            canOfferDelete(viewing)
+              ? () => {
+                  setDeleting(viewing);
+                  setViewing(null);
+                }
+              : undefined
+          }
+        />
+      )}
+      <DeleteDialog
+        open={Boolean(deleting)}
+        title={deleting ? `Delete ${userFullName(deleting)} permanently?` : ""}
+        message="Their account, school roles and everything they submitted (assignments, exam attempts, attendance…) will be removed."
+        confirmText={deleting?.email || deleting?.username}
+        loadCheck={deleting ? () => superAdminApi.userDeleteCheck(deleting.id) : undefined}
+        onDelete={() => superAdminApi.deleteUser(deleting.id)}
+        onDeactivate={
+          deleting?.is_active
+            ? async () => {
+                await superAdminApi.deactivateUser(deleting.id);
+                toast(`${userFullName(deleting)} deactivated.`);
+                list.reload();
+              }
+            : undefined
+        }
+        onDeleted={() => {
+          toast(`${userFullName(deleting)} was deleted.`);
+          list.reload();
+        }}
+        onClose={() => setDeleting(null)}
+      />
       {editing && (
         <UserEditModal
           user={editing}
