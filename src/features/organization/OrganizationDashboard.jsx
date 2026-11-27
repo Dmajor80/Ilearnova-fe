@@ -15,6 +15,8 @@ import ManagingSchoolBanner from "@/components/admin/ManagingSchoolBanner";
 import Toaster from "@/components/ui/Toast";
 import { useManagedSchool } from "@/lib/manageSchool";
 
+const PROFILE_PATH = "/organization-dashboard/profile";
+
 /** The school this dashboard is for: the managed one, else the admin's own. */
 function schoolNameFor(managed) {
   if (managed) return managed.name;
@@ -42,7 +44,7 @@ const OrganizationDashboard = () => {
   const { status: subscription, loaded: subscriptionLoaded } = useSubscriptionStatus(location.pathname);
   const schoolLocked = subscription?.mode === MODES.BILLING_ONLY;
   // Locked school: admins may only use billing (and their profile).
-  const locked = schoolLocked && location.pathname !== BILLING_PATH;
+  const locked = schoolLocked && location.pathname !== BILLING_PATH && location.pathname !== PROFILE_PATH;
   // Wait for the subscription answer, and load nothing a locked school
   // would refuse (the alert bell and pending badges).
   const canLoad = subscriptionLoaded && !schoolLocked;
@@ -236,7 +238,7 @@ const OrganizationDashboard = () => {
                   <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-xl py-3 z-20 border border-slate-200 animate-in slide-in-from-top-2 duration-200">
                     <button
                       onClick={() => {
-                        navigate("/profile");
+                        navigate(PROFILE_PATH);
                         setIsProfileDropdownOpen(false);
                       }}
                       className="flex items-center w-full text-left px-4 py-3 text-slate-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-200 rounded-lg mx-2"
