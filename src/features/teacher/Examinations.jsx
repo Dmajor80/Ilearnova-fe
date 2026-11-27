@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { Eye, FileQuestion, Plus, RefreshCw, Trash2 } from "lucide-react";
-import { useTeacherBankQuestions, useTeacherClasses, useTeacherExaminations } from "@/hooks/teacher";
-import { getTeacherList } from "@/hooks/teacher/teacherApiUtils";
+import { useTeacherClasses, useTeacherExaminations } from "@/hooks/teacher";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import { CardGridSkeleton } from "@/components/ui/Skeleton";
 import CoursesComponent from "./components/CourseComponents";
+import ExamQuestions from "./exams/ExamQuestions";
 
 const emptyForm = {
   title: "",
@@ -21,16 +23,13 @@ const emptyForm = {
 export default function Examinations() {
   const examsApi = useTeacherExaminations();
   const classesApi = useTeacherClasses();
-  const questionApi = useTeacherBankQuestions();
   const [subjects, setSubjects] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingExam, setEditingExam] = useState(null);
   const [form, setForm] = useState(emptyForm);
   const [selectedExam, setSelectedExam] = useState(null);
-  const [detailView, setDetailView] = useState("submissions");
-  const [questionPayload, setQuestionPayload] = useState("{}");
-  const [questionJsonError, setQuestionJsonError] = useState("");
-  const [questionDetails, setQuestionDetails] = useState("");
+  const [questionsExam, setQuestionsExam] = useState(null);
+  const [deletingExam, setDeletingExam] = useState(null);
   const [examPage, setExamPage] = useState(1);
   const [submissionPage, setSubmissionPage] = useState(1);
 
@@ -82,15 +81,11 @@ export default function Examinations() {
     }
   };
 
-  const openDetails = async (exam, view) => {
+  const openSubmissions = async (exam) => {
     setSelectedExam(exam);
-    setDetailView(view);
     try {
-      if (view === "submissions") {
-        setSubmissionPage(1);
-        await examsApi.fetchSubmissions(exam.id, { page: 1 });
-      }
-      else await examsApi.fetchBankQuestions(exam.id);
+      setSubmissionPage(1);
+      await examsApi.fetchSubmissions(exam.id, { page: 1 });
     } catch {
       // The API hook reports request failures.
     }
@@ -107,39 +102,12 @@ export default function Examinations() {
     examsApi.fetchSubmissions(selectedExam.id, { page }).catch(() => {});
   };
 
-  const questions = getTeacherList(examsApi.bankQuestions, ["questions", "bank_questions"]);
-
-  const submitQuestionPayload = async (event) => {
-    event.preventDefault();
-    if (!selectedExam) return;
-    try {
-      const payload = JSON.parse(questionPayload);
-      await examsApi.addBankQuestions(selectedExam.id, payload);
-      await examsApi.fetchBankQuestions(selectedExam.id);
-      setQuestionJsonError("");
-    } catch (error) {
-      if (error instanceof SyntaxError) setQuestionJsonError("The question details aren't in the right format. Please check them and try again.");
-    }
-  };
-
-  const saveQuestionDetails = async (event) => {
-    event.preventDefault();
-    if (!questionApi.question?.id) return;
-    try {
-      const payload = JSON.parse(questionDetails);
-      await questionApi.updateQuestion(questionApi.question.id, payload);
-      setQuestionJsonError("");
-    } catch (error) {
-      if (error instanceof SyntaxError) setQuestionJsonError("The question update isn't in the right format. Please check it and try again.");
-    }
-  };
-
   return (
     <div className="space-y-6">
       <CoursesComponent page="Examinations" />
       <section className="rounded-xl bg-white p-5 shadow-sm">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-          <div><h2 className="text-2xl font-bold">Examinations</h2><p className="text-sm text-gray-600">Create exams, review submissions, and inspect linked question-bank items.</p></div>
+          <div><h2 className="text-2xl font-bold">Examinations</h2><p className="text-sm text-gray-600">Create exams, write their questions, and review submissions.</p></div>
           <div className="flex gap-2">
             <button type="button" onClick={() => examsApi.refreshData({ page: examPage }, true)} aria-label="Refresh examinations" className="rounded-lg border px-3 text-gray-700 hover:bg-gray-50"><RefreshCw size={17} /></button>
             <button onClick={() => openForm()} className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"><Plus size={17} /> Create examination</button>
@@ -147,8 +115,7 @@ export default function Examinations() {
         </div>
         {examsApi.error && <p role="alert" className="mb-4 rounded-lg bg-red-50 p-3 text-red-700">{examsApi.error.message}</p>}
         {classesApi.error && <p role="alert" className="mb-4 rounded-lg bg-red-50 p-3 text-red-700">{classesApi.error.message}</p>}
-        {questionApi.error && <p role="alert" className="mb-4 rounded-lg bg-red-50 p-3 text-red-700">{questionApi.error.message}</p>}
-        {examsApi.loading && <p className="py-8 text-center text-gray-500">Loading examinations...</p>}
+        {examsApi.loading && <CardGridSkeleton count={4} label="Loading examinations" className="lg:grid-cols-2" />}
         {!examsApi.loading && !examsApi.examinations.length && <p className="rounded-lg bg-gray-50 p-6 text-center text-gray-600">No examinations found.</p>}
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {!examsApi.loading && examsApi.examinations.map((exam) => (
@@ -164,14 +131,10 @@ export default function Examinations() {
                 {exam.duration_minutes != null && <p>{exam.duration_minutes} minutes · {exam.total_marks ?? "—"} marks</p>}
               </div>
               <div className="mt-4 flex flex-wrap gap-2">
-                <button onClick={() => openDetails(exam, "submissions")} className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50"><Eye size={15} className="mr-1 inline" /> Submissions</button>
-                <button onClick={() => openDetails(exam, "questions")} className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50"><FileQuestion size={15} className="mr-1 inline" /> Questions</button>
+                <button onClick={() => openSubmissions(exam)} className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50"><Eye size={15} className="mr-1 inline" /> Submissions</button>
+                <button onClick={() => setQuestionsExam(exam)} className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50"><FileQuestion size={15} className="mr-1 inline" /> Questions</button>
                 <button onClick={() => openForm(exam)} className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50">Edit</button>
-                <button onClick={async () => {
-                  if (window.confirm(`Delete "${exam.title}"?`)) {
-                    try { await examsApi.removeExamination(exam.id, { page: examPage }); } catch { /* Hook reports failures. */ }
-                  }
-                }} aria-label="Delete examination" className="rounded-lg border px-3 py-2 text-red-600 hover:bg-red-50"><Trash2 size={15} /></button>
+                <button onClick={() => setDeletingExam(exam)} aria-label="Delete examination" className="rounded-lg border px-3 py-2 text-red-600 hover:bg-red-50"><Trash2 size={15} /></button>
               </div>
             </article>
           ))}
@@ -191,23 +154,11 @@ export default function Examinations() {
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 p-4">
           <section className="max-h-[80vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
-              <div><h3 className="text-xl font-semibold">{detailView === "submissions" ? "Exam submissions" : "Question bank"}</h3><p className="text-sm text-gray-500">{selectedExam.title}</p></div>
+              <div><h3 className="text-xl font-semibold">Exam submissions</h3><p className="text-sm text-gray-500">{selectedExam.title}</p></div>
               <button onClick={() => setSelectedExam(null)} className="text-gray-500">Close</button>
             </div>
-            {detailView === "submissions" ? (
-              examsApi.submissions.length ? <div className="divide-y">{examsApi.submissions.map((submission) => <article key={submission.id} className="py-3"><p className="font-medium">{submission.student_name || submission.student?.name || "Student"}</p><p className="text-sm text-gray-500">{submission.submitted_at ? new Date(submission.submitted_at).toLocaleString() : ""}</p></article>)}</div> : <p className="text-gray-600">No exam submissions found.</p>
-            ) : (
-              <>
-                {questions.length ? <div className="divide-y">{questions.map((question) => <article key={question.id} className="flex items-center justify-between gap-4 py-3"><div><p className="font-medium">{question.question || question.text || question.title || question.id}</p><p className="text-xs text-gray-500">{question.question_type || question.type || ""}</p></div><div className="flex gap-2"><button onClick={async () => { try { const data = await questionApi.fetchQuestion(question.id); setQuestionDetails(JSON.stringify(data, null, 2)); setQuestionJsonError(""); } catch { /* Hook reports failures. */ } }} className="rounded border px-3 py-1.5 text-sm">Load details</button><button onClick={async () => { if (window.confirm("Delete this question?")) { try { await questionApi.removeQuestion(question.id); await examsApi.fetchBankQuestions(selectedExam.id); } catch { /* Hook reports failures. */ } } }} className="rounded border px-3 py-1.5 text-sm text-red-600">Delete</button></div></article>)}</div> : <p className="text-gray-600">No linked bank questions found for this examination.</p>}
-                <form onSubmit={submitQuestionPayload} className="mt-5 space-y-2 border-t pt-4">
-                  <label className="block text-sm font-medium">Add or link questions (JSON)
-                    <textarea value={questionPayload} onChange={(event) => setQuestionPayload(event.target.value)} className="mt-1 w-full rounded-lg border p-3 font-mono text-sm" rows="3" />
-                  </label>
-                  <button disabled={examsApi.mutating} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">Add questions</button>
-                </form>
-              </>
-            )}
-            {detailView === "submissions" && examsApi.submissionPagination && (
+            {examsApi.submissions.length ? <div className="divide-y">{examsApi.submissions.map((submission) => <article key={submission.id} className="py-3"><p className="font-medium">{submission.student_name || submission.student?.name || "Student"}</p><p className="text-sm text-gray-500">{submission.submitted_at ? new Date(submission.submitted_at).toLocaleString() : ""}</p></article>)}</div> : <p className="text-gray-600">No exam submissions found.</p>}
+            {examsApi.submissionPagination && (
               <div className="mt-4 flex items-center justify-between border-t pt-3">
                 <span className="text-sm text-gray-500">Page {examsApi.submissionPagination.page} · {examsApi.submissionPagination.total} submissions</span>
                 <div className="flex gap-2">
@@ -216,16 +167,21 @@ export default function Examinations() {
                 </div>
               </div>
             )}
-            {detailView === "questions" && questionDetails && <form onSubmit={saveQuestionDetails} className="mt-4 space-y-2 border-t pt-4">
-              <label className="block text-sm font-medium">Update question (JSON)
-                <textarea value={questionDetails} onChange={(event) => setQuestionDetails(event.target.value)} className="mt-1 w-full rounded-lg border p-3 font-mono text-xs" rows="8" />
-              </label>
-              <button disabled={questionApi.mutating} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">Update question</button>
-            </form>}
-            {questionJsonError && <p role="alert" className="mt-3 text-sm text-red-600">{questionJsonError}</p>}
           </section>
         </div>
       )}
+
+      <ExamQuestions exam={questionsExam} open={Boolean(questionsExam)} onClose={() => setQuestionsExam(null)} />
+
+      <ConfirmDialog
+        open={Boolean(deletingExam)}
+        title="Delete this examination?"
+        message={deletingExam ? `"${deletingExam.title}" and its questions will be deleted.` : ""}
+        confirmLabel="Delete"
+        variant="danger"
+        onConfirm={() => examsApi.removeExamination(deletingExam.id, { page: examPage })}
+        onClose={() => setDeletingExam(null)}
+      />
 
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">

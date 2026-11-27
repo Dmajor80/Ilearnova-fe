@@ -28,6 +28,7 @@ import TeacherCbt from "../cbt/TeacherCbt";
 import TeacherAnalytics from "./TeacherAnalytics";
 import DirectMessages from "@/features/communication/DirectMessages";
 import SectionTabs from "@/components/navigation/SectionTabs";
+import Toaster from "@/components/ui/Toast";
 import { groupOf, tabOf } from "@/components/navigation/navGroups";
 
 /** Sidebar groups; pages in a group are tabs of one another. */
@@ -216,6 +217,7 @@ export default function TeacherDashboard() {
           {renderActivePage()}
         </main>
       </div>
+      <Toaster />
     </div>
   );
 }
