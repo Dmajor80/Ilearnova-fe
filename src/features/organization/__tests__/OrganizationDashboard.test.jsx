@@ -67,6 +67,7 @@ describe("OrganizationDashboard navigation", () => {
       "Announcements",
       "Operations",
       "Fees & billing",
+      "Settings",
     ]);
   });
 
@@ -131,5 +132,27 @@ describe("OrganizationDashboard profile", () => {
     show("/organization-dashboard/profile");
     expect(screen.queryByText("Your subscription has expired")).toBeNull();
     expect(screen.getByTestId("where").textContent).toBe("/organization-dashboard/profile");
+  });
+});
+
+// The profile opened "on a new page" with no obvious way back: it had no
+// place in the sidebar, and the header's gear icon did nothing.
+describe("OrganizationDashboard settings", () => {
+  it("has a Settings sidebar link that opens the admin's profile", () => {
+    show("/organization-dashboard/overview");
+    fireEvent.click(within(sidebar()).getByTitle("Settings"));
+    expect(screen.getByTestId("where").textContent).toBe("/organization-dashboard/profile");
+  });
+
+  it("opens Settings from the header's gear icon", () => {
+    show("/organization-dashboard/overview");
+    fireEvent.click(screen.getByRole("button", { name: "Settings" }));
+    expect(screen.getByTestId("where").textContent).toBe("/organization-dashboard/profile");
+  });
+
+  it("highlights Settings in the sidebar while on the profile", () => {
+    show("/organization-dashboard/profile");
+    expect(within(sidebar()).getByTitle("Settings").getAttribute("aria-current")).toBe("page");
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toMatch(/profile|settings/i);
   });
 });

@@ -2,6 +2,18 @@ import { API_BASE_URL, REFRESH_PATH } from "./config";
 
 let refreshPromise = null;
 
+/** Fired on window whenever the signed-in account changes (log in, log out). */
+export const AUTH_CHANGED_EVENT = "ilearnova:auth-changed";
+
+function notifyAuthChanged() {
+  if (typeof window === "undefined") return;
+  try {
+    window.dispatchEvent(new Event(AUTH_CHANGED_EVENT));
+  } catch {
+    // no-op
+  }
+}
+
 // Small URL join helper to avoid double slashes
 function joinUrl(base, path) {
   const b = (base || "").replace(/\/+$/, "");
@@ -65,6 +77,7 @@ export function clearAuth() {
   } catch {
     // no-op
   }
+  notifyAuthChanged();
 }
 
 export function normalizeAuthResponse(response) {
@@ -103,6 +116,7 @@ export function persistAuthResponse(response, preferStore) {
     const store = preferStore || getAuthStorage();
     store?.setItem("user_data", JSON.stringify(normalized.user));
   }
+  notifyAuthChanged();
   return normalized;
 }
 

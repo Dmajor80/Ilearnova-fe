@@ -6,6 +6,7 @@ import {
   Home,
   Megaphone,
   MessageCircle,
+  Settings,
   SlidersHorizontal,
   TrendingUp,
   UserCheck,
@@ -58,4 +59,6 @@ export const ADMIN_GROUPS = [
       { id: "billing", label: "Subscription" },
     ],
   },
+  // The admin's own profile; tab id "profile" keeps /organization-dashboard/profile.
+  { id: "settings", label: "Settings", icon: Settings, tabs: [{ id: "profile", label: "My profile" }] },
 ];

@@ -202,6 +202,7 @@ const AppContent = () => {
       <Route path="/organization-dashboard" element={<RequireAuth><OrgAdminGate><OrganizationDashboard /></OrgAdminGate></RequireAuth>}>
         <Route index element={<Navigate to="/organization-dashboard/overview" replace />} />
         <Route path="overview" element={<OrganizationOverview />} />
+        <Route path="settings" element={<Navigate to="/organization-dashboard/profile" replace />} />
         <Route path="students" element={<OrganizationStudents />} />
         <Route path="teachers" element={<OrganizationTeachers />} />
         {/* Pending sign-ups live under the Pending pill now. */}
