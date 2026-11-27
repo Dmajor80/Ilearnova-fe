@@ -3,13 +3,12 @@ import {
   useOrganizationCalendar,
   useOrganizationFoodMenu,
   useOrganizationFoodOrders,
-  useOrganizationParents,
   useOrganizationSubjects,
   useOrganizationUnpaidTuition
 } from "@/hooks/organization";
 import DeleteConfirmModal from "../components/DeleteConfirmModal";
 import ParentLinkRequests from "../components/ParentLinkRequests";
-import InviteModal, { SchoolCodeNote } from "../components/InviteModal";
+import PeopleDirectory from "../components/PeopleDirectory";
 import SchoolDataTable from "@/components/school-admin/SchoolDataTable";
 
 const TABS = [
@@ -73,122 +72,17 @@ function Dialog({ title, onClose, children }) {
   );
 }
 
+/**
+ * Parent link requests, then the school's parents with the same statuses
+ * and actions as Students and Teachers (suspend, remove from the school,
+ * delete a mistaken account permanently).
+ */
 function ParentsPanel() {
-  const parents = useOrganizationParents();
-  const [form, setForm] = useState(null);
-  const [editingId, setEditingId] = useState(null);
-  const [deleteTarget, setDeleteTarget] = useState(null);
-  const [showInvite, setShowInvite] = useState(false);
-
-  const startForm = (parent = null) => {
-    const [firstName = "", ...lastName] = String(parent?.full_name || "").split(" ");
-    setEditingId(parent?.id || null);
-    setForm({
-      email: parent?.email || "",
-      first_name: parent?.first_name || firstName,
-      last_name: parent?.last_name || lastName.join(" "),
-      phone_number: parent?.phone_number || "",
-      date_of_birth: parent?.date_of_birth || "",
-      address: parent?.address || ""
-    });
-  };
-
-  const save = async (event) => {
-    event.preventDefault();
-    const payload = {
-      ...form,
-      phone_number: form.phone_number || null,
-      date_of_birth: form.date_of_birth || null,
-      address: form.address || null
-    };
-    try {
-      if (editingId) await parents.updateParent(editingId, payload);
-      else await parents.createParent(payload);
-      setForm(null);
-    } catch {
-      // The hook displays the API error notification.
-    }
-  };
-
-  const remove = async () => {
-    try {
-      await parents.deleteParent(deleteTarget.id);
-      setDeleteTarget(null);
-    } catch {
-      // The hook displays the API error notification.
-    }
-  };
-
-  const rows = parents.parents.map((parent) => ({
-    ...parent,
-    displayName: getName(parent),
-    created: formatDate(parent.created_at)
-  }));
-
+  const [linksApproved, setLinksApproved] = useState(0);
   return (
     <section className="space-y-4">
-      <ParentLinkRequests onApproved={() => parents.refreshData(true)} />
-      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-        <div>
-          <h3 className="text-xl font-semibold">Parent directory</h3>
-          <p className="text-sm text-gray-600">{parents.totalParents} parents</p>
-          <SchoolCodeNote className="mt-1" />
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <input
-            aria-label="Search parents"
-            value={parents.searchQuery}
-            onChange={(event) => parents.handleSearch(event.target.value)}
-            placeholder="Search parents"
-            className="min-h-[42px] rounded-lg border px-3"
-          />
-          <button type="button" onClick={() => startForm()} className="rounded-lg bg-blue-600 px-4 py-2 text-white">Add parent</button>
-          <button type="button" onClick={() => setShowInvite(true)} className="rounded-lg border px-4 py-2">Invite</button>
-          <button type="button" onClick={() => parents.refreshData(true)} className="rounded-lg border px-3 py-2">Refresh</button>
-        </div>
-      </div>
-      {parents.notification.show && <p role="status" className="rounded-lg bg-blue-50 p-3 text-sm">{parents.notification.message}</p>}
-      <SchoolDataTable
-        data={rows}
-        loading={parents.loading}
-        error={parents.error?.message}
-        showPagination={false}
-        columns={[
-          { key: "displayName", label: "Name" },
-          { key: "email", label: "Email" },
-          { key: "phone_number", label: "Phone" },
-          { key: "created", label: "Added" },
-          {
-            key: "id",
-            label: "Actions",
-            sortable: false,
-            render: (_, parent) => (
-              <div className="flex gap-3">
-                <button type="button" className="text-blue-700 hover:underline" onClick={() => startForm(parent)}>Edit</button>
-                <button type="button" className="text-red-700 hover:underline" onClick={() => setDeleteTarget(parent)}>Delete</button>
-              </div>
-            )
-          }
-        ]}
-      />
-      <PageControls page={parents.currentPage} totalPages={parents.totalPages} onChange={parents.handlePageChange} />
-      {form && (
-        <Dialog title={editingId ? "Edit parent" : "Add parent"} onClose={() => setForm(null)}>
-          <form onSubmit={save} className="grid gap-3 sm:grid-cols-2">
-            <label className="text-sm">Email<input required type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} className="mt-1 w-full rounded-lg border p-3" /></label>
-            <label className="text-sm">First name<input value={form.first_name} onChange={(event) => setForm({ ...form, first_name: event.target.value })} className="mt-1 w-full rounded-lg border p-3" /></label>
-            <label className="text-sm">Last name<input value={form.last_name} onChange={(event) => setForm({ ...form, last_name: event.target.value })} className="mt-1 w-full rounded-lg border p-3" /></label>
-            <label className="text-sm">Phone<input value={form.phone_number} onChange={(event) => setForm({ ...form, phone_number: event.target.value })} className="mt-1 w-full rounded-lg border p-3" /></label>
-            <label className="text-sm">Date of birth<input type="date" value={form.date_of_birth} onChange={(event) => setForm({ ...form, date_of_birth: event.target.value })} className="mt-1 w-full rounded-lg border p-3" /></label>
-            <label className="text-sm sm:col-span-2">Address<textarea value={form.address} onChange={(event) => setForm({ ...form, address: event.target.value })} rows={2} className="mt-1 w-full rounded-lg border p-3" /></label>
-            <button type="submit" disabled={parents.mutating} className="rounded-lg bg-blue-600 px-4 py-3 text-white disabled:opacity-50 sm:col-span-2">
-              {parents.mutating ? "Saving…" : "Save parent"}
-            </button>
-          </form>
-        </Dialog>
-      )}
-      <InviteModal open={showInvite} role="parent" onClose={() => setShowInvite(false)} />
-      {deleteTarget && <DeleteConfirmModal item={deleteTarget} type="parent" onConfirm={remove} onCancel={() => setDeleteTarget(null)} />}
+      <ParentLinkRequests onApproved={() => setLinksApproved((n) => n + 1)} />
+      <PeopleDirectory kind="parent" refreshToken={linksApproved} />
     </section>
   );
 }
