@@ -6,18 +6,10 @@ vi.mock("@/api/baseClient", () => ({
   SUBSCRIPTION_BLOCKED_EVENT: "ilearnova:subscription-blocked",
   http: { get: vi.fn(), post: vi.fn(), put: vi.fn(), patch: vi.fn(), del: vi.fn() },
 }));
-vi.mock("@/api/authApi", () => ({
-  getOrganizations: vi.fn().mockResolvedValue({ results: [] }),
-  resendOtp: vi.fn(),
-  registerOrgAdmin: vi.fn(),
-}));
-vi.mock("@/api/auth", () => ({ persistAuthResponse: vi.fn(), getTokens: () => ({ access: null }) }));
 
 import { http } from "@/api/baseClient";
-import * as authApi from "@/api/authApi";
 import AccessCodeField from "../AccessCodeField";
 import PricingPage from "../PricingPage";
-import SignupForm from "@/features/auth/SignupForm";
 
 afterEach(() => {
   cleanup();
@@ -57,46 +49,7 @@ describe("AccessCodeField", () => {
   });
 });
 
-describe("SignupForm from an invite link", () => {
-  const link = "/register/school?code=ILN-AAAA-BBBB-CCCC&email=principal%40sunrise.ng";
-
-  it("pre-fills the school admin form with the email and code", async () => {
-    http.post.mockResolvedValue({ success: true, data: { valid: true, duration_days: 365 } });
-    render(inRouter(<SignupForm />, link));
-    expect(screen.getByLabelText("Access code").value).toBe("ILN-AAAA-BBBB-CCCC");
-    expect(screen.getByDisplayValue("principal@sunrise.ng")).toBeTruthy();
-    expect(screen.getByPlaceholderText("Enter organization name")).toBeTruthy();
-  });
-
-  it("shows the backend's reason next to the code", async () => {
-    http.post.mockResolvedValue({ success: true, data: { valid: true } });
-    const error = new Error("Validation failed");
-    error.status = 400;
-    error.data = { field_errors: { access_code: ["This access code was issued to a different email address."] } };
-    authApi.registerOrgAdmin.mockRejectedValue(error);
-
-    const { container } = render(inRouter(<SignupForm />, link));
-    const fill = (name, value) => {
-      const input = container.querySelector(`[name="${name}"]`);
-      if (input) fireEvent.change(input, { target: { value } });
-    };
-    fill("first_name", "Ngozi");
-    fill("last_name", "Eze");
-    fill("username", "ngozi");
-    fill("password", "S3cure-pass!");
-    fill("password_confirmation", "S3cure-pass!");
-    fill("organization_name", "Sunrise College");
-    fireEvent.submit(container.querySelector("form"));
-
-    await waitFor(() => expect(authApi.registerOrgAdmin).toHaveBeenCalled());
-    expect(authApi.registerOrgAdmin.mock.calls[0][0]).toMatchObject({
-      email: "principal@sunrise.ng",
-      organization_name: "Sunrise College",
-      access_code: "ILN-AAAA-BBBB-CCCC",
-    });
-    expect((await screen.findAllByText("This access code was issued to a different email address.")).length).toBeGreaterThan(0);
-  });
-});
+// Invite links (/register/school?code=…&email=…): features/auth/__tests__/schoolSignup.test.jsx
 
 describe("PricingPage", () => {
   it("buys a plan for a new school through Paystack", async () => {

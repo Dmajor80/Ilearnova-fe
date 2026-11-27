@@ -6,6 +6,8 @@ import Loader from "@/components/Loader";
 // Auth Components
 import Login from "@/features/auth/Login";
 import SignupForm from "@/features/auth/SignupForm";
+import RegisterSchool from "@/features/auth/RegisterSchool";
+import SchoolSetup from "@/features/auth/SchoolSetup";
 import RequireAuth from "@/features/auth/RequireAuth";
 import RedirectIfAuthenticated from "@/features/auth/RedirectIfAuthenticated";
 import PostLoginRedirect from "@/features/auth/PostLoginRedirect";
@@ -131,7 +133,8 @@ const AppContent = () => {
       <Route path="/" element={<HomePage />} />
       <Route path="/payments/callback" element={<PaymentCallback />} />
       <Route path="/pricing" element={<PricingPage />} />
-      <Route path="/register/school" element={<SignupForm />} />
+      <Route path="/register/school" element={<RegisterSchool />} />
+      <Route path="/register/school/setup" element={<SchoolSetup />} />
       {/* <Route path="/" element={<HomePageRefresh />} /> */}
       <Route path="/home" element={<RegisteredHomePage />} />
       {/* Public authentication routes */}
