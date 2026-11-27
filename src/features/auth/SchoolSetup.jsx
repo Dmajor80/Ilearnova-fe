@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { AtSign, Lock, Mail, User } from "lucide-react";
 import { completeSchoolSetup, getSchoolSetup, resendSchoolSetup } from "@/api/authApi";
-import { fieldErrorsOf } from "@/lib/apiHelpers";
+import { fieldErrorsOf, keepShown } from "@/lib/apiHelpers";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { AuthShell, TextField } from "./RegisterSchool";
 
@@ -118,7 +118,7 @@ export default function SchoolSetup() {
     } catch (error) {
       const found = fieldErrorsOf(error);
       if (found.token) setLinkError(found.token);
-      else setErrors(found);
+      else setErrors(keepShown(found, ["first_name", "last_name", "username", "password", "confirm"]));
     } finally {
       setSaving(false);
     }

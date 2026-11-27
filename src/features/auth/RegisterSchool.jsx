@@ -3,7 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Building, CheckCircle, Mail } from "lucide-react";
 import { registerSchool, resendSchoolSetup } from "@/api/authApi";
 import AccessCodeField from "@/features/billing/AccessCodeField";
-import { fieldErrorsOf } from "@/lib/apiHelpers";
+import { fieldErrorsOf, keepShown } from "@/lib/apiHelpers";
 
 export const fieldClass =
   "w-full rounded-xl border border-gray-300 bg-white py-3 pl-10 pr-4 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500";
@@ -87,7 +87,7 @@ export default function RegisterSchool() {
       });
       setDone({ email: result?.email || form.email.trim(), name: result?.organization?.name || form.organization_name.trim() });
     } catch (error) {
-      setErrors(fieldErrorsOf(error));
+      setErrors(keepShown(fieldErrorsOf(error), ["email", "organization_name", "access_code", "subscription"]));
     } finally {
       setSaving(false);
     }
