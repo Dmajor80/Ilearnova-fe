@@ -8,7 +8,14 @@ import {
   useTeacherSubjects
 } from "@/hooks/teacher";
 import { useOrganization } from "@/context/OrganizationContext";
-import { addTeacherClassStudents, getTeacherClassStudents, removeTeacherClassStudents } from "@/api/teacher";
+import {
+  addTeacherClassStudents,
+  enrolTeacherSubjectStudents,
+  getTeacherClassStudents,
+  getTeacherSubjectStudents,
+  removeTeacherClassStudents,
+  unenrolTeacherSubjectStudents
+} from "@/api/teacher";
 import ImportPeopleModal from "@/features/organization/components/ImportPeopleModal";
 import CoursesComponent from "./components/CourseComponents";
 import ClasslessSubjectsPanel from "./components/ClasslessSubjectsPanel";
@@ -26,7 +33,7 @@ export default function ClassManagement() {
   const can = permissionsApi.has;
   const ownClasses = permissionsApi.classes;
   const ledClasses = ownClasses.filter((c) => c.leads);
-  const [extraModal, setExtraModal] = useState(null); // "students" | "subject" | "import"
+  const [extraModal, setExtraModal] = useState(null); // "students" | "subjectStudents" | "subject" | "import"
   // Class preselected in the New subject form ("" = let them pick).
   const [newSubjectClass, setNewSubjectClass] = useState("");
   const [selectedClass, setSelectedClass] = useState(null);
@@ -111,6 +118,13 @@ export default function ClassManagement() {
   // Same rule as the server: create_subjects, and only in a class they lead.
   const canAddSubjectToSelectedClass = Boolean(selectedClass) && can(TEACHER_PERMISSIONS.createSubjects)
     && ledClasses.some((c) => String(c.id) === String(selectedClass.id));
+
+  // A class subject the teacher teaches (from their own subjects list), with
+  // manage_subject_students: they may add students from other classes to it.
+  const selectedSubject = subjectsApi.subjects.find((s) => String(s.id) === String(selectedSubjectId));
+  const canAddExtrasToSelectedSubject = Boolean(selectedClass) && Boolean(selectedSubject)
+    && can(TEACHER_PERMISSIONS.manageSubjectStudents);
+  const selectedClassName = selectedClass?.name || selectedClass?.class_name || "";
 
   const openNewSubject = (classId = "") => {
     setNewSubjectClass(classId);
@@ -206,6 +220,11 @@ export default function ClassManagement() {
               {canAddSubjectToSelectedClass && (
                 <button onClick={() => openNewSubject(String(selectedClass.id))} aria-label={`Add subject to ${selectedClass.name || selectedClass.class_name}`} className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50"><Plus size={15} className="mr-1 inline" /> Subject</button>
               )}
+              {canAddExtrasToSelectedSubject && (
+                <button onClick={() => setExtraModal("subjectStudents")} aria-label={`Add students from other classes to ${selectedSubject.name}`} className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50">
+                  <UserPlus size={15} className="mr-1 inline" /> Add students from other classes
+                </button>
+              )}
               <button onClick={() => setActiveModal("topic")} disabled={!selectedSubjectId} className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50 disabled:opacity-50"><Plus size={15} className="mr-1 inline" /> Topic</button>
               <button onClick={() => setActiveModal("material")} className="rounded-lg bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700"><FilePlus2 size={15} className="mr-1 inline" /> Course material</button>
             </div>
@@ -261,6 +280,19 @@ export default function ClassManagement() {
           onClose={() => {
             setExtraModal(null);
             classesApi.refreshData();
+          }}
+        />
+      )}
+      {extraModal === "subjectStudents" && canAddExtrasToSelectedSubject && (
+        <TeacherStudentsModal
+          title={`Students in ${selectedSubject.name} (${selectedSubject.class_name || selectedClassName})`}
+          fromClass={selectedSubject.class_name || selectedClassName}
+          load={() => getTeacherSubjectStudents(selectedSubject.id)}
+          add={(ids) => enrolTeacherSubjectStudents(selectedSubject.id, ids)}
+          remove={(ids) => unenrolTeacherSubjectStudents(selectedSubject.id, ids)}
+          onClose={() => {
+            setExtraModal(null);
+            subjectsApi.refreshData();
           }}
         />
       )}

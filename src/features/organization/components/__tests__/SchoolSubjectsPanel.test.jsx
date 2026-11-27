@@ -47,6 +47,22 @@ describe("SchoolSubjectsPanel", () => {
     expect(await screen.findByRole("dialog", { name: "Students taking French" })).toBeTruthy();
   });
 
+  it("gives class subjects a Students action for extra students", async () => {
+    http.get.mockImplementation((url) => {
+      if (url === "/api/admin/school/subjects/") return Promise.resolve({ success: true, data: { subjects: SUBJECTS } });
+      if (url === "/api/admin/school/subjects/s1/students/") {
+        return Promise.resolve({ success: true, data: { count: 0, class_name: "JSS1", students: [] } });
+      }
+      if (url.startsWith("/api/admin/school/")) return Promise.resolve({ success: true, data: {} });
+      return Promise.reject(new Error(`unexpected ${url}`));
+    });
+    render(<SchoolSubjectsPanel />);
+    const classed = await screen.findByRole("region", { name: "Class subjects" });
+    fireEvent.click(within(classed).getByRole("button", { name: "Students in Maths" }));
+    expect(await screen.findByRole("dialog", { name: "Students taking Maths" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Add students from other classes" })).toBeTruthy();
+  });
+
   it("creates a subject without a class", async () => {
     http.post.mockResolvedValue({ success: true, data: { id: "s3", name: "Music", classname: null } });
     render(<SchoolSubjectsPanel />);

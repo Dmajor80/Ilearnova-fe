@@ -18,7 +18,8 @@ const studentsLabel = (count) => `${count ?? 0} ${count === 1 ? "student" : "stu
 /**
  * The school's subjects for the admin: class subjects in one table, subjects
  * without a class in their own list, each with a Students action to enrol
- * students individually.
+ * students individually (for a class subject: extra students from other
+ * classes, on top of the class's own).
  */
 export default function SchoolSubjectsPanel() {
   const [subjects, setSubjects] = useState([]);
@@ -118,7 +119,16 @@ export default function SchoolSubjectsPanel() {
                       <td className="p-3">{s.class_name || "No class"}</td>
                       <td className="p-3">{s.teacher_name || "—"}</td>
                       <td className="p-3">{s.student_count ?? "—"}</td>
-                      <td className="p-3 text-right">
+                      <td className="flex justify-end gap-2 p-3">
+                        <button
+                          type="button"
+                          onClick={() => setEnrolling(s)}
+                          aria-label={`Students in ${s.name}`}
+                          title="Extra students from other classes"
+                          className="flex items-center gap-1 rounded-lg bg-indigo-50 px-3 py-1 text-indigo-700 hover:bg-indigo-100"
+                        >
+                          <Users className="h-4 w-4" aria-hidden="true" /> Students
+                        </button>
                         <button type="button" onClick={() => openForm(s)} aria-label={`Edit ${s.name}`} className="rounded-lg border px-3 py-1 hover:bg-gray-50">Edit</button>
                       </td>
                     </tr>
