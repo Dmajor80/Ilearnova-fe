@@ -60,6 +60,17 @@ export const superAdminApi = {
     unwrap(await http.get(`${BASE}/organizations/${id(orgId)}/delete-check/`, { auth: true })),
   /** Permanent. 409 `{ error, blockers }` when the school has payments or is protected. */
   deleteOrganization: (orgId) => http.del(`${BASE}/organizations/${id(orgId)}/`, { auth: true, params: { permanent: "true" } }),
+  /**
+   * Selections. `resource` is "users" or "organizations".
+   * - `ids(resource, filters)` → `{ count, ids }` for every row matching the list's filters.
+   * - `bulkDeleteCheck(resource, ids)` → `{ deletable, blocked, related, items: [{ id, name, reason }] }`.
+   * - `bulkDelete(resource, ids)` → `{ deleted: [id], skipped: [{ id, name, reason }] }`.
+   * Up to 500 ids per call; each row goes through the single-delete rules.
+   */
+  ids: async (resource, params) => unwrap(await http.get(`${BASE}/${resource}/ids/`, { auth: true, params })),
+  bulkDeleteCheck: async (resource, ids) =>
+    unwrap(await http.post(`${BASE}/${resource}/bulk-delete-check/`, { ids }, { auth: true })),
+  bulkDelete: async (resource, ids) => unwrap(await http.post(`${BASE}/${resource}/bulk-delete/`, { ids }, { auth: true })),
   activateOrganization: (orgId) => http.post(`${BASE}/organizations/${id(orgId)}/activate/`, {}, { auth: true }),
 };
 

@@ -2,19 +2,11 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Trash2 } from "lucide-react";
 import Modal, { Button } from "./Modal";
 import { Skeleton, SkeletonRegion } from "./Skeleton";
+import { countLabel } from "@/lib/countLabel";
 
 const errorReason = (err) => err?.data?.error || err?.data?.detail || err?.message || "That didn't work. Try again.";
 const countList = (counts) => Object.entries(counts || {}).filter(([, n]) => n > 0);
 
-/** "1 school role", "1 class", "1 timetable entry"; plural labels come from the API. */
-function countLabel(n, label) {
-  if (n !== 1) return `${n} ${label}`;
-  let one = label;
-  if (/ies$/.test(label)) one = label.replace(/ies$/, "y");
-  else if (/(ss|ch|sh|x)es$/.test(label)) one = label.replace(/es$/, "");
-  else if (/s$/.test(label)) one = label.replace(/s$/, "");
-  return `${n} ${one}`;
-}
 
 /**
  * Permanent-delete confirmation.

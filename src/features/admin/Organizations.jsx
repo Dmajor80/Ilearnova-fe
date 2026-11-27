@@ -16,6 +16,8 @@ import {
   SubscriptionPill,
   formatDay,
 } from "@/components/admin/AdminUI";
+import { BulkDeleteDialog, RowCheckbox, SelectPageCheckbox, SelectionBar } from "@/components/admin/BulkSelect";
+import useSelection from "@/hooks/superadmin/useSelection";
 import OrganizationFormModal from "@/components/admin/OrganizationFormModal";
 import useOrganizationActions from "@/components/admin/useOrganizationActions";
 import useResource from "@/hooks/superadmin/useResource";
@@ -40,6 +42,9 @@ export default function Organizations() {
   const query = useDebouncedValue(search.trim(), 350);
 
   useEffect(() => setPage(1), [query, status]);
+  const filters = { search: query || undefined, is_active: status || undefined };
+  const selection = useSelection(`${query}|${status}`);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   const list = useResource(
     async () =>
@@ -47,8 +52,7 @@ export default function Organizations() {
         await superAdminApi.organizations({
           page,
           page_size: PAGE_SIZE,
-          search: query || undefined,
-          is_active: status || undefined,
+          ...filters,
         })
       ),
     [page, query, status]
@@ -84,6 +88,7 @@ export default function Organizations() {
   const items = list.data?.items || [];
   const total = list.data?.total || 0;
   const firstLoad = list.loading && !list.data;
+  const pageIds = items.map((o) => String(o.id));
 
   return (
     <div className="space-y-5">
@@ -140,8 +145,16 @@ export default function Organizations() {
       <ErrorAlert message={list.error && apiErrorDetails(list.error).messages.join(" ")} onRetry={list.reload} />
 
       <section className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
+        <SelectionBar
+          selection={selection}
+          pageIds={pageIds}
+          total={total}
+          noun="school"
+          loadAllIds={() => superAdminApi.ids("organizations", filters)}
+          onDelete={() => setBulkDeleting(true)}
+        />
         {firstLoad ? (
-          <TableSkeleton columns={7} label="Loading schools" />
+          <TableSkeleton columns={8} label="Loading schools" />
         ) : !items.length ? (
           <EmptyState icon={Building2} title={query || status ? "No schools match" : "No schools yet"}>
             {query || status ? "Try a different search." : "Add a school or invite one from Subscriptions."}
@@ -151,6 +164,9 @@ export default function Organizations() {
             <table className="w-full min-w-[860px] text-left text-sm">
               <thead className="bg-gray-50 text-xs font-medium uppercase tracking-wide text-gray-500">
                 <tr>
+                  <th scope="col" className="w-10 py-3 pl-5 pr-0">
+                    <SelectPageCheckbox selection={selection} pageIds={pageIds} label="Select all schools on this page" />
+                  </th>
                   <th scope="col" className="px-5 py-3">School</th>
                   <th scope="col" className="px-3 py-3 text-right">Students</th>
                   <th scope="col" className="px-3 py-3 text-right">Teachers</th>
@@ -165,7 +181,10 @@ export default function Organizations() {
                   const counts = orgCounts(org);
                   const sub = subscriptionOf(org, billingById);
                   return (
-                    <tr key={org.id} className="hover:bg-gray-50/60">
+                    <tr key={org.id} className={selection.has(org.id) ? "bg-blue-50/60" : "hover:bg-gray-50/60"}>
+                      <td className="w-10 py-3 pl-5 pr-0">
+                        <RowCheckbox selection={selection} id={org.id} label={`Select ${org.name}`} />
+                      </td>
                       <td className="px-5 py-3">
                         <Link to={`/admin-dashboard/organizations/${org.id}`} className="font-medium text-gray-900 hover:text-blue-700 hover:underline">
                           {org.name}
@@ -217,6 +236,19 @@ export default function Organizations() {
         />
       )}
       {actions.dialogs}
+      <BulkDeleteDialog
+        open={bulkDeleting}
+        resource="organizations"
+        ids={[...selection.ids]}
+        noun="school"
+        warning="Each school goes with its classes, subjects, exams, results and other records. Its people keep their accounts but lose their role there. Schools with payments or paid subscriptions, the platform's DEFAULT organization and any holding superadmins are kept."
+        onClose={() => setBulkDeleting(false)}
+        onDone={(done) => {
+          if (done.deleted.length) toast(`${done.deleted.length} school${done.deleted.length === 1 ? "" : "s"} deleted.`);
+          selection.set(done.skipped.map((s) => s.id));
+          reload();
+        }}
+      />
     </div>
   );
 }
