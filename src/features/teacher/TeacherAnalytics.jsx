@@ -74,7 +74,7 @@ export default function TeacherAnalytics() {
                     {subjects.map((row) => (
                       <tr key={row.subject_id}>
                         <th scope="row" className="px-3 py-2 text-left font-medium text-gray-900">{row.subject_name}</th>
-                        <td className="px-3 py-2 text-gray-700">{row.class_name}</td>
+                        <td className="px-3 py-2 text-gray-700">{row.class_name || "No class"}</td>
                         <td className="px-3 py-2 tabular-nums text-gray-700">{row.student_count}</td>
                         <td className="px-3 py-2 tabular-nums text-gray-900">{percent(row.attendance_rate)}</td>
                         <td className="px-3 py-2 tabular-nums text-gray-700">{percent(row.exams?.average_percentage)}</td>

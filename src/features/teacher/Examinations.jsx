@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Eye, FileQuestion, Plus, RefreshCw, Trash2 } from "lucide-react";
-import { useTeacherClasses, useTeacherExaminations } from "@/hooks/teacher";
+import { useTeacherExaminations, useTeacherSubjects } from "@/hooks/teacher";
+import { teacherSubjectLabel } from "@/hooks/teacher/teacherSubjects";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { CardGridSkeleton } from "@/components/ui/Skeleton";
 import CoursesComponent from "./components/CourseComponents";
@@ -22,8 +23,7 @@ const emptyForm = {
 
 export default function Examinations() {
   const examsApi = useTeacherExaminations();
-  const classesApi = useTeacherClasses();
-  const [subjects, setSubjects] = useState([]);
+  const { subjects, error: subjectsError } = useTeacherSubjects();
   const [showForm, setShowForm] = useState(false);
   const [editingExam, setEditingExam] = useState(null);
   const [form, setForm] = useState(emptyForm);
@@ -32,25 +32,6 @@ export default function Examinations() {
   const [deletingExam, setDeletingExam] = useState(null);
   const [examPage, setExamPage] = useState(1);
   const [submissionPage, setSubmissionPage] = useState(1);
-
-  const fetchSubjects = classesApi.fetchSubjects;
-  useEffect(() => {
-    let cancelled = false;
-    const loadSubjects = async () => {
-      const responses = await Promise.all(classesApi.classes.map(async (classItem) => {
-        try {
-          const response = await fetchSubjects(classItem.id);
-          const list = response?.subjects ?? response?.results ?? response;
-          return Array.isArray(list) ? list : [];
-        } catch {
-          return [];
-        }
-      }));
-      if (!cancelled) setSubjects(responses.flat());
-    };
-    if (classesApi.classes.length) loadSubjects();
-    return () => { cancelled = true; };
-  }, [classesApi.classes, fetchSubjects]);
 
   const openForm = (exam = null) => {
     setEditingExam(exam);
@@ -114,7 +95,7 @@ export default function Examinations() {
           </div>
         </div>
         {examsApi.error && <p role="alert" className="mb-4 rounded-lg bg-red-50 p-3 text-red-700">{examsApi.error.message}</p>}
-        {classesApi.error && <p role="alert" className="mb-4 rounded-lg bg-red-50 p-3 text-red-700">{classesApi.error.message}</p>}
+        {subjectsError && <p role="alert" className="mb-4 rounded-lg bg-red-50 p-3 text-red-700">{subjectsError.message}</p>}
         {examsApi.loading && <CardGridSkeleton count={4} label="Loading examinations" className="lg:grid-cols-2" />}
         {!examsApi.loading && !examsApi.examinations.length && <p className="rounded-lg bg-gray-50 p-6 text-center text-gray-600">No examinations found.</p>}
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -189,7 +170,7 @@ export default function Examinations() {
             <div className="flex items-center justify-between"><h3 className="text-xl font-semibold">{editingExam ? "Edit examination" : "Create examination"}</h3><button type="button" onClick={() => setShowForm(false)} className="text-gray-500">Close</button></div>
             <input required maxLength={200} placeholder="Title" value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} className="w-full rounded-lg border p-3" />
             <textarea placeholder="Description" value={form.description || ""} onChange={(event) => setForm({ ...form, description: event.target.value })} className="w-full rounded-lg border p-3" rows="2" />
-            <select required value={form.subject} onChange={(event) => setForm({ ...form, subject: event.target.value })} className="w-full rounded-lg border p-3"><option value="">Choose a subject</option>{subjects.map((subject) => <option key={subject.id} value={subject.id}>{subject.class_name || subject.classname || ""} {subject.name}</option>)}</select>
+            <label className="block text-sm">Subject<select required value={form.subject} onChange={(event) => setForm({ ...form, subject: event.target.value })} className="mt-1 w-full rounded-lg border p-3"><option value="">Choose a subject</option>{subjects.map((subject) => <option key={subject.id} value={subject.id}>{teacherSubjectLabel(subject)}</option>)}</select></label>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2"><label className="text-sm">Start time<input required type="datetime-local" value={form.start_time} onChange={(event) => setForm({ ...form, start_time: event.target.value })} className="mt-1 w-full rounded-lg border p-3" /></label><label className="text-sm">End time<input required type="datetime-local" value={form.end_time} onChange={(event) => setForm({ ...form, end_time: event.target.value })} className="mt-1 w-full rounded-lg border p-3" /></label></div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3"><label className="text-sm">Duration (min)<input type="number" min="0" value={form.duration_minutes} onChange={(event) => setForm({ ...form, duration_minutes: event.target.value })} className="mt-1 w-full rounded-lg border p-3" /></label><label className="text-sm">Total marks<input type="number" min="0" value={form.total_marks} onChange={(event) => setForm({ ...form, total_marks: event.target.value })} className="mt-1 w-full rounded-lg border p-3" /></label><label className="text-sm">Questions<input type="number" min="0" value={form.num_of_questions} onChange={(event) => setForm({ ...form, num_of_questions: event.target.value })} className="mt-1 w-full rounded-lg border p-3" /></label></div>
             <textarea placeholder="Instructions" value={form.instructions || ""} onChange={(event) => setForm({ ...form, instructions: event.target.value })} className="w-full rounded-lg border p-3" rows="3" />

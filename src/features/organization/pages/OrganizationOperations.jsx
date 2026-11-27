@@ -473,7 +473,7 @@ function FinancePanel() {
           showPagination={false}
           columns={[
             { key: "name", label: "Subject" },
-            { key: "class_name", label: "Class" },
+            { key: "class_name", label: "Class", render: (value) => value || "No class" },
             { key: "teacher_name", label: "Teacher" },
             { key: "description", label: "Description" },
             { key: "is_active", label: "Status", render: (value) => value === false ? "Inactive" : value === true ? "Active" : "—" }

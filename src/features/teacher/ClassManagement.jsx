@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { BookOpen, FilePlus2, Megaphone, Plus, RefreshCw, Users } from "lucide-react";
-import { useTeacherAnnouncements, useTeacherClasses } from "@/hooks/teacher";
+import { useTeacherAnnouncements, useTeacherClasses, useTeacherSubjects } from "@/hooks/teacher";
 import { useOrganization } from "@/context/OrganizationContext";
 import CoursesComponent from "./components/CourseComponents";
+import ClasslessSubjectsPanel from "./components/ClasslessSubjectsPanel";
 
 export default function ClassManagement() {
   const classesApi = useTeacherClasses();
   const announcementApi = useTeacherAnnouncements();
+  const subjectsApi = useTeacherSubjects();
   const { currentOrgId } = useOrganization();
   const [selectedClass, setSelectedClass] = useState(null);
   const [activeModal, setActiveModal] = useState(null);
@@ -150,6 +152,8 @@ export default function ClassManagement() {
           ))}
         </div>
       </section>
+
+      <ClasslessSubjectsPanel subjects={subjectsApi.subjects} fetchStudents={subjectsApi.fetchStudents} />
 
       {selectedClass && (
         <section className="space-y-5 rounded-xl bg-white p-5 shadow-sm">

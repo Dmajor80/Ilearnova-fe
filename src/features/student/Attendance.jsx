@@ -69,7 +69,7 @@ export default function Attendance() {
         setShown(PAGE);
         // Keep the subject list from the unfiltered view so choosing one doesn't empty it.
         if (!params.subject_id) {
-          setSubjects(attendanceBy(data.records || [], (r) => r.subject_id, (r) => `${r.subject_name} (${r.course_name})`));
+          setSubjects(attendanceBy(data.records || [], (r) => r.subject_id, (r) => (r.course_name ? `${r.subject_name} (${r.course_name})` : r.subject_name)));
         }
       })
       .catch((err) => active && setState({ loading: false, data: null, error: apiErrorDetails(err).messages.join(" ") }));
@@ -165,7 +165,7 @@ export default function Attendance() {
                         <tr key={`${r.date}-${r.subject_id}`}>
                           <td className="whitespace-nowrap px-3 py-2 text-gray-900">{dayLabel(r.date)}</td>
                           <td className="px-3 py-2 text-gray-900">{r.subject_name}</td>
-                          <td className="px-3 py-2 text-gray-600">{r.course_name}</td>
+                          <td className="px-3 py-2 text-gray-600">{r.course_name || "No class"}</td>
                           <td className="px-3 py-2">
                             <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS[r.status]?.pill || "bg-slate-100"}`}>
                               {STATUS[r.status]?.label || r.status}
