@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { CheckCheck, MailPlus, PauseCircle, Pencil, RefreshCw, RotateCcw, Search, Trash2, Upload, UserMinus } from "lucide-react";
+import { CheckCheck, KeyRound, MailPlus, PauseCircle, Pencil, RefreshCw, RotateCcw, Search, Trash2, Upload, UserMinus } from "lucide-react";
 import useSchoolMembers, { MEMBER_STATUSES } from "@/hooks/organization/useSchoolMembers";
 import useOrganizationClasses from "@/hooks/organization/useOrganizationClasses";
 import GenericModal from "./GenericModal";
 import ImportPeopleModal from "./ImportPeopleModal";
 import InviteModal, { SchoolCodeNote } from "./InviteModal";
+import TeacherPermissionsModal from "./TeacherPermissionsModal";
 import { TableSkeleton } from "@/components/ui/Skeleton";
 import ActionsMenu from "@/components/ui/ActionsMenu";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
@@ -60,6 +61,17 @@ const COPY = {
 
 const nameOf = (m) => m.full_name || m.email || "Unknown";
 
+/** Extra permissions the admin gave a teacher, as a small count badge. */
+function PermissionsBadge({ codes }) {
+  const count = codes?.length || 0;
+  if (!count) return null;
+  return (
+    <span className="ml-2 rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700">
+      {count} {count === 1 ? "permission" : "permissions"}
+    </span>
+  );
+}
+
 /** Add / edit form; students also get the school's classes to pick from. */
 function StudentForm(props) {
   const { classes } = useOrganizationClasses({ page: 1 });
@@ -92,6 +104,7 @@ export default function PeopleDirectory({ kind, refreshToken }) {
   const [editing, setEditing] = useState(null); // null, "new" or a member
   const [showImport, setShowImport] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
+  const [permissionsFor, setPermissionsFor] = useState(null);
   const [message, setMessage] = useState(null);
 
   const api = useSchoolMembers(kind, { status, search, page });
@@ -199,6 +212,13 @@ export default function PeopleDirectory({ kind, refreshToken }) {
       icon: RotateCcw,
       hidden: m.status !== "suspended",
       onSelect: () => act(() => api.reinstate(m), `${nameOf(m)} is back.`),
+    },
+    {
+      id: "permissions",
+      label: "Permissions…",
+      icon: KeyRound,
+      hidden: kind !== "teacher" || m.status === "pending",
+      onSelect: () => setPermissionsFor(m),
     },
     { id: "remove", label: "Remove from school…", icon: UserMinus, hidden: m.status === "pending", danger: true, onSelect: () => askRemove(m) },
     { id: "delete", label: "Delete permanently…", icon: Trash2, danger: true, separatorBefore: true, onSelect: () => setDeleting(m) },
@@ -324,7 +344,10 @@ export default function PeopleDirectory({ kind, refreshToken }) {
                   </td>
                   <td className="whitespace-nowrap px-3 py-3 font-medium text-gray-900">{nameOf(m)}</td>
                   <td className="hidden whitespace-nowrap px-3 py-3 text-gray-600 sm:table-cell">{m.email}</td>
-                  <td className="whitespace-nowrap px-3 py-3 text-gray-600">{copy.detail(m)}</td>
+                  <td className="whitespace-nowrap px-3 py-3 text-gray-600">
+                    {copy.detail(m)}
+                    {kind === "teacher" && <PermissionsBadge codes={m.permissions} />}
+                  </td>
                   <td className="px-3 py-3">
                     <span className={`rounded-full px-2 py-1 text-xs font-medium ${STATUS_TONE[m.status] || "bg-gray-100 text-gray-700"}`}>
                       {PILL_LABEL[m.status] || m.status}
@@ -406,6 +429,17 @@ export default function PeopleDirectory({ kind, refreshToken }) {
         />
       )}
       {showImport && <ImportPeopleModal kind={kind} onClose={() => setShowImport(false)} onImported={api.reload} />}
+      {permissionsFor && (
+        <TeacherPermissionsModal
+          teacher={permissionsFor}
+          onClose={() => setPermissionsFor(null)}
+          onSaved={() => {
+            setMessage({ type: "success", text: `Saved permissions for ${nameOf(permissionsFor)}.` });
+            setPermissionsFor(null);
+            reload();
+          }}
+        />
+      )}
       <InviteModal open={showInvite} role={kind} onClose={() => setShowInvite(false)} />
     </div>
   );

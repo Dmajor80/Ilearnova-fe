@@ -1,26 +1,30 @@
 import { useState } from "react";
-import { BookOpen, Users } from "lucide-react";
+import { BookOpen, UserPlus, Users } from "lucide-react";
+import {
+  enrolTeacherSubjectStudents,
+  getTeacherSubjectStudents,
+  unenrolTeacherSubjectStudents
+} from "@/api/teacher";
+import TeacherStudentsModal from "./TeacherStudentsModal";
 
 /**
- * Read-only view of the teacher's subjects that have no class (e.g. French
- * taken by a few pupils from several classes) and who is enrolled in each.
- * Enrolment itself is managed by the school admin.
+ * The teacher's subjects that have no class (e.g. French taken by a few
+ * pupils from several classes) and who is enrolled in each. Enrolment is the
+ * school admin's, unless the admin let this teacher manage it (``canEnrol``,
+ * the manage_subject_students permission): then "Enrol students" opens a
+ * picker. ``onEnrolmentChanged`` fires when that picker closes.
  */
-export default function ClasslessSubjectsPanel({ subjects, fetchStudents }) {
+export default function ClasslessSubjectsPanel({ subjects, fetchStudents, canEnrol = false, onEnrolmentChanged }) {
   const [openId, setOpenId] = useState("");
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [enrolling, setEnrolling] = useState(null);
 
   const classless = subjects.filter((subject) => !subject.class_id);
   if (!classless.length) return null;
 
-  const toggle = async (subject) => {
-    if (openId === subject.id) {
-      setOpenId("");
-      return;
-    }
-    setOpenId(subject.id);
+  const loadStudents = async (subject) => {
     setStudents([]);
     setFailed(false);
     setLoading(true);
@@ -33,11 +37,28 @@ export default function ClasslessSubjectsPanel({ subjects, fetchStudents }) {
     }
   };
 
+  const toggle = async (subject) => {
+    if (openId === subject.id) {
+      setOpenId("");
+      return;
+    }
+    setOpenId(subject.id);
+    await loadStudents(subject);
+  };
+
+  const closeEnrolment = () => {
+    const subject = enrolling;
+    setEnrolling(null);
+    onEnrolmentChanged?.();
+    if (subject && openId === subject.id) loadStudents(subject);
+  };
+
   return (
     <section aria-labelledby="classless-subjects-heading" className="rounded-xl bg-white p-5 shadow-sm">
       <h2 id="classless-subjects-heading" className="text-xl font-bold text-gray-900">Subjects without a class</h2>
       <p className="mb-4 text-sm text-gray-600">
-        Only the students enrolled in these subjects take them. Your school admin manages who is enrolled.
+        Only the students enrolled in these subjects take them.{" "}
+        {canEnrol ? "You can enrol students in them." : "Your school admin manages who is enrolled."}
       </p>
       <div className="space-y-3">
         {classless.map((subject) => (
@@ -57,6 +78,15 @@ export default function ClasslessSubjectsPanel({ subjects, fetchStudents }) {
             </button>
             {openId === subject.id && (
               <div className="border-t p-4">
+                {canEnrol && (
+                  <button
+                    type="button"
+                    onClick={() => setEnrolling(subject)}
+                    className="mb-3 inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
+                  >
+                    <UserPlus size={15} /> Enrol students
+                  </button>
+                )}
                 {loading ? <p className="text-sm text-gray-500">Loading students...</p>
                   : failed ? <p role="alert" className="text-sm text-red-700">Could not load the students. Try again.</p>
                     : students.length ? (
@@ -74,6 +104,15 @@ export default function ClasslessSubjectsPanel({ subjects, fetchStudents }) {
           </div>
         ))}
       </div>
+      {enrolling && (
+        <TeacherStudentsModal
+          title={`Students in ${enrolling.name}`}
+          load={() => getTeacherSubjectStudents(enrolling.id)}
+          add={(ids) => enrolTeacherSubjectStudents(enrolling.id, ids)}
+          remove={(ids) => unenrolTeacherSubjectStudents(enrolling.id, ids)}
+          onClose={closeEnrolment}
+        />
+      )}
     </section>
   );
 }

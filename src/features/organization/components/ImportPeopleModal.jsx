@@ -51,9 +51,12 @@ const upload = async (base, file, { dryRun, sendEmail }) => {
  * Add many students or teachers (``kind``) from a spreadsheet. Step 1 checks
  * the file (nothing is created) and lists who would be added or what is
  * wrong, by sheet line; step 2 imports. All rows are added or none are.
+ * ``base`` points it at other endpoints with the same shape (a permitted
+ * teacher's ``/api/teacher/students``); ``note`` adds a line under the
+ * columns (e.g. which classes rows may name).
  */
-export default function ImportPeopleModal({ kind = "student", onClose, onImported }) {
-  const config = KINDS[kind];
+export default function ImportPeopleModal({ kind = "student", base, note, onClose, onImported }) {
+  const config = { ...KINDS[kind], ...(base ? { base } : {}) };
   const plural = `${kind}s`;
   const Kind = kind[0].toUpperCase() + kind.slice(1);
   const titleId = `import-${plural}-title`;
@@ -119,6 +122,7 @@ export default function ImportPeopleModal({ kind = "student", onClose, onImporte
           <div>
             <h3 id={titleId} className="text-lg font-semibold text-gray-900">Import {plural}</h3>
             <p className="mt-1 text-sm text-gray-600">{config.columns}</p>
+            {note && <p className="mt-1 text-sm font-medium text-gray-700">{note}</p>}
           </div>
           <button type="button" onClick={onClose} aria-label="Close" className="rounded-lg p-1 text-gray-500 hover:bg-gray-100">
             <X className="h-5 w-5" />

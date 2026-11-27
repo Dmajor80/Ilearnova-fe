@@ -371,3 +371,18 @@ export const schoolSubjectsApi = {
   unenroll: async (id, studentId) =>
     body(await http.del(`${SUBJECTS}${encodeURIComponent(id)}/students/${encodeURIComponent(studentId)}/`, { auth: true })),
 };
+
+// Extra permissions one teacher has for their own classes and subjects:
+// { permissions: [codes], available: [{ code, label, description }] }.
+export const teacherPermissionsApi = {
+  get: async (teacherId) =>
+    body(await http.get(`/api/admin/school/teachers/${encodeURIComponent(teacherId)}/permissions/`, { auth: true })),
+  set: async (teacherId, permissions) =>
+    body(
+      await http.put(
+        `/api/admin/school/teachers/${encodeURIComponent(teacherId)}/permissions/`,
+        { permissions },
+        { auth: true }
+      )
+    ),
+};
