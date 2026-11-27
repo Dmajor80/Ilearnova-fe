@@ -4,7 +4,7 @@ import { CheckCheck, MailPlus, PauseCircle, Pencil, RefreshCw, RotateCcw, Search
 import useSchoolMembers, { MEMBER_STATUSES } from "@/hooks/organization/useSchoolMembers";
 import useOrganizationClasses from "@/hooks/organization/useOrganizationClasses";
 import GenericModal from "./GenericModal";
-import ImportStudentsModal from "./ImportStudentsModal";
+import ImportPeopleModal from "./ImportPeopleModal";
 import InviteModal, { SchoolCodeNote } from "./InviteModal";
 import { TableSkeleton } from "@/components/ui/Skeleton";
 import ActionsMenu from "@/components/ui/ActionsMenu";
@@ -221,11 +221,9 @@ export default function PeopleDirectory({ kind, refreshToken }) {
           <button type="button" onClick={() => setShowInvite(true)} className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border px-4 py-2 text-gray-700 hover:bg-gray-50">
             <MailPlus className="h-4 w-4" aria-hidden="true" /> Invite
           </button>
-          {kind === "student" && (
-            <button type="button" onClick={() => setShowImport(true)} className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border px-4 py-2 text-gray-700 hover:bg-gray-50">
-              <Upload className="h-4 w-4" /> Import
-            </button>
-          )}
+          <button type="button" onClick={() => setShowImport(true)} className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border px-4 py-2 text-gray-700 hover:bg-gray-50">
+            <Upload className="h-4 w-4" /> Import
+          </button>
           <button type="button" onClick={api.reload} aria-label={`Refresh ${copy.title.toLowerCase()}`} className="min-h-[44px] rounded-lg border px-3 text-gray-700 hover:bg-gray-50">
             <RefreshCw className="h-4 w-4" />
           </button>
@@ -405,7 +403,7 @@ export default function PeopleDirectory({ kind, refreshToken }) {
           onClose={() => setEditing(null)}
         />
       )}
-      {showImport && <ImportStudentsModal onClose={() => setShowImport(false)} onImported={api.reload} />}
+      {showImport && <ImportPeopleModal kind={kind} onClose={() => setShowImport(false)} onImported={api.reload} />}
       <InviteModal open={showInvite} role={kind} onClose={() => setShowInvite(false)} />
     </div>
   );
