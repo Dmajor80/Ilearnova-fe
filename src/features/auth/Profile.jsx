@@ -4,10 +4,28 @@ import { http } from "@/api/baseClient";
 import { useOrganization } from "@/context/OrganizationContext";
 import useNotification from "@/hooks/useNotification";
 import StudentIdCard from "@/features/student/StudentIdCard";
+import { FormSkeleton, Skeleton, SkeletonRegion } from "@/components/ui/Skeleton";
+
+/** "Organization Admin at Greenfield Academy", or just the role name. */
+function roleLabel(user) {
+  const pr = user.primary_role;
+  const name = pr?.role?.name || pr?.role?.code || user.role;
+  if (!name) return "Member";
+  const org = pr?.organization?.name;
+  return org ? `${name} at ${org}` : name;
+}
+
+/** "20 Nov 2026", or null when the account has no valid join date. */
+function joinedLabel(user) {
+  const raw = user.date_joined || user.created_at;
+  if (!raw) return null;
+  const d = new Date(raw);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+}
 
 const Profile = ({ embedded = false }) => {
-  const { user, refreshUser } = useOrganization();
-  const [loading, setLoading] = useState(false);
+  const { user, loading, refreshUser } = useOrganization();
   const [updating, setUpdating] = useState(false);
   const [formData, setFormData] = useState({
     first_name: "",
@@ -100,10 +118,25 @@ const Profile = ({ embedded = false }) => {
     }
   };
 
-  if (loading) {
+  if (loading && !user) {
     return (
-      <div className={`${embedded ? "py-16" : "min-h-screen"} flex items-center justify-center`}>
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className={embedded ? "" : "min-h-screen bg-gray-50 py-8"}>
+        <SkeletonRegion
+          label="Loading your profile"
+          className={embedded ? "max-w-4xl mx-auto" : "max-w-4xl mx-auto px-4 sm:px-6 lg:px-8"}
+        >
+          <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+            <div className="flex items-center gap-4 bg-slate-100 px-6 py-8">
+              <Skeleton className="h-20 w-20 shrink-0 rounded-full" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-6 w-48 max-w-full" />
+                <Skeleton className="h-4 w-56 max-w-full" />
+                <Skeleton className="h-3 w-64 max-w-full" />
+              </div>
+            </div>
+            <FormSkeleton fields={8} label="Loading profile form" className="p-6" />
+          </div>
+        </SkeletonRegion>
       </div>
     );
   }
@@ -128,8 +161,8 @@ const Profile = ({ embedded = false }) => {
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           {/* Header */}
           <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-8">
-            <div className="flex items-center space-x-4">
-              <div className="relative">
+            <div className="flex items-center gap-4">
+              <div className="relative shrink-0">
                 <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center">
                   {user.profile_picture ? (
                     <img
@@ -145,13 +178,14 @@ const Profile = ({ embedded = false }) => {
                   <Camera className="w-4 h-4 text-gray-600" />
                 </button>
               </div>
-              <div className="text-white">
-                <h1 className="text-2xl font-bold">
+              <div className="text-white min-w-0 flex-1">
+                <h1 className="text-2xl font-bold break-words">
                   {formData.first_name} {formData.last_name}
                 </h1>
-                <p className="text-blue-100">{formData.email}</p>
-                <p className="text-sm text-blue-100 mt-1">
-                  Role: {user.role || "User"} • Joined: {new Date(user.created_at).toLocaleDateString()}
+                <p className="text-blue-100 break-all">{formData.email}</p>
+                <p className="text-sm text-blue-100 mt-1 break-words">
+                  Role: {roleLabel(user)}
+                  {joinedLabel(user) && <> • Joined: {joinedLabel(user)}</>}
                 </p>
               </div>
             </div>
