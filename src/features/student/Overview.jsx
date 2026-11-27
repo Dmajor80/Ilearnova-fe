@@ -29,9 +29,7 @@ import pro from "../../assets/progress (2).png";
 import assignment from "../../assets/assignment.png";
 import mask from "../../assets/Mask group.png";
 import bell from "../../assets/bell.png";
-import chemistry from "../../assets/chemistry.png";
 import LiveCalendar from "./LiveCalendar";
-import StudentsTable from "./StudentsTable";
 import { useStudentAnnouncements, useStudentAssignments } from "@/hooks/student";
 const Overview = () => {
   const studentAnnouncements = useStudentAnnouncements();
@@ -46,7 +44,6 @@ const Overview = () => {
   const [showProfile, setShowProfile] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const chartRef = useRef(null);
 
   useEffect(() => {
     if (!attendance.loading) {
@@ -85,8 +82,6 @@ const Overview = () => {
     };
   }, [isProfileDropdownOpen]);
 
-  // Sample data
-  const chartData = [35, 42, 55, 60, 48, 72];
   // const activityData = [
   //   { name: "Team Meeting", time: "9:00 AM", color: "blue" },
   //   { name: "Project Review", time: "11:30 AM", color: "amber" },
@@ -109,13 +104,13 @@ const Overview = () => {
   };
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-6 md:p-8">
+    <div className="w-full min-w-0 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 md:p-8">
       {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-8 mb-8 text-white shadow-2xl">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-2">Welcome back{firstName ? `, ${firstName}` : ""}! 👋</h2>
-            <p className="text-blue-100 text-lg">Ready to continue your learning journey? Let's explore what's new today.</p>
+      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-5 md:p-8 mb-6 md:mb-8 text-white shadow-2xl">
+        <div className="flex items-center justify-between gap-4">
+          <div className="min-w-0">
+            <h2 className="break-words text-2xl md:text-4xl font-bold mb-2">Welcome back{firstName ? `, ${firstName}` : ""}! 👋</h2>
+            <p className="text-blue-100 text-base md:text-lg">Ready to continue your learning journey? Let's explore what's new today.</p>
           </div>
           <div className="hidden md:block">
             <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
@@ -152,9 +147,9 @@ const Overview = () => {
       )}
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
         <div
-          className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-200 hover:scale-[1.02] cursor-pointer"
+          className="bg-white p-4 md:p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-200 hover:scale-[1.02] cursor-pointer"
           style={fadeInUp(0.2)}
         >
           <div className="flex justify-between items-center mb-4">
@@ -170,13 +165,10 @@ const Overview = () => {
             </div>
           </div>
           <p className="text-slate-600 font-semibold text-lg">Courses Completed</p>
-          <div className="mt-3 w-full bg-slate-200 rounded-full h-1">
-            <div className="bg-gradient-to-r from-green-500 to-emerald-500 h-1 rounded-full" style={{ width: '100%' }}></div>
-          </div>
         </div>
 
         <div
-          className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-200 hover:scale-[1.02] cursor-pointer"
+          className="bg-white p-4 md:p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-200 hover:scale-[1.02] cursor-pointer"
           style={fadeInUp(0.3)}
         >
           <div className="flex justify-between items-center mb-4">
@@ -192,13 +184,10 @@ const Overview = () => {
             </div>
           </div>
           <p className="text-slate-600 font-semibold text-lg">Courses In Progress</p>
-          <div className="mt-3 w-full bg-slate-200 rounded-full h-1">
-            <div className="bg-gradient-to-r from-blue-500 to-indigo-500 h-1 rounded-full" style={{ width: '75%' }}></div>
-          </div>
         </div>
 
         <div
-          className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-200 hover:scale-[1.02] cursor-pointer"
+          className="bg-white p-4 md:p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-200 hover:scale-[1.02] cursor-pointer"
           style={fadeInUp(0.4)}
         >
           <div className="flex justify-between items-center mb-4">
@@ -214,17 +203,14 @@ const Overview = () => {
             </div>
           </div>
           <p className="text-slate-600 font-semibold text-lg">Pending Assignments</p>
-          <div className="mt-3 w-full bg-slate-200 rounded-full h-1">
-            <div className="bg-gradient-to-r from-orange-500 to-red-500 h-1 rounded-full" style={{ width: '60%' }}></div>
-          </div>
         </div>
       </div>
 
       {/* Calendar and Activities */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-        <div className="col-span-2" style={fadeInUp(0.6)}>
-          <div className="bg-white p-6 rounded-xl shadow-lg mb-6 border border-slate-200">
-            <div className="flex justify-between items-center mb-6">
+        <div className="min-w-0 md:col-span-2" style={fadeInUp(0.6)}>
+          <div className="bg-white p-4 md:p-6 rounded-xl shadow-lg mb-6 border border-slate-200">
+            <div className="flex flex-wrap justify-between items-center gap-2 mb-6">
               <h3 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
                 Courses In Progress
               </h3>
@@ -241,21 +227,21 @@ const Overview = () => {
               <ListSkeleton rows={3} label="Loading courses in progress" />
             ) : courseSummary.inProgress.length ? courseSummary.inProgress.map((course, index) => (
               <div key={course.course_id} className="mb-4 bg-gradient-to-r from-slate-50 to-blue-50 p-4 rounded-xl border border-slate-200 hover:shadow-md transition-all duration-200 hover:scale-[1.01]">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl shadow-md">
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className="hidden sm:block p-3 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl shadow-md">
                     <img src={completed} alt="Course icon" className="w-6 h-6" />
                   </div>
-                  <div className="flex-1">
-                    <div className="flex justify-between items-center mb-3">
-                      <div>
-                        <h4 className="text-lg font-bold text-slate-800 mb-1">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex justify-between items-center gap-3 mb-3">
+                      <div className="min-w-0">
+                        <h4 className="break-words text-lg font-bold text-slate-800 mb-1">
                           {course.course_name}
                         </h4>
                         <p className="text-slate-600 font-medium">
                           {course.completed_lessons} of {course.total_lessons} lessons done
                         </p>
                       </div>
-                      <div className="text-right">
+                      <div className="shrink-0 text-right">
                         <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                           {Math.round(course.completion_percentage)}%
                         </span>
@@ -290,8 +276,8 @@ const Overview = () => {
             )}
           </div>
           {/* notification */}
-          <div className="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
-            <div className="flex justify-between items-center mb-6">
+          <div className="bg-white p-4 md:p-6 rounded-xl shadow-lg border border-slate-200">
+            <div className="flex flex-wrap justify-between items-center gap-2 mb-6">
               <h3 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
                 Notifications
               </h3>
@@ -322,11 +308,11 @@ const Overview = () => {
                         <div className="p-2 bg-white rounded-lg shadow-md">
                           <img src={bell} alt="" className="w-5 h-5" />
                         </div>
-                        <div className="flex-1">
-                          <p className="text-lg font-bold text-slate-800 mb-2">
+                        <div className="min-w-0 flex-1">
+                          <p className="break-words text-lg font-bold text-slate-800 mb-2">
                             {announcement.title}
                           </p>
-                          <p className="text-slate-600 font-medium leading-relaxed">
+                          <p className="break-words text-slate-600 font-medium leading-relaxed">
                             {announcement.message}
                           </p>
                           {announcement.created_at && (
@@ -346,163 +332,14 @@ const Overview = () => {
           </div>
           {/* end of notification */}
         </div>
-        <div className="col-span-1" style={fadeInUp(0.5)}>
+        <div className="min-w-0" style={fadeInUp(0.5)}>
           {/* calender */}
 
           <LiveCalendar />
           {/* end of calender */}
 
-          {/* class */}
-          <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] w-full h-auto">
-            <div className="flex flex-col lg:flex-row items-center gap-[2rem] w-fit">
-              <img src={chemistry} alt="" />
-              <div>
-                <p
-                  className="text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px] font-medium "
-                  style={{ color: "rgba(51, 51, 51, 1)" }}
-                >
-                  Chemistry Practical
-                </p>
-                <p
-                  className="lg:text-[14px] font-normal "
-                  style={{ color: "rgba(105, 105, 105, 1)" }}
-                >
-                  October 22nd - 26th .10:00 am
-                </p>
-              </div>
-            </div>
-          </div>
-          {/* end of class */}
-
-          {/* class */}
-          <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] w-full h-auto">
-            <div className="flex flex-col lg:flex-row items-center gap-[2rem] w-fit">
-              <img src={chemistry} alt="" />
-              <div>
-                <p
-                  className="text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px] font-medium "
-                  style={{ color: "rgba(51, 51, 51, 1)" }}
-                >
-                  Chemistry Practical
-                </p>
-                <p
-                  className="lg:text-[14px] font-normal "
-                  style={{ color: "rgba(105, 105, 105, 1)" }}
-                >
-                  October 22nd - 26th .10:00 am
-                </p>
-              </div>
-            </div>
-          </div>
-          {/* end of class */}
-
-          {/* class */}
-          <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] w-full h-auto">
-            <div className="flex flex-col lg:flex-row items-center gap-[2rem] w-fit">
-              <img src={chemistry} alt="" />
-              <div>
-                <p
-                  className="text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px] font-medium "
-                  style={{ color: "rgba(51, 51, 51, 1)" }}
-                >
-                  Chemistry Practical
-                </p>
-                <p
-                  className="lg:text-[14px] font-normal "
-                  style={{ color: "rgba(105, 105, 105, 1)" }}
-                >
-                  October 22nd - 26th .10:00 am
-                </p>
-              </div>
-            </div>
-          </div>
-          {/* end of class */}
-
-          {/* certification */}
-          <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] w-full">
-            <div className="flex items-center justify-between">
-              <p className="text-[12px] sm:lg:text-[14px] md:text-[16px] lg:text-[18px] font-medium">
-                Certification
-              </p>
-              <p
-                className="text-[12px] font-normal"
-                style={{ color: "rgba(18, 40, 164, 1)" }}
-              >
-                View
-              </p>
-            </div>
-            {/* class */}
-            <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] w-full h-auto">
-              <div className="flex flex-col lg:flex-row items-center gap-[2rem] w-fit">
-                <img src={chemistry} alt="" />
-                <div>
-                  <p
-                    className="text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px] font-medium "
-                    style={{ color: "rgba(51, 51, 51, 1)" }}
-                  >
-                    Chemistry Practical
-                  </p>
-                  <p
-                    className="lg:text-[14px] font-normal "
-                    style={{ color: "rgba(105, 105, 105, 1)" }}
-                  >
-                    October 22nd - 26th .10:00 am
-                  </p>
-                </div>
-              </div>
-            </div>
-            {/* end of class */}
-            {/* class */}
-            <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] w-full h-auto">
-              <div className="flex flex-col lg:flex-row items-center gap-[2rem] w-fit">
-                <img src={chemistry} alt="" />
-                <div>
-                  <p
-                    className="text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px] font-medium "
-                    style={{ color: "rgba(51, 51, 51, 1)" }}
-                  >
-                    Chemistry Practical
-                  </p>
-                  <p
-                    className="lg:text-[14px] font-normal "
-                    style={{ color: "rgba(105, 105, 105, 1)" }}
-                  >
-                    October 22nd - 26th .10:00 am
-                  </p>
-                </div>
-              </div>
-            </div>
-            {/* end of class */}
-            {/* class */}
-            <div className="bg-white p-6 rounded-xl shadow-sm mb-[1.5rem] w-full h-auto">
-              <div className="flex flex-col lg:flex-row items-center gap-[2rem] w-fit">
-                <img src={chemistry} alt="" />
-                <div>
-                  <p
-                    className="text-[12px] sm:text-[14px] md:text-[16px] lg:text-[18px] font-medium "
-                    style={{ color: "rgba(51, 51, 51, 1)" }}
-                  >
-                    Chemistry Practical
-                  </p>
-                  <p
-                    className="lg:text-[14px] font-normal "
-                    style={{ color: "rgba(105, 105, 105, 1)" }}
-                  >
-                    October 22nd - 26th .10:00 am
-                  </p>
-                </div>
-              </div>
-            </div>
-            {/* end of class */}
-          </div>
-          {/* certification */}
-        </div>
-      </div>
-
-      {/* Performance Charts */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
         <div
-          className="bg-white p-4 rounded-xl shadow-sm"
+          className="bg-white p-4 rounded-xl shadow-sm mt-6"
           style={fadeInUp(0.7)}
         >
           <div className="flex justify-between items-center mb-4">
@@ -540,52 +377,12 @@ const Overview = () => {
           </div>
           )}
         </div>
-
-        <div
-          className="col-span-2 bg-white p-4 rounded-xl shadow-sm"
-          style={fadeInUp(0.8)}
-        >
-          <div className="flex justify-between items-center mb-4">
-            <h3 className=" text-[12px] lg:text-[16px] font-semibold text-gray-800">
-              Weekly Progress
-            </h3>
-            <button className="text-[12px] lg:text-[16px] text-gray-500 flex items-center">
-              Last 7 Days <ChevronDown size={14} />
-            </button>
-          </div>
-
-          <div className="h-52" ref={chartRef}>
-            <div className="flex h-40 items-end justify-between gap-2">
-              {chartData.map((value, index) => (
-                <div
-                  key={index}
-                  className="relative flex-1 flex flex-col items-center"
-                >
-                  <div
-                    className="bg-green-500 w-full rounded-t-md"
-                    style={{
-                      height: `${value}%`,
-                      maxHeight: "100%",
-                      animation: `growHeight 1s ease-out ${
-                        1 + index * 0.1
-                      }s forwards`,
-                      transform: "scaleY(0)",
-                      transformOrigin: "bottom",
-                    }}
-                  ></div>
-                  <span className="text-xs text-gray-500 mt-1">
-                    Day {index + 1}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
 
       {/* Online exam scores: graded CBT exams, latest term first */}
-      <section className="bg-white p-6 rounded-xl shadow-sm mb-6" style={fadeInUp(0.9)} aria-labelledby="exam-scores-heading">
-        <div className="flex justify-between items-center mb-6">
+      <section className="bg-white p-4 md:p-6 rounded-xl shadow-sm mb-6" style={fadeInUp(0.9)} aria-labelledby="exam-scores-heading">
+        <div className="flex flex-wrap justify-between items-center gap-2 mb-6">
           <h3 id="exam-scores-heading" className="text-[18px] lg:text-[20px] font-semibold text-gray-800">
             Online exam scores
           </h3>
@@ -639,8 +436,8 @@ const Overview = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {latestTerm.subjects.map((subject) => (
                 <div key={subject.subject_id} className="bg-gray-50 p-4 rounded-lg">
-                  <div className="flex justify-between items-start mb-2">
-                    <h5 className="font-medium text-gray-800">{subject.subject_name}</h5>
+                  <div className="flex justify-between items-start gap-3 mb-2">
+                    <h5 className="min-w-0 break-words font-medium text-gray-800">{subject.subject_name}</h5>
                     <div className="text-right">
                       <div className="text-lg font-bold text-blue-600">{subject.average_percentage}%</div>
                       <div className="text-xs text-gray-500">Grade {subject.grade}</div>
@@ -666,8 +463,6 @@ const Overview = () => {
         )}
       </section>
 
-      {/* Team Performance */}
-      <StudentsTable />
 
       <style>{`
         @keyframes fadeInUp {

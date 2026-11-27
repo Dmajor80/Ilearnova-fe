@@ -41,7 +41,7 @@ function ResendLink({ reason }) {
           </button>
           <p className="text-center text-sm text-gray-600">
             Already set up?{" "}
-            <Link to="/login" className="font-medium text-blue-600 hover:underline">
+            <Link to="/login" className="py-3 font-medium text-blue-600 hover:underline">
               Log in
             </Link>
           </p>

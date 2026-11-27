@@ -146,7 +146,7 @@ export default function TeacherDashboard() {
       }`}>
         <div className="flex h-16 items-center justify-between border-b px-5">
           <span className="text-xl font-bold tracking-wide text-blue-900">ILEARNOVA</span>
-          <button type="button" className="rounded p-2 text-gray-500 lg:hidden" onClick={() => setMobileMenuOpen(false)} aria-label="Close menu">
+          <button type="button" className="inline-flex h-10 w-10 items-center justify-center rounded text-gray-500 lg:hidden" onClick={() => setMobileMenuOpen(false)} aria-label="Close menu">
             <X size={20} />
           </button>
         </div>
@@ -179,25 +179,25 @@ export default function TeacherDashboard() {
 
       <div className="min-w-0 flex-1 lg:ml-64">
         <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b bg-white px-4 sm:px-6">
-          <div className="flex items-center gap-3">
-            <button type="button" onClick={() => setMobileMenuOpen(true)} aria-label="Open menu" className="rounded-lg p-2 text-gray-600 hover:bg-gray-100 lg:hidden">
+          <div className="flex min-w-0 items-center gap-3">
+            <button type="button" onClick={() => setMobileMenuOpen(true)} aria-label="Open menu" className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-gray-600 hover:bg-gray-100 lg:hidden">
               <Menu size={20} />
             </button>
-            <div>
-              <p className="text-xs text-gray-500">Teacher workspace</p>
-              <h1 className="text-lg font-semibold text-gray-900">{tabOf(TEACHER_GROUPS, activeTab)?.label}</h1>
+            <div className="min-w-0">
+              <p className="truncate text-xs text-gray-500">Teacher workspace</p>
+              <h1 className="truncate text-lg font-semibold text-gray-900">{tabOf(TEACHER_GROUPS, activeTab)?.label}</h1>
             </div>
           </div>
-          <div className="relative">
+          <div className="relative shrink-0">
             <button
               type="button"
               aria-haspopup="menu"
               aria-expanded={profileMenuOpen}
               onClick={() => setProfileMenuOpen((open) => !open)}
-              className="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+              className="flex min-h-10 items-center gap-2 rounded-lg border px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 sm:py-2"
             >
               <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-50 text-blue-700"><User size={16} /></span>
-              <span className="hidden sm:inline">Profile</span>
+              <span className="sr-only sm:not-sr-only">Profile</span>
               <ChevronDown size={16} />
             </button>
             {profileMenuOpen && (

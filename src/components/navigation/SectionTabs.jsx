@@ -5,7 +5,7 @@
 export default function SectionTabs({ group, activeId, onSelect, className = "" }) {
   if (!group || group.tabs.length < 2) return null;
   return (
-    <nav aria-label={group.label} className={`flex gap-1 overflow-x-auto overflow-y-hidden border-b border-slate-200 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${className}`}>
+    <nav aria-label={group.label} className={`flex max-w-full gap-1 overflow-x-auto overflow-y-hidden border-b border-slate-200 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${className}`}>
       {group.tabs.map((tab) => {
         const active = tab.id === activeId;
         return (
@@ -14,7 +14,7 @@ export default function SectionTabs({ group, activeId, onSelect, className = "" 
             type="button"
             aria-current={active ? "page" : undefined}
             onClick={() => onSelect(tab.id)}
-            className={`whitespace-nowrap px-4 py-2 text-sm font-medium transition ${
+            className={`min-h-10 shrink-0 whitespace-nowrap px-4 py-2 text-sm font-medium transition ${
               active
                 ? "text-blue-700 shadow-[inset_0_-2px_0_0_var(--color-blue-600)]"
                 : "text-slate-600 hover:text-slate-900 hover:shadow-[inset_0_-2px_0_0_var(--color-slate-300)]"

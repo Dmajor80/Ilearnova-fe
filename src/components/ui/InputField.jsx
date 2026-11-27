@@ -20,16 +20,17 @@ export default React.memo(function InputField({
   handleSubmit,
   showToggle = false,
   disabled = false,
+  className = "",
 }) {
   const [showPassword, setShowPassword] = useState(false);
   const isPassword = showToggle || type === "password";
 
   return (
-    <div className="mb-6 group">
+    <div className={`group ${className}`}>
       {label && (
         <label
           htmlFor={name}
-          className={`block text-sm font-semibold mb-3 transition-colors ${
+          className={`block text-sm font-semibold mb-1.5 sm:mb-3 transition-colors ${
             darkMode
               ? "text-gray-200 group-focus-within:text-blue-400"
               : "text-gray-700 group-focus-within:text-blue-600"
@@ -80,7 +81,7 @@ export default React.memo(function InputField({
           }}
           className={`w-full ${Icon ? "pl-12" : "pl-4"} ${
             isPassword ? "pr-12" : "pr-4"
-          } py-4 rounded-2xl border-2 text-sm font-medium transition-all duration-300 ease-in-out outline-none ${
+          } py-3 sm:py-4 rounded-xl sm:rounded-2xl border-2 text-base sm:text-sm font-medium transition-all duration-300 ease-in-out outline-none ${
             darkMode
               ? "bg-gray-800/50 text-white border-gray-600 placeholder-gray-400 focus:bg-gray-800 focus:border-blue-500 focus:shadow-lg focus:shadow-blue-500/20"
               : "bg-white text-gray-800 border-gray-200 placeholder-gray-500 focus:bg-blue-50/30 focus:border-blue-500 focus:shadow-lg focus:shadow-blue-500/20"
@@ -93,7 +94,7 @@ export default React.memo(function InputField({
           <button
             type="button"
             onClick={() => setShowPassword((v) => !v)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-1 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="absolute right-1 sm:right-4 top-1/2 -translate-y-1/2 z-10 p-2.5 sm:p-1 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
             tabIndex={-1}
             aria-label={showPassword ? "Hide password" : "Show password"}
           >

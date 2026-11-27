@@ -10,22 +10,22 @@ export const fieldClass =
 
 export function AuthShell({ title, subtitle, children }) {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 px-4 py-12">
+    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 px-4 py-8 sm:py-12">
       <div className="mx-auto max-w-lg">
-        <div className="mb-8 text-center">
-          <h1 className="mb-2 text-3xl font-bold text-gray-900 sm:text-4xl">{title}</h1>
+        <div className="mb-6 text-center sm:mb-8">
+          <h1 className="mb-2 text-2xl font-bold leading-tight text-gray-900 sm:text-4xl">{title}</h1>
           {subtitle && <p className="text-gray-600">{subtitle}</p>}
         </div>
-        <div className="rounded-3xl border border-white/50 bg-white/80 p-6 shadow-xl sm:p-8">{children}</div>
+        <div className="rounded-2xl border border-white/50 bg-white/80 p-5 shadow-xl sm:rounded-3xl sm:p-8">{children}</div>
       </div>
     </main>
   );
 }
 
-export function TextField({ id, label, icon: Icon, error, hint, ...props }) {
+export function TextField({ id, label, icon: Icon, error, hint, className, ...props }) {
   return (
     <div>
-      <label htmlFor={id} className="mb-2 block text-sm font-medium text-gray-700">
+      <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-gray-700 sm:mb-2">
         {label}
       </label>
       <div className="relative">
@@ -33,7 +33,7 @@ export function TextField({ id, label, icon: Icon, error, hint, ...props }) {
         <input
           id={id}
           name={id}
-          className={`${fieldClass} ${Icon ? "" : "pl-4"} ${error ? "border-red-500" : ""}`}
+          className={className || `${fieldClass} ${Icon ? "" : "pl-4"} ${error ? "border-red-500" : ""}`}
           aria-invalid={error ? "true" : undefined}
           aria-describedby={error || hint ? `${id}_note` : undefined}
           {...props}
@@ -120,7 +120,7 @@ export default function RegisterSchool() {
             ) : (
               <>
                 Didn&apos;t get it?{" "}
-                <button type="button" onClick={resend} className="font-medium text-blue-600 hover:underline">
+                <button type="button" onClick={resend} className="py-3 font-medium text-blue-600 hover:underline">
                   Send it again
                 </button>
               </>
@@ -179,11 +179,11 @@ export default function RegisterSchool() {
         </button>
         <p className="text-center text-sm text-gray-600">
           Joining a school as a teacher, student or parent?{" "}
-          <Link to="/signup" className="font-medium text-blue-600 hover:underline">
+          <Link to="/signup" className="py-3 font-medium text-blue-600 hover:underline">
             Sign up here
           </Link>
           . Already registered?{" "}
-          <Link to="/login" className="font-medium text-blue-600 hover:underline">
+          <Link to="/login" className="py-3 font-medium text-blue-600 hover:underline">
             Log in
           </Link>
           .

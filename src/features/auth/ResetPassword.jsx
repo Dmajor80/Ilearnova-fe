@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Lock, AlertCircle, Check, X, Eye, EyeOff, ArrowLeft, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { http } from "../../api/baseClient";
 import { resetPassword } from "../../api/authApi";
 
 
@@ -19,10 +18,10 @@ const PasswordField = React.memo(function PasswordField({
 }) {
   const [show, setShow] = useState(false);
   return (
-    <div className="mb-6 group">
+    <div className="mb-5 sm:mb-6 group">
       <label
         htmlFor={name}
-        className={`block text-sm font-semibold mb-3 transition-colors ${
+        className={`block text-sm font-semibold mb-1.5 sm:mb-3 transition-colors ${
           darkMode
             ? "text-gray-200 group-focus-within:text-blue-400"
             : "text-gray-700 group-focus-within:text-blue-600"
@@ -54,7 +53,7 @@ const PasswordField = React.memo(function PasswordField({
               onEnter();
             }
           }}
-          className={`w-full pl-12 pr-12 py-4 rounded-2xl border-2 text-sm font-medium transition-all duration-300 ease-in-out outline-none ${
+          className={`w-full pl-12 pr-12 py-3 sm:py-4 rounded-xl sm:rounded-2xl border-2 text-base sm:text-sm font-medium transition-all duration-300 ease-in-out outline-none ${
             darkMode
               ? "bg-gray-800/50 text-white border-gray-600 placeholder-gray-400 focus:bg-gray-800 focus:border-blue-500 focus:shadow-lg focus:shadow-blue-500/20"
               : "bg-white text-gray-800 border-gray-200 placeholder-gray-500 focus:bg-blue-50/30 focus:border-blue-500 focus:shadow-lg focus:shadow-blue-500/20"
@@ -66,7 +65,7 @@ const PasswordField = React.memo(function PasswordField({
         <button
           type="button"
           onClick={() => setShow((v) => !v)}
-          className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 p-1 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
+          className="absolute right-1 sm:right-4 top-1/2 transform -translate-y-1/2 z-10 p-2.5 sm:p-1 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
           tabIndex={-1}
           aria-label={show ? "Hide password" : "Show password"}
         >
@@ -187,7 +186,7 @@ export default function ResetPassword() {
       {/* Notification */}
       {showNotification && (
         <div
-          className={`fixed top-6 right-6 z-50 max-w-md p-4 rounded-2xl shadow-2xl transform transition-all duration-500 ${
+          className={`fixed top-4 left-4 right-4 sm:top-6 sm:left-auto sm:right-6 z-50 sm:max-w-md p-4 rounded-2xl shadow-2xl transform transition-all duration-500 ${
             notificationType === "success"
               ? "bg-green-500 text-white"
               : notificationType === "error"
@@ -214,7 +213,7 @@ export default function ResetPassword() {
             </div>
             <button
               onClick={() => setShowNotification(false)}
-              className="ml-2 flex-shrink-0 opacity-70 hover:opacity-100 transition-opacity"
+              className="-my-2 -mr-2 ml-1 p-2 sm:m-0 sm:ml-2 sm:p-0 flex-shrink-0 opacity-70 hover:opacity-100 transition-opacity"
               aria-label="Close notification"
             >
               <X className="w-5 h-5" />
@@ -223,11 +222,11 @@ export default function ResetPassword() {
         </div>
       )}
 
-      <div className="w-full px-6 sm:px-8 lg:px-12 py-12">
+      <div className="w-full px-5 sm:px-8 lg:px-12 py-6 sm:py-12">
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className={`inline-flex items-center px-6 py-3 rounded-xl font-medium transition-all duration-300 mb-8 ${
+          className={`inline-flex items-center -ml-3 sm:ml-0 px-3 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium transition-all duration-300 mb-4 sm:mb-8 ${
             darkMode
               ? "text-gray-300 hover:text-white hover:bg-gray-800"
               : "text-gray-600 hover:text-gray-900 hover:bg-white"
@@ -237,11 +236,11 @@ export default function ResetPassword() {
           Back
         </button>
 
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 xl:gap-20 items-center min-h-[560px]">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 xl:gap-20 items-center sm:min-h-[560px]">
           <div className="w-full max-w-md mx-auto lg:mx-0">
-            <div className="text-center lg:text-left mb-10">
+            <div className="text-center lg:text-left mb-6 sm:mb-10">
               <h1
-                className={`text-4xl sm:text-5xl font-bold ${
+                className={`text-3xl sm:text-5xl font-bold ${
                   darkMode
                     ? "text-white"
                     : "bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent"
@@ -255,7 +254,7 @@ export default function ResetPassword() {
             </div>
 
             <div
-              className={`p-8 rounded-3xl backdrop-blur-lg transition-all duration-500 ${
+              className={`p-5 sm:p-8 rounded-2xl sm:rounded-3xl backdrop-blur-lg transition-all duration-500 ${
                 darkMode
                   ? "bg-gray-800/30 border border-gray-700/50"
                   : "bg-white/70 border border-white/50 shadow-xl"
@@ -291,7 +290,7 @@ export default function ResetPassword() {
                 type="button"
                 onClick={submitReset}
                 disabled={loading}
-                className="w-full px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-cyan-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-4 focus:ring-blue-300 shadow-lg"
+                className="w-full px-8 py-3.5 sm:py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl sm:rounded-2xl hover:from-blue-700 hover:to-cyan-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-4 focus:ring-blue-300 shadow-lg"
               >
                 {loading ? (
                   <span className="inline-flex items-center gap-2">

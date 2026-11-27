@@ -111,7 +111,7 @@ export default function MyFees() {
       {loading ? (
         <p className="py-8 text-center text-gray-500">Loading fees…</p>
       ) : fees.length ? (
-        <div className="overflow-x-auto">
+        <div className="relative overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200 text-sm">
             <thead className="bg-gray-50">
               <tr>

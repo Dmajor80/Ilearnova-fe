@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function LiveCalendar() {
@@ -164,15 +164,19 @@ export default function LiveCalendar() {
         </h3>
         <div className="flex items-center space-x-2">
           <button
+            type="button"
             onClick={prevMonth}
-            className="p-1 rounded-full hover:bg-gray-100"
+            aria-label="Previous month"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-100 md:h-auto md:w-auto md:p-1"
           >
             <ChevronLeft size={16} className="text-gray-600" />
           </button>
           <Calendar size={16} className="text-gray-600" />
           <button
+            type="button"
             onClick={nextMonth}
-            className="p-1 rounded-full hover:bg-gray-100"
+            aria-label="Next month"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full hover:bg-gray-100 md:h-auto md:w-auto md:p-1"
           >
             <ChevronRight size={16} className="text-gray-600" />
           </button>

@@ -60,25 +60,25 @@ export default function ParentDashboard() {
         isMobileMenuOpen={isMobileMenuOpen}
         setIsMobileMenuOpen={setIsMobileMenuOpen}
       />
-      <div className="flex-1 md:ml-64">
+      <div className="min-w-0 flex-1 md:ml-64">
         <ParentHeader
           activeTab={activeTab}
           setIsMobileMenuOpen={setIsMobileMenuOpen}
           dashboardData={dashboardData}
         />
-        <main className="m-4 mt-0 flex-1 p-6 md:m-6 md:mt-0 md:p-8">
+        <main className="m-4 mt-0 flex-1 px-0 py-6 md:m-6 md:mt-0 md:p-8">
           <SectionTabs group={groupOf(PARENT_GROUPS, activeTab)} activeId={activeTab} onSelect={setActiveTab} className="mb-6" />
           {(activeTab === "dashboard" || activeTab === "children") && (
             <div className="space-y-6">
               {activeTab === "dashboard" && (
                 <>
-                  <div className="rounded-xl bg-gradient-to-r from-blue-600 to-blue-800 p-8 text-white shadow-lg">
+                  <div className="rounded-xl bg-gradient-to-r from-blue-600 to-blue-800 p-5 text-white shadow-lg md:p-8">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h2 className="mb-2 text-3xl font-bold">
+                        <h2 className="mb-2 break-words text-2xl font-bold md:text-3xl">
                           Welcome back, {dashboardData?.user?.first_name || "Parent"}!
                         </h2>
-                        <p className="text-lg text-blue-100">
+                        <p className="text-base text-blue-100 md:text-lg">
                           Here&apos;s an overview of your children&apos;s academic progress and activities.
                         </p>
                       </div>
@@ -88,9 +88,9 @@ export default function ParentDashboard() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-                    <div className="space-y-8 lg:col-span-2">
-                      <section className="rounded-xl bg-white p-6 shadow-lg">
+                  <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-3">
+                    <div className="min-w-0 space-y-6 md:space-y-8 lg:col-span-2">
+                      <section className="rounded-xl bg-white p-4 shadow-lg md:p-6">
                         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                           <div>
                             <h3 className="text-xl font-semibold text-gray-800">Progress overview</h3>
@@ -140,12 +140,12 @@ export default function ParentDashboard() {
                         )}
                       </section>
                     </div>
-                    <div className="space-y-8">
-                      <section className="rounded-xl bg-white p-6 shadow-lg">
+                    <div className="min-w-0 space-y-6 md:space-y-8">
+                      <section className="rounded-xl bg-white p-4 shadow-lg md:p-6">
                         <h3 className="mb-4 text-xl font-semibold text-gray-800">From the school</h3>
                         <LatestAnnouncements onSeeAll={() => setActiveTab("announcement")} />
                       </section>
-                      <section className="rounded-xl bg-white p-6 shadow-lg">
+                      <section className="rounded-xl bg-white p-4 shadow-lg md:p-6">
                         <h3 className="mb-4 text-xl font-semibold text-gray-800">Quick links</h3>
                         <div className="grid grid-cols-2 gap-3">
                           {QUICK_LINKS.map((link) => (
@@ -209,7 +209,7 @@ export function ProgressSummary({ progress }) {
   }
   return (
     <div className="space-y-6">
-      <dl className="grid grid-cols-3 gap-3">
+      <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div className="rounded-lg bg-blue-50 p-4">
           <dt className="text-sm text-slate-600">Attendance</dt>
           <dd className="mt-1 text-2xl font-bold text-slate-900">{pct(present, total)}%</dd>
@@ -230,12 +230,12 @@ export function ProgressSummary({ progress }) {
             {subjects.map((row) => {
               const value = pct(attended(row), counted(row));
               return (
-                <li key={row.subject_name} className="grid grid-cols-[minmax(6rem,10rem)_1fr_auto] items-center gap-3 text-sm">
+                <li key={row.subject_name} className="grid grid-cols-[minmax(4rem,10rem)_1fr_auto] items-center gap-2 text-sm sm:gap-3">
                   <span className="truncate text-slate-700">{row.subject_name}</span>
                   <span className="h-2.5 overflow-hidden rounded-full bg-slate-100" aria-hidden="true">
                     <span className="block h-full rounded-full bg-blue-600" style={{ width: `${value}%` }} />
                   </span>
-                  <span className="w-28 text-right tabular-nums text-slate-900">
+                  <span className="text-right tabular-nums text-slate-900 sm:w-28">
                     {value}% <span className="text-slate-500">({attended(row)}/{counted(row)})</span>
                   </span>
                 </li>
@@ -249,9 +249,9 @@ export function ProgressSummary({ progress }) {
           <h4 className="mb-2 font-semibold text-slate-800">Online exams</h4>
           <ul className="divide-y text-sm">
             {exams.map((exam) => (
-              <li key={exam.exam} className="flex justify-between py-2">
-                <span className="text-slate-700">{exam.title}</span>
-                <span className="tabular-nums text-slate-900">{exam.score}/{exam.total_marks}</span>
+              <li key={exam.exam} className="flex justify-between gap-3 py-2">
+                <span className="min-w-0 break-words text-slate-700">{exam.title}</span>
+                <span className="shrink-0 tabular-nums text-slate-900">{exam.score}/{exam.total_marks}</span>
               </li>
             ))}
           </ul>
