@@ -1,8 +1,10 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { getTokens } from "../api/auth";
+import { AUTH_CHANGED_EVENT, getTokens } from "../api/auth";
 import { http } from "../api/baseClient";
 
 const OrganizationContext = createContext(null);
+
+const AUTH_STORAGE_KEYS = ["user_data", "auth_access", "auth_refresh"];
 
 function readUserDataFromStorage() {
   try {
@@ -40,17 +42,20 @@ export function OrganizationProvider({ children }) {
   const [currentOrgId, setCurrentOrgId] = useState(null);
   const [user, setUser] = useState(null);
 
-  // Initialize from user_data
+  // Load the signed-in account from storage, and again whenever it changes
+  // (log in / log out happen without a page reload, or in another tab).
   useEffect(() => {
     let cancelled = false;
 
     function init() {
+      if (cancelled) return;
       const userData = readUserDataFromStorage();
 
       if (!userData) {
-        if (!cancelled) {
-          setLoading(false);
-        }
+        setUser(null);
+        setOrgs([]);
+        setCurrentOrgId(null);
+        setLoading(false);
         return;
       }
 
@@ -62,38 +67,37 @@ export function OrganizationProvider({ children }) {
         userOrgs = userData.orgs;
       }
 
-    
-      const selectedOrgId = userData?.selectedOrgId || null;
-
-      let initialOrgId = selectedOrgId;
-      if (!initialOrgId) {
-        if (userOrgs.length === 1) {
-          const firstOrg = userOrgs[0];
-          initialOrgId = firstOrg?.organization?.id ||
-                        firstOrg?.id ||
-                        (typeof firstOrg === 'string' ? firstOrg : null);
-        } else if (userOrgs.length > 1) {
-          // For now, auto-select the first one if user has multiple orgs
-          const firstOrg = userOrgs[0];
-          initialOrgId = firstOrg?.organization?.id ||
-                        firstOrg?.id ||
-                        (typeof firstOrg === 'string' ? firstOrg : null);
-        }
+      let initialOrgId = userData?.selectedOrgId || null;
+      if (!initialOrgId && userOrgs.length > 0) {
+        // Auto-select the first org (the only one, or the first of several)
+        const firstOrg = userOrgs[0];
+        initialOrgId =
+          firstOrg?.organization?.id ||
+          firstOrg?.id ||
+          (typeof firstOrg === "string" ? firstOrg : null);
       }
 
+      setUser(userData);
+      setOrgs(userOrgs);
+      setCurrentOrgId(initialOrgId || null);
+      setLoading(false);
+    }
 
-      if (!cancelled) {
-        setUser(userData);
-        setOrgs(userOrgs);
-        setCurrentOrgId(initialOrgId || null);
-        setLoading(false);
+    function onStorage(event) {
+      // event.key is null when another tab cleared the whole storage
+      if (event.key === null || AUTH_STORAGE_KEYS.includes(event.key)) {
+        init();
       }
     }
 
     init();
+    window.addEventListener(AUTH_CHANGED_EVENT, init);
+    window.addEventListener("storage", onStorage);
 
     return () => {
       cancelled = true;
+      window.removeEventListener(AUTH_CHANGED_EVENT, init);
+      window.removeEventListener("storage", onStorage);
     };
   }, []);
 

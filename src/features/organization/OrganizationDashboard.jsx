@@ -141,6 +141,14 @@ const OrganizationDashboard = () => {
                       }
                     }}
                     aria-current={isActive ? "page" : undefined}
+                    // A one-page group whose page has its own name says both
+                    // ("Settings: My profile"), so it isn't confused with the
+                    // header's gear button, also named "Settings".
+                    aria-label={
+                      item.tabs.length === 1 && item.tabs[0].label !== item.label
+                        ? `${item.label}: ${item.tabs[0].label}`
+                        : undefined
+                    }
                     className={`w-full flex items-center px-4 py-3 text-left rounded-xl transition-all duration-200 min-h-[48px] group ${
                       isActive
                         ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg transform scale-[1.02] border border-blue-500"
@@ -189,34 +197,39 @@ const OrganizationDashboard = () => {
         </div>
       </div>
 
-      <div className="flex-1 md:ml-64">
+      <div className="flex-1 min-w-0 overflow-x-hidden md:ml-64">
         {/* Header Section */}
-        <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 m-4 md:m-6 mb-0 border border-slate-200">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4 md:space-x-6">
+        <div className="bg-white rounded-xl shadow-lg p-4 md:p-8 m-4 md:m-6 mb-0 border border-slate-200">
+          <div className="flex items-center justify-between gap-2 md:gap-4">
+            <div className="flex min-w-0 items-center gap-2 md:gap-6">
               <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 md:hidden border border-slate-200"
+                className="shrink-0 p-2 md:p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 md:hidden border border-slate-200"
               >
                 <Menu className="w-5 h-5 text-slate-600" />
               </button>
-              <div>
-                <p className="text-slate-500 text-sm mb-2 font-medium">{schoolName || "Organization"} / Dashboard</p>
-                <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent capitalize">
+              <div className="min-w-0">
+                <p className="truncate text-slate-500 text-xs md:text-sm mb-1 md:mb-2 font-medium">{schoolName || "Organization"} / Dashboard</p>
+                <h1 className="truncate text-xl md:text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent capitalize">
                   {tabOf(GROUPS, activeTab)?.label || "Organization"}
                 </h1>
               </div>
             </div>
-            <div className="flex items-center space-x-3 md:space-x-4">
+            <div className="flex shrink-0 items-center gap-2 md:gap-4">
               <button
                 onClick={() => navigate("/organization-dashboard/alerts")}
                 aria-label={alertsLoading ? "Open alerts" : `Open alerts (${totalNotifications} notifications)`}
-                className="p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 border border-slate-200 group relative"
+                className="p-2 md:p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 border border-slate-200 group relative"
               >
                 <Bell className="w-5 h-5 text-slate-600 group-hover:text-blue-600 transition-colors" />
                 {totalNotifications > 0 && <span className="absolute -top-1 -right-1 min-w-5 rounded-full border border-white bg-red-500 px-1 text-center text-xs text-white">{totalNotifications > 99 ? "99+" : totalNotifications}</span>}
               </button>
-              <button className="p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 border border-slate-200 group">
+              <button
+                type="button"
+                aria-label="Settings"
+                onClick={() => navigate(PROFILE_PATH)}
+                className="p-2 md:p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 border border-slate-200 group"
+              >
                 <Settings className="w-5 h-5 text-slate-600 group-hover:text-blue-600 transition-colors" />
               </button>
 
@@ -224,11 +237,11 @@ const OrganizationDashboard = () => {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                  className="flex items-center space-x-3 p-2 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 border border-slate-200"
+                  className="flex items-center gap-1 md:gap-3 p-1 md:p-2 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 border border-slate-200"
                   aria-haspopup="true"
                   aria-expanded={isProfileDropdownOpen}
                 >
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-blue-500 bg-blue-50 text-blue-600 shadow-md" aria-label="Profile">
+                  <span className="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-full border-2 border-blue-500 bg-blue-50 text-blue-600 shadow-md" aria-label="Profile">
                     <User className="h-5 w-5" />
                   </span>
                   <ChevronDown className="w-4 h-4 text-slate-600" />
