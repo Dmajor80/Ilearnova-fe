@@ -213,6 +213,7 @@ const AppContent = () => {
         <Route path="grading" element={<GradingPolicyPage />} />
         <Route path="billing" element={<BillingPage />} />
         <Route path="fees" element={<SchoolFeesPage />} />
+        <Route path="profile" element={<Profile embedded />} />
         <Route path="analytics" element={<OrganizationAnalytics />} />
         <Route path="reports" element={<OrganizationReports />} />
         <Route path="alerts" element={<OrganizationAlerts />} />

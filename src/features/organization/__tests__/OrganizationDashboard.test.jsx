@@ -113,3 +113,23 @@ describe("OrganizationDashboard navigation", () => {
     expect(screen.getByText("Subscription extended.")).toBeTruthy();
   });
 });
+
+// Bug: "Edit Profile" sent school admins to the bare /profile page, outside
+// the dashboard (no sidebar, no way back), and there was no
+// /organization-dashboard/profile.
+describe("OrganizationDashboard profile", () => {
+  it("opens the admin's profile inside the dashboard", () => {
+    show("/organization-dashboard/overview");
+    fireEvent.click(screen.getByLabelText("Profile").closest("button"));
+    fireEvent.click(screen.getByRole("button", { name: /edit profile/i }));
+    expect(screen.getByTestId("where").textContent).toBe("/organization-dashboard/profile");
+    expect(sidebar()).toBeTruthy(); // still in the dashboard layout
+  });
+
+  it("keeps the profile reachable while the school is locked", () => {
+    subscription.status = { mode: "billing_only" };
+    show("/organization-dashboard/profile");
+    expect(screen.queryByText("Your subscription has expired")).toBeNull();
+    expect(screen.getByTestId("where").textContent).toBe("/organization-dashboard/profile");
+  });
+});

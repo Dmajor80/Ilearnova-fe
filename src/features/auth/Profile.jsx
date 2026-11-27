@@ -5,7 +5,7 @@ import { useOrganization } from "@/context/OrganizationContext";
 import useNotification from "@/hooks/useNotification";
 import StudentIdCard from "@/features/student/StudentIdCard";
 
-const Profile = () => {
+const Profile = ({ embedded = false }) => {
   const { user, refreshUser } = useOrganization();
   const [loading, setLoading] = useState(false);
   const [updating, setUpdating] = useState(false);
@@ -40,9 +40,6 @@ const Profile = () => {
         country: profile.country || user.country || "",
       });
     }
-
-  console.log(user)
-
   }, [user]);
 
   const handleInputChange = (e) => {
@@ -112,7 +109,7 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className={`${embedded ? "py-16" : "min-h-screen"} flex items-center justify-center`}>
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
@@ -121,7 +118,7 @@ const Profile = () => {
   if (!user) {
     console.error("Profile component: No user data available to load profile.");
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className={`${embedded ? "py-16" : "min-h-screen"} flex items-center justify-center`}>
         <div className="text-center">
           <User className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">No user data</h3>
@@ -133,8 +130,8 @@ const Profile = () => {
 
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className={embedded ? "" : "min-h-screen bg-gray-50 py-8"}>
+      <div className={embedded ? "max-w-4xl mx-auto" : "max-w-4xl mx-auto px-4 sm:px-6 lg:px-8"}>
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           {/* Header */}
           <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-8">
