@@ -7,6 +7,35 @@
 body {
   font-family: "DM Sans", sans-serif;
 }
+
+/* Tailwind 4 gives buttons the arrow cursor; show the hand on anything
+   clickable so buttons and CTAs stand out. In the base layer, so a
+   cursor-* utility on an element still wins. */
+@layer base {
+  button,
+  [role="button"],
+  [role="menuitem"],
+  [role="tab"],
+  [role="option"],
+  [type="button"],
+  [type="submit"],
+  [type="reset"],
+  [type="checkbox"],
+  [type="radio"],
+  [type="file"]::file-selector-button,
+  select,
+  summary,
+  label[for] {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [aria-disabled="true"],
+  input:disabled,
+  select:disabled {
+    cursor: not-allowed;
+  }
+}
 .bg-gold {
   --tw-bg-opacity: 1;
   background-color: rgb(18 40 164 / var(--tw-bg-opacity));
