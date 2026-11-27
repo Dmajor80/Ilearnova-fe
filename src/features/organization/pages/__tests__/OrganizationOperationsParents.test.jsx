@@ -61,6 +61,14 @@ describe("Parents tab", () => {
     expect(within(row).getByText("2")).toBeTruthy(); // children
   });
 
+  // There is no parent import, so the shared people list must not offer one.
+  it("offers Invite but no Import for parents", async () => {
+    render(<MemoryRouter><OrganizationOperations /></MemoryRouter>);
+    await openRowMenu();
+    expect(screen.getByRole("button", { name: /^invite/i })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /^import/i })).toBeNull();
+  });
+
   it("suspends a parent", async () => {
     render(<MemoryRouter><OrganizationOperations /></MemoryRouter>);
     await openRowMenu();
