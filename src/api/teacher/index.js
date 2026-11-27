@@ -88,19 +88,17 @@ const TEACHER_CLASS_MATERIAL_FIELDS = new Set([
   "is_published"
 ]);
 
-const getTeacherClassMaterialBody = (materialData) => {
+const getTeacherClassMaterialBody = (materialData, fields = TEACHER_CLASS_MATERIAL_FIELDS) => {
   if (typeof FormData !== "undefined" && materialData instanceof FormData) {
     const body = new FormData();
     for (const [key, value] of materialData.entries()) {
-      if (TEACHER_CLASS_MATERIAL_FIELDS.has(key)) body.append(key, value);
+      if (fields.has(key)) body.append(key, value);
     }
     return body;
   }
 
   return Object.fromEntries(
-    Object.entries(materialData || {}).filter(([key]) =>
-      TEACHER_CLASS_MATERIAL_FIELDS.has(key)
-    )
+    Object.entries(materialData || {}).filter(([key]) => fields.has(key))
   );
 };
 
@@ -108,6 +106,22 @@ export const createTeacherClassMaterial = (classId, materialData) =>
   http.post(
     `${TEACHER_API}/classes/${resourceId(classId)}/materials/`,
     getTeacherClassMaterialBody(materialData),
+    { auth: true }
+  );
+
+const TEACHER_MATERIAL_FIELDS = new Set([...TEACHER_CLASS_MATERIAL_FIELDS, "subject", "class_obj"]);
+
+// Materials of the teacher's subjects (classless ones included) and classes
+// they lead. Filters: subject_id, class_id.
+export const getTeacherMaterials = (params = {}) =>
+  http.get(`${TEACHER_API}/materials/`, { auth: true, params });
+
+// A material for one of the teacher's subjects (`subject`) or a class
+// (`class_obj`). Files must be documents; a refusal answers {file: [reason]}.
+export const createTeacherMaterial = (materialData) =>
+  http.post(
+    `${TEACHER_API}/materials/`,
+    getTeacherClassMaterialBody(materialData, TEACHER_MATERIAL_FIELDS),
     { auth: true }
   );
 

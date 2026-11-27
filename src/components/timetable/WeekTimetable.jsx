@@ -1,5 +1,6 @@
 import { CalendarDays, ExternalLink } from "lucide-react";
 import { ListSkeleton } from "@/components/ui/Skeleton";
+import { slotClassName } from "./slotLabels";
 
 const formatTime = (value) => {
   const [h, m] = String(value || "").split(":");
@@ -10,7 +11,8 @@ const formatTime = (value) => {
 
 /**
  * A read-only week: one card per school day that has lessons, each lesson
- * with its time, subject, class, teacher and room. `days` is the
+ * with its time, subject, class ("No class" for a subject without one),
+ * teacher and room. `days` is the
  * `[{day_of_week, day_name, entries}]` list the timetable endpoints return.
  */
 export default function WeekTimetable({ days, loading, error, emptyText }) {
@@ -46,7 +48,7 @@ export default function WeekTimetable({ days, loading, error, emptyText }) {
                 <div className="min-w-0 text-sm">
                   <p className="font-semibold text-slate-900">{slot.subject_name || slot.course_name}</p>
                   <p className="text-slate-600">
-                    {[slot.subject_name && slot.course_name, slot.teacher_name, slot.room].filter(Boolean).join(" · ")}
+                    {[slot.subject_name && slotClassName(slot), slot.teacher_name, slot.room].filter(Boolean).join(" · ")}
                   </p>
                   {slot.meeting_link && (
                     <a

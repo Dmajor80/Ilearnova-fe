@@ -43,4 +43,17 @@ describe("Student timetable", () => {
     expect(await screen.findByText("No timetable yet")).toBeTruthy();
     expect(screen.queryByText(/Mathematics|Stephen Hill/)).toBeNull();
   });
+
+  it("shows a subject without a class as \"No class\"", async () => {
+    const days = [{
+      day_of_week: 1,
+      day_name: "Tuesday",
+      entries: [{ id: "f", start_time: "10:00:00", end_time: "11:00:00", subject_name: "French", course_id: null, course_name: null, teacher_name: "Mrs Okafor", room: "Room 4" }],
+    }];
+    http.get.mockResolvedValue({ success: true, data: { days } });
+    render(<Timetable />);
+    const tuesday = await screen.findByRole("region", { name: "Tuesday" });
+    expect(within(tuesday).getByText("French")).toBeTruthy();
+    expect(within(tuesday).getByText("No class · Mrs Okafor · Room 4")).toBeTruthy();
+  });
 });

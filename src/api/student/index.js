@@ -16,6 +16,16 @@ export const enrollStudentInClass = (classId) =>
 export const getStudentClassMaterials = (classId) =>
   http.get(`${STUDENT_API}/classes/${resourceId(classId)}/materials/`, { auth: true });
 
+// Every material the student may see: their classes' class-wide materials and
+// materials of subjects they take, classless ones included (class_name null).
+// Filters: subject_id, class_id.
+export const getStudentMaterials = (params = {}) =>
+  http.get(`${STUDENT_API}/materials/`, { auth: true, params });
+
+// The material's file, only for a student who may see it.
+export const downloadStudentMaterial = (materialId) =>
+  http.get(`${STUDENT_API}/materials/${resourceId(materialId)}/download/`, { auth: true, responseType: "blob" });
+
 export const getStudentClassSubjects = (classId) =>
   http.get(`${STUDENT_API}/classes/${resourceId(classId)}/subjects/`, { auth: true });
 
