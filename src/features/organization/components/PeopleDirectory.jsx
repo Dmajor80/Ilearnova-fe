@@ -1,12 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { CheckCheck, MailPlus, RefreshCw, Search, Upload } from "lucide-react";
+import { CheckCheck, MailPlus, PauseCircle, Pencil, RefreshCw, RotateCcw, Search, Trash2, Upload, UserMinus } from "lucide-react";
 import useSchoolMembers, { MEMBER_STATUSES } from "@/hooks/organization/useSchoolMembers";
 import useOrganizationClasses from "@/hooks/organization/useOrganizationClasses";
 import GenericModal from "./GenericModal";
-import ImportStudentsModal from "./ImportStudentsModal";
+import ImportPeopleModal from "./ImportPeopleModal";
 import InviteModal, { SchoolCodeNote } from "./InviteModal";
 import { TableSkeleton } from "@/components/ui/Skeleton";
+import ActionsMenu from "@/components/ui/ActionsMenu";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import DeleteDialog from "@/components/ui/DeleteDialog";
+import { storedSchoolName } from "@/lib/schoolCode";
 
 const PILL_LABEL = { all: "All", active: "Active", pending: "Pending", suspended: "Suspended" };
 const STATUS_TONE = {
@@ -40,6 +44,18 @@ const COPY = {
       suspended: "No suspended teachers.",
     },
   },
+  parent: {
+    title: "Parents",
+    blurb: "Parents and guardians in your school. Parents who joined with your school code wait under Pending until you verify them.",
+    detail: (m) => String(m.children_count ?? 0),
+    detailLabel: "Children",
+    empty: {
+      all: "No parents yet.",
+      active: "No active parents.",
+      pending: "No parents are waiting for verification.",
+      suspended: "No suspended parents.",
+    },
+  },
 };
 
 const nameOf = (m) => m.full_name || m.email || "Unknown";
@@ -50,33 +66,20 @@ function StudentForm(props) {
   return <GenericModal {...props} availableClasses={classes || []} />;
 }
 
-/** Confirm a suspend or reject before it happens. */
-function ConfirmDialog({ confirm, busy, onCancel, onConfirm }) {
-  if (!confirm) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <section role="dialog" aria-modal="true" aria-labelledby="people-confirm-title" className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl">
-        <h3 id="people-confirm-title" className="text-lg font-semibold text-gray-900">{confirm.title}</h3>
-        <p className="mt-2 text-sm text-gray-600">{confirm.body}</p>
-        <div className="mt-6 flex justify-end gap-3">
-          <button type="button" onClick={onCancel} className="rounded-lg border px-4 py-2 hover:bg-gray-50">Cancel</button>
-          <button type="button" disabled={busy} onClick={onConfirm} className="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700 disabled:opacity-50">
-            {confirm.action}
-          </button>
-        </div>
-      </section>
-    </div>
-  );
-}
-
 /**
- * A school's students or teachers in one list: status pills (all, active,
- * pending, suspended) with counts, search, and pages of 20. Pending people
- * are verified or rejected here; active ones can be suspended and
+ * A school's students, teachers or parents in one list: status pills (all,
+ * active, pending, suspended) with counts, search, and pages of 20. Pending
+ * people are verified or rejected here; active ones can be suspended and
  * reinstated later. The pill lives in the URL (?status=pending) so other
  * screens can link straight to it.
+ *
+ * Each row's menu also takes someone out of the school for good: "Remove
+ * from school" (their account and the school's records stay; they can be
+ * added again) or "Delete permanently" (only a mistaken account with no
+ * records; the API says why not, and offers removing instead).
+ * `refreshToken` reloads the list whenever it changes.
  */
-export default function PeopleDirectory({ kind }) {
+export default function PeopleDirectory({ kind, refreshToken }) {
   const copy = COPY[kind];
   const MemberForm = kind === "student" ? StudentForm : GenericModal;
   const [params, setParams] = useSearchParams();
@@ -85,12 +88,19 @@ export default function PeopleDirectory({ kind }) {
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState(() => new Set());
   const [confirm, setConfirm] = useState(null);
+  const [deleting, setDeleting] = useState(null);
   const [editing, setEditing] = useState(null); // null, "new" or a member
   const [showImport, setShowImport] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
   const [message, setMessage] = useState(null);
 
   const api = useSchoolMembers(kind, { status, search, page });
+  const { reload } = api;
+  const school = storedSchoolName();
+
+  useEffect(() => {
+    if (refreshToken) reload();
+  }, [refreshToken, reload]);
 
   // A new pill or search starts again from page one with nothing ticked.
   useEffect(() => {
@@ -142,28 +152,57 @@ export default function PeopleDirectory({ kind }) {
     if (ok) setEditing(null);
   };
 
+  /** The dialog shows a failure itself; success is reported on the page. */
   const runConfirmed = async () => {
-    const done = await act(confirm.run, confirm.success);
-    if (done) setConfirm(null);
+    setMessage(null);
+    const result = await confirm.run();
+    setMessage({ type: "success", text: confirm.success(result) });
   };
 
   const askSuspend = (m) =>
     setConfirm({
       title: `Suspend ${nameOf(m)}?`,
-      body: `They lose access to your school until you reinstate them. Their records stay, and their account still works for any other school.`,
+      message: `They lose access to your school until you reinstate them. Their records stay, and their account still works for any other school.`,
       action: "Suspend",
       run: () => api.suspend(m),
-      success: `${nameOf(m)} is suspended.`,
+      success: () => `${nameOf(m)} is suspended.`,
     });
 
   const askReject = (m) =>
     setConfirm({
       title: `Reject ${nameOf(m)}?`,
-      body: "They will not get access to your school. They can ask to join again later.",
+      message: "They will not get access to your school. They can ask to join again later.",
       action: "Reject",
       run: () => api.reject(m),
-      success: `Rejected ${nameOf(m)}.`,
+      success: () => `Rejected ${nameOf(m)}.`,
     });
+
+  const removedText = (m, result) => result?.message || `${nameOf(m)} was removed from ${school}.`;
+
+  const askRemove = (m) =>
+    setConfirm({
+      title: `Remove ${nameOf(m)} from the school?`,
+      message:
+        `Their account and the school's records are kept; they lose access to ${school}. You can add them again later.` +
+        (kind === "teacher" ? " They are also taken off the subjects and classes they teach here." : ""),
+      action: "Remove from school",
+      run: () => api.remove(m),
+      success: (result) => removedText(m, result),
+    });
+
+  const rowActions = (m) => [
+    { id: "edit", label: "Edit", icon: Pencil, hidden: m.status !== "active", onSelect: () => setEditing(m) },
+    { id: "suspend", label: "Suspend…", icon: PauseCircle, hidden: m.status !== "active", onSelect: () => askSuspend(m) },
+    {
+      id: "reinstate",
+      label: "Reinstate",
+      icon: RotateCcw,
+      hidden: m.status !== "suspended",
+      onSelect: () => act(() => api.reinstate(m), `${nameOf(m)} is back.`),
+    },
+    { id: "remove", label: "Remove from school…", icon: UserMinus, hidden: m.status === "pending", danger: true, onSelect: () => askRemove(m) },
+    { id: "delete", label: "Delete permanently…", icon: Trash2, danger: true, separatorBefore: true, onSelect: () => setDeleting(m) },
+  ];
 
   const { pages = 0, has_next: hasNext, has_prev: hasPrev } = api.pagination;
 
@@ -182,7 +221,7 @@ export default function PeopleDirectory({ kind }) {
           <button type="button" onClick={() => setShowInvite(true)} className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border px-4 py-2 text-gray-700 hover:bg-gray-50">
             <MailPlus className="h-4 w-4" aria-hidden="true" /> Invite
           </button>
-          {kind === "student" && (
+          {kind !== "parent" && (
             <button type="button" onClick={() => setShowImport(true)} className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border px-4 py-2 text-gray-700 hover:bg-gray-50">
               <Upload className="h-4 w-4" /> Import
             </button>
@@ -292,7 +331,7 @@ export default function PeopleDirectory({ kind }) {
                     </span>
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
-                    <div className="flex justify-end gap-3">
+                    <div className="flex items-center justify-end gap-3">
                       {m.status === "pending" && (
                         <>
                           <button type="button" disabled={api.mutating} onClick={() => act(() => api.verify(m), `Verified ${nameOf(m)}.`)} className="font-medium text-green-700 hover:underline disabled:opacity-50">
@@ -303,19 +342,7 @@ export default function PeopleDirectory({ kind }) {
                           </button>
                         </>
                       )}
-                      {m.status === "active" && (
-                        <>
-                          <button type="button" onClick={() => setEditing(m)} className="text-blue-700 hover:underline">Edit</button>
-                          <button type="button" disabled={api.mutating} onClick={() => askSuspend(m)} className="text-red-700 hover:underline disabled:opacity-50">
-                            Suspend
-                          </button>
-                        </>
-                      )}
-                      {m.status === "suspended" && (
-                        <button type="button" disabled={api.mutating} onClick={() => act(() => api.reinstate(m), `${nameOf(m)} is back.`)} className="font-medium text-green-700 hover:underline disabled:opacity-50">
-                          Reinstate
-                        </button>
-                      )}
+                      <ActionsMenu label={`Actions for ${nameOf(m)}`} items={rowActions(m)} />
                     </div>
                   </td>
                 </tr>
@@ -343,7 +370,32 @@ export default function PeopleDirectory({ kind }) {
         </nav>
       )}
 
-      <ConfirmDialog confirm={confirm} busy={api.mutating} onCancel={() => setConfirm(null)} onConfirm={runConfirmed} />
+      <ConfirmDialog
+        open={Boolean(confirm)}
+        title={confirm?.title}
+        message={confirm?.message}
+        confirmLabel={confirm?.action}
+        variant="danger"
+        onConfirm={runConfirmed}
+        onClose={() => setConfirm(null)}
+      />
+      {deleting && (
+        <DeleteDialog
+          open
+          title={`Delete ${nameOf(deleting)} permanently?`}
+          message={`Only for an account made by mistake, such as a duplicate sign-up, that belongs to ${school} alone and has no records here. To take someone out of the school and keep their records, remove them instead.`}
+          confirmText={nameOf(deleting)}
+          loadCheck={() => api.deleteCheck(deleting)}
+          onDelete={() => api.deletePermanently(deleting)}
+          onDeleted={() => setMessage({ type: "success", text: `${nameOf(deleting)} was deleted permanently.` })}
+          onDeactivate={async () => {
+            const result = await api.remove(deleting);
+            setMessage({ type: "success", text: removedText(deleting, result) });
+          }}
+          deactivateLabel="Remove from school instead"
+          onClose={() => setDeleting(null)}
+        />
+      )}
       {editing !== null && (
         <MemberForm
           item={editing === "new" ? null : editing}
@@ -353,7 +405,7 @@ export default function PeopleDirectory({ kind }) {
           onClose={() => setEditing(null)}
         />
       )}
-      {showImport && <ImportStudentsModal onClose={() => setShowImport(false)} onImported={api.reload} />}
+      {showImport && <ImportPeopleModal kind={kind} onClose={() => setShowImport(false)} onImported={api.reload} />}
       <InviteModal open={showInvite} role={kind} onClose={() => setShowInvite(false)} />
     </div>
   );

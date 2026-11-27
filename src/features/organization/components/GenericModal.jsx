@@ -22,6 +22,14 @@ const fieldGroups = {
     { name: "phone_number", label: "Phone number" },
     { name: "date_of_birth", label: "Date of birth", type: "date" }
   ],
+  parent: [
+    { name: "first_name", label: "First name" },
+    { name: "last_name", label: "Last name" },
+    { name: "email", label: "Email", type: "email", required: true },
+    { name: "phone_number", label: "Phone number" },
+    { name: "date_of_birth", label: "Date of birth", type: "date" },
+    { name: "address", label: "Address", type: "textarea" }
+  ],
   class: [
     { name: "name", label: "Class name", required: true },
     { name: "description", label: "Description", type: "textarea" },
@@ -39,7 +47,7 @@ const fieldGroups = {
 const GenericModal = ({ item, type, onSave, onClose, saving = false, availableClasses = [] }) => {
   const [form, setForm] = useState(() => {
     const initial = item ? { ...item } : {};
-    if (type === "student" || type === "teacher") {
+    if (type === "student" || type === "teacher" || type === "parent") {
       const [firstName = "", ...lastName] = String(
         initial.full_name || initial.name || ""
       ).split(" ");

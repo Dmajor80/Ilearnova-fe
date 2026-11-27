@@ -33,16 +33,32 @@ const show = (url = "/organization-dashboard/students") =>
     </MemoryRouter>
   );
 
+const ADMIN = {
+  id: "me",
+  roles: [{ role: { code: "org_admin" }, organization: { id: "o1", name: "Sunrise College", code: "SUN12345" } }],
+};
+
 beforeEach(() => {
+  window.localStorage.setItem("user_data", JSON.stringify(ADMIN));
   http.get.mockImplementation(respond);
   http.post.mockResolvedValue({ success: true, data: {} });
 });
 afterEach(() => {
   cleanup();
+  window.localStorage.clear();
   vi.clearAllMocks();
 });
 
 const lastParams = () => http.get.mock.calls.at(-1)[1].params;
+const rowOf = async (name) => (await screen.findByText(name)).closest("tr");
+const menuItems = (row) => {
+  fireEvent.click(within(row).getByRole("button", { name: /^Actions for/ }));
+  return screen.getAllByRole("menuitem").map((item) => item.textContent);
+};
+const choose = (row, label) => {
+  fireEvent.click(within(row).getByRole("button", { name: /^Actions for/ }));
+  fireEvent.click(screen.getByRole("menuitem", { name: label }));
+};
 
 describe("PeopleDirectory", () => {
   it("lists everyone with a count on each pill", async () => {
@@ -90,9 +106,8 @@ describe("PeopleDirectory", () => {
 
   it("asks before suspending, then suspends", async () => {
     show();
-    const row = (await screen.findByText("Ada Obi")).closest("tr");
-    fireEvent.click(within(row).getByRole("button", { name: "Suspend" }));
-    const dialog = screen.getByRole("dialog");
+    choose(await rowOf("Ada Obi"), "Suspend…");
+    const dialog = screen.getByRole("alertdialog");
     expect(dialog.textContent).toContain("Suspend Ada Obi?");
     fireEvent.click(within(dialog).getByRole("button", { name: "Suspend" }));
     await waitFor(() =>
@@ -103,8 +118,7 @@ describe("PeopleDirectory", () => {
 
   it("reinstates a suspended student", async () => {
     show("/organization-dashboard/students?status=suspended");
-    const row = (await screen.findByText("Efe Okon")).closest("tr");
-    fireEvent.click(within(row).getByRole("button", { name: "Reinstate" }));
+    choose(await rowOf("Efe Okon"), "Reinstate");
     await waitFor(() =>
       expect(http.post).toHaveBeenCalledWith("/api/admin/school/students/u-efe/reinstate/", {}, { auth: true })
     );
@@ -130,5 +144,102 @@ describe("PeopleDirectory", () => {
     const row = (await screen.findByText("Chidi Eze")).closest("tr");
     fireEvent.click(within(row).getByRole("button", { name: "Verify" }));
     expect(await screen.findByText("This student is already verified.")).toBeTruthy();
+  });
+});
+
+describe("taking someone out of the school", () => {
+  const CHECK_OK = { can_delete: true, reason: null, blockers: {}, related: { "school roles": 1 } };
+  const CHECK_BLOCKED = {
+    can_delete: false,
+    reason: "This account has records at the school (3 results, 2 submissions). Remove them from the school instead.",
+    blockers: { results: 3, submissions: 2 },
+    related: { "school roles": 1, results: 3, submissions: 2 },
+  };
+  const withCheck = (check) =>
+    http.get.mockImplementation((path, opts) =>
+      path.endsWith("/delete-check/") ? Promise.resolve(check) : respond(path, opts)
+    );
+
+  it("offers each status the actions that fit it", async () => {
+    show();
+    expect(menuItems(await rowOf("Ada Obi"))).toEqual(["Edit", "Suspend…", "Remove from school…", "Delete permanently…"]);
+    fireEvent.keyDown(screen.getByRole("menu"), { key: "Escape" });
+    expect(menuItems(await rowOf("Efe Okon"))).toEqual(["Reinstate", "Remove from school…", "Delete permanently…"]);
+    fireEvent.keyDown(screen.getByRole("menu"), { key: "Escape" });
+    // A pending sign-up keeps Verify / Reject on the row; a wrong one can be deleted.
+    const chidi = await rowOf("Chidi Eze");
+    expect(within(chidi).getByRole("button", { name: "Verify" })).toBeTruthy();
+    expect(menuItems(chidi)).toEqual(["Delete permanently…"]);
+  });
+
+  it("removes from the school after saying what is kept", async () => {
+    http.del.mockResolvedValue({ success: true, message: "Ada Obi was removed from Sunrise College." });
+    show();
+    choose(await rowOf("Ada Obi"), "Remove from school…");
+    const dialog = screen.getByRole("alertdialog");
+    expect(dialog.textContent).toContain("Remove Ada Obi from the school?");
+    expect(dialog.textContent).toContain(
+      "Their account and the school's records are kept; they lose access to Sunrise College. You can add them again later."
+    );
+    fireEvent.click(within(dialog).getByRole("button", { name: "Remove from school" }));
+    await waitFor(() =>
+      expect(http.del).toHaveBeenCalledWith("/api/admin/school/students/u-ada/", { auth: true })
+    );
+    expect(await screen.findByText("Ada Obi was removed from Sunrise College.")).toBeTruthy();
+  });
+
+  it("deletes a mistaken account permanently once the name is typed", async () => {
+    withCheck(CHECK_OK);
+    http.del.mockResolvedValue(null);
+    show();
+    choose(await rowOf("Ada Obi"), "Delete permanently…");
+    const dialog = screen.getByRole("alertdialog");
+    await waitFor(() =>
+      expect(http.get).toHaveBeenCalledWith("/api/admin/school/students/u-ada/delete-check/", { auth: true })
+    );
+    expect(await within(dialog).findByText("1 school role")).toBeTruthy();
+    const button = within(dialog).getByRole("button", { name: "Delete permanently" });
+    expect(button.disabled).toBe(true);
+    fireEvent.change(within(dialog).getByLabelText(/to confirm/), { target: { value: "Ada Obi" } });
+    fireEvent.click(button);
+    await waitFor(() =>
+      expect(http.del).toHaveBeenCalledWith("/api/admin/school/students/u-ada/", {
+        auth: true,
+        params: { permanent: true },
+      })
+    );
+    expect(await screen.findByText("Ada Obi was deleted permanently.")).toBeTruthy();
+  });
+
+  it("explains why it can't delete and offers to remove instead", async () => {
+    withCheck(CHECK_BLOCKED);
+    http.del.mockResolvedValue({ success: true, message: "Ada Obi was removed from Sunrise College." });
+    show();
+    choose(await rowOf("Ada Obi"), "Delete permanently…");
+    const dialog = screen.getByRole("alertdialog");
+    const alert = await within(dialog).findByRole("alert");
+    expect(alert.textContent).toContain("Remove them from the school instead.");
+    expect(within(dialog).getByRole("button", { name: "Delete permanently" }).disabled).toBe(true);
+    fireEvent.click(within(dialog).getByRole("button", { name: "Remove from school instead" }));
+    await waitFor(() =>
+      expect(http.del).toHaveBeenCalledWith("/api/admin/school/students/u-ada/", { auth: true })
+    );
+    expect(http.del.mock.calls.some(([, opts]) => opts?.params?.permanent)).toBe(false);
+  });
+
+  it("shows the refusal when the delete is blocked at the last moment (409)", async () => {
+    withCheck(CHECK_OK);
+    const conflict = new Error("Conflict");
+    conflict.status = 409;
+    conflict.data = { error: "This account has records at the school (1 result). Remove them from the school instead.", blockers: { results: 1 } };
+    http.del.mockRejectedValue(conflict);
+    show();
+    choose(await rowOf("Ada Obi"), "Delete permanently…");
+    const dialog = screen.getByRole("alertdialog");
+    await within(dialog).findByText("1 school role");
+    fireEvent.change(within(dialog).getByLabelText(/to confirm/), { target: { value: "Ada Obi" } });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Delete permanently" }));
+    expect(await within(dialog).findByText(/\(1 result\)\. Remove them from the school instead\./)).toBeTruthy();
+    expect(within(dialog).getByRole("button", { name: "Remove from school instead" })).toBeTruthy();
   });
 });
