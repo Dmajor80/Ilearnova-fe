@@ -5,6 +5,7 @@ import { apiErrorDetails } from "@/lib/apiHelpers";
 export const MEMBER_KINDS = {
   student: { path: "/api/admin/school/students/", key: "students", noun: "student" },
   teacher: { path: "/api/admin/school/teachers/", key: "teachers", noun: "teacher" },
+  parent: { path: "/api/admin/school/parents/", key: "parents", noun: "parent" },
 };
 
 export const MEMBER_STATUSES = ["all", "active", "pending", "suspended"];
@@ -13,9 +14,15 @@ const PAGE_SIZE = 20;
 const EMPTY_COUNTS = { all: 0, active: 0, pending: 0, suspended: 0 };
 
 /**
- * One page of a school's students or teachers for a status pill
+ * One page of a school's students, teachers or parents for a status pill
  * ("all", "active", "pending", "suspended") and search, plus the count for
  * every pill. Actions reload the page when done.
+ *
+ * Taking someone out: `suspend` blocks them for now (they stay under
+ * Suspended); `remove` ends their place in the school (account and records
+ * kept, gone from every list; adding them again brings them back);
+ * `deletePermanently` deletes a mistaken account with no records, after
+ * `deleteCheck` says whether it may.
  */
 export default function useSchoolMembers(kind, { status = "all", search = "", page = 1 } = {}) {
   const { path, key } = MEMBER_KINDS[kind];
@@ -55,14 +62,18 @@ export default function useSchoolMembers(kind, { status = "all", search = "", pa
     return () => clearTimeout(timer);
   }, [load, search]);
 
-  /** Run a change, then reload. Throws the friendly message on failure. */
-  const run = useCallback(async (request) => {
+  /**
+   * Run a change, then reload. Throws the friendly message on failure, or
+   * the API error itself with `raw` (callers that read its status, e.g. 409).
+   */
+  const run = useCallback(async (request, { raw = false } = {}) => {
     setMutating(true);
     try {
       const result = await request();
       await load();
       return result;
     } catch (err) {
+      if (raw) throw err;
       throw new Error(apiErrorDetails(err).messages.join(" "));
     } finally {
       setMutating(false);
@@ -84,6 +95,10 @@ export default function useSchoolMembers(kind, { status = "all", search = "", pa
     update: (member, data) => run(() => http.patch(memberPath(member), data, { auth: true })),
     suspend: (member) => run(() => http.post(`${memberPath(member)}suspend/`, {}, { auth: true })),
     reinstate: (member) => run(() => http.post(`${memberPath(member)}reinstate/`, {}, { auth: true })),
+    remove: (member) => run(() => http.del(memberPath(member), { auth: true })),
+    deleteCheck: (member) => http.get(`${memberPath(member)}delete-check/`, { auth: true }),
+    deletePermanently: (member) =>
+      run(() => http.del(memberPath(member), { auth: true, params: { permanent: true } }), { raw: true }),
     verify: (member) => run(() => http.post(`${pendingPath(member)}verify/`, {}, { auth: true })),
     reject: (member) => run(() => http.post(`${pendingPath(member)}reject/`, {}, { auth: true })),
     verifyMany: (members) =>
