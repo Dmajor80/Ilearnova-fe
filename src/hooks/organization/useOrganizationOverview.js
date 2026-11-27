@@ -22,7 +22,6 @@ export default function useOrganizationOverview() {
   const [activities, setActivities] = useState([]);
 
   const refreshData = useCallback(async (resetFailures = false) => {
-    console.log(circuitBreaker)
     if (resetFailures) circuitBreaker.resetAllEndpoints();
 
     setLoading(true);
@@ -35,15 +34,12 @@ export default function useOrganizationOverview() {
 
     try {
       if (requests.length === 0) return;
-      console.log(requests)
       const results = await Promise.allSettled(
         requests.map(([, path]) => http.get(path, { auth: true }))
       );
       const failures = [];
       let succeeded = false;
       results.forEach((result, index) => {
-        console.log(index)
-        console.log(result)
         const [endpoint, , setValue] = requests[index];
         if (result.status === "fulfilled") {
           const data = result.value?.data ?? result.value;

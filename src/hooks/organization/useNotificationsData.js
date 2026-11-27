@@ -38,7 +38,6 @@ export default function useNotificationsData({ enabled = true } = {}) {
     const endpointName = "notifications";
 
     if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
-      console.log("Skipping notifications call - endpoint marked as failed");
       return;
     }
 
@@ -62,7 +61,6 @@ export default function useNotificationsData({ enabled = true } = {}) {
       });
 
       const data = payload?.data ?? payload;
-      console.log("Notifications API response:", data);
 
       if (data.results) {
         setNotifications(data.results || []);

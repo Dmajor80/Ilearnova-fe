@@ -209,7 +209,7 @@ const AppContent = () => {
         <Route path="pending-students" element={<Navigate to="/organization-dashboard/students?status=pending" replace />} />
         <Route path="classes" element={<OrganizationClasses />} />
         <Route path="exams" element={<OrganizationExams />} />
-        <Route path="results" element={<TeacherResults />} />
+        <Route path="results" element={<TeacherResults forSchoolAdmin />} />
         <Route path="grading" element={<GradingPolicyPage />} />
         <Route path="billing" element={<BillingPage />} />
         <Route path="fees" element={<SchoolFeesPage />} />

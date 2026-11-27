@@ -41,7 +41,6 @@ export default function useCalendarEvents() {
     const endpointName = "calendarEvents";
 
     if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
-      console.log("Skipping calendar events call - endpoint marked as failed");
       return;
     }
 
@@ -65,7 +64,6 @@ export default function useCalendarEvents() {
       });
 
       const data = payload?.data ?? payload;
-      console.log("Calendar events API response:", data);
 
       if (data.results) {
         setEvents(data.results || []);

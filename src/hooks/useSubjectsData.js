@@ -31,14 +31,12 @@ export default function useSubjectsData() {
     const endpointName = "subjects";
 
     if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
-      console.log("Skipping subjects call - endpoint marked as failed");
       return;
     }
 
     try {
       const payload = await http.get("/api/admin/subjects/", { auth: true });
       const data = payload?.data ?? payload;
-      console.log("Subjects API response:", data);
 
       if (Array.isArray(data.results)) {
         setSubjects(data.results);

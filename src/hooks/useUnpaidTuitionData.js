@@ -36,7 +36,6 @@ export default function useUnpaidTuitionData() {
     const endpointName = "unpaidTuition";
 
     if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
-      console.log("Skipping unpaid tuition call - endpoint marked as failed");
       return;
     }
 
@@ -46,7 +45,6 @@ export default function useUnpaidTuitionData() {
       });
 
       const data = payload?.data ?? payload;
-      console.log("Unpaid tuition API response:", data);
 
       if (Array.isArray(data.students)) {
         setStudents(data.students);

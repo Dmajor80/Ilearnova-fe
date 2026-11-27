@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Download } from "lucide-react";
 import { resultsApi } from "@/api/resultsApi";
 import { apiErrorDetails, averageText, fmt, safeName, saveBlob, scoreColumns } from "./resultsUtils";
+import { TableSkeleton } from "@/components/ui/Skeleton";
 
 function ReportCard({ report, onDownload, downloading }) {
   const { headings, cells } = scoreColumns(report.subjects);
@@ -128,7 +129,7 @@ export default function ReportCards({ childId, emptyText = "No results have been
     }
   };
 
-  if (loading) return <p className="py-8 text-center text-gray-500">Loading results…</p>;
+  if (loading) return <TableSkeleton rows={5} columns={4} label="Loading results" />;
 
   return (
     <div className="space-y-4">

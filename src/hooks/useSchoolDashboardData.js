@@ -53,7 +53,6 @@ export default function useSchoolDashboardData() {
 
     // Check circuit breaker
     if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
-      console.log("Skipping metrics call - endpoint marked as failed");
       return;
     }
 
@@ -62,7 +61,6 @@ export default function useSchoolDashboardData() {
         auth: true
       });
       const data = payload?.data ?? payload;
-      console.log("Metrics API response:", data);
 
 
       setMetrics(prevMetrics => ({
@@ -97,7 +95,6 @@ export default function useSchoolDashboardData() {
 
     // Check circuit breaker
     if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
-      console.log("Skipping performance call - endpoint marked as failed");
       return;
     }
 
@@ -106,7 +103,6 @@ export default function useSchoolDashboardData() {
         auth: true
       });
       const data = payload?.data ?? payload;
-      console.log("Performance API response:", data);
 
       setSchoolData(prev => ({
         ...prev,
@@ -126,7 +122,6 @@ export default function useSchoolDashboardData() {
 
     // Check circuit breaker
     if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
-      console.log("Skipping teachers call - endpoint marked as failed");
       return;
     }
 
@@ -136,7 +131,6 @@ export default function useSchoolDashboardData() {
         params: { limit: 10, include_performance: true }
       });
       const data = payload?.data ?? payload;
-      console.log("Teachers API response:", data);
 
       setSchoolData(prev => ({
         ...prev,
@@ -161,7 +155,6 @@ export default function useSchoolDashboardData() {
 
     // Check circuit breaker
     if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
-      console.log("Skipping unpaid tuition call - endpoint marked as failed");
       return;
     }
 
@@ -170,7 +163,6 @@ export default function useSchoolDashboardData() {
         auth: true,
         params: { limit: 10 }
       });
-      console.log("unpaid tuition data:", payload);
 
       const data = payload?.data ?? payload;
 
@@ -197,7 +189,6 @@ export default function useSchoolDashboardData() {
 
     // Check circuit breaker
     if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
-      console.log("Skipping activities call - endpoint marked as failed");
       return;
     }
 
@@ -207,7 +198,6 @@ export default function useSchoolDashboardData() {
         params: { limit: 10 }
       });
       const data = payload?.data ?? payload;
-      console.log("Activities API response:", data);
 
       setRecentActivities(data.activities || []);
     } catch (err) {

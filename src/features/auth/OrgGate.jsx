@@ -75,13 +75,9 @@ export default function OrgGate({ children }) {
     );
   }
 
-  // Debug logging
-  console.log("OrgGate: loading:", loading, "orgs:", orgs, "orgs.length:", orgs?.length, "currentOrgId:", currentOrgId);
-
   // No organizations at all -> send user to onboarding to create/link one.
   // But allow org_admin users to access dashboard even without organizations
   if (!loading && Array.isArray(orgs) && orgs.length === 0 && !isOrgAdmin) {
-    console.log("OrgGate: No organizations found, redirecting to organization-details");
     return <Navigate to="/organization-details" state={{ from: location }} replace />;
   }
 
@@ -89,7 +85,6 @@ export default function OrgGate({ children }) {
   // Let's be more lenient and allow access if user has organizations
   if (!loading && Array.isArray(orgs) && orgs.length > 0 && !currentOrgId) {
     console.warn("OrgGate: User has organizations but no currentOrgId selected. This might indicate a parsing issue.");
-    console.log("OrgGate: Organizations data:", orgs);
     // For now, let's allow access and let the app handle organization selection
   }
 

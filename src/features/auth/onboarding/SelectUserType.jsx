@@ -34,7 +34,6 @@ export default function SelectUserType() {
   }, [navigate]);
 
   const postUserType = async (body) => {
-    console.log(body)
     const token = getToken();
     if (!token) {
       showNotification("Authentication required. Please log in again.", "error");

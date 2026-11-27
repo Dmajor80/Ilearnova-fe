@@ -42,7 +42,6 @@ export default function useTeacherData() {
 
     // Check circuit breaker
     if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
-      console.log("Skipping teachers call - endpoint marked as failed");
       return;
     }
 
@@ -68,7 +67,6 @@ export default function useTeacherData() {
       });
 
       const data = payload?.data ?? payload;
-      console.log("Teachers API response:", data);
 
       // Handle both paginated and non-paginated responses
       if (data.results) {
@@ -115,7 +113,6 @@ export default function useTeacherData() {
     const endpointName = "teacherDetails";
 
     if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
-      console.log("Skipping teacher details call - endpoint marked as failed");
       return null;
     }
 
@@ -125,7 +122,6 @@ export default function useTeacherData() {
       });
 
       const data = payload?.data ?? payload;
-      console.log("Teacher details API response:", data);
 
       return data;
     } catch (err) {
@@ -151,7 +147,6 @@ export default function useTeacherData() {
         auth: true
       });
       const data = payload?.data ?? payload;
-      console.log("Create teacher API response:", data);
 
       notification.notify("Teacher added successfully", "success");
       await fetchTeachers();
@@ -179,7 +174,6 @@ export default function useTeacherData() {
         auth: true
       });
       const data = payload?.data ?? payload;
-      console.log("Update teacher API response:", data);
 
       notification.notify("Teacher updated successfully", "success");
       await fetchTeachers();

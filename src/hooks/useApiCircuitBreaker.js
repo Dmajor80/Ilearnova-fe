@@ -124,8 +124,6 @@ export default function useApiCircuitBreaker(options = {}) {
       delete newTimes[endpointName];
       return newTimes;
     });
-
-    console.log(`Reset circuit breaker for endpoint: ${endpointName}`);
   }, []);
 
   /**
@@ -136,7 +134,6 @@ export default function useApiCircuitBreaker(options = {}) {
     setEndpointErrors({});
     setEndpointRetries({});
     setEndpointFailureTimes({});
-    console.log("Reset all circuit breakers");
   }, []);
 
   /**

@@ -174,13 +174,8 @@ const FileBrowser = ({ organizationId, onFileSelect, onFolderSelect }) => {
   };
 
   const downloadSelected = () => {
-    // Mock download functionality
-    selectedItems.forEach(item => {
-      if (item.type === 'file') {
-        // In real app, this would trigger actual download
-        console.log(`Downloading ${item.name}`);
-      }
-    });
+    // Mock download functionality: in a real app this would trigger an
+    // actual download for each selected file.
   };
 
   const deleteSelected = () => {

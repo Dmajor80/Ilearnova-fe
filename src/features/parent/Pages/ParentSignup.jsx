@@ -33,11 +33,9 @@ function Signup() {
     //             navigate("/login");
     //         } else {
     //             alert(data.message || "Invalid email or password.");
-    //             console.log('clicked')
     //         }
     //     } catch (error) {
     //         alert("Network error. Please try again.");
-    //         console.log('click........')
     //     }
     // };
 
@@ -49,7 +47,6 @@ function Signup() {
                 body: { username, firstName, lastName, birthDate, address, phone, email, password },
                 auth: false,
             });
-            console.log(data);
             if (data?.status === "success" || data?.success === true) {
                 navigate("/login");
             } else {
@@ -58,7 +55,6 @@ function Signup() {
         } catch (error) {
             const msg = error?.data?.detail || error?.message || "Network error. Please try again.";
             alert(msg);
-            console.log(error);
         } finally {
             setLoading(false);
         }

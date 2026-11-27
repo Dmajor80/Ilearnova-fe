@@ -30,14 +30,12 @@ export default function useAdminUsersData() {
     const endpointName = "adminUsers";
 
     if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
-      console.log("Skipping admin users call - endpoint marked as failed");
       return;
     }
 
     try {
       const payload = await http.get("/api/admin/users/", { auth: true });
       const data = payload?.data ?? payload;
-      console.log("Admin users API response:", data);
 
       if (Array.isArray(data.results)) {
         setUsers(data.results);

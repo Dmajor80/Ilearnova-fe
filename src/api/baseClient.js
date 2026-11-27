@@ -77,20 +77,6 @@ async function request(method, path, {
   const contentType = res.headers.get("content-type") || "";
   const isJson = contentType.includes("application/json");
 
-  if (responseType !== "blob") {
-    try {
-      const preview = isJson ? await res.clone().json() : await res.clone().text();
-      if (isJson) {
-        console.log("url:", url);
-        console.log("response:", preview);
-      } else {
-        console.log("response:", preview);
-      }
-    } catch (error) {
-      console.warn("Unable to preview API response:", error);
-    }
-  }
-
   let data = null;
   try {
     data = responseType === "blob" && res.ok

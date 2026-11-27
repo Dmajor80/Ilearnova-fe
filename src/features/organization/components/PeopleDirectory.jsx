@@ -5,6 +5,7 @@ import useSchoolMembers, { MEMBER_STATUSES } from "@/hooks/organization/useSchoo
 import useOrganizationClasses from "@/hooks/organization/useOrganizationClasses";
 import GenericModal from "./GenericModal";
 import ImportStudentsModal from "./ImportStudentsModal";
+import { TableSkeleton } from "@/components/ui/Skeleton";
 
 const PILL_LABEL = { all: "All", active: "Active", pending: "Pending", suspended: "Suspended" };
 const STATUS_TONE = {
@@ -242,7 +243,7 @@ export default function PeopleDirectory({ kind }) {
       {api.error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{api.error}</p>}
 
       {api.loading && !api.rows.length ? (
-        <p className="py-8 text-center text-gray-500">Loading {copy.title.toLowerCase()}…</p>
+        <TableSkeleton rows={6} columns={5} label={`Loading ${copy.title.toLowerCase()}`} />
       ) : api.rows.length ? (
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200 text-sm">

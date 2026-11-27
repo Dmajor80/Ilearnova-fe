@@ -36,7 +36,6 @@ export default function useFoodOrdersData() {
     const endpointName = "foodOrders";
 
     if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
-      console.log("Skipping food orders call - endpoint marked as failed");
       return;
     }
 
@@ -60,7 +59,6 @@ export default function useFoodOrdersData() {
       });
 
       const data = payload?.data ?? payload;
-      console.log("Food orders API response:", data);
 
       if (data.results) {
         setOrders(data.results || []);

@@ -28,7 +28,7 @@ export default function useParentData() {
   const [currentPage, setCurrentPage] = useState(1);
   const [parentsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
-  const [ordering, setOrdering] = useState("-date_joined");
+  const [ordering, setOrdering] = useState("-created_at");
   const [selectedParent, setSelectedParent] = useState(null);
 
   // Mutation loading state (create/update/delete)
@@ -42,7 +42,6 @@ export default function useParentData() {
 
     // Check circuit breaker
     if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
-      console.log("Skipping parents call - endpoint marked as failed");
       return;
     }
 
@@ -68,7 +67,6 @@ export default function useParentData() {
       });
 
       const data = payload?.data ?? payload;
-      console.log("Parents API response:", data);
 
       // Handle the documented { parents, pagination } response and legacy formats.
       if (Array.isArray(data.parents)) {
@@ -113,7 +111,6 @@ export default function useParentData() {
     const endpointName = "parentDetails";
 
     if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
-      console.log("Skipping parent details call - endpoint marked as failed");
       return null;
     }
 
@@ -123,7 +120,6 @@ export default function useParentData() {
       });
 
       const data = payload?.data ?? payload;
-      console.log("Parent details API response:", data);
 
       return data;
     } catch (err) {
@@ -149,7 +145,6 @@ export default function useParentData() {
         auth: true
       });
       const data = payload?.data ?? payload;
-      console.log("Create parent API response:", data);
 
       notification.notify("Parent added successfully", "success");
       await fetchParents();
@@ -177,7 +172,6 @@ export default function useParentData() {
         auth: true
       });
       const data = payload?.data ?? payload;
-      console.log("Update parent API response:", data);
 
       notification.notify("Parent updated successfully", "success");
       await fetchParents();

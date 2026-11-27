@@ -25,7 +25,6 @@ export default function useSchoolAdminUser() {
           window.sessionStorage.getItem("user_data");
         
         if (userData) {
-          console.log(userData)
           const parsedUser = JSON.parse(userData);
           setUser(parsedUser);
           

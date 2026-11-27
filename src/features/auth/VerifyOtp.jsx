@@ -148,7 +148,6 @@ export default function VerifyOtp() {
 
     try {
       const data = await verifyOtp(email, otp);
-      console.log(data)
       const prefillEmail = data?.prefill?.email || email;
       const prefillUsername = data?.prefill?.username || email;
 

@@ -208,9 +208,8 @@ const DeviceList = ({ organizationId }) => {
     return `${diffDays} days ago`;
   };
 
-  const handleRemoteAction = (deviceId, action) => {
+  const handleRemoteAction = () => {
     // Mock remote actions
-    console.log(`Performing ${action} on device ${deviceId}`);
   };
 
   const handleDeviceSelect = (device) => {

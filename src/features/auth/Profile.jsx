@@ -40,9 +40,6 @@ const Profile = () => {
         country: profile.country || user.country || "",
       });
     }
-
-  console.log(user)
-
   }, [user]);
 
   const handleInputChange = (e) => {
@@ -56,10 +53,9 @@ const Profile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setUpdating(true);
-    console.log("Profile: Starting profile update with data:", formData);
 
     try {
-      const response = await http.put("/api/auth/profile/", {
+      await http.put("/api/auth/profile/", {
         body: {
           username: formData.username || user.username,
           email: formData.email,
@@ -70,17 +66,11 @@ const Profile = () => {
           address: formData.address,
         }
       });
-      console.log("Profile: Update response:", response);
 
       notification.notify("Profile updated successfully!", "success", 3000);
-      console.log("Profile: Profile update successful, calling refreshUser");
       // Refresh user data in context
       if (refreshUser) {
-        console.log("Profile: refreshUser function available, calling it");
         await refreshUser();
-        console.log("Profile: refreshUser completed");
-      } else {
-        console.log("Profile: refreshUser function not available");
       }
     } catch (error) {
       console.error("Profile update error:", error);
