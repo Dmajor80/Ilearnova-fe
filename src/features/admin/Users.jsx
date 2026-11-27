@@ -26,6 +26,8 @@ import DeleteDialog from "@/components/ui/DeleteDialog";
 import { InitialsAvatar } from "@/components/ui/Avatar";
 import { TableSkeleton } from "@/components/ui/Skeleton";
 import { ActivePill, EmptyState, ErrorAlert, PageCard, Pagination, Pill, formatDay } from "@/components/admin/AdminUI";
+import { BulkDeleteDialog, RowCheckbox, SelectPageCheckbox, SelectionBar } from "@/components/admin/BulkSelect";
+import useSelection from "@/hooks/superadmin/useSelection";
 import { UserDetailModal, UserEditModal, UserRolesModal, userRoleLabels, userSchools } from "@/components/admin/UserModals";
 import useResource from "@/hooks/superadmin/useResource";
 import useDebouncedValue from "@/hooks/useDebouncedValue";
@@ -83,6 +85,8 @@ export default function Users() {
   const [confirm, setConfirm] = useState(null);
   const [deleting, setDeleting] = useState(null);
   const [exporting, setExporting] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const selection = useSelection(filtersKey);
 
   const list = useResource(async () => {
     const result = asPage(await superAdminApi.users({ ...filters, page, page_size: PAGE_SIZE }));
@@ -185,6 +189,7 @@ export default function Users() {
 
   const items = list.data?.items || [];
   const total = list.data?.total || 0;
+  const pageIds = items.map((u) => String(u.id));
   const filtered = Boolean(query || role || organizationId || status);
   const selectClass = "rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30";
 
@@ -271,8 +276,16 @@ export default function Users() {
         <div className="flex items-center justify-between border-b border-gray-100 px-5 py-3 text-sm text-gray-500">
           <span aria-live="polite">{list.data ? `${total} user${total === 1 ? "" : "s"}${filtered ? " match" : ""}` : " "}</span>
         </div>
+        <SelectionBar
+          selection={selection}
+          pageIds={pageIds}
+          total={total}
+          noun="user"
+          loadAllIds={() => superAdminApi.ids("users", filters)}
+          onDelete={() => setBulkDeleting(true)}
+        />
         {list.loading && !list.data ? (
-          <TableSkeleton columns={6} label="Loading users" />
+          <TableSkeleton columns={7} label="Loading users" />
         ) : !items.length ? (
           <EmptyState icon={UsersIcon} title={filtered ? "No users match these filters" : "No users yet"}>
             {filtered ? "Try clearing a filter." : "Add the first one with “Add user”."}
@@ -282,6 +295,9 @@ export default function Users() {
             <table className="w-full min-w-[860px] text-left text-sm">
               <thead className="bg-gray-50 text-xs font-medium uppercase tracking-wide text-gray-500">
                 <tr>
+                  <th scope="col" className="w-10 py-3 pl-5 pr-0">
+                    <SelectPageCheckbox selection={selection} pageIds={pageIds} label="Select all users on this page" />
+                  </th>
                   <th scope="col" className="px-5 py-3">User</th>
                   <th scope="col" className="px-3 py-3">School</th>
                   <th scope="col" className="px-3 py-3">Role</th>
@@ -296,7 +312,10 @@ export default function Users() {
                   const schools = userSchools(user);
                   const roles = userRoleLabels(user);
                   return (
-                    <tr key={user.id} className="hover:bg-gray-50/60">
+                    <tr key={user.id} className={selection.has(user.id) ? "bg-blue-50/60" : "hover:bg-gray-50/60"}>
+                      <td className="w-10 py-3 pl-5 pr-0">
+                        <RowCheckbox selection={selection} id={user.id} label={`Select ${name}`} />
+                      </td>
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-3">
                           <InitialsAvatar name={name} size="h-9 w-9" />
@@ -378,6 +397,19 @@ export default function Users() {
           list.reload();
         }}
         onClose={() => setDeleting(null)}
+      />
+      <BulkDeleteDialog
+        open={bulkDeleting}
+        resource="users"
+        ids={[...selection.ids]}
+        noun="user"
+        warning="Each account goes with its school roles and everything it submitted. Users with payments, your own account and the last superuser are kept."
+        onClose={() => setBulkDeleting(false)}
+        onDone={(done) => {
+          if (done.deleted.length) toast(`${done.deleted.length} user${done.deleted.length === 1 ? "" : "s"} deleted.`);
+          selection.set(done.skipped.map((s) => s.id));
+          list.reload();
+        }}
       />
       {editing && (
         <UserEditModal
