@@ -4,16 +4,17 @@ import { persistAuthResponse } from "@/api/auth";
 import useNotification from "@/hooks/useNotification";
 import usePrefersDarkMode from "@/hooks/usePrefersDarkMode";
 import { parseError, getUserFriendlyMessage, getNotificationType } from "@/lib/errorHandler";
-import { useNavigate } from "react-router-dom";
+import { fieldErrorsOf, serverReasonOf } from "@/lib/apiHelpers";
 
 /**
  * Hook that encapsulates registration form state, validation, notifications, and submit logic.
  * Pass an onSuccess callback to handle navigation after successful registration.
  * `initial` pre-fills fields. Schools register elsewhere
  * (features/auth/RegisterSchool), so there is no org admin role here.
+ * `validateExtra(formData)` returns more `{ field: message }` errors (e.g.
+ * the school code didn't match a school).
  */
-export default function useRegister({ onSuccess, initial } = {}) {
-  const navigate = useNavigate();
+export default function useRegister({ onSuccess, initial, validateExtra } = {}) {
   const darkMode = usePrefersDarkMode();
   const notification = useNotification("success");
 
@@ -28,7 +29,7 @@ export default function useRegister({ onSuccess, initial } = {}) {
     phone: "",
     role: "individual_learner",
     organization_name: "",
-    organization_id: "",
+    organization_code: "",
     student_id: "",
     parent_email: "",
     id_document: null,
@@ -85,8 +86,8 @@ export default function useRegister({ onSuccess, initial } = {}) {
     }
 
     if (["teacher", "student", "parent"].includes(formData.role)) {
-      if (!formData.organization_id) {
-        newErrors.organization_id = "Please select an organization";
+      if (!String(formData.organization_code || "").trim()) {
+        newErrors.organization_code = "Enter your school's code.";
       }
     }
     if (formData.role === "student") {
@@ -98,9 +99,15 @@ export default function useRegister({ onSuccess, initial } = {}) {
       }
     }
 
+    if (typeof validateExtra === "function") {
+      Object.entries(validateExtra(formData) || {}).forEach(([field, message]) => {
+        if (message && !newErrors[field]) newErrors[field] = message;
+      });
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [formData]);
+  }, [formData, validateExtra]);
 
   const handleSubmit = useCallback(
     async (e) => {
@@ -123,7 +130,7 @@ export default function useRegister({ onSuccess, initial } = {}) {
           email: formData.email,
           password: formData.password,
           phone_number: formData.phone || undefined,
-          organization_code: formData.organization_id,
+          organization_code: String(formData.organization_code || "").trim().toUpperCase(),
           date_of_birth: formData.date_of_birth || undefined,
           additional_data:{}
         };
@@ -155,15 +162,12 @@ export default function useRegister({ onSuccess, initial } = {}) {
             response = await authApi.registerSuperAdmin(registrationData);
             break;
           case "teacher":
-            // registrationData.organization_id = formData.organization_id;
             response = await authApi.registerTeacher(registrationData);
             break;
           case "student":
-            // registrationData.organization_id = formData.organization_id;
             response = await authApi.registerStudent(registrationData);
             break;
           case "parent":
-            // registrationData.organization_id = formData.organization_id;
             response = await authApi.registerParent(registrationData);
             break;
           case "individual_learner":
@@ -177,7 +181,7 @@ export default function useRegister({ onSuccess, initial } = {}) {
               registrationData.organization_name = formData.organization_name;
             }
             if (["teacher", "student", "parent"].includes(formData.role)) {
-              registrationData.organization_id = formData.organization_id;
+              registrationData.organization_code = formData.organization_code;
             }
             response = await authApi.register(registrationData);
         }
@@ -196,16 +200,14 @@ export default function useRegister({ onSuccess, initial } = {}) {
         const userMessage = getUserFriendlyMessage(appError);
         const notificationType = getNotificationType(appError);
 
-        // Show the backend's per-field reasons (e.g. "This access code was
-        // issued to a different email address.") next to the fields.
-        const fieldErrors = error?.data?.field_errors || {};
-        const byField = Object.fromEntries(
-          Object.entries(fieldErrors).map(([field, list]) => [
-            field,
-            String(Array.isArray(list) ? list[0] : list),
-          ])
-        );
-        const general = userMessage;
+        // Show the backend's per-field reasons (e.g. "No school has that
+        // code.") next to the fields; both { field_errors } and plain DRF.
+        const byField = error?.data ? fieldErrorsOf(error) : {};
+        delete byField._general;
+        // The banner says why the server refused (e.g. "An account with this
+        // email already exists…"); the generic text is only for network/5xx
+        // errors or a 4xx that said nothing usable.
+        const general = serverReasonOf(error) || userMessage;
 
         notification.notify(general, notificationType, 8000);
         setErrors({ ...byField, general });

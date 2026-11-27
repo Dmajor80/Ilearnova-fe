@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { CheckCheck, RefreshCw, Search, Upload } from "lucide-react";
+import { CheckCheck, MailPlus, RefreshCw, Search, Upload } from "lucide-react";
 import useSchoolMembers, { MEMBER_STATUSES } from "@/hooks/organization/useSchoolMembers";
 import useOrganizationClasses from "@/hooks/organization/useOrganizationClasses";
 import GenericModal from "./GenericModal";
 import ImportStudentsModal from "./ImportStudentsModal";
+import InviteModal, { SchoolCodeNote } from "./InviteModal";
 import { TableSkeleton } from "@/components/ui/Skeleton";
 
 const PILL_LABEL = { all: "All", active: "Active", pending: "Pending", suspended: "Suspended" };
@@ -86,6 +87,7 @@ export default function PeopleDirectory({ kind }) {
   const [confirm, setConfirm] = useState(null);
   const [editing, setEditing] = useState(null); // null, "new" or a member
   const [showImport, setShowImport] = useState(false);
+  const [showInvite, setShowInvite] = useState(false);
   const [message, setMessage] = useState(null);
 
   const api = useSchoolMembers(kind, { status, search, page });
@@ -172,9 +174,13 @@ export default function PeopleDirectory({ kind }) {
           <h2 className="text-xl font-bold text-gray-800 sm:text-2xl">{copy.title}</h2>
           <p className="mt-1 max-w-2xl text-sm text-gray-600">{copy.blurb}</p>
         </div>
+        <div className="flex flex-col gap-2 lg:items-end">
         <div className="flex flex-wrap gap-2">
           <button type="button" onClick={() => setEditing("new")} className="min-h-[44px] rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700">
             Add {kind}
+          </button>
+          <button type="button" onClick={() => setShowInvite(true)} className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border px-4 py-2 text-gray-700 hover:bg-gray-50">
+            <MailPlus className="h-4 w-4" aria-hidden="true" /> Invite
           </button>
           {kind === "student" && (
             <button type="button" onClick={() => setShowImport(true)} className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border px-4 py-2 text-gray-700 hover:bg-gray-50">
@@ -184,6 +190,8 @@ export default function PeopleDirectory({ kind }) {
           <button type="button" onClick={api.reload} aria-label={`Refresh ${copy.title.toLowerCase()}`} className="min-h-[44px] rounded-lg border px-3 text-gray-700 hover:bg-gray-50">
             <RefreshCw className="h-4 w-4" />
           </button>
+        </div>
+        <SchoolCodeNote />
         </div>
       </div>
 
@@ -346,6 +354,7 @@ export default function PeopleDirectory({ kind }) {
         />
       )}
       {showImport && <ImportStudentsModal onClose={() => setShowImport(false)} onImported={api.reload} />}
+      <InviteModal open={showInvite} role={kind} onClose={() => setShowInvite(false)} />
     </div>
   );
 }

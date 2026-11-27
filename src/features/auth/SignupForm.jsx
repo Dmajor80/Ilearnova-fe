@@ -1,11 +1,11 @@
-/* eslint-disable no-unused-vars */
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Mail, User, Lock, CheckCircle, Building, GraduationCap, UserCheck, Heart, BookOpen, Calendar } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import useRegister from "@/hooks/useRegister";
 import InputField from "@/components/ui/InputField";
 import NotificationBar from "@/components/ui/NotificationBar";
-import { getOrganizations } from "@/api/authApi";
+import { lookupSchool } from "@/api/joinApi";
+import useDebouncedValue from "@/hooks/useDebouncedValue";
 import { resendOtp } from "@/api/authApi";
 
 const LoadingSpinner = () => (
@@ -29,12 +29,32 @@ const roleOptions = [
   { value: "individual_learner", label: "Individual Learner", icon: BookOpen, description: "Self-paced learning" },
 ];
 
+const SCHOOL_ROLES = ["teacher", "student", "parent"];
+const MIN_CODE_LENGTH = 4;
+const normalizeCode = (value) => String(value || "").trim().toUpperCase();
+
 export default function SignupForm() {
   const navigate = useNavigate();
   const [showEmailVerification, setShowEmailVerification] = useState(false);
   const [userEmail, setUserEmail] = useState("");
-  const [organizations, setOrganizations] = useState([]);
-  const [organizationsLoading, setOrganizationsLoading] = useState(false);
+  const [pendingApproval, setPendingApproval] = useState(null);
+  // Which school the typed code belongs to:
+  // { code, status: "checking" | "found" | "missing", school, message }.
+  const [lookup, setLookup] = useState(null);
+  const lookupRef = useRef(null);
+  lookupRef.current = lookup;
+
+  // The code must belong to a school before the form can be sent.
+  const validateSchoolCode = useCallback((data) => {
+    if (!SCHOOL_ROLES.includes(data.role)) return {};
+    const code = normalizeCode(data.organization_code);
+    if (!code) return {};
+    const current = lookupRef.current;
+    if (current?.code === code && current.status === "found") return {};
+    if (current?.code === code && current.status === "missing") return { organization_code: current.message };
+    if (code.length < MIN_CODE_LENGTH) return { organization_code: "Check your school's code." };
+    return { organization_code: "Still checking your school's code. Try again in a moment." };
+  }, []);
 
   const {
     formData,
@@ -45,9 +65,16 @@ export default function SignupForm() {
     handleSubmit,
     notification,
   } = useRegister({
+    validateExtra: validateSchoolCode,
     onSuccess: (response) => {
       const registeredUser = response?.data?.user || response?.user;
       setUserEmail(registeredUser?.email || formData.email);
+      if (SCHOOL_ROLES.includes(formData.role)) {
+        // School roles get no verification email: their school has to approve them.
+        const found = lookupRef.current?.status === "found" ? lookupRef.current.school : null;
+        setPendingApproval({ role: formData.role, schoolName: found?.name || "your school" });
+        return;
+      }
       setShowEmailVerification(true);
       if (registeredUser && registeredUser.is_verified === false) {
         setTimeout(() => {
@@ -65,21 +92,99 @@ export default function SignupForm() {
     navigate("/login");
   };
 
-  useEffect(() => {
-    const fetchOrganizations = async () => {
-      setOrganizationsLoading(true);
-      try {
-        const response = await getOrganizations();
-        setOrganizations(response.results || []);
-      } catch (error) {
-        console.error("Failed to fetch organizations:", error);
-      } finally {
-        setOrganizationsLoading(false);
-      }
-    };
+  const isSchoolRole = SCHOOL_ROLES.includes(formData.role);
+  const typedCode = normalizeCode(formData.organization_code);
+  const debouncedCode = useDebouncedValue(typedCode, 400);
 
-    fetchOrganizations();
-  }, [formData.role]);
+  // Look the code up once they stop typing.
+  useEffect(() => {
+    if (!isSchoolRole || debouncedCode.length < MIN_CODE_LENGTH) {
+      setLookup(null);
+      return undefined;
+    }
+    let live = true;
+    setLookup({ code: debouncedCode, status: "checking" });
+    lookupSchool(debouncedCode)
+      .then((school) => {
+        if (live) setLookup({ code: debouncedCode, status: "found", school });
+      })
+      .catch((error) => {
+        if (!live) return;
+        const message =
+          error?.status === 404
+            ? error?.data?.error || error?.message || "No school has that code. Check it with your school."
+            : "We couldn't check that code. Try again.";
+        setLookup({ code: debouncedCode, status: "missing", message });
+      });
+    return () => {
+      live = false;
+    };
+  }, [debouncedCode, isSchoolRole]);
+
+  const codeLookup = lookup && lookup.code === typedCode ? lookup : null;
+
+  if (pendingApproval) {
+    const isParent = pendingApproval.role === "parent";
+    return (
+      <div
+        className={`min-h-screen w-full transition-all duration-500 ${
+          darkMode
+            ? "bg-gradient-to-br from-gray-950 via-gray-900 to-black text-gray-100"
+            : "bg-gradient-to-br from-blue-50 via-white to-purple-50 text-gray-800"
+        }`}
+      >
+        <div className="w-full px-6 sm:px-8 lg:px-12 py-12">
+          <div className="max-w-2xl mx-auto text-center">
+            <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-r from-green-500 to-blue-500 mb-6">
+              <CheckCircle className="w-12 h-12 text-white" />
+            </div>
+            <h1 className="text-4xl sm:text-5xl font-bold mb-4 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+              Registration Successful!
+            </h1>
+            <p className={`text-lg sm:text-xl mb-8 ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
+              Your account is waiting for {pendingApproval.schoolName} to approve it.
+            </p>
+
+            <div
+              className={`p-8 rounded-3xl backdrop-blur-lg transition-all duration-500 mb-8 text-left ${
+                darkMode ? "bg-gray-800/30 border border-gray-700/50" : "bg-white/70 border border-white/50 shadow-xl"
+              }`}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <Building className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                <h2 className="text-2xl font-bold">What happens next</h2>
+              </div>
+              {isParent ? (
+                <ol className={`list-decimal pl-5 space-y-2 ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
+                  <li>Log in with the username and password you just created.</li>
+                  <li>Open <strong>My Children</strong> and request a link to your child using their student email.</li>
+                  <li>When {pendingApproval.schoolName} approves that link, your account is approved and you can follow your child's progress.</li>
+                </ol>
+              ) : (
+                <ol className={`list-decimal pl-5 space-y-2 ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
+                  <li>A school admin at {pendingApproval.schoolName} reviews and approves your account.</li>
+                  <li>Once you're approved, log in and you'll see your classes.</li>
+                  <li>You can log in before then; you'll see that you're still waiting for approval.</li>
+                </ol>
+              )}
+              {userEmail && (
+                <p className={`mt-4 text-sm ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+                  Registered as <span className="font-semibold break-all">{userEmail}</span>
+                </p>
+              )}
+            </div>
+
+            <Link
+              to="/login"
+              className="inline-block w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-green-600 to-blue-600 text-white font-semibold rounded-2xl hover:from-green-700 hover:to-blue-700 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-green-300 shadow-lg"
+            >
+              Log in
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (showEmailVerification) {
     return (
@@ -366,41 +471,50 @@ export default function SignupForm() {
                 )}
 
 
-                {/* Organization Selection for Teacher, Student, Parent */}
-                {["teacher", "student", "parent"].includes(formData.role) && (
+                {/* School code for Teacher, Student, Parent */}
+                {isSchoolRole && (
                   <div>
-                    <label className={`block text-sm font-medium mb-3 ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
-                      Select Organization
+                    <label htmlFor="organization_code" className={`block text-sm font-medium mb-3 ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                      School code <span className="text-red-500 ml-1">*</span>
                     </label>
                     <div className="relative">
-                      <select
-                        name="organization_id"
-                        value={formData.organization_id || ""}
-                        onChange={(e) => handleInputChange("organization_id", e.target.value)}
+                      <input
+                        id="organization_code"
+                        name="organization_code"
+                        type="text"
+                        autoComplete="off"
+                        autoCapitalize="characters"
+                        spellCheck={false}
+                        placeholder="e.g. SUN12345"
+                        value={formData.organization_code || ""}
+                        onChange={(e) => handleInputChange("organization_code", e.target.value.toUpperCase())}
                         required
-                        disabled={organizationsLoading}
-                        className={`w-full px-4 py-3 pl-12 pr-4 rounded-xl border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        aria-invalid={errors.organization_code || codeLookup?.status === "missing" ? "true" : undefined}
+                        aria-describedby="organization_code_hint organization_code_status"
+                        className={`w-full px-4 py-3 pl-12 pr-4 rounded-xl border-2 uppercase tracking-wider transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                           darkMode
                             ? "bg-gray-800 border-gray-600 text-gray-100 placeholder-gray-400"
                             : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
-                        } ${errors.organization_id ? "border-red-500" : "focus:border-blue-500"}`}
-                      >
-                        <option value="">
-                          {organizationsLoading ? "Loading organizations..." : "Select an organization"}
-                        </option>
-                        {organizations.map((org) => (
-                          <option key={org.id} value={org.code}>
-                            {org.name} {org.city && `(${org.city})`}
-                          </option>
-                        ))}
-                      </select>
+                        } ${errors.organization_code ? "border-red-500" : "focus:border-blue-500"}`}
+                      />
                       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                         <Building className={`w-5 h-5 ${darkMode ? "text-gray-400" : "text-gray-500"}`} />
                       </div>
                     </div>
-                    {errors.organization_id && (
-                      <p className="mt-1 text-sm text-red-600">{errors.organization_id}</p>
-                    )}
+                    <p id="organization_code_hint" className={`mt-1 text-sm ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+                      Ask your school for its code, or use the invite link they emailed you.
+                    </p>
+                    <div id="organization_code_status" role="status" aria-live="polite" className="mt-1 text-sm">
+                      {errors.organization_code ? (
+                        <p className="text-red-600">{errors.organization_code}</p>
+                      ) : codeLookup?.status === "found" ? (
+                        <p className="font-medium text-green-700">✓ {codeLookup.school?.name}</p>
+                      ) : codeLookup?.status === "missing" ? (
+                        <p className="text-red-600">{codeLookup.message}</p>
+                      ) : codeLookup?.status === "checking" ? (
+                        <p className={darkMode ? "text-gray-400" : "text-gray-500"}>Checking…</p>
+                      ) : null}
+                    </div>
                   </div>
                 )}
 

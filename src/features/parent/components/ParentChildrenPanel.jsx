@@ -3,6 +3,13 @@ import { useLinkParentStudent } from "@/hooks/parent";
 import { getParentChildClass, getParentChildName } from "./parentDisplayUtils";
 import { ListSkeleton } from "@/components/ui/Skeleton";
 
+const RELATIONSHIPS = [
+  { value: "mother", label: "Mother" },
+  { value: "father", label: "Father" },
+  { value: "guardian", label: "Guardian" },
+  { value: "other", label: "Other" }
+];
+
 export default function ParentChildrenPanel({
   children,
   loading,
@@ -13,15 +20,19 @@ export default function ParentChildrenPanel({
 }) {
   const { linkStudent, mutating, error: linkError, notification } = useLinkParentStudent();
   const [email, setEmail] = useState("");
+  const [relationship, setRelationship] = useState("guardian");
+  const [sentTo, setSentTo] = useState("");
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     const studentEmail = email.trim();
     if (!studentEmail) return;
 
+    setSentTo("");
     try {
-      await linkStudent({ email: studentEmail });
+      await linkStudent({ student_email: studentEmail, relationship });
       setEmail("");
+      setSentTo(studentEmail);
       await refreshData();
     } catch {
       // The hook exposes the request error and notification for display.
@@ -47,6 +58,17 @@ export default function ParentChildrenPanel({
             onChange={(event) => setEmail(event.target.value)}
             placeholder="student@example.com"
           />
+          <label className="sr-only" htmlFor="parent-student-relationship">Relationship</label>
+          <select
+            id="parent-student-relationship"
+            className="rounded-lg border border-slate-300 px-3 py-2"
+            value={relationship}
+            onChange={(event) => setRelationship(event.target.value)}
+          >
+            {RELATIONSHIPS.map(({ value, label }) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
+          </select>
           <button
             className="rounded-lg bg-blue-700 px-5 py-2 font-semibold text-white disabled:opacity-60"
             type="submit"
@@ -55,6 +77,11 @@ export default function ParentChildrenPanel({
             {mutating ? "Sending request…" : "Link student"}
           </button>
         </form>
+        {sentTo && !linkError && (
+          <p className="mt-3 text-sm text-green-700" role="status">
+            Request sent for {sentTo}. The school will review it and link the student to your account once approved.
+          </p>
+        )}
         {linkError && (
           <p className="mt-3 text-sm text-red-600" role="alert">
             {notification.message || "The student link request could not be completed."}

@@ -8,6 +8,8 @@ import {
   useOrganizationUnpaidTuition
 } from "@/hooks/organization";
 import DeleteConfirmModal from "../components/DeleteConfirmModal";
+import ParentLinkRequests from "../components/ParentLinkRequests";
+import InviteModal, { SchoolCodeNote } from "../components/InviteModal";
 import SchoolDataTable from "@/components/school-admin/SchoolDataTable";
 
 const TABS = [
@@ -76,6 +78,7 @@ function ParentsPanel() {
   const [form, setForm] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [showInvite, setShowInvite] = useState(false);
 
   const startForm = (parent = null) => {
     const [firstName = "", ...lastName] = String(parent?.full_name || "").split(" ");
@@ -124,12 +127,14 @@ function ParentsPanel() {
 
   return (
     <section className="space-y-4">
+      <ParentLinkRequests onApproved={() => parents.refreshData(true)} />
       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
         <div>
           <h3 className="text-xl font-semibold">Parent directory</h3>
           <p className="text-sm text-gray-600">{parents.totalParents} parents</p>
+          <SchoolCodeNote className="mt-1" />
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <input
             aria-label="Search parents"
             value={parents.searchQuery}
@@ -138,6 +143,7 @@ function ParentsPanel() {
             className="min-h-[42px] rounded-lg border px-3"
           />
           <button type="button" onClick={() => startForm()} className="rounded-lg bg-blue-600 px-4 py-2 text-white">Add parent</button>
+          <button type="button" onClick={() => setShowInvite(true)} className="rounded-lg border px-4 py-2">Invite</button>
           <button type="button" onClick={() => parents.refreshData(true)} className="rounded-lg border px-3 py-2">Refresh</button>
         </div>
       </div>
@@ -181,6 +187,7 @@ function ParentsPanel() {
           </form>
         </Dialog>
       )}
+      <InviteModal open={showInvite} role="parent" onClose={() => setShowInvite(false)} />
       {deleteTarget && <DeleteConfirmModal item={deleteTarget} type="parent" onConfirm={remove} onCancel={() => setDeleteTarget(null)} />}
     </section>
   );

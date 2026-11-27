@@ -8,11 +8,13 @@ import Login from "@/features/auth/Login";
 import SignupForm from "@/features/auth/SignupForm";
 import RegisterSchool from "@/features/auth/RegisterSchool";
 import SchoolSetup from "@/features/auth/SchoolSetup";
+import JoinSchool from "@/features/auth/JoinSchool";
 import RequireAuth from "@/features/auth/RequireAuth";
 import RedirectIfAuthenticated from "@/features/auth/RedirectIfAuthenticated";
 import PostLoginRedirect from "@/features/auth/PostLoginRedirect";
 import OrgGate from "@/features/auth/OrgGate";
 import RoleGate from "@/features/auth/RoleGate";
+import PendingApprovalGate from "@/features/auth/PendingApprovalGate";
 import ForgotPassword from "@/features/auth/ForgotPassword";
 import VerifyOtp from "@/features/auth/VerifyOtp";
 import ResetPassword from "@/features/auth/ResetPassword";
@@ -140,6 +142,7 @@ const AppContent = () => {
       {/* Public authentication routes */}
       <Route path="/new-login" element={<Navigate to="/login" replace />} />
       <Route path="/signup" element={<SignupForm />} />
+      <Route path="/join" element={<JoinSchool />} />
       <Route path="/verify-success" element={<VerifySuccess />} />
       <Route path="/verify-failure" element={<VerifyFailure />} />
       <Route path="/login" element={<Login />} />
@@ -158,10 +161,10 @@ const AppContent = () => {
 
       <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
 
-      <Route path="/teacher-dashboard" element={<RequireAuth><TeacherDashboard /></RequireAuth>} />
+      <Route path="/teacher-dashboard" element={<RequireAuth><PendingApprovalGate role="teacher"><TeacherDashboard /></PendingApprovalGate></RequireAuth>} />
 
       {/* Student Dashboard with nested routes */}
-      <Route path="/student-dashboard" element={<RequireAuth><StudentDashboard /></RequireAuth>}>
+      <Route path="/student-dashboard" element={<RequireAuth><PendingApprovalGate role="student"><StudentDashboard /></PendingApprovalGate></RequireAuth>}>
         <Route index element={<Overview />} />
         <Route path="overview" element={<Overview />} />
         {/* The ID card lives on the profile page now. */}
@@ -222,10 +225,10 @@ const AppContent = () => {
         <Route path="messages" element={<DirectMessages />} />
       </Route>
       {/* Parent Dashboard */}
-      <Route path="/parent-dashboard" element={<RequireAuth><ParentDashboard /></RequireAuth>} />
+      <Route path="/parent-dashboard" element={<RequireAuth><PendingApprovalGate role="parent"><ParentDashboard /></PendingApprovalGate></RequireAuth>} />
       {/* Parent Attendance */}
-      <Route path="/parent-attendance" element={<RequireAuth><ParentAttendance /></RequireAuth>} />
-      <Route path="/parent-attendance/:id" element={<RequireAuth><ParentAttendance /></RequireAuth>} />
+      <Route path="/parent-attendance" element={<RequireAuth><PendingApprovalGate role="parent"><ParentAttendance /></PendingApprovalGate></RequireAuth>} />
+      <Route path="/parent-attendance/:id" element={<RequireAuth><PendingApprovalGate role="parent"><ParentAttendance /></PendingApprovalGate></RequireAuth>} />
       {/* Individual Learner Dashboard */}
       <Route path="/individual-dashboard" element={<RequireAuth><IndividualLearnerPersonalDashboard /></RequireAuth>} />
       {/* New Features - Test Routes */}
