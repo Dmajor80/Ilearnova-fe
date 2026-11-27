@@ -9,8 +9,8 @@ import { useNavigate } from "react-router-dom";
 /**
  * Hook that encapsulates registration form state, validation, notifications, and submit logic.
  * Pass an onSuccess callback to handle navigation after successful registration.
- * `initial` pre-fills fields, e.g. from an invite link:
- * { role: "org_admin", email, access_code }.
+ * `initial` pre-fills fields. Schools register elsewhere
+ * (features/auth/RegisterSchool), so there is no org admin role here.
  */
 export default function useRegister({ onSuccess, initial } = {}) {
   const navigate = useNavigate();
@@ -32,7 +32,6 @@ export default function useRegister({ onSuccess, initial } = {}) {
     student_id: "",
     parent_email: "",
     id_document: null,
-    access_code: "",
     ...(initial || {}),
   });
 
@@ -79,7 +78,7 @@ export default function useRegister({ onSuccess, initial } = {}) {
     }
 
     // Role-specific validations
-    if (["super_admin", "org_admin"].includes(formData.role)) {
+    if (formData.role === "super_admin") {
       if (!formData.organization_name.trim()) {
         newErrors.organization_name = "Organization name is required";
       }
@@ -156,13 +155,6 @@ export default function useRegister({ onSuccess, initial } = {}) {
             registrationData.organization_name = formData.organization_name;
             response = await authApi.registerSuperAdmin(registrationData);
             break;
-          case "org_admin":
-            registrationData.organization_name = formData.organization_name;
-            if (formData.access_code?.trim()) {
-              registrationData.access_code = formData.access_code.trim();
-            }
-            response = await authApi.registerOrgAdmin(registrationData);
-            break;
           case "teacher":
             // registrationData.organization_id = formData.organization_id;
             response = await authApi.registerTeacher(registrationData);
@@ -182,7 +174,7 @@ export default function useRegister({ onSuccess, initial } = {}) {
 
             // Fallback to general register for any other roles
             registrationData.role = formData.role;
-            if (["super_admin", "org_admin"].includes(formData.role)) {
+            if (formData.role === "super_admin") {
               registrationData.organization_name = formData.organization_name;
             }
             if (["teacher", "student", "parent"].includes(formData.role)) {
@@ -214,7 +206,7 @@ export default function useRegister({ onSuccess, initial } = {}) {
             String(Array.isArray(list) ? list[0] : list),
           ])
         );
-        const general = byField.subscription || byField.access_code || userMessage;
+        const general = userMessage;
 
         notification.notify(general, notificationType, 8000);
         setErrors({ ...byField, general });

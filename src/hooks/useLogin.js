@@ -9,11 +9,11 @@ import { parseError, getUserFriendlyMessage, getNotificationType, withRetry } fr
  * Hook that encapsulates login form state, validation, notifications, and submit logic.
  * Pass an onSuccess callback to handle navigation after successful login.
  */
-export default function useLogin({ onSuccess } = {}) {
+export default function useLogin({ onSuccess, initialUsername = "" } = {}) {
   const darkMode = usePrefersDarkMode();
 
   const [formData, setFormData] = useState({
-    username: "",
+    username: initialUsername,
     password: "",
     organization_code: "",
   });
