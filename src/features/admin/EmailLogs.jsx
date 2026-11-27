@@ -116,7 +116,7 @@ export default function EmailLogs() {
         ) : !items.length ? (
           <EmptyState icon={Mail} title="No emails match these filters" />
         ) : (
-          <div className={`overflow-x-auto transition-opacity ${list.loading ? "opacity-60" : ""}`}>
+          <div className={`relative overflow-x-auto transition-opacity ${list.loading ? "opacity-60" : ""}`}>
             <table className="w-full min-w-[780px] text-left text-sm">
               <thead className="bg-gray-50 text-xs font-medium uppercase tracking-wide text-gray-500">
                 <tr>

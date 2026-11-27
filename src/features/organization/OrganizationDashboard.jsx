@@ -121,7 +121,8 @@ const OrganizationDashboard = () => {
             </div>
             <button
               onClick={() => setIsSidebarOpen(false)}
-              className="md:hidden p-2 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:bg-slate-50 border border-slate-200"
+              aria-label="Close menu"
+              className="md:hidden inline-flex min-h-10 min-w-10 items-center justify-center p-2 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:bg-slate-50 border border-slate-200"
             >
               <X className="w-5 h-5 text-slate-600" />
             </button>
@@ -197,14 +198,15 @@ const OrganizationDashboard = () => {
         </div>
       </div>
 
-      <div className="flex-1 min-w-0 overflow-x-hidden md:ml-64">
+      <div className="flex-1 min-w-0 md:ml-64">
         {/* Header Section */}
         <div className="bg-white rounded-xl shadow-lg p-4 md:p-8 m-4 md:m-6 mb-0 border border-slate-200">
           <div className="flex items-center justify-between gap-2 md:gap-4">
             <div className="flex min-w-0 items-center gap-2 md:gap-6">
               <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="shrink-0 p-2 md:p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 md:hidden border border-slate-200"
+                aria-label="Open menu"
+                className="shrink-0 inline-flex min-h-10 min-w-10 items-center justify-center p-2 md:p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 md:hidden border border-slate-200"
               >
                 <Menu className="w-5 h-5 text-slate-600" />
               </button>
@@ -219,7 +221,7 @@ const OrganizationDashboard = () => {
               <button
                 onClick={() => navigate("/organization-dashboard/alerts")}
                 aria-label={alertsLoading ? "Open alerts" : `Open alerts (${totalNotifications} notifications)`}
-                className="p-2 md:p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 border border-slate-200 group relative"
+                className="inline-flex min-h-10 min-w-10 items-center justify-center p-2 md:p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 border border-slate-200 group relative"
               >
                 <Bell className="w-5 h-5 text-slate-600 group-hover:text-blue-600 transition-colors" />
                 {totalNotifications > 0 && <span className="absolute -top-1 -right-1 min-w-5 rounded-full border border-white bg-red-500 px-1 text-center text-xs text-white">{totalNotifications > 99 ? "99+" : totalNotifications}</span>}
@@ -228,7 +230,7 @@ const OrganizationDashboard = () => {
                 type="button"
                 aria-label="Settings"
                 onClick={() => navigate(PROFILE_PATH)}
-                className="p-2 md:p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 border border-slate-200 group"
+                className="hidden sm:inline-flex min-h-10 min-w-10 items-center justify-center p-2 md:p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 border border-slate-200 group"
               >
                 <Settings className="w-5 h-5 text-slate-600 group-hover:text-blue-600 transition-colors" />
               </button>
@@ -237,7 +239,7 @@ const OrganizationDashboard = () => {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                  className="flex items-center gap-1 md:gap-3 p-1 md:p-2 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 border border-slate-200"
+                  className="flex min-h-10 items-center gap-1 md:gap-3 p-1 md:p-2 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 border border-slate-200"
                   aria-haspopup="true"
                   aria-expanded={isProfileDropdownOpen}
                 >
@@ -277,7 +279,7 @@ const OrganizationDashboard = () => {
           </div>
         </div>
 
-        <main className="flex-1 m-4 md:m-6 mt-0 p-6 md:p-8">
+        <main className="flex-1 m-4 md:m-6 mt-0 px-0 py-6 md:p-8">
           <SectionTabs group={activeGroup} activeId={activeTab} onSelect={(id) => navigate(pathOf(id))} className="mb-6" />
           {!subscriptionLoaded ? (
             // Pages wait for the subscription answer: a locked school's page

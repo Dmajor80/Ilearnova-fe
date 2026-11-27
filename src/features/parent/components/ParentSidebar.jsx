@@ -46,7 +46,7 @@ function ParentSidebar({ activeTab, setActiveTab, isMobileMenuOpen, setIsMobileM
             <button
               onClick={() => setIsMobileMenuOpen(false)}
               aria-label="Close menu"
-              className="md:hidden p-2 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:bg-slate-50 border border-slate-200"
+              className="md:hidden inline-flex min-h-10 min-w-10 items-center justify-center p-2 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:bg-slate-50 border border-slate-200"
             >
               <X className="w-5 h-5 text-slate-600" />
             </button>

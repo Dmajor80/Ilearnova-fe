@@ -91,7 +91,7 @@ function SchoolsTab({ plans }) {
         ) : !rows.length ? (
           <EmptyState icon={CreditCard} title={state ? "No schools in this state" : "No schools yet"} />
         ) : (
-          <div className="overflow-x-auto">
+          <div className="relative overflow-x-auto">
             <table className="w-full min-w-[640px] text-left text-sm">
               <thead className={tableHead}>
                 <tr>
@@ -306,7 +306,7 @@ function CodesTab({ refreshKey, plans }) {
         ) : !rows.length ? (
           <EmptyState icon={Send} title="No codes" />
         ) : (
-          <div className="overflow-x-auto">
+          <div className="relative overflow-x-auto">
             <table className="w-full min-w-[720px] text-left text-sm">
               <thead className={tableHead}>
                 <tr>
@@ -463,7 +463,7 @@ function PlansTab({ plans, loading, error, onChanged, startCreating, onCreateHan
         ) : !plans?.length ? (
           <EmptyState icon={CreditCard} title="No plans yet">Create one so schools can subscribe.</EmptyState>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="relative overflow-x-auto">
             <table className="w-full min-w-[720px] text-left text-sm">
               <thead className={tableHead}>
                 <tr>

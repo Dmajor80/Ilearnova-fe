@@ -1,8 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AlertCircle, Check, X, Loader2, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { http } from "../../api/baseClient";
-import { verifyOtp, resendOtp } from "../../api/authApi";
+import { verifyOtp, resendOtp as requestNewOtp } from "../../api/authApi";
 
 const OtpInput = ({ value, onChange, onComplete, disabled, darkMode }) => {
   const inputsRef = useRef([]);
@@ -89,7 +88,7 @@ const OtpInput = ({ value, onChange, onComplete, disabled, darkMode }) => {
           onKeyDown={(e) => handleKeyDown(i, e)}
           onPaste={(e) => handlePaste(i, e)}
           disabled={disabled}
-          className={`w-12 h-12 sm:w-14 sm:h-14 text-center text-lg sm:text-xl font-semibold rounded-xl border-2 outline-none transition-all ${
+          className={`flex-1 min-w-0 sm:flex-none w-full h-12 sm:w-14 sm:h-14 text-center text-lg sm:text-xl font-semibold rounded-xl border-2 outline-none transition-all ${
             darkMode
               ? "bg-gray-800/50 text-white border-gray-600 focus:border-blue-500"
               : "bg-white text-gray-800 border-gray-200 focus:border-blue-600"
@@ -174,11 +173,11 @@ export default function VerifyOtp() {
     }
   };
 
-  const resendOtp = async () => {
+  const handleResend = async () => {
     if (!email) return;
     setResending(true);
     try {
-      await resendOtp(email);
+      await requestNewOtp(email);
       notify("OTP resent. Please check your email.", "success", 3000);
     } catch (e) {
       notify(e.message || "Network error", "error");
@@ -198,7 +197,7 @@ export default function VerifyOtp() {
       {/* Notification */}
       {showNotification && (
         <div
-          className={`fixed top-6 right-6 z-50 max-w-md p-4 rounded-2xl shadow-2xl transform transition-all duration-500 ${
+          className={`fixed top-4 left-4 right-4 sm:top-6 sm:left-auto sm:right-6 z-50 sm:max-w-md p-4 rounded-2xl shadow-2xl transform transition-all duration-500 ${
             notificationType === "success"
               ? "bg-green-500 text-white"
               : notificationType === "error"
@@ -225,7 +224,7 @@ export default function VerifyOtp() {
             </div>
             <button
               onClick={() => setShowNotification(false)}
-              className="ml-2 flex-shrink-0 opacity-70 hover:opacity-100 transition-opacity"
+              className="-my-2 -mr-2 ml-1 p-2 sm:m-0 sm:ml-2 sm:p-0 flex-shrink-0 opacity-70 hover:opacity-100 transition-opacity"
               aria-label="Close notification"
             >
               <X className="w-5 h-5" />
@@ -234,11 +233,11 @@ export default function VerifyOtp() {
         </div>
       )}
 
-      <div className="w-full px-6 sm:px-8 lg:px-12 py-12">
+      <div className="w-full px-5 sm:px-8 lg:px-12 py-6 sm:py-12">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8">
+          <div className="text-center mb-6 sm:mb-8">
             <h1
-              className={`text-4xl sm:text-5xl font-bold ${
+              className={`text-3xl sm:text-5xl font-bold ${
                 darkMode
                   ? "text-white"
                   : "bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent"
@@ -248,12 +247,12 @@ export default function VerifyOtp() {
             </h1>
             <p className={`${darkMode ? "text-gray-300" : "text-gray-600"} mt-3`}>
               We sent a 6-digit code to
-              <span className="font-semibold ml-2">{email}</span>
+              <span className="block sm:inline sm:ml-2 font-semibold break-all">{email}</span>
             </p>
           </div>
 
           <div
-            className={`p-8 rounded-3xl backdrop-blur-lg transition-all duration-500 max-w-xl mx-auto ${
+            className={`p-5 sm:p-8 rounded-2xl sm:rounded-3xl backdrop-blur-lg transition-all duration-500 max-w-xl mx-auto ${
               darkMode
                 ? "bg-gray-800/30 border border-gray-700/50"
                 : "bg-white/70 border border-white/50 shadow-xl"
@@ -278,12 +277,12 @@ export default function VerifyOtp() {
               </p>
             )}
 
-            <div className="flex items-center gap-3 mt-2 mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 mt-2 mb-4 sm:mb-6">
               <button
                 type="button"
                 onClick={submitVerify}
                 disabled={loading}
-                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-cyan-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-blue-300"
+                className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-xl sm:rounded-2xl hover:from-blue-700 hover:to-cyan-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-blue-300"
               >
                 {loading ? (
                   <span className="inline-flex items-center gap-2">
@@ -296,15 +295,15 @@ export default function VerifyOtp() {
 
               <button
                 type="button"
-                onClick={resendOtp}
+                onClick={handleResend}
                 disabled={resending}
-                className={`px-6 py-3 rounded-2xl font-semibold border-2 transition-all ${
+                className={`w-full sm:w-auto px-6 py-3 rounded-xl sm:rounded-2xl font-semibold border-2 transition-all ${
                   darkMode
                     ? "border-gray-600 text-gray-200 hover:bg-gray-800"
                     : "border-gray-300 text-gray-700 hover:bg-gray-100"
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
-                <span className="inline-flex items-center gap-2">
+                <span className="inline-flex items-center justify-center gap-2">
                   {resending ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
                   ) : (
@@ -319,7 +318,7 @@ export default function VerifyOtp() {
               Wrong email?{" "}
               <button
                 onClick={() => navigate("/forgot-password")}
-                className="text-blue-600 hover:text-blue-700 font-semibold hover:underline focus:outline-none rounded px-1 py-1"
+                className="inline-flex items-center min-h-10 sm:min-h-0 text-blue-600 hover:text-blue-700 font-semibold hover:underline focus:outline-none rounded px-1 py-1"
               >
                 Change email
               </button>

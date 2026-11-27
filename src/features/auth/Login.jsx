@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { Mail, Lock, Check, BookOpen, GraduationCap, Building } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Mail, Lock, Check, BookOpen, GraduationCap, Building, ChevronDown } from "lucide-react";
 import InputField from "@/components/ui/InputField";
 import NotificationBar from "@/components/ui/NotificationBar";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -81,6 +81,10 @@ export default function Login() {
     },
   });
 
+  // On phones the optional school code sits behind a toggle; from sm: up it is always shown.
+  const [showOrgCode, setShowOrgCode] = useState(false);
+  const orgCodeOpen = showOrgCode || Boolean(formData?.organization_code) || Boolean(errors?.organization_code);
+
   const handleFormSubmit = (e) => {
     handleSubmit(e);
   };
@@ -117,21 +121,21 @@ export default function Login() {
   onClose={() => notification.setShow(false)}
 />
 
-      <div className="w-full px-6 sm:px-8 lg:px-12 py-12">
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 xl:gap-20 items-center min-h-[600px]">
+      <div className="w-full px-5 sm:px-8 lg:px-12 py-8 sm:py-12">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 xl:gap-20 items-center sm:min-h-[600px]">
           {/* Form Section */}
           <div className="w-full max-w-md mx-auto lg:mx-0">
-            <div className="text-center lg:text-left mb-10">
-              <div className="flex items-center justify-center lg:justify-start mb-4">
-                <div className="p-3 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-600 mr-4">
-                  <GraduationCap className="w-8 h-8 text-white" />
+            <div className="text-center lg:text-left mb-6 sm:mb-10">
+              <div className="flex items-center justify-center lg:justify-start mb-2 sm:mb-4">
+                <div className="p-2.5 sm:p-3 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-600 mr-3 sm:mr-4">
+                  <GraduationCap className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                 </div>
-                <h1 className={`text-4xl sm:text-5xl font-bold ${darkMode ? "text-white" : "bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent"}`}>
+                <h1 className={`text-3xl sm:text-5xl font-bold ${darkMode ? "text-white" : "bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent"}`}>
                   { info === "first_time_user" || schoolReady ? "Welcome" : "Welcome Back"}
                 </h1>
               </div>
               <p
-                className={`text-lg sm:text-xl ${
+                className={`text-base sm:text-xl ${
                   darkMode ? "text-gray-300" : "text-gray-600"
                 }`}
               >
@@ -142,7 +146,7 @@ export default function Login() {
             </div>
 
             <form onSubmit={handleFormSubmit} autoComplete="off">
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 <InputField
                   label="Username"
                   name="username"
@@ -175,7 +179,27 @@ export default function Login() {
                   disabled={loading}
                 />
 
+                {!orgCodeOpen && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowOrgCode(true);
+                      setTimeout(() => document.getElementById("organization_code")?.focus(), 0);
+                    }}
+                    aria-expanded="false"
+                    aria-controls="organization_code"
+                    className={`sm:hidden flex items-center gap-1.5 min-h-10 -my-1.5 text-sm font-medium ${
+                      darkMode ? "text-gray-300" : "text-gray-600"
+                    }`}
+                  >
+                    <Building className="w-4 h-4" />
+                    Signing in to a specific school?
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
+                )}
+
                 <InputField
+                  className={orgCodeOpen ? "" : "hidden sm:block"}
                   label="Organization Code (optional)"
                   name="organization_code"
                   type="text"
@@ -192,8 +216,8 @@ export default function Login() {
                 />
 
                 {/* Remember Me & Forgot Password */}
-                <div className="flex items-center justify-between mb-6">
-                  <label className="flex items-center cursor-pointer">
+                <div className="flex items-center justify-between sm:mb-6">
+                  <label className="flex items-center cursor-pointer min-h-11 sm:min-h-0 pr-2">
                     <input
                       type="checkbox"
                       checked={rememberMe}
@@ -213,7 +237,7 @@ export default function Login() {
                   <button
                     type="button"
                     onClick={() => navigate("/forgot-password")}
-                    className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1 transition-all duration-200"
+                    className="min-h-11 sm:min-h-0 -mr-2 sm:mr-0 text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1 transition-all duration-200"
                     disabled={loading}
                   >
                     Forgot Password?
@@ -223,13 +247,13 @@ export default function Login() {
                 <button
                   type="submit"
                   disabled={loading || isBlocked}
-                  className="w-full px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-cyan-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-4 focus:ring-blue-300 shadow-lg"
+                  className="w-full px-8 py-3.5 sm:py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-cyan-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-4 focus:ring-blue-300 shadow-lg"
                 >
                   {loading ? <LoadingSpinner /> : isBlocked ? "Account Locked" : "Sign In"}
                 </button>
 
                 {/* Divider */}
-                <div className="relative my-8">
+                <div className="relative my-5 sm:my-8">
                   <div
                     className={`absolute inset-0 flex items-center ${
                       darkMode ? "text-gray-600" : "text-gray-400"
@@ -301,7 +325,7 @@ export default function Login() {
               </div>
             )}
 
-            <div className="text-center mt-8 space-y-2">
+            <div className="text-center mt-6 sm:mt-8 space-y-2">
               <p
                 className={`text-sm ${
                   darkMode ? "text-gray-400" : "text-gray-500"
@@ -309,7 +333,7 @@ export default function Login() {
               >
                 Having trouble signing in?{" "}
                 <button
-                  className="text-blue-600 hover:text-blue-700 font-medium hover:underline"
+                  className="inline-flex items-center min-h-10 sm:min-h-0 text-blue-600 hover:text-blue-700 font-medium hover:underline"
                   type="button"
                 >
                   Contact Support

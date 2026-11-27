@@ -160,13 +160,13 @@ export default function JoinSchool() {
           </p>
           <p className="text-sm text-gray-600">
             Have a school code instead?{" "}
-            <Link to="/signup" className="font-medium text-blue-600 hover:underline">
+            <Link to="/signup" className="py-3 font-medium text-blue-600 hover:underline">
               Sign up here
             </Link>
           </p>
           <p className="text-sm text-gray-600">
             Already have an account?{" "}
-            <Link to="/login" className="font-medium text-blue-600 hover:underline">
+            <Link to="/login" className="py-3 font-medium text-blue-600 hover:underline">
               Log in
             </Link>
           </p>
@@ -271,7 +271,7 @@ export default function JoinSchool() {
         </button>
         <p className="text-center text-sm text-gray-600">
           Already have an account?{" "}
-          <Link to="/login" className="font-medium text-blue-600 hover:underline">
+          <Link to="/login" className="py-3 font-medium text-blue-600 hover:underline">
             Log in
           </Link>
         </p>

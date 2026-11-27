@@ -226,7 +226,7 @@ function FeesTable({ classes, refreshKey }) {
 
       {error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
 
-      <div className="overflow-x-auto">
+      <div className="relative overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200 text-sm">
           <thead className="bg-gray-50">
             <tr>
@@ -243,7 +243,7 @@ function FeesTable({ classes, refreshKey }) {
           </thead>
           <tbody className="divide-y divide-gray-100">
             {loading ? (
-              <tr><td colSpan={9} className="py-6 text-center text-gray-500">Loading fees…</td></tr>
+              <tr><td colSpan={9} className="px-3 py-6 text-left text-gray-500 sm:text-center">Loading fees…</td></tr>
             ) : data.results.length ? (
               data.results.map((fee) => (
                 <tr key={fee.id}>
@@ -265,7 +265,7 @@ function FeesTable({ classes, refreshKey }) {
                 </tr>
               ))
             ) : (
-              <tr><td colSpan={9} className="py-6 text-center text-gray-500">No fees match.</td></tr>
+              <tr><td colSpan={9} className="px-3 py-6 text-left text-gray-500 sm:text-center">No fees match.</td></tr>
             )}
           </tbody>
         </table>
@@ -307,7 +307,7 @@ function PaymentsTable() {
   if (error) return <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>;
   if (!rows.length) return <p className="py-6 text-center text-gray-500">No online payments yet.</p>;
   return (
-    <div className="overflow-x-auto">
+    <div className="relative overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200 text-sm">
         <thead className="bg-gray-50">
           <tr>

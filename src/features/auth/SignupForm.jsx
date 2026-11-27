@@ -309,15 +309,15 @@ export default function SignupForm() {
         onClose={() => notification.setShow(false)}
       />
 
-      <div className="w-full px-6 sm:px-8 lg:px-12 py-12">
+      <div className="w-full px-4 sm:px-8 lg:px-12 py-6 sm:py-12">
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 xl:gap-20 items-center">
           <div className="w-full">
-            <div className="text-center lg:text-left mb-10">
-              <h1 className={`text-4xl sm:text-5xl font-bold mb-4 ${darkMode ? "text-white" : "bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent"}`}>
+            <div className="text-center lg:text-left mb-5 sm:mb-10">
+              <h1 className={`text-3xl sm:text-5xl font-bold mb-2 sm:mb-4 ${darkMode ? "text-white" : "bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent"}`}>
                 Join Our School
               </h1>
               <p
-                className={`text-lg sm:text-xl ${
+                className={`text-base sm:text-xl ${
                   darkMode ? "text-gray-300" : "text-gray-600"
                 }`}
               >
@@ -326,19 +326,19 @@ export default function SignupForm() {
             </div>
 
             <div
-              className={`p-8 rounded-3xl backdrop-blur-lg transition-all duration-500 ${
+              className={`p-4 sm:p-8 rounded-2xl sm:rounded-3xl backdrop-blur-lg transition-all duration-500 ${
                 darkMode
                   ? "bg-gray-800/30 border border-gray-700/50"
                   : "bg-white/70 border border-white/50 shadow-xl"
               }`}
             >
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                 {/* Role Selection */}
                 <div>
-                  <label className={`block text-sm font-medium mb-3 ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                  <p id="signup-role-label" className={`block text-sm font-medium mb-2 sm:mb-3 ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
                     Select Your Role
-                  </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  </p>
+                  <div role="group" aria-labelledby="signup-role-label" className="grid grid-cols-2 gap-2 sm:gap-3">
                     {roleOptions.map((role) => {
                       const IconComponent = role.icon;
                       return (
@@ -346,28 +346,29 @@ export default function SignupForm() {
                           key={role.value}
                           type="button"
                           onClick={() => handleInputChange("role", role.value)}
-                          className={`p-4 rounded-xl border-2 transition-all duration-200 text-left ${
+                          aria-pressed={formData.role === role.value}
+                          className={`min-h-14 px-3 py-2.5 sm:p-4 rounded-xl border-2 transition-all duration-200 text-left ${
                             formData.role === role.value
                               ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
                               : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
                           }`}
                         >
-                          <div className="flex items-center gap-3">
-                            <IconComponent className={`w-5 h-5 ${formData.role === role.value ? "text-blue-600" : "text-gray-500"}`} />
-                            <div>
-                              <div className={`font-medium ${formData.role === role.value ? "text-blue-600" : ""}`}>
+                          <div className="flex items-center gap-2 sm:gap-3">
+                            <IconComponent className={`w-5 h-5 shrink-0 ${formData.role === role.value ? "text-blue-600" : "text-gray-500"}`} />
+                            <div className="min-w-0">
+                              <div className={`text-sm sm:text-base leading-tight sm:leading-normal font-medium ${formData.role === role.value ? "text-blue-600" : ""}`}>
                                 {role.label}
                               </div>
-                              <div className="text-xs text-gray-500">{role.description}</div>
+                              <div className="hidden sm:block text-xs text-gray-500">{role.description}</div>
                             </div>
                           </div>
                         </button>
                       );
                     })}
                   </div>
-                  <p className={`mt-3 text-sm ${darkMode ? "text-gray-400" : "text-gray-600"}`}>
+                  <p className={`mt-2 sm:mt-3 text-sm ${darkMode ? "text-gray-400" : "text-gray-600"}`}>
                     Setting up a new school?{" "}
-                    <Link to="/register/school" className="font-medium text-blue-600 hover:underline">
+                    <Link to="/register/school" className="py-3 font-medium text-blue-600 hover:underline">
                       Register your school
                     </Link>{" "}
                     instead.
@@ -377,7 +378,7 @@ export default function SignupForm() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <InputField
                     label="First Name"
                     name="first_name"
@@ -428,7 +429,7 @@ export default function SignupForm() {
                 />
                 
                 <div>
-                  <label htmlFor="date_of_birth" className={`block text-sm font-medium mb-3 ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                  <label htmlFor="date_of_birth" className={`block text-sm font-medium mb-1.5 sm:mb-3 ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
                     Date of Birth <span className="text-red-500 ml-1">*</span>
                   </label>
                   <div className="relative">
@@ -440,7 +441,7 @@ export default function SignupForm() {
                       onChange={(e) => handleInputChange("date_of_birth", e.target.value)}
                       required
                       max={new Date().toISOString().split("T")[0]}
-                      className={`w-full px-4 py-3 pl-12 pr-4 rounded-xl border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      className={`w-full min-h-12 px-4 py-3 pl-12 pr-4 text-base rounded-xl border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                         darkMode
                           ? "bg-gray-800 border-gray-600 text-gray-100 placeholder-gray-400"
                           : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
@@ -474,7 +475,7 @@ export default function SignupForm() {
                 {/* School code for Teacher, Student, Parent */}
                 {isSchoolRole && (
                   <div>
-                    <label htmlFor="organization_code" className={`block text-sm font-medium mb-3 ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
+                    <label htmlFor="organization_code" className={`block text-sm font-medium mb-1.5 sm:mb-3 ${darkMode ? "text-gray-300" : "text-gray-700"}`}>
                       School code <span className="text-red-500 ml-1">*</span>
                     </label>
                     <div className="relative">
@@ -491,7 +492,7 @@ export default function SignupForm() {
                         required
                         aria-invalid={errors.organization_code || codeLookup?.status === "missing" ? "true" : undefined}
                         aria-describedby="organization_code_hint organization_code_status"
-                        className={`w-full px-4 py-3 pl-12 pr-4 rounded-xl border-2 uppercase tracking-wider transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        className={`w-full px-4 py-3 pl-12 pr-4 text-base rounded-xl border-2 uppercase tracking-wider transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                           darkMode
                             ? "bg-gray-800 border-gray-600 text-gray-100 placeholder-gray-400"
                             : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
@@ -589,7 +590,7 @@ export default function SignupForm() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full px-8 py-4 bg-gradient-to-r from-green-600 to-blue-600 text-white font-semibold rounded-2xl hover:from-green-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-4 focus:ring-green-300 shadow-lg"
+                  className="w-full px-8 py-3.5 sm:py-4 bg-gradient-to-r from-green-600 to-blue-600 text-white font-semibold rounded-xl sm:rounded-2xl hover:from-green-700 hover:to-blue-700 transition-all duration-300 transform sm:hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-4 focus:ring-green-300 shadow-lg"
                 >
                   {loading ? <LoadingSpinner /> : "Create Account"}
                 </button>
@@ -597,15 +598,16 @@ export default function SignupForm() {
             </div>
 
             <p
-              className={`text-center mt-8 text-base ${
+              className={`text-center mt-4 sm:mt-8 text-sm sm:text-base ${
                 darkMode ? "text-gray-300" : "text-gray-600"
               }`}
             >
               Already have an account?{" "}
-              <Link to="/login">
-                <button className="text-blue-600 hover:text-blue-700 font-semibold hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1 transition-all duration-200">
-                  Login here
-                </button>
+              <Link
+                to="/login"
+                className="inline-flex items-center min-h-10 sm:min-h-0 text-blue-600 hover:text-blue-700 font-semibold hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1 transition-all duration-200"
+              >
+                Login here
               </Link>
             </p>
           </div>

@@ -291,7 +291,7 @@ export default function Users() {
             {filtered ? "Try clearing a filter." : "Add the first one with “Add user”."}
           </EmptyState>
         ) : (
-          <div className={`overflow-x-auto transition-opacity ${list.loading ? "opacity-60" : ""}`}>
+          <div className={`relative overflow-x-auto transition-opacity ${list.loading ? "opacity-60" : ""}`}>
             <table className="w-full min-w-[860px] text-left text-sm">
               <thead className="bg-gray-50 text-xs font-medium uppercase tracking-wide text-gray-500">
                 <tr>
