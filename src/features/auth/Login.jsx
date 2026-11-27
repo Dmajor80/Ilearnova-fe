@@ -59,8 +59,6 @@ export default function Login() {
   //   return "/home";
   // };
 
-  console.log("Login: Component rendered, useLogin hook initialized");
-
   const {
     formData,
     rememberMe,
@@ -77,16 +75,13 @@ export default function Login() {
     notification,
   } = useLogin({
     initialUsername: setupUsername || "",
-    onSuccess: (response) => {
-      console.log("Login: onSuccess called with response:", response);
-      console.log("Login: Navigating to /post-login for role-based redirection");
+    onSuccess: () => {
       // Navigate to post-login redirector for consistent role-based redirection
       navigate("/post-login", { replace: true });
     },
   });
 
   const handleFormSubmit = (e) => {
-    console.log("Login: Form submit triggered");
     handleSubmit(e);
   };
 
@@ -314,7 +309,6 @@ export default function Login() {
               >
                 Having trouble signing in?{" "}
                 <button
-                  onClick={() => console.log("Contact support clicked")}
                   className="text-blue-600 hover:text-blue-700 font-medium hover:underline"
                   type="button"
                 >

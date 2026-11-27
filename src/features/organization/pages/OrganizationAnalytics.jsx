@@ -10,6 +10,7 @@ import {
   YAxis
 } from "recharts";
 import { RefreshCw, TrendingUp } from "lucide-react";
+import { Skeleton, SkeletonRegion } from "@/components/ui/Skeleton";
 
 const chartDefinitions = [
   { key: "student_performance", title: "Student performance", color: "#4f46e5", format: "percent" },
@@ -129,7 +130,15 @@ const OrganizationAnalytics = () => {
       )}
 
       {analytics.loading && !response ? (
-        <p className="rounded-xl bg-white py-10 text-center text-gray-500 shadow-sm">Loading analytics…</p>
+        <SkeletonRegion label="Loading analytics" className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+          {Array.from({ length: 4 }, (_, i) => (
+            <div key={i} className="rounded-xl bg-white p-5 shadow-sm">
+              <Skeleton className="h-4 w-40" />
+              <Skeleton className="mt-2 h-3 w-24" />
+              <Skeleton className="mt-5 h-56 w-full rounded-lg" />
+            </div>
+          ))}
+        </SkeletonRegion>
       ) : availableCharts.length ? (
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
           {availableCharts.map((definition) => (

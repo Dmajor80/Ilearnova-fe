@@ -175,11 +175,10 @@ export function logError(error, context = {}) {
   
   // In development, log to console
   if (process.env.NODE_ENV === 'development') {
-    console.group(`🚨 ${appError.type} - ${appError.severity.toUpperCase()}`);
+    console.error(`🚨 ${appError.type} - ${appError.severity.toUpperCase()}`);
     console.error('Message:', appError.message);
     console.error('Context:', appError.context);
     console.error('Stack:', appError.stack);
-    console.groupEnd();
   }
   
   // In production, you would send to error monitoring service

@@ -288,8 +288,8 @@ export const ParentListContent = () => {
               className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               disabled={loading}
             >
-              <option value="-date_joined">Newest</option>
-              <option value="date_joined">Oldest</option>
+              <option value="-created_at">Newest</option>
+              <option value="created_at">Oldest</option>
               <option value="first_name">Name</option>
             </select>
             <button

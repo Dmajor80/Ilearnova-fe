@@ -20,7 +20,6 @@ function readUserDataFromStorage() {
 function writeUserDataToStorage(nextUser) {
   try {
     const { store } = getTokens();
-    console.log(store + "write user")
     const json = JSON.stringify(nextUser);
     // Prefer the same store that currently holds tokens
     if (store) {
@@ -73,15 +72,12 @@ export function OrganizationProvider({ children }) {
           initialOrgId = firstOrg?.organization?.id ||
                         firstOrg?.id ||
                         (typeof firstOrg === 'string' ? firstOrg : null);
-          console.log("OrganizationContext: Auto-selecting organization:", initialOrgId, "from:", firstOrg);
         } else if (userOrgs.length > 1) {
-          console.log("OrganizationContext: Multiple organizations found, user needs to select one");
           // For now, auto-select the first one if user has multiple orgs
           const firstOrg = userOrgs[0];
           initialOrgId = firstOrg?.organization?.id ||
                         firstOrg?.id ||
                         (typeof firstOrg === 'string' ? firstOrg : null);
-          console.log("OrganizationContext: Auto-selecting first organization:", initialOrgId);
         }
       }
 
@@ -103,7 +99,6 @@ export function OrganizationProvider({ children }) {
 
   const persistSelectedOrgId = useCallback((orgId) => {
     const userData = readUserDataFromStorage();
-    console.log(userData)
     if (!userData) return;
     const nextUser = {
       ...userData,
@@ -127,8 +122,6 @@ export function OrganizationProvider({ children }) {
         setUser(newUserData);
         // Update user_data in storage
         writeUserDataToStorage(newUserData);
-      } else {
-        console.log("OrganizationContext: No user data received from API");
       }
     } catch (error) {
       console.error("OrganizationContext: Error refreshing user data:", error);

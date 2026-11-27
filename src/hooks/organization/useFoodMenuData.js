@@ -36,7 +36,6 @@ export default function useFoodMenuData() {
     const endpointName = "foodMenu";
 
     if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
-      console.log("Skipping food menu call - endpoint marked as failed");
       return;
     }
 
@@ -60,7 +59,6 @@ export default function useFoodMenuData() {
       });
 
       const data = payload?.data ?? payload;
-      console.log("Food menu API response:", data);
 
       if (data.results) {
         setMenuItems(data.results || []);

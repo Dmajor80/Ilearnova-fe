@@ -198,10 +198,9 @@ export default function OrganizationDetails() {
       };
 
       setAccessError("");
-      const response = await http.post("/api/user-type/", {
+      await http.post("/api/user-type/", {
         body,
       });
-      console.log(response)
       // Persist details
       try {
         sessionStorage.setItem("selected_user_type", "organization");

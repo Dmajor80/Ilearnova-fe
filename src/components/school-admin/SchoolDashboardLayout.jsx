@@ -182,7 +182,7 @@ const SchoolDashboardLayout = React.memo(function SchoolDashboardLayout({
                   loading={schoolDataLoading}
                   error={schoolDataError}
                   itemsPerPage={5}
-                  onRowClick={(teacher) => console.log("Teacher clicked:", teacher)}
+                  onRowClick={() => {}}
                 />
 
                 {/* Unpaid Tuition Table */}
@@ -248,7 +248,7 @@ const SchoolDashboardLayout = React.memo(function SchoolDashboardLayout({
                   loading={schoolDataLoading}
                   error={schoolDataError}
                   itemsPerPage={5}
-                  onRowClick={(student) => console.log("Student clicked:", student)}
+                  onRowClick={() => {}}
                 />
               </div>
 

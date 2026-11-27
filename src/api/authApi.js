@@ -92,7 +92,6 @@ export async function registerParent(data) {
 
 
 export async function registerIndividualLearner(data) {
-  console.log(data)
   return await http.post("/api/auth/register/individual-learner/", {
     body: data,
     auth: false,

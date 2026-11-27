@@ -50,7 +50,6 @@ export default function useStudentData() {
 
     // Check circuit breaker
     if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
-      console.log("Skipping students call - endpoint marked as failed");
       return;
     }
 
@@ -74,9 +73,7 @@ export default function useStudentData() {
         auth: true,
         params: queryParams
       });
-      console.log(payload)
       const data = payload?.data ?? payload;
-      console.log("Students API response:", data);
 
       // Handle both paginated and non-paginated responses
       if (data.results) {
@@ -123,7 +120,6 @@ export default function useStudentData() {
     const endpointName = "grades";
 
     if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
-      console.log("Skipping grades call - endpoint marked as failed");
       return;
     }
 
@@ -136,7 +132,6 @@ export default function useStudentData() {
         active_only: true
       });
       const data = response?.data ?? response;
-      console.log("Grades API response:", data);
 
       // Handle different response formats
       if (Array.isArray(data.classes)) {
@@ -170,7 +165,6 @@ export default function useStudentData() {
     const endpointName = "studentDetails";
 
     if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
-      console.log("Skipping student details call - endpoint marked as failed");
       return null;
     }
 
@@ -180,7 +174,6 @@ export default function useStudentData() {
       });
       
       const data = payload?.data ?? payload;
-      console.log("Student details API response:", data);
 
       return data;
     } catch (err) {
@@ -206,7 +199,6 @@ export default function useStudentData() {
     try {
       const payload = await apiCreateStudent(studentData);
       const data = payload?.data ?? payload;
-      console.log("Create student API response:", data);
 
       notification.notify("Student added successfully", "success");
       await fetchStudents();
@@ -241,7 +233,6 @@ export default function useStudentData() {
         auth: true
       });
       const data = payload?.data ?? payload;
-      console.log("Update student API response:", data);
 
       notification.notify("Student updated successfully", "success");
       await fetchStudents();
@@ -369,7 +360,6 @@ export default function useStudentData() {
       const endpointName = "grades";
 
       if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
-        console.log("Skipping grades call - endpoint marked as failed");
         return;
       }
 
@@ -382,7 +372,6 @@ export default function useStudentData() {
           active_only: true
         });
         const data = response?.data ?? response;
-        console.log("Grades API response:", data);
 
         if (!mounted) return; // Component unmounted
 

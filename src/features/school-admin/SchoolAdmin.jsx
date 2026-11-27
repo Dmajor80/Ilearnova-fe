@@ -94,8 +94,7 @@ const SchoolAdmin = React.memo(function SchoolAdmin() {
 
     openLogoFilePicker(
       organizationData.id,
-      (data) => {
-        console.log("Logo uploaded successfully:", data);
+      () => {
         // The hook automatically updates the user data in storage
         // You might want to show a success notification here
       },
@@ -109,8 +108,7 @@ const SchoolAdmin = React.memo(function SchoolAdmin() {
   // Handle user profile click
   const handleProfileClick = () => {
     openProfileFilePicker(
-      (data) => {
-        console.log("Profile picture uploaded successfully:", data);
+      () => {
         // The hook automatically updates the user data in storage
         // You might want to show a success notification here
       },

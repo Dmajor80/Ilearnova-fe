@@ -37,14 +37,12 @@ export default function useClassesData() {
     const endpointName = "classes";
 
     if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
-      console.log("Skipping classes call - endpoint marked as failed");
       return;
     }
 
     try {
       const payload = await http.get("/api/admin/classes/", { auth: true });
       const data = payload?.data ?? payload;
-      console.log("Classes API response:", data);
 
       if (Array.isArray(data.results)) {
         setClasses(data.results);

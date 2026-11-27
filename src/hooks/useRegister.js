@@ -146,7 +146,6 @@ export default function useRegister({ onSuccess, initial } = {}) {
         };
         }
         
-        console.log(registrationData)
 
         let response;
         // Call specific registration endpoint based on role

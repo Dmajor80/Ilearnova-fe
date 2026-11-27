@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { MessageCircle, RefreshCw, Search, Send } from "lucide-react";
 import useDirectMessages from "@/hooks/messaging/useDirectMessages";
+import { ListSkeleton, Skeleton, SkeletonRegion } from "@/components/ui/Skeleton";
 
 function contactFromConversation(conversation) {
   return conversation.user ?? conversation.contact ?? conversation.other_user ?? null;
@@ -137,7 +138,7 @@ export default function DirectMessages({ restrictRecipients = false }) {
               </form>
               <div className="flex-1 overflow-y-auto p-2">
                 {messaging.contactsLoading ? (
-                  <p role="status" className="p-3 text-sm text-gray-500">Loading school contacts…</p>
+                  <ListSkeleton rows={5} label="Loading school contacts" className="divide-transparent px-3" />
                 ) : messageableContacts.length === 0 ? (
                   <p className="p-3 text-sm text-gray-500">No messageable contacts found.</p>
                 ) : (
@@ -163,7 +164,7 @@ export default function DirectMessages({ restrictRecipients = false }) {
           ) : (
             <div className="flex-1 overflow-y-auto p-2">
               {messaging.conversationsLoading ? (
-                <p role="status" className="p-3 text-sm text-gray-500">Loading conversations…</p>
+                <ListSkeleton rows={5} label="Loading conversations" className="divide-transparent px-3" />
               ) : messaging.conversations.length === 0 ? (
                 <p className="p-3 text-sm text-gray-500">No conversations yet. Choose “New message” to find a school contact.</p>
               ) : (
@@ -232,7 +233,11 @@ export default function DirectMessages({ restrictRecipients = false }) {
                   </div>
                 )}
                 {messaging.messagesLoading && messaging.messages.length === 0 ? (
-                  <p role="status" className="py-8 text-center text-sm text-gray-500">Loading conversation…</p>
+                  <SkeletonRegion label="Loading conversation" className="space-y-3 py-4">
+                    <Skeleton className="h-10 w-2/3 rounded-2xl" />
+                    <Skeleton className="ml-auto h-10 w-1/2 rounded-2xl" />
+                    <Skeleton className="h-10 w-3/5 rounded-2xl" />
+                  </SkeletonRegion>
                 ) : messaging.messages.length === 0 ? (
                   <p className="py-8 text-center text-sm text-gray-500">No messages yet. Send the first message.</p>
                 ) : (

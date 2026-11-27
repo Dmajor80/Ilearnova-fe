@@ -146,7 +146,6 @@ export default function useDashboardData() {
   useEffect(() => {
     const interval = setInterval(() => {
       if (!loading) {
-        console.log("Auto-refreshing dashboard data...");
         fetchMetrics();
         fetchRecentActivities();
       }

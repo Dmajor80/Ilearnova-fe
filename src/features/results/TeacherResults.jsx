@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { Download, Eye, EyeOff, RefreshCw, Save, Settings2, Upload } from "lucide-react";
 import { resultsApi } from "@/api/resultsApi";
+import { FormSkeleton, TableSkeleton } from "@/components/ui/Skeleton";
 import ScoreSheet from "./ScoreSheet";
 import ComponentsEditor from "./ComponentsEditor";
 import {
@@ -29,7 +31,7 @@ const SOURCE_LABEL = {
  * Teachers (and school admins) record term results: pick a subject and term,
  * type or upload scores, then publish them to students and parents.
  */
-export default function TeacherResults() {
+export default function TeacherResults({ forSchoolAdmin = false }) {
   const [subjects, setSubjects] = useState([]);
   const [subjectId, setSubjectId] = useState("");
   const [period, setPeriod] = useState({ session: currentSession(), term: "first" });
@@ -220,12 +222,29 @@ export default function TeacherResults() {
     }
   };
 
-  if (loading) return <p className="py-10 text-center text-gray-500">Loading your subjects…</p>;
+  if (loading) {
+    return (
+      <section className="space-y-5 rounded-xl bg-white p-4 shadow-sm md:p-6">
+        <FormSkeleton fields={4} label={forSchoolAdmin ? "Loading subjects" : "Loading your subjects"} />
+        <TableSkeleton rows={5} columns={5} label="Loading scores" />
+      </section>
+    );
+  }
   if (!subjects.length) {
     return (
       <section className="mx-auto max-w-2xl rounded-xl bg-white p-6 text-center shadow-sm">
         <h2 className="text-xl font-bold text-gray-900">Results</h2>
-        <p className="mt-2 text-gray-600">You are not assigned to any subject yet. Ask your school admin to assign you one.</p>
+        {forSchoolAdmin ? (
+          <p className="mt-2 text-gray-600">
+            Your school has no subjects yet. Add subjects to a class in{" "}
+            <Link to="/organization-dashboard/classes" className="font-medium text-blue-700 underline hover:text-blue-800">
+              Classes
+            </Link>
+            , then record results here.
+          </p>
+        ) : (
+          <p className="mt-2 text-gray-600">You are not assigned to any subject yet. Ask your school admin to assign you one.</p>
+        )}
       </section>
     );
   }
@@ -345,7 +364,7 @@ export default function TeacherResults() {
           <ScoreSheet sheet={sheet} drafts={drafts} onEdit={edit} rowErrors={rowErrors} bands={bands} disabled={busy} republish={republish} />
         </>
       ) : (
-        busy && <p className="py-8 text-center text-gray-500">Loading scores…</p>
+        busy && <TableSkeleton rows={6} columns={5} label="Loading scores" />
       )}
     </section>
   );

@@ -77,7 +77,6 @@ export const DashboardContent = React.memo(function DashboardContent() {
 
   // Handle profile click
   const handleProfileClick = () => {
-    console.log("Profile clicked - implement profile management");
     // TODO: Implement user profile management functionality
   };
 

@@ -3,6 +3,7 @@ import { Plus, RotateCcw, Save, Trash2 } from "lucide-react";
 import { resultsApi } from "@/api/resultsApi";
 import ComponentsEditor from "./ComponentsEditor";
 import { apiErrorDetails, bandsProblem, componentsProblem, fmt, toEditable, toPayload } from "./resultsUtils";
+import { FormSkeleton } from "@/components/ui/Skeleton";
 
 const toBands = (scale = []) =>
   scale.map((b) => ({ grade: b.grade, min: fmt(b.min), remark: b.remark || "" }));
@@ -55,7 +56,7 @@ export default function GradingPolicyPage() {
     return message ? (
       <p role="alert" className="rounded-lg bg-red-50 p-4 text-red-800">{message.lines.join(" ")}</p>
     ) : (
-      <p className="py-10 text-center text-gray-500">Loading grading policy…</p>
+      <FormSkeleton fields={6} label="Loading grading policy" className="rounded-xl bg-white p-6 shadow-sm" />
     );
   }
 

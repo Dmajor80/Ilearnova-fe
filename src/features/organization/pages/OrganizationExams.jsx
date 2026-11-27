@@ -3,6 +3,7 @@ import { ClipboardList, Eye, Pencil, Plus, RefreshCw, Search, Trash2 } from "luc
 import SchoolDataTable from "@/components/school-admin/SchoolDataTable";
 import useSchoolExamsData, { describeApiError } from "@/hooks/organization/useSchoolExamsData";
 import DeleteConfirmModal from "../components/DeleteConfirmModal";
+import { TableSkeleton } from "@/components/ui/Skeleton";
 
 const STATUS_STYLES = {
   published: "bg-green-100 text-green-800",
@@ -308,7 +309,7 @@ const OrganizationExams = () => {
               </div>
               <button type="button" onClick={() => setResultsExam(null)} className="text-gray-500">Close</button>
             </div>
-            {results.loading && <p className="py-6 text-center text-gray-500">Loading results...</p>}
+            {results.loading && <TableSkeleton rows={4} columns={5} label="Loading results" />}
             {results.error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{results.error}</p>}
             {!results.loading && !results.error && !results.items.length && <p className="text-gray-600">No attempts yet.</p>}
             {!results.loading && results.items.length > 0 && (

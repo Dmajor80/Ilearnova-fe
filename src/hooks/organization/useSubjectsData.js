@@ -31,7 +31,6 @@ export default function useSubjectsData() {
     const endpointName = "subjects";
 
     if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
-      console.log("Skipping subjects call - endpoint marked as failed");
       return;
     }
 
@@ -45,7 +44,6 @@ export default function useSubjectsData() {
         }
       });
       const data = payload?.data ?? payload;
-      console.log("Subjects API response:", data);
 
       if (Array.isArray(data.subjects)) {
         setSubjects(data.subjects);

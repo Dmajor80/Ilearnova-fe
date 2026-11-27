@@ -30,7 +30,6 @@ export default function useSchoolAdminActions() {
    * Handle navigation between routes
    */
   const handleNavigation = useCallback((routeId) => {
-    console.log(routeId)
     setActiveRoute(routeId);
     // Close any open quick actions when navigating
     setQuickActionsOpen(false);

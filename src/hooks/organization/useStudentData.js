@@ -49,7 +49,6 @@ export default function useStudentData() {
 
     // Check circuit breaker
     if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
-      console.log("Skipping students call - endpoint marked as failed");
       return;
     }
 
@@ -78,7 +77,6 @@ export default function useStudentData() {
       });
       const responseData = payload?.data ?? payload;
       const data = responseData?.data ?? responseData;
-      console.log("Students API response:", data);
 
       // Handle the documented { students, pagination } response and legacy formats.
       if (Array.isArray(data?.students)) {
@@ -130,7 +128,6 @@ export default function useStudentData() {
     const { shouldCallEndpoint, markEndpointFailed } = circuitBreaker;
 
     if (!shouldCallEndpoint(endpointName)) {
-      console.log("Skipping grades call - endpoint marked as failed");
       return;
     }
 
@@ -143,7 +140,6 @@ export default function useStudentData() {
         params: { page_size: 100 }
       });
       const data = response?.data ?? response;
-      console.log("Grades API response:", data);
 
       // Handle different response formats
       if (Array.isArray(data.classes)) {
@@ -177,7 +173,6 @@ export default function useStudentData() {
     const endpointName = "studentDetails";
 
     if (!circuitBreaker.shouldCallEndpoint(endpointName)) {
-      console.log("Skipping student details call - endpoint marked as failed");
       return null;
     }
 
@@ -187,7 +182,6 @@ export default function useStudentData() {
       });
       
       const data = payload?.data ?? payload;
-      console.log("Student details API response:", data);
 
       return data;
     } catch (err) {
@@ -215,7 +209,6 @@ export default function useStudentData() {
         auth: true
       });
       const data = payload?.data ?? payload;
-      console.log("Create student API response:", data);
 
       notification.notify("Student added successfully", "success");
       await fetchStudents();
@@ -250,7 +243,6 @@ export default function useStudentData() {
         auth: true
       });
       const data = payload?.data ?? payload;
-      console.log("Update student API response:", data);
 
       notification.notify("Student updated successfully", "success");
       await fetchStudents();
