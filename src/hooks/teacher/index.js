@@ -8,3 +8,5 @@ export { default as useTeacherClasses } from "./useTeacherClasses";
 export { default as useTeacherExaminations } from "./useTeacherExaminations";
 export { default as useTeacherStudents } from "./useTeacherStudents";
 export { default as useTeacherTimetable } from "./useTeacherTimetable";
+export { default as useTeacherSubjects } from "./useTeacherSubjects";
+export { teacherSubjectLabel } from "./teacherSubjects";

@@ -1,7 +1,8 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import CoursesComponent from "./components/CourseComponents";
 import { Plus, Search, Filter, Calendar, Clock, Users, FileText, Edit, Trash2, Eye, Download, RefreshCw } from "lucide-react";
-import { useTeacherAssignments, useTeacherClasses, useTeacherStudents } from "@/hooks/teacher";
+import { useTeacherAssignments, useTeacherSubjects } from "@/hooks/teacher";
+import { teacherSubjectLabel } from "@/hooks/teacher/teacherSubjects";
 
 const Assignments = () => {
   const [activeTab, setActiveTab] = useState("assignments");
@@ -11,36 +12,17 @@ const Assignments = () => {
   const [editingAssignment, setEditingAssignment] = useState(null);
   const [form, setForm] = useState({ title: "", description: "", due_date: "", subject: "", is_active: true });
   const assignmentsApi = useTeacherAssignments();
-  const classesApi = useTeacherClasses();
-  const fetchSubjects = classesApi.fetchSubjects;
-  const studentsApi = useTeacherStudents();
-  const [subjects, setSubjects] = useState([]);
+  const { subjects, error: subjectsError } = useTeacherSubjects();
+  // Students taking each subject: a class's pupils, or those enrolled in a
+  // subject without a class.
+  const studentCounts = useMemo(
+    () => Object.fromEntries(subjects.map((subject) => [subject.id, Number(subject.student_count || 0)])),
+    [subjects]
+  );
   const [selectedAssignment, setSelectedAssignment] = useState(null);
   const [submissionsLoading, setSubmissionsLoading] = useState(false);
   const [assignmentPage, setAssignmentPage] = useState(1);
   const [submissionPage, setSubmissionPage] = useState(1);
-
-  useEffect(() => {
-    const loadSubjects = async () => {
-      const subjectResponses = await Promise.all(
-        classesApi.classes.map(async (classItem) => {
-          try {
-            const response = await fetchSubjects(classItem.id);
-            const data = response?.subjects ?? response?.results ?? response;
-            return (Array.isArray(data) ? data : []).map((subject) => ({
-              ...subject,
-              class_name: subject.class_name || classItem.name,
-              class_id: classItem.id
-            }));
-          } catch {
-            return [];
-          }
-        })
-      );
-      setSubjects(subjectResponses.flat());
-    };
-    if (classesApi.classes.length) loadSubjects();
-  }, [classesApi.classes, fetchSubjects]);
 
   const assignments = assignmentsApi.assignments;
   const openForm = (assignment = null) => {
@@ -189,14 +171,13 @@ const Assignments = () => {
           <div className="space-y-4">
             {assignmentsApi.loading && <p className="rounded-xl bg-white p-6 text-center text-gray-600">Loading assignments...</p>}
             {assignmentsApi.error && <p role="alert" className="rounded-xl bg-red-50 p-4 text-red-700">{assignmentsApi.error.message}</p>}
-            {classesApi.error && <p role="alert" className="rounded-xl bg-red-50 p-4 text-red-700">{classesApi.error.message}</p>}
-            {studentsApi.error && <p role="alert" className="rounded-xl bg-red-50 p-4 text-red-700">{studentsApi.error.message}</p>}
+            {subjectsError && <p role="alert" className="rounded-xl bg-red-50 p-4 text-red-700">{subjectsError.message}</p>}
             {!assignmentsApi.loading && filteredAssignments.map((assignment) => (
               <div key={assignment.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="p-6">
                   {(() => {
                     const submitted = Number(assignment.submission_count || 0);
-                    const total = studentsApi.students.filter((student) => student.class_name === assignment.class_name).length;
+                    const total = studentCounts[assignment.subject] || 0;
                     const status = assignment.is_active ? "active" : "inactive";
                     return (
                   <>
@@ -216,7 +197,7 @@ const Assignments = () => {
                         </div>
                         <div className="flex items-center space-x-1">
                           <Users className="w-4 h-4" />
-                          <span>{assignment.class_name || "Class"}</span>
+                          <span>{assignment.class_name || "No class"}</span>
                         </div>
                         <div className="flex items-center space-x-1">
                           <Calendar className="w-4 h-4" />
@@ -368,7 +349,7 @@ const Assignments = () => {
             <label className="block text-sm font-medium">Subject
               <select required value={form.subject} onChange={(event) => setForm({ ...form, subject: event.target.value })} className="mt-1 w-full rounded-lg border p-3">
                 <option value="">Choose a subject</option>
-                {subjects.map((subject) => <option key={subject.id} value={subject.id}>{subject.class_name} - {subject.name}</option>)}
+                {subjects.map((subject) => <option key={subject.id} value={subject.id}>{teacherSubjectLabel(subject)}</option>)}
               </select>
             </label>
             <label className="block text-sm font-medium">Due date

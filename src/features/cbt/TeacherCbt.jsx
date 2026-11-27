@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { AlertCircle, Check, ChevronLeft, ChevronRight, FileUp, Plus, RefreshCw, Trash2 } from "lucide-react";
-import { useTeacherCbt, useTeacherClasses } from "@/hooks/teacher";
+import { useTeacherCbt, useTeacherSubjects } from "@/hooks/teacher";
+import { teacherSubjectLabel } from "@/hooks/teacher/teacherSubjects";
 
 const initialExamForm = {
   title: "",
   description: "",
   instructions: "",
-  class_id: "",
   subject: "",
   term: "",
   start_time: "",
@@ -56,10 +56,11 @@ const pageButtonClass = "inline-flex items-center gap-1 rounded-lg border px-3 p
 
 export default function TeacherCbt() {
   const cbtApi = useTeacherCbt();
-  const classesApi = useTeacherClasses();
+  const subjectsApi = useTeacherSubjects();
+  const { subjects } = subjectsApi;
   const [examForm, setExamForm] = useState(initialExamForm);
   const [questionForm, setQuestionForm] = useState(makeInitialQuestion);
-  const [filterClass, setFilterClass] = useState("");
+  const [filterSubject, setFilterSubject] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [examPage, setExamPage] = useState(1);
   const [attemptPage, setAttemptPage] = useState(1);
@@ -70,9 +71,7 @@ export default function TeacherCbt() {
   const [notice, setNotice] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingExamId, setEditingExamId] = useState("");
-  const [subjects, setSubjects] = useState([]);
   const [gradingDraft, setGradingDraft] = useState({});
-  const fetchSubjects = classesApi.fetchSubjects;
 
   const selectedExam = cbtApi.selectedExam?.id === selectedExamId
     ? cbtApi.selectedExam
@@ -89,43 +88,19 @@ export default function TeacherCbt() {
   const questionPagination = cbtApi.questionPagination;
   const attemptPagination = cbtApi.attemptPagination;
 
+  // Subjects come straight from the teacher's subject list, so subjects
+  // without a class (e.g. French for a few pupils) can be chosen too.
   useEffect(() => {
-    if (!examForm.class_id && classesApi.classes.length) {
-      setExamForm((current) => ({ ...current, class_id: classesApi.classes[0].id }));
+    if (!examForm.subject && subjects.length) {
+      setExamForm((current) => ({ ...current, subject: subjects[0].id }));
     }
-  }, [classesApi.classes, examForm.class_id]);
-
-  useEffect(() => {
-    if (!examForm.class_id) {
-      setSubjects([]);
-      setExamForm((current) => ({ ...current, subject: "" }));
-      return;
-    }
-    let active = true;
-    fetchSubjects(examForm.class_id).then((response) => {
-      if (!active) return;
-      const classSubjects = unwrapList(response, ["subjects"]);
-      setSubjects(classSubjects);
-      setExamForm((current) => ({
-        ...current,
-        subject: classSubjects.some((subject) => subject.id === current.subject)
-          ? current.subject
-          : classSubjects[0]?.id || ""
-      }));
-    }).catch(() => {
-      if (active) {
-        setSubjects([]);
-        setExamForm((current) => ({ ...current, subject: "" }));
-      }
-    });
-    return () => { active = false; };
-  }, [fetchSubjects, examForm.class_id]);
+  }, [subjects, examForm.subject]);
 
   const handleFilter = async (event) => {
     event.preventDefault();
     setExamPage(1);
     await cbtApi.refreshExams({
-      class_id: filterClass || undefined,
+      subject_id: filterSubject || undefined,
       status: filterStatus || undefined,
       page: 1
     });
@@ -134,7 +109,7 @@ export default function TeacherCbt() {
   const changeExamPage = (page) => {
     setExamPage(page);
     cbtApi.refreshExams({
-      class_id: filterClass || undefined,
+      subject_id: filterSubject || undefined,
       status: filterStatus || undefined,
       page
     });
@@ -148,7 +123,6 @@ export default function TeacherCbt() {
       setEditingExamId(exam.id);
       setExamForm({
         ...initialExamForm,
-        class_id: source.class_id || exam.class_id || "",
         subject: source.subject || exam.subject || "",
         title: source.title || "",
         description: source.description || "",
@@ -222,7 +196,7 @@ export default function TeacherCbt() {
 
     try {
       const savedExam = await cbtApi.saveExam(payload, editingExamId || undefined, {
-        class_id: filterClass || undefined,
+        subject_id: filterSubject || undefined,
         status: filterStatus || undefined,
         page: examPage
       });
@@ -230,7 +204,6 @@ export default function TeacherCbt() {
       setEditingExamId("");
       setExamForm((current) => ({
         ...initialExamForm,
-        class_id: current.class_id,
         subject: current.subject
       }));
       if (savedExam?.id) {
@@ -381,7 +354,7 @@ export default function TeacherCbt() {
           <span>{errorMessage || cbtApi.error?.message || notice}</span>
         </div>
       )}
-      {classesApi.error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{classesApi.error.message}</p>}
+      {subjectsApi.error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{subjectsApi.error.message}</p>}
 
       {showCreateForm && (
         <form onSubmit={createExam} className="space-y-4 rounded-xl bg-white p-5 shadow-sm">
@@ -390,16 +363,10 @@ export default function TeacherCbt() {
             <label className="text-sm font-medium">Title
               <input required maxLength={200} value={examForm.title} onChange={(event) => setExamForm({ ...examForm, title: event.target.value })} className="mt-1 w-full rounded-lg border p-3" />
             </label>
-            <label className="text-sm font-medium">Class
-              <select value={examForm.class_id} onChange={(event) => setExamForm({ ...examForm, class_id: event.target.value })} className="mt-1 w-full rounded-lg border p-3">
-                <option value="">Choose a class</option>
-                {classesApi.classes.map((classItem) => <option key={classItem.id} value={classItem.id}>{classItem.name || classItem.class_name}</option>)}
-              </select>
-            </label>
             <label className="text-sm font-medium">Subject
               <select required value={examForm.subject} onChange={(event) => setExamForm({ ...examForm, subject: event.target.value })} className="mt-1 w-full rounded-lg border p-3">
                 <option value="">Choose a subject</option>
-                {subjects.map((subject) => <option key={subject.id} value={subject.id}>{subject.name}</option>)}
+                {subjects.map((subject) => <option key={subject.id} value={subject.id}>{teacherSubjectLabel(subject)}</option>)}
               </select>
             </label>
             <label className="text-sm font-medium">Term
@@ -442,7 +409,7 @@ export default function TeacherCbt() {
               </label>
             ))}
           </div>
-          <button type="submit" disabled={cbtApi.mutating || classesApi.loading} className="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 disabled:opacity-50">
+          <button type="submit" disabled={cbtApi.mutating || subjectsApi.loading} className="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 disabled:opacity-50">
             {cbtApi.mutating ? "Saving..." : editingExamId ? "Save changes" : "Save exam"}
           </button>
         </form>
@@ -451,14 +418,14 @@ export default function TeacherCbt() {
       <section className="space-y-4 rounded-xl bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h3 className="text-lg font-semibold">Exams</h3>
-          <button type="button" onClick={() => cbtApi.refreshExams({ class_id: filterClass || undefined, status: filterStatus || undefined, page: examPage }, true)} className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm hover:bg-gray-50">
+          <button type="button" onClick={() => cbtApi.refreshExams({ subject_id: filterSubject || undefined, status: filterStatus || undefined, page: examPage }, true)} className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm hover:bg-gray-50">
             <RefreshCw size={15} /> Refresh
           </button>
         </div>
         <form onSubmit={handleFilter} className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
-          <select value={filterClass} onChange={(event) => setFilterClass(event.target.value)} aria-label="Filter CBT exams by class" className="rounded-lg border p-3">
-            <option value="">All classes</option>
-            {classesApi.classes.map((classItem) => <option key={classItem.id} value={classItem.id}>{classItem.name || classItem.class_name}</option>)}
+          <select value={filterSubject} onChange={(event) => setFilterSubject(event.target.value)} aria-label="Filter CBT exams by subject" className="rounded-lg border p-3">
+            <option value="">All subjects</option>
+            {subjects.map((subject) => <option key={subject.id} value={subject.id}>{teacherSubjectLabel(subject)}</option>)}
           </select>
           <select value={filterStatus} onChange={(event) => setFilterStatus(event.target.value)} aria-label="Filter CBT exams by status" className="rounded-lg border p-3">
             {EXAM_STATUSES.map((status) => <option key={status || "all"} value={status}>{status ? status[0].toUpperCase() + status.slice(1) : "All statuses"}</option>)}
@@ -485,7 +452,7 @@ export default function TeacherCbt() {
                   <button type="button" disabled={cbtApi.mutating} onClick={() => cbtApi.saveExam({
                     status: exam.status === "published" ? "draft" : "published"
                   }, exam.id, {
-                    class_id: filterClass || undefined,
+                    subject_id: filterSubject || undefined,
                     status: filterStatus || undefined,
                     page: examPage
                   }).catch((error) => setErrorMessage(error.message || "Unable to update exam status."))} className="rounded-lg border px-3 py-2 text-sm text-indigo-700 hover:bg-indigo-50 disabled:opacity-50">
@@ -496,7 +463,7 @@ export default function TeacherCbt() {
                   if (window.confirm(`Delete "${exam.title}"?`)) {
                     try {
                       await cbtApi.removeExam(exam.id, {
-                        class_id: filterClass || undefined,
+                        subject_id: filterSubject || undefined,
                         status: filterStatus || undefined,
                         page: examPage
                       });

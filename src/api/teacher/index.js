@@ -172,6 +172,15 @@ export const addTeacherExaminationBankQuestions = (examinationId, questionData) 
 export const getTeacherStudents = () =>
   http.get(`${TEACHER_API}/students/`, { auth: true });
 
+// The teacher's subjects, including ones without a class (class_id/class_name
+// null), each with student_count.
+export const getTeacherSubjects = () =>
+  http.get(`${TEACHER_API}/subjects/`, { auth: true });
+
+// Students taking a subject: its class's, or those enrolled in a classless one.
+export const getTeacherSubjectStudents = (subjectId) =>
+  http.get(`${TEACHER_API}/subjects/${resourceId(subjectId)}/students/`, { auth: true });
+
 export const getTeacherAttendanceReport = (subjectId, params = {}) =>
   http.get(
     `${TEACHER_API}/subjects/${resourceId(subjectId)}/attendance/report/`,

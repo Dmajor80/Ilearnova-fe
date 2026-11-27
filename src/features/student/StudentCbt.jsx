@@ -161,7 +161,7 @@ const StudentCbt = () => {
         </button>
         <h1 className="text-2xl font-bold text-slate-800">{selectedExam.title}</h1>
         <p className="mt-1 text-slate-600">
-          {selectedExam.subject_name} · {selectedExam.class_name}
+          {[selectedExam.subject_name, selectedExam.class_name].filter(Boolean).join(" · ")}
         </p>
         <div className="mt-5 grid gap-3 rounded-lg bg-slate-50 p-4 text-sm text-slate-700 sm:grid-cols-3">
           <p>Duration: {selectedExam.duration_minutes} minutes</p>
@@ -415,7 +415,7 @@ const StudentCbt = () => {
                 <div>
                   <h2 className="font-semibold text-slate-800">{exam.title}</h2>
                   <p className="mt-1 text-sm text-slate-600">
-                    {exam.subject_name} · {exam.class_name} · {exam.question_count} questions · {exam.duration_minutes} min
+                    {[exam.subject_name, exam.class_name].filter(Boolean).join(" · ")} · {exam.question_count} questions · {exam.duration_minutes} min
                   </p>
                   <p className="mt-2 text-sm text-slate-500">
                     {formatDateTime(exam.start_time)} – {formatDateTime(exam.end_time)}

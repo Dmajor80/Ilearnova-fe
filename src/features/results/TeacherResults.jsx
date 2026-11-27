@@ -5,6 +5,7 @@ import { resultsApi } from "@/api/resultsApi";
 import { FormSkeleton, TableSkeleton } from "@/components/ui/Skeleton";
 import ScoreSheet from "./ScoreSheet";
 import ComponentsEditor from "./ComponentsEditor";
+import { teacherSubjectLabel } from "@/hooks/teacher/teacherSubjects";
 import {
   TERMS,
   apiErrorDetails,
@@ -266,7 +267,7 @@ export default function TeacherResults({ forSchoolAdmin = false }) {
           Subject
           <select value={subjectId} onChange={(e) => setSubjectId(e.target.value)} className="mt-1 w-full rounded-lg border px-3 py-2">
             {subjects.map((s) => (
-              <option key={s.id} value={s.id}>{s.class_name} · {s.name}</option>
+              <option key={s.id} value={s.id}>{teacherSubjectLabel(s)}</option>
             ))}
           </select>
         </label>

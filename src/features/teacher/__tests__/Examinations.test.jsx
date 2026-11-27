@@ -28,7 +28,7 @@ const examsApi = {
 
 vi.mock("@/hooks/teacher", () => ({
   useTeacherExaminations: () => examsApi,
-  useTeacherClasses: () => ({ classes: [], fetchSubjects: vi.fn(), error: null })
+  useTeacherSubjects: () => ({ subjects: [], error: null })
 }));
 vi.mock("../components/CourseComponents", () => ({ default: () => null }));
 vi.mock("../exams/ExamQuestions", () => ({

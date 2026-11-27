@@ -350,3 +350,24 @@ export const schoolAnnouncementsApi = {
   create: async (body) => unwrapOne(await http.post(ANNOUNCEMENTS, body, { auth: true })),
   remove: (id) => http.del(`${ANNOUNCEMENTS}${encodeURIComponent(id)}/`, { auth: true }),
 };
+
+/* Subjects in the admin's school. A subject may have no class (classname
+ * null): its students are then enrolled one by one. Students are identified
+ * by user id, the `id` from /api/admin/school/students/. Enrolment calls
+ * answer { subject_id, classless, count, students: [{ id, student_role_id,
+ * name, username, email, admission_number }] }. */
+const SUBJECTS = "/api/admin/school/subjects/";
+const body = (payload) => payload?.data ?? payload;
+
+export const schoolSubjectsApi = {
+  list: async (params = {}) => body(await http.get(SUBJECTS, { auth: true, params })),
+  create: async (subject) => body(await http.post(SUBJECTS, subject, { auth: true })),
+  update: async (id, subject) =>
+    body(await http.patch(`${SUBJECTS}${encodeURIComponent(id)}/`, subject, { auth: true })),
+  students: async (id) =>
+    body(await http.get(`${SUBJECTS}${encodeURIComponent(id)}/students/`, { auth: true })),
+  enroll: async (id, studentIds) =>
+    body(await http.post(`${SUBJECTS}${encodeURIComponent(id)}/students/`, { student_ids: studentIds }, { auth: true })),
+  unenroll: async (id, studentId) =>
+    body(await http.del(`${SUBJECTS}${encodeURIComponent(id)}/students/${encodeURIComponent(studentId)}/`, { auth: true })),
+};
