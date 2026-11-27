@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from "react";
-import { Mail, User, Lock, CheckCircle, Building, Users, GraduationCap, UserCheck, Heart, BookOpen, Calendar } from "lucide-react";
-import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { Mail, User, Lock, CheckCircle, Building, GraduationCap, UserCheck, Heart, BookOpen, Calendar } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import useRegister from "@/hooks/useRegister";
-import AccessCodeField from "@/features/billing/AccessCodeField";
 import InputField from "@/components/ui/InputField";
 import NotificationBar from "@/components/ui/NotificationBar";
 import { getOrganizations } from "@/api/authApi";
@@ -24,7 +23,6 @@ const LoadingSpinner = () => (
 
 
 const roleOptions = [
-  { value: "org_admin", label: "Organization Admin", icon: Users, description: "Manage your organization" },
   { value: "teacher", label: "Teacher", icon: GraduationCap, description: "Teach and manage students" },
   { value: "student", label: "Student", icon: UserCheck, description: "Learn and participate" },
   { value: "parent", label: "Parent", icon: Heart, description: "Monitor your child's progress" },
@@ -37,20 +35,6 @@ export default function SignupForm() {
   const [userEmail, setUserEmail] = useState("");
   const [organizations, setOrganizations] = useState([]);
   const [organizationsLoading, setOrganizationsLoading] = useState(false);
-  // Invite / paid-code emails link to /register/school?code=…&email=…
-  const [searchParams] = useSearchParams();
-  const { pathname } = useLocation();
-  const inviteCode = searchParams.get("code");
-  const inviteEmail = searchParams.get("email");
-  const [initial] = useState(() =>
-    inviteCode || inviteEmail || pathname === "/register/school"
-      ? {
-          role: "org_admin",
-          ...(inviteEmail ? { email: inviteEmail } : {}),
-          ...(inviteCode ? { access_code: inviteCode.toUpperCase() } : {}),
-        }
-      : undefined
-  );
 
   const {
     formData,
@@ -61,7 +45,6 @@ export default function SignupForm() {
     handleSubmit,
     notification,
   } = useRegister({
-    initial,
     onSuccess: (response) => {
       const registeredUser = response?.data?.user || response?.user;
       setUserEmail(registeredUser?.email || formData.email);
@@ -277,6 +260,13 @@ export default function SignupForm() {
                       );
                     })}
                   </div>
+                  <p className={`mt-3 text-sm ${darkMode ? "text-gray-400" : "text-gray-600"}`}>
+                    Setting up a new school?{" "}
+                    <Link to="/register/school" className="font-medium text-blue-600 hover:underline">
+                      Register your school
+                    </Link>{" "}
+                    instead.
+                  </p>
                   {errors.role && (
                     <p className="mt-1 text-sm text-red-600">{errors.role}</p>
                   )}
@@ -360,8 +350,8 @@ export default function SignupForm() {
                   )}
                 </div>
 
-                {/* Organization Name for Super Admin and Org Admin */}
-                {["super_admin", "org_admin"].includes(formData.role) && (
+                {/* Organization Name for Super Admin */}
+                {formData.role === "super_admin" && (
                   <InputField
                     label="Organization Name"
                     name="organization_name"
@@ -375,17 +365,6 @@ export default function SignupForm() {
                   />
                 )}
 
-                {/* Creating a school needs a subscription: an access code, or
-                    one iLearnova set up for this email. */}
-                {formData.role === "org_admin" && (
-                  <AccessCodeField
-                    value={formData.access_code}
-                    email={formData.email}
-                    onChange={(value) => handleInputChange("access_code", value)}
-                    error={errors.access_code || errors.subscription}
-                    darkMode={darkMode}
-                  />
-                )}
 
                 {/* Organization Selection for Teacher, Student, Parent */}
                 {["teacher", "student", "parent"].includes(formData.role) && (

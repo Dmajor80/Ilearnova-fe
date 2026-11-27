@@ -9,7 +9,10 @@ vi.mock("@/api/baseClient", () => ({
 }));
 vi.mock("@/lib/csv", () => ({ downloadCsv: vi.fn(), toCsv: vi.fn() }));
 
+vi.mock("@/api/auth", () => ({ getStoredUser: vi.fn(() => ({ id: "u-9", email: "me@example.com" })) }));
+
 import { http } from "@/api/baseClient";
+import { getStoredUser } from "@/api/auth";
 import { downloadCsv } from "@/lib/csv";
 import Users from "../Users";
 
@@ -129,5 +132,50 @@ describe("Users (superadmin)", () => {
     });
     renderPage();
     expect(await screen.findByText("Ada Obi")).toBeTruthy();
+  });
+
+  const menuLabels = async (name) => {
+    fireEvent.click(await screen.findByRole("button", { name: `Actions for ${name}` }));
+    const labels = within(screen.getByRole("menu")).getAllByRole("menuitem").map((el) => el.textContent);
+    fireEvent.keyDown(screen.getByRole("menu"), { key: "Escape" });
+    return labels;
+  };
+
+  it("offers 'Delete permanently…' for ordinary users only", async () => {
+    renderPage();
+    expect(await menuLabels("Ada Obi")).toContain("Delete permanently…");
+    expect(await menuLabels("Platform Admin")).not.toContain("Delete permanently…");
+  });
+
+  it("hides delete for yourself", async () => {
+    getStoredUser.mockReturnValue({ id: "u-1", email: USER.email });
+    renderPage();
+    expect(await menuLabels("Ada Obi")).not.toContain("Delete permanently…");
+    getStoredUser.mockReturnValue({ id: "u-9", email: "me@example.com" });
+  });
+
+  it("deletes a user after typing their email", async () => {
+    routeGets(http, {
+      "/api/superadmin/users/u-1/delete-check/": { can_delete: true, reason: null, blockers: {}, related: { "school roles": 1, submissions: 12 } },
+      "/api/superadmin/users/": paginated([USER, SUPERUSER]),
+      "/api/superadmin/organizations/": paginated([ORG]),
+    });
+    http.del.mockResolvedValue(null);
+    renderPage();
+    fireEvent.click(await screen.findByRole("button", { name: "Actions for Ada Obi" }));
+    fireEvent.click(within(screen.getByRole("menu")).getByRole("menuitem", { name: "Delete permanently…" }));
+    const dialog = screen.getByRole("alertdialog");
+    expect(await within(dialog).findByText("12 submissions")).toBeTruthy();
+    fireEvent.change(within(dialog).getByLabelText(`Type ${USER.email} to confirm`), { target: { value: USER.email } });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Delete permanently" }));
+    await waitFor(() => expect(http.del).toHaveBeenCalledWith("/api/superadmin/users/u-1/", { auth: true }));
+  });
+
+  it("offers delete from the user's view modal too", async () => {
+    renderPage();
+    fireEvent.click(await screen.findByRole("button", { name: "Ada Obi" }));
+    const view = screen.getByRole("dialog");
+    fireEvent.click(within(view).getByRole("button", { name: "Delete permanently…" }));
+    expect(await screen.findByRole("alertdialog", { name: /Delete Ada Obi permanently/ })).toBeTruthy();
   });
 });

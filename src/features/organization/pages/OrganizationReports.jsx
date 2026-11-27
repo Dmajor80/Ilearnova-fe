@@ -18,14 +18,14 @@ const OrganizationReports = () => {
     <div className="space-y-5 rounded-xl bg-white p-4 shadow-sm md:p-6">
       <div className="border-b pb-4">
         <h3 className="text-xl font-semibold">Reports & Documents</h3>
-        <p className="mt-1 text-sm text-gray-600">Download the school data export provided by the admin API.</p>
+        <p className="mt-1 text-sm text-gray-600">Download a copy of your school's data.</p>
       </div>
       <div className="flex flex-col gap-4 rounded-xl border p-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <span className="rounded-lg bg-blue-50 p-3 text-blue-700"><FileText className="h-6 w-6" /></span>
           <div>
             <h4 className="font-medium">School data export</h4>
-            <p className="text-sm text-gray-600">Exports data using the configured school admin endpoint.</p>
+            <p className="text-sm text-gray-600">Exports your school's records as a file you can open or share.</p>
           </div>
         </div>
         <label className="flex items-center gap-2 text-sm text-gray-700">

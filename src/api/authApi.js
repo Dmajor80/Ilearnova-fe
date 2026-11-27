@@ -27,11 +27,39 @@ export async function registerSuperAdmin(data) {
   });
 }
 
-export async function registerOrgAdmin(data) {
-  return await http.post("/api/auth/register/org-admin/", {
-    body: data,
-    auth: false,
-  });
+const unwrap = (payload) => (payload && typeof payload === "object" && "data" in payload ? payload.data : payload);
+
+/**
+ * Registering a school, step 1: only the school's email, name and access
+ * code. The backend creates the school and emails a link for step 2.
+ */
+export async function registerSchool({ email, organization_name, access_code }) {
+  return unwrap(
+    await http.post("/api/auth/register/school/", {
+      body: { email, organization_name, ...(access_code ? { access_code } : {}) },
+      auth: false,
+    })
+  );
+}
+
+/** Step 2: which school an emailed setup link is for. */
+export async function getSchoolSetup(token) {
+  return unwrap(await http.get("/api/auth/register/school/setup/", { auth: false, params: { token } }));
+}
+
+/** Step 2: create the school's admin account from the setup link. */
+export async function completeSchoolSetup({ token, first_name, last_name, username, password }) {
+  return unwrap(
+    await http.post("/api/auth/register/school/setup/", {
+      body: { token, first_name, last_name, username, password },
+      auth: false,
+    })
+  );
+}
+
+/** Email a fresh setup link (answers the same for any email). */
+export async function resendSchoolSetup(email) {
+  return unwrap(await http.post("/api/auth/register/school/resend/", { body: { email }, auth: false }));
 }
 
 export async function schoolAdminLogin({ email, password, school_code }) {

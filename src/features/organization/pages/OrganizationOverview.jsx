@@ -100,6 +100,12 @@ const OrganizationOverview = () => {
     }
   ];
 
+  const refreshAll = () => {
+    overview.refreshData(true);
+    calendar.refreshData(true);
+    alerts.refreshData(true);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-4 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white sm:flex-row sm:items-center">
@@ -108,11 +114,7 @@ const OrganizationOverview = () => {
           <p className="mt-1 text-blue-100">Live school metrics, activities, alerts, and upcoming events.</p>
         </div>
         <button
-          onClick={() => {
-            overview.refreshData(true);
-            calendar.refreshData(true);
-            alerts.refreshData(true);
-          }}
+          onClick={refreshAll}
           className="self-start rounded-lg bg-white/15 px-4 py-2 hover:bg-white/25 sm:self-auto"
         >
           Refresh overview
@@ -120,9 +122,16 @@ const OrganizationOverview = () => {
       </div>
 
       {(overview.error || calendar.error || alerts.error) && (
-        <p role="alert" className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-          Some dashboard data could not be loaded. Refresh to retry, or check the affected API request in the browser network panel.
-        </p>
+        <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+          <span>We couldn't load part of your dashboard.</span>
+          <button
+            type="button"
+            onClick={refreshAll}
+            className="rounded-md border border-amber-300 bg-white px-3 py-1 font-medium text-amber-900 hover:bg-amber-100"
+          >
+            Try again
+          </button>
+        </div>
       )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">

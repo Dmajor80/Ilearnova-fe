@@ -39,7 +39,7 @@ export default function useClassesData({ page = 1, search = "" } = {}) {
     const { shouldCallEndpoint, endpointErrors, markEndpointFailed } = circuitBreakerRef.current;
 
     if (!shouldCallEndpoint(endpointName)) {
-      throw new Error(endpointErrors[endpointName]?.message || "Classes endpoint is unavailable.");
+      throw new Error(endpointErrors[endpointName]?.message || "Classes are temporarily unavailable. Please try again in a minute.");
     }
 
     try {

@@ -216,4 +216,44 @@ describe("Superadmin subscriptions", () => {
     expect(within(await row("ILN-RAWC-0000-0003")).getByText("legacy")).toBeTruthy();
     expect(within(await row("ILN-DAYS-0000-0004")).getByText("30 days, no plan")).toBeTruthy();
   });
+
+  it("deletes an unused plan, and shows the reason when it's in use", async () => {
+    renderPage("/admin-dashboard/subscriptions?tab=plans");
+    await menuItem("Annual", "Delete");
+    let dialog = screen.getByRole("alertdialog");
+    fireEvent.click(within(dialog).getByRole("button", { name: "Delete permanently" }));
+    await waitFor(() =>
+      expect(http.del).toHaveBeenCalledWith("/api/billing/superadmin/plans/p1/", { auth: true, params: { permanent: "true" } })
+    );
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
+
+    const err = Object.assign(new Error("in use"), {
+      status: 409,
+      data: { error: "This plan is in use (3 subscriptions), so it cannot be deleted.", blockers: { subscriptions: 3 } },
+    });
+    http.del.mockRejectedValueOnce(err);
+    await menuItem("Annual", "Delete");
+    dialog = screen.getByRole("alertdialog");
+    fireEvent.click(within(dialog).getByRole("button", { name: "Delete permanently" }));
+    expect((await within(dialog).findByRole("alert")).textContent).toMatch(/in use/);
+  });
+
+  it("deletes unused access codes only", async () => {
+    const REDEEMED = { ...CODE, id: "c2", code: "ILN-USED-USED-USED", is_redeemable: false, redeemed_at: "2026-11-20T00:00:00Z" };
+    http.get.mockImplementation((path) => {
+      if (path.endsWith("/plans/")) return Promise.resolve({ count: 1, results: [ANNUAL] });
+      if (path.endsWith("/access-codes/")) return Promise.resolve({ count: 2, results: [CODE, REDEEMED] });
+      return Promise.resolve({ count: 0, results: [] });
+    });
+    renderPage();
+    fireEvent.click(screen.getByRole("tab", { name: "Access codes" }));
+    fireEvent.click(await screen.findByRole("button", { name: `Actions for ${REDEEMED.code}` }));
+    expect(within(screen.getByRole("menu")).queryByRole("menuitem", { name: "Delete" })).toBeNull();
+    fireEvent.keyDown(screen.getByRole("menu"), { key: "Escape" });
+    await menuItem(CODE.code, "Delete");
+    fireEvent.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: "Delete permanently" }));
+    await waitFor(() =>
+      expect(http.del).toHaveBeenCalledWith("/api/billing/superadmin/access-codes/c1/", { auth: true, params: { permanent: "true" } })
+    );
+  });
 });

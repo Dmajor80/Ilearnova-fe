@@ -46,7 +46,7 @@ export default function usePendingStaffData(role = "teacher", { enabled = true }
       const data = unwrapResponse(payload);
 
       if (!Array.isArray(data?.pending_staff)) {
-        throw new Error("The pending staff endpoint returned an unexpected response.");
+        throw new Error("We couldn't load pending staff. Please try again.");
       }
 
       if (request === requestId.current) {

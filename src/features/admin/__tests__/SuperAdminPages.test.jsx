@@ -68,6 +68,30 @@ describe("Email logs", () => {
     expect(call[1].params).toMatchObject({ status: "failed", page: 1 });
     expect(screen.getByLabelText("Filter by status").value).toBe("failed");
   });
+
+  it("deletes one log after confirming", async () => {
+    http.del.mockResolvedValue(null);
+    renderLogs();
+    fireEvent.click(await screen.findByRole("button", { name: "Actions for email to person@example.com" }));
+    fireEvent.click(within(screen.getByRole("menu")).getByRole("menuitem", { name: "Delete" }));
+    expect(http.del).not.toHaveBeenCalled();
+    fireEvent.click(within(screen.getByRole("alertdialog")).getByRole("button", { name: "Delete" }));
+    await waitFor(() => expect(http.del).toHaveBeenCalledWith("/api/superadmin/emails/email-1/", { auth: true }));
+  });
+
+  it("clears old emails by status and age", async () => {
+    http.post.mockResolvedValue({ deleted: 7 });
+    renderLogs();
+    await screen.findByText("person@example.com");
+    fireEvent.click(screen.getByRole("button", { name: "Clear old emails" }));
+    const dialog = screen.getByRole("alertdialog");
+    fireEvent.change(within(dialog).getByLabelText("Which emails"), { target: { value: "failed" } });
+    fireEvent.change(within(dialog).getByLabelText("Older than (days)"), { target: { value: "60" } });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Clear emails" }));
+    await waitFor(() =>
+      expect(http.post).toHaveBeenCalledWith("/api/superadmin/emails/purge/", { status: "failed", older_than_days: 60 }, { auth: true })
+    );
+  });
 });
 
 describe("ActionsMenu keyboard", () => {
@@ -76,10 +100,12 @@ describe("ActionsMenu keyboard", () => {
     const button = await screen.findByRole("button", { name: "Actions for email to person@example.com" });
     fireEvent.keyDown(button, { key: "ArrowDown" });
     const menu = screen.getByRole("menu");
-    const [details, resend] = within(menu).getAllByRole("menuitem");
+    const [details, resend, remove] = within(menu).getAllByRole("menuitem");
     expect(document.activeElement).toBe(details);
     fireEvent.keyDown(menu, { key: "ArrowDown" });
     expect(document.activeElement).toBe(resend);
+    fireEvent.keyDown(menu, { key: "ArrowDown" });
+    expect(document.activeElement).toBe(remove);
     fireEvent.keyDown(menu, { key: "ArrowDown" });
     expect(document.activeElement).toBe(details);
     fireEvent.keyDown(menu, { key: "Escape" });

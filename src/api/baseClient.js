@@ -110,8 +110,9 @@ async function request(method, path, {
     }
     const message =
       (data && (data.detail || data.message || data.error)) ||
-      res.statusText ||
-      "Request failed";
+      (res.status >= 500
+        ? "Something went wrong on our side. Please try again in a moment."
+        : "Something went wrong. Please try again.");
     const error = new Error(message);
     error.status = res.status;
     error.data = data;

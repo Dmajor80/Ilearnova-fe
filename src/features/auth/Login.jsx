@@ -8,7 +8,8 @@ import useLogin from "@/hooks/useLogin";
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation()
-  const { info } = location.state || {}
+  const { info, username: setupUsername } = location.state || {}
+  const schoolReady = info === "school_setup_done"
 
   // To make the page always load from the top position
   useEffect(()=>{
@@ -75,6 +76,7 @@ export default function Login() {
     handleSubmit,
     notification,
   } = useLogin({
+    initialUsername: setupUsername || "",
     onSuccess: (response) => {
       console.log("Login: onSuccess called with response:", response);
       console.log("Login: Navigating to /post-login for role-based redirection");
@@ -130,7 +132,7 @@ export default function Login() {
                   <GraduationCap className="w-8 h-8 text-white" />
                 </div>
                 <h1 className={`text-4xl sm:text-5xl font-bold ${darkMode ? "text-white" : "bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent"}`}>
-                  { info === "first_time_user"? "Welcome" : "Welcome Back"}
+                  { info === "first_time_user" || schoolReady ? "Welcome" : "Welcome Back"}
                 </h1>
               </div>
               <p
@@ -138,7 +140,9 @@ export default function Login() {
                   darkMode ? "text-gray-300" : "text-gray-600"
                 }`}
               >
-                { info === "first_time_user" ? "Sign in to access your workspace" : "Sign in to continue your learning journey" }
+                { schoolReady
+                  ? "Your school admin account is ready. Log in with your new password."
+                  : info === "first_time_user" ? "Sign in to access your workspace" : "Sign in to continue your learning journey" }
               </p>
             </div>
 

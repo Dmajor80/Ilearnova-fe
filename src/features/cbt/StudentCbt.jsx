@@ -268,7 +268,7 @@ export default function StudentCbt() {
           </label>
         </section>
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm leading-5 text-amber-900">
-          Prototype mode: this page uses a local demo student and class roster. Real verified enrollment and exam permissions must be enforced by the backend.
+          Demo mode: this page uses sample students and classes.
         </div>
         {!classExams.length && <div className="rounded-xl border border-dashed bg-white p-8 text-center text-gray-500">        There are no published exams for {student.className} yet.</div>}
         <div className="grid gap-4 lg:grid-cols-2">

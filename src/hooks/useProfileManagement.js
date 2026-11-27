@@ -76,7 +76,7 @@ export default function useProfileManagement() {
 
         return { success: true, data };
       } else {
-        throw new Error(`Upload failed: ${response.status}`);
+        throw new Error("We couldn't upload the image. Please try again.");
       }
     } catch (err) {
       const userMessage = err.message || 'Failed to upload organization logo';
@@ -154,7 +154,7 @@ export default function useProfileManagement() {
 
         return { success: true, data };
       } else {
-        throw new Error(`Upload failed: ${response.status}`);
+        throw new Error("We couldn't upload the image. Please try again.");
       }
     } catch (err) {
       const userMessage = err.message || 'Failed to upload profile picture';

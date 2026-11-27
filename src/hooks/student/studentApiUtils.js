@@ -31,7 +31,7 @@ export const getStudentListAcrossPages = async (fetchPage, keys = []) => {
     page = nextPageMatch ? Number(nextPageMatch[1]) : page + 1;
   }
 
-  throw new Error("The student API returned a repeated pagination page.");
+  throw new Error("We couldn't load all of your records. Please try again.");
 };
 
 export const getStudentErrorMessage = (error) =>
