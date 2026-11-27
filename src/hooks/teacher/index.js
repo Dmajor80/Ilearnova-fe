@@ -9,4 +9,5 @@ export { default as useTeacherExaminations } from "./useTeacherExaminations";
 export { default as useTeacherStudents } from "./useTeacherStudents";
 export { default as useTeacherTimetable } from "./useTeacherTimetable";
 export { default as useTeacherSubjects } from "./useTeacherSubjects";
+export { default as useTeacherPermissions, TEACHER_PERMISSIONS } from "./useTeacherPermissions";
 export { teacherSubjectLabel } from "./teacherSubjects";

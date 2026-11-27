@@ -1,21 +1,39 @@
 import { useState } from "react";
-import { BookOpen, FilePlus2, Megaphone, Plus, RefreshCw, Users } from "lucide-react";
-import { useTeacherAnnouncements, useTeacherClasses, useTeacherSubjects } from "@/hooks/teacher";
+import { BookOpen, FilePlus2, Megaphone, Plus, RefreshCw, Upload, UserPlus, Users } from "lucide-react";
+import {
+  TEACHER_PERMISSIONS,
+  useTeacherAnnouncements,
+  useTeacherClasses,
+  useTeacherPermissions,
+  useTeacherSubjects
+} from "@/hooks/teacher";
 import { useOrganization } from "@/context/OrganizationContext";
+import { addTeacherClassStudents, getTeacherClassStudents, removeTeacherClassStudents } from "@/api/teacher";
+import ImportPeopleModal from "@/features/organization/components/ImportPeopleModal";
 import CoursesComponent from "./components/CourseComponents";
 import ClasslessSubjectsPanel from "./components/ClasslessSubjectsPanel";
+import NewSubjectModal from "./components/NewSubjectModal";
+import TeacherStudentsModal from "./components/TeacherStudentsModal";
 
 export default function ClassManagement() {
   const classesApi = useTeacherClasses();
   const announcementApi = useTeacherAnnouncements();
   const subjectsApi = useTeacherSubjects();
   const { currentOrgId } = useOrganization();
+  // Extra controls only when the school admin granted them; the server checks
+  // every action again, for the teacher's own classes and subjects only.
+  const permissionsApi = useTeacherPermissions();
+  const can = permissionsApi.has;
+  const ownClasses = permissionsApi.classes;
+  const ledClasses = ownClasses.filter((c) => c.leads);
+  const [extraModal, setExtraModal] = useState(null); // "students" | "subject" | "import"
+  // Class preselected in the New subject form ("" = let them pick).
+  const [newSubjectClass, setNewSubjectClass] = useState("");
   const [selectedClass, setSelectedClass] = useState(null);
   const [activeModal, setActiveModal] = useState(null);
   const [selectedSubjectId, setSelectedSubjectId] = useState("");
   const [announcement, setAnnouncement] = useState({ title: "", message: "" });
   const [material, setMaterial] = useState({ title: "", description: "", content_type: "text", link: "" });
-  const [subjectName, setSubjectName] = useState("");
   const [topic, setTopic] = useState({ name: "", description: "" });
   const [classForm, setClassForm] = useState({ name: "", description: "" });
 
@@ -60,19 +78,6 @@ export default function ClassManagement() {
     }
   };
 
-  const saveSubject = async (event) => {
-    event.preventDefault();
-    if (!selectedClass) return;
-    try {
-      const created = await classesApi.addSubject(selectedClass.id, { name: subjectName });
-      setSubjectName("");
-      if (created?.id) setSelectedSubjectId(created.id);
-      setActiveModal(null);
-    } catch {
-      // The API hook reports request failures.
-    }
-  };
-
   const saveTopic = async (event) => {
     event.preventDefault();
     if (!selectedSubjectId) return;
@@ -101,15 +106,32 @@ export default function ClassManagement() {
     }
   };
 
+  const isOwnClass = (classItem) => ownClasses.some((c) => String(c.id) === String(classItem?.id));
+  const canManageSelectedClass = Boolean(selectedClass) && can(TEACHER_PERMISSIONS.manageClassStudents) && isOwnClass(selectedClass);
+  // Same rule as the server: create_subjects, and only in a class they lead.
+  const canAddSubjectToSelectedClass = Boolean(selectedClass) && can(TEACHER_PERMISSIONS.createSubjects)
+    && ledClasses.some((c) => String(c.id) === String(selectedClass.id));
+
+  const openNewSubject = (classId = "") => {
+    setNewSubjectClass(classId);
+    setExtraModal("subject");
+  };
+
+  const subjectCreated = (subject) => {
+    setExtraModal(null);
+    subjectsApi.refreshData();
+    if (selectedClass && subject?.classname && String(subject.classname) === String(selectedClass.id)) {
+      classesApi.fetchSubjects(selectedClass.id).catch(() => {});
+    }
+  };
+
   const modalForm = activeModal === "announcement"
     ? { title: "Publish announcement", submit: saveAnnouncement, busy: announcementApi.mutating }
     : activeModal === "material"
       ? { title: "Add class material", submit: saveMaterial, busy: classesApi.mutating }
-      : activeModal === "subject"
-        ? { title: "Add subject", submit: saveSubject, busy: classesApi.mutating }
-        : activeModal === "class"
-          ? { title: "Create class", submit: saveClass, busy: classesApi.mutating }
-          : { title: "Add topic", submit: saveTopic, busy: classesApi.mutating };
+      : activeModal === "class"
+        ? { title: "Create class", submit: saveClass, busy: classesApi.mutating }
+        : { title: "Add topic", submit: saveTopic, busy: classesApi.mutating };
 
   return (
     <div className="space-y-6">
@@ -125,6 +147,16 @@ export default function ClassManagement() {
               <Plus size={17} /> Create class
             </button>
             {!currentOrgId && <span className="self-center text-xs text-gray-500">Choose an organization to create a class.</span>}
+            {can(TEACHER_PERMISSIONS.createSubjects) && (
+              <button onClick={() => openNewSubject()} className="inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-gray-700 hover:bg-gray-50">
+                <Plus size={17} /> New subject
+              </button>
+            )}
+            {can(TEACHER_PERMISSIONS.importStudents) && (
+              <button onClick={() => setExtraModal("import")} className="inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-gray-700 hover:bg-gray-50">
+                <Upload size={17} /> Import students
+              </button>
+            )}
             <button onClick={() => setActiveModal("announcement")} className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700">
               <Megaphone size={17} /> Announcement
             </button>
@@ -153,7 +185,12 @@ export default function ClassManagement() {
         </div>
       </section>
 
-      <ClasslessSubjectsPanel subjects={subjectsApi.subjects} fetchStudents={subjectsApi.fetchStudents} />
+      <ClasslessSubjectsPanel
+        subjects={subjectsApi.subjects}
+        fetchStudents={subjectsApi.fetchStudents}
+        canEnrol={can(TEACHER_PERMISSIONS.manageSubjectStudents)}
+        onEnrolmentChanged={() => subjectsApi.refreshData()}
+      />
 
       {selectedClass && (
         <section className="space-y-5 rounded-xl bg-white p-5 shadow-sm">
@@ -163,7 +200,12 @@ export default function ClassManagement() {
               <p className="text-sm text-gray-600">{selectedClass.description || "Class details and learning content"}</p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <button onClick={() => setActiveModal("subject")} className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50"><Plus size={15} className="mr-1 inline" /> Subject</button>
+              {canManageSelectedClass && (
+                <button onClick={() => setExtraModal("students")} className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50"><UserPlus size={15} className="mr-1 inline" /> Manage students</button>
+              )}
+              {canAddSubjectToSelectedClass && (
+                <button onClick={() => openNewSubject(String(selectedClass.id))} aria-label={`Add subject to ${selectedClass.name || selectedClass.class_name}`} className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50"><Plus size={15} className="mr-1 inline" /> Subject</button>
+              )}
               <button onClick={() => setActiveModal("topic")} disabled={!selectedSubjectId} className="rounded-lg border px-3 py-2 text-sm hover:bg-gray-50 disabled:opacity-50"><Plus size={15} className="mr-1 inline" /> Topic</button>
               <button onClick={() => setActiveModal("material")} className="rounded-lg bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700"><FilePlus2 size={15} className="mr-1 inline" /> Course material</button>
             </div>
@@ -210,6 +252,33 @@ export default function ClassManagement() {
         </section>
       )}
 
+      {extraModal === "students" && canManageSelectedClass && (
+        <TeacherStudentsModal
+          title={`Students in ${selectedClass.name || selectedClass.class_name}`}
+          load={() => getTeacherClassStudents(selectedClass.id)}
+          add={(ids) => addTeacherClassStudents(selectedClass.id, ids)}
+          remove={(ids) => removeTeacherClassStudents(selectedClass.id, ids)}
+          onClose={() => {
+            setExtraModal(null);
+            classesApi.refreshData();
+          }}
+        />
+      )}
+      {extraModal === "subject" && (
+        <NewSubjectModal classes={ledClasses} defaultClass={newSubjectClass} onClose={() => setExtraModal(null)} onCreated={subjectCreated} />
+      )}
+      {extraModal === "import" && (
+        <ImportPeopleModal
+          kind="student"
+          base="/api/teacher/students"
+          note={ownClasses.length
+            ? `Each row's class must be one of your classes: ${ownClasses.map((c) => c.name).join(", ")}.`
+            : "You have no classes yet, so no rows can be imported."}
+          onClose={() => setExtraModal(null)}
+          onImported={() => classesApi.refreshData()}
+        />
+      )}
+
       {activeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <form onSubmit={modalForm.submit} className="w-full max-w-lg space-y-4 rounded-xl bg-white p-6 shadow-xl">
@@ -229,7 +298,6 @@ export default function ClassManagement() {
               </select>
               <input type="url" placeholder="Link (optional)" value={material.link} onChange={(event) => setMaterial({ ...material, link: event.target.value })} className="w-full rounded-lg border p-3" />
             </>}
-            {activeModal === "subject" && <input required maxLength={100} placeholder="Subject name" value={subjectName} onChange={(event) => setSubjectName(event.target.value)} className="w-full rounded-lg border p-3" />}
             {activeModal === "topic" && <>
               <input required maxLength={100} placeholder="Topic name" value={topic.name} onChange={(event) => setTopic({ ...topic, name: event.target.value })} className="w-full rounded-lg border p-3" />
               <textarea placeholder="Description" value={topic.description} onChange={(event) => setTopic({ ...topic, description: event.target.value })} className="w-full rounded-lg border p-3" rows="3" />

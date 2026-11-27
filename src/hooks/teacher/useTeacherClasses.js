@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   createTeacherClass,
   createTeacherClassMaterial,
-  createTeacherClassSubject,
   createTeacherSubjectTopic,
   getTeacherClass,
   getTeacherClassMaterials,
@@ -82,17 +81,6 @@ export default function useTeacherClasses() {
     return result;
   }, [request]);
 
-  const addSubject = useCallback(async (classId, data) => {
-    const result = await request(
-      `teacherClassSubjects:${classId}`,
-      "create_teacher_class_subject",
-      () => createTeacherClassSubject(classId, data),
-      { mutation: true, successMessage: "Subject added to class", failureMessage: "Failed to add subject" }
-    );
-    await fetchSubjects(classId);
-    return result;
-  }, [request, fetchSubjects]);
-
   const fetchTopics = useCallback(async (subjectId) => {
     const result = await request(
       `teacherSubjectTopics:${subjectId}`,
@@ -147,7 +135,6 @@ export default function useTeacherClasses() {
     fetchMaterials,
     addMaterial,
     fetchSubjects,
-    addSubject,
     fetchTopics,
     addTopic,
     addClass,

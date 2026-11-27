@@ -117,13 +117,6 @@ export const getTeacherClassSubjects = (classId) =>
     { auth: true }
   );
 
-export const createTeacherClassSubject = (classId, subjectData) =>
-  http.post(
-    `${TEACHER_API}/classes/${resourceId(classId)}/subjects/`,
-    subjectData,
-    { auth: true }
-  );
-
 export const getTeacherExaminations = (params = {}) =>
   http.get(`${TEACHER_API}/examinations/`, { auth: true, params: pageParams(params) });
 
@@ -180,6 +173,37 @@ export const getTeacherSubjects = () =>
 // Students taking a subject: its class's, or those enrolled in a classless one.
 export const getTeacherSubjectStudents = (subjectId) =>
   http.get(`${TEACHER_API}/subjects/${resourceId(subjectId)}/students/`, { auth: true });
+
+// Extra permissions from the school admin (own classes and subjects only):
+// { permissions: [codes], available, classes: [{ id, name, leads }] }.
+export const getTeacherPermissions = () =>
+  http.get(`${TEACHER_API}/permissions/`, { auth: true });
+
+// The school's students to pick from (needs a manage-students permission).
+export const searchTeacherSchoolStudents = (q) =>
+  http.get(`${TEACHER_API}/students/search/`, { auth: true, params: { q } });
+
+const classStudentsPath = (classId) => `${TEACHER_API}/classes/${resourceId(classId)}/students/`;
+const subjectStudentsPath = (subjectId) => `${TEACHER_API}/subjects/${resourceId(subjectId)}/students/`;
+
+export const getTeacherClassStudents = (classId) =>
+  http.get(classStudentsPath(classId), { auth: true });
+
+export const addTeacherClassStudents = (classId, studentIds) =>
+  http.post(classStudentsPath(classId), { student_ids: studentIds }, { auth: true });
+
+export const removeTeacherClassStudents = (classId, studentIds) =>
+  http.del(classStudentsPath(classId), { auth: true, body: { student_ids: studentIds } });
+
+export const enrolTeacherSubjectStudents = (subjectId, studentIds) =>
+  http.post(subjectStudentsPath(subjectId), { student_ids: studentIds }, { auth: true });
+
+export const unenrolTeacherSubjectStudents = (subjectId, studentIds) =>
+  http.del(subjectStudentsPath(subjectId), { auth: true, body: { student_ids: studentIds } });
+
+// { name, description, classname: a class they lead, or null }.
+export const createTeacherSubject = (subjectData) =>
+  http.post(`${TEACHER_API}/subjects/`, subjectData, { auth: true });
 
 export const getTeacherAttendanceReport = (subjectId, params = {}) =>
   http.get(

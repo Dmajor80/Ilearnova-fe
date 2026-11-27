@@ -63,7 +63,9 @@ vi.mock("@/hooks/teacher", () => ({
   useTeacherCbt: () => cbtApi,
   useTeacherClasses: () => classesApi,
   useTeacherAnnouncements: () => ({ mutating: false, publishAnnouncement: vi.fn() }),
-  useTeacherStudents: () => ({ students: [], loading: false, error: null })
+  useTeacherStudents: () => ({ students: [], loading: false, error: null }),
+  useTeacherPermissions: () => ({ permissions: [], classes: [], loading: false, has: () => false, reload: vi.fn() }),
+  TEACHER_PERMISSIONS: {}
 }));
 vi.mock("@/context/OrganizationContext", () => ({ useOrganization: () => ({ currentOrgId: "org1" }) }));
 vi.mock("../components/CourseComponents", () => ({ default: () => null }));
