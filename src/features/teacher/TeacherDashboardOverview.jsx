@@ -9,6 +9,7 @@ import {
 import QuickStatsCard from "@/components/dashboard/QuickStatsCard";
 import { RefreshCw } from "lucide-react";
 import { ListSkeleton, Skeleton, StatCardsSkeleton } from "@/components/ui/Skeleton";
+import { slotClassName } from "@/components/timetable/slotLabels";
 
 const shortTime = (value) => {
   const [h, m] = String(value || "").split(":");
@@ -182,7 +183,7 @@ export default function TeacherDashboardOverview({ onNavigate = () => {} }) {
                     <li key={slot.id} className="flex gap-3 py-2 text-sm">
                       <span className="w-20 flex-shrink-0 tabular-nums text-blue-700">{shortTime(slot.start_time)}</span>
                       <span className="text-gray-900">
-                        {slot.subject_name || "Class"} <span className="text-gray-500">· {slot.class_name}{slot.room ? ` · ${slot.room}` : ""}</span>
+                        {slot.subject_name || "Class"} <span className="text-gray-500">· {slotClassName(slot)}{slot.room ? ` · ${slot.room}` : ""}</span>
                       </span>
                     </li>
                   ))}

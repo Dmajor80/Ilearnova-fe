@@ -70,6 +70,7 @@ import Overview from "@/features/student/Overview";
 import Attendance from "@/features/student/Attendance";
 import Assignments from "@/features/student/Assignments";
 import Timetable from "@/features/student/Timetable";
+import StudentMaterials from "@/features/student/StudentMaterials";
 import OnlineExamScores from "@/features/student/OnlineExamScores";
 import { CoursesComponent } from "@/features/student/CoursesComponent";
 import CoursePage from "@/features/student/CoursePage";
@@ -175,6 +176,7 @@ const AppContent = () => {
         <Route path="transcript" element={<OnlineExamScores />} />
         <Route path="courses" element={<CoursesComponent />} />
         <Route path="courses/:courseId" element={<CoursePage />} />
+        <Route path="materials" element={<StudentMaterials />} />
         <Route path="result" element={<Result />} />
         <Route path="fees" element={<MyFees />} />
         <Route path="exam" element={<Exam />} />

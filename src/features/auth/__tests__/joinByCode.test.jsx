@@ -3,7 +3,7 @@
  * school's code on sign-up, open a personal invite link a school admin
  * emailed them, or open the school's shareable "open" link for a role.
  */
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -88,10 +88,18 @@ describe("signing up with a school code", () => {
   });
 
   it("uppercases the code and shows the school it belongs to", async () => {
-    showSignup();
-    fireEvent.change(screen.getByLabelText(/School code/), { target: { value: "sun12345" } });
-    expect(screen.getByLabelText(/School code/).value).toBe("SUN12345");
-    expect(await screen.findByText("✓ Sunrise College")).toBeTruthy();
+    // The lookup waits out a 400ms typing debounce. Step past it on a fake
+    // clock so a busy machine can't push it beyond findByText's timeout.
+    vi.useFakeTimers();
+    try {
+      showSignup();
+      fireEvent.change(screen.getByLabelText(/School code/), { target: { value: "sun12345" } });
+      expect(screen.getByLabelText(/School code/).value).toBe("SUN12345");
+      await act(() => vi.advanceTimersByTimeAsync(400));
+    } finally {
+      vi.useRealTimers();
+    }
+    expect(await screen.findByText("✓ Sunrise College", {}, { timeout: 5000 })).toBeTruthy();
     expect(http.get).toHaveBeenCalledWith("/api/organizations/lookup/", expect.objectContaining({ auth: false, params: { code: "SUN12345" } }));
   });
 

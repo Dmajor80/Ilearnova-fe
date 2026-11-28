@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, Clock3, ExternalLink, RefreshCw } from "lucide-react";
 import { useTeacherTimetable } from "@/hooks/teacher";
+import { slotClassName } from "@/components/timetable/slotLabels";
 
 const DAY_KEYS = ["day_name", "day", "name", "weekday"];
 const SESSION_KEYS = ["entries", "sessions", "schedule", "slots", "periods", "classes"];
@@ -54,14 +55,14 @@ export default function Timetable() {
 
   const classNames = useMemo(
     () => [...new Set(days.flatMap(({ sessions }) => sessions
-      .map((session) => session.class_name || session.class?.name)
+      .map(slotClassName)
       .filter(Boolean)))],
     [days]
   );
   const activeDay = days.find((day) => day.name === selectedDay) || days[0];
   const sessions = (activeDay?.sessions || []).filter((session) =>
     selectedClass === "all" ||
-    (session.class_name || session.class?.name) === selectedClass
+    slotClassName(session) === selectedClass
   );
 
   useEffect(() => {
@@ -141,7 +142,7 @@ export default function Timetable() {
                 </div>
                 <div className="min-w-48 flex-1">
                   <p className="font-semibold text-gray-900">{session.subject_name || session.subject?.name || "Class session"}</p>
-                  <p className="text-sm text-gray-600">{session.class_name || session.class?.name || "Class"}</p>
+                  <p className="text-sm text-gray-600">{slotClassName(session) || "Class"}</p>
                 </div>
                 <div className="text-sm text-gray-500">{session.room || "Room not specified"}</div>
                 {session.meeting_link && (

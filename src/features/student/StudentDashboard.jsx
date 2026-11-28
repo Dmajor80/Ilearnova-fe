@@ -27,7 +27,15 @@ const BASE = "/student-dashboard/";
 /** Sidebar groups; pages in a group are tabs of one another. */
 const STUDENT_GROUPS = [
   { id: "overview", label: "Overview", icon: LayoutDashboard, tabs: [{ id: "overview", label: "Overview" }] },
-  { id: "courses", label: "Courses", icon: BookOpen, tabs: [{ id: "courses", label: "Courses" }] },
+  {
+    id: "courses",
+    label: "Courses",
+    icon: BookOpen,
+    tabs: [
+      { id: "courses", label: "Courses" },
+      { id: "materials", label: "Materials" },
+    ],
+  },
   {
     id: "classwork",
     label: "Classwork",

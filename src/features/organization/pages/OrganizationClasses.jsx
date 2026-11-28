@@ -3,6 +3,7 @@ import SchoolDataTable from "@/components/school-admin/SchoolDataTable";
 import useOrganizationClasses from "@/hooks/organization/useOrganizationClasses";
 import GenericModal from "../components/GenericModal";
 import SchoolSubjectsPanel from "../components/SchoolSubjectsPanel";
+import SchoolTimetablePanel from "../components/SchoolTimetablePanel";
 import { BookOpen, RefreshCw, Search, Users } from "lucide-react";
 
 const OrganizationClasses = () => {
@@ -110,6 +111,9 @@ const OrganizationClasses = () => {
       )}
       <div className="border-t pt-5">
         <SchoolSubjectsPanel />
+      </div>
+      <div className="border-t pt-5">
+        <SchoolTimetablePanel />
       </div>
       {showModal && <GenericModal type="class" saving={classesApi.mutating} availableClasses={classesApi.availableClasses} onSave={saveClass} onClose={() => setShowModal(false)} />}
     </div>

@@ -2,11 +2,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   createTeacherClass,
   createTeacherClassMaterial,
+  createTeacherMaterial,
   createTeacherSubjectTopic,
   getTeacherClass,
   getTeacherClassMaterials,
   getTeacherClasses,
   getTeacherClassSubjects,
+  getTeacherMaterials,
   getTeacherSubjectTopics
 } from "@/api/teacher";
 import useTeacherApi, { getTeacherList } from "./teacherApiUtils";
@@ -69,6 +71,29 @@ export default function useTeacherClasses() {
     await fetchMaterials(classId);
     return result;
   }, [request, fetchMaterials]);
+
+  const fetchSubjectMaterials = useCallback(async (subjectId) => {
+    const result = await request(
+      `teacherSubjectMaterials:${subjectId}`,
+      "fetch_teacher_subject_materials",
+      () => getTeacherMaterials({ subject_id: subjectId }),
+      { failureMessage: "Course materials unavailable" }
+    );
+    if (result !== null) setMaterials(getTeacherList(result, ["materials"]));
+    return result;
+  }, [request]);
+
+  // `data` carries `subject`; works for subjects without a class too.
+  const addSubjectMaterial = useCallback(async (subjectId, data) => {
+    const result = await request(
+      `teacherSubjectMaterials:${subjectId}`,
+      "create_teacher_subject_material",
+      () => createTeacherMaterial(data),
+      { mutation: true, successMessage: "Course material added", failureMessage: "Failed to add course material" }
+    );
+    await fetchSubjectMaterials(subjectId);
+    return result;
+  }, [request, fetchSubjectMaterials]);
 
   const fetchSubjects = useCallback(async (classId) => {
     const result = await request(
@@ -134,6 +159,8 @@ export default function useTeacherClasses() {
     fetchClass,
     fetchMaterials,
     addMaterial,
+    fetchSubjectMaterials,
+    addSubjectMaterial,
     fetchSubjects,
     fetchTopics,
     addTopic,

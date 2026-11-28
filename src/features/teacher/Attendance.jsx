@@ -28,8 +28,9 @@ export default function Attendance() {
     }
   }, [subjects, selectedSubjectId]);
 
-  // The roster is the subject's own: its class's students, or, for a subject
-  // without a class, only the students enrolled in it.
+  // The roster is the subject's own: its class's students plus any extra
+  // students enrolled from other classes (for a subject without a class,
+  // only the enrolled students).
   useEffect(() => {
     if (!selectedSubjectId) {
       setStudents([]);

@@ -145,6 +145,83 @@ describe("teacher controls from permissions", () => {
     );
   });
 
+  describe("extra students in a class subject", () => {
+    const MATHS = { id: "m1", name: "Mathematics", class_id: "c1", class_name: "JSS1A", student_count: 2 };
+    const ENGLISH = { id: "en", name: "English" }; // Mrs Cole's, in the same class
+    const CHIDI = { id: "u-chidi", name: "Chidi Eze", email: "chidi@x.ng", via: "extra" };
+
+    beforeEach(() => {
+      classesApi.subjects = [{ id: "m1", name: "Mathematics" }, ENGLISH];
+      subjectsApi.subjects = [FRENCH, MATHS];
+      const get = http.get.getMockImplementation();
+      http.get.mockImplementation((url, ...rest) => {
+        if (url === "/api/teacher/subjects/m1/students/") {
+          return Promise.resolve({ success: true, data: [{ ...ADA, via: "class" }, CHIDI] });
+        }
+        return get(url, ...rest);
+      });
+      http.post.mockImplementation((url) => {
+        if (url === "/api/teacher/subjects/m1/students/") {
+          return Promise.resolve({ success: true, data: [{ ...ADA, via: "class" }, { ...BAYO, via: "extra" }, CHIDI] });
+        }
+        return Promise.reject(new Error(`unexpected ${url}`));
+      });
+    });
+    afterEach(() => {
+      classesApi.subjects = [];
+      subjectsApi.subjects = [FRENCH];
+    });
+
+    const pickSubject = (name) => fireEvent.click(screen.getByRole("button", { name }));
+
+    it("is hidden without manage_subject_students", async () => {
+      render(<ClassManagement />);
+      await openClass("JSS1A");
+      pickSubject("Mathematics");
+      expect(screen.queryByRole("button", { name: /Add students from other classes/ })).toBeNull();
+    });
+
+    it("is hidden for a subject another teacher teaches", async () => {
+      granted = ["manage_subject_students"];
+      render(<ClassManagement />);
+      await openClass("JSS1A");
+      pickSubject("English");
+      expect(screen.queryByRole("button", { name: /Add students from other classes/ })).toBeNull();
+    });
+
+    it("adds a student from another class to an own class subject", async () => {
+      granted = ["manage_subject_students"];
+      render(<ClassManagement />);
+      await openClass("JSS1A");
+      pickSubject("Mathematics");
+      fireEvent.click(screen.getByRole("button", { name: /Add students from other classes/ }));
+
+      const dialog = await screen.findByRole("dialog", { name: "Students in Mathematics (JSS1A)" });
+      const extras = await within(dialog).findByRole("list", { name: "Extra students" });
+      expect(within(extras).getByText("Chidi Eze")).toBeTruthy();
+      expect(within(extras).queryByText("Ada Obi")).toBeNull();
+      expect(within(dialog).getByText("From JSS1A: 1 student (manage them in the class)")).toBeTruthy();
+
+      const results = within(dialog).getByRole("list", { name: "School students" });
+      const ada = await within(results).findByRole("button", { name: "Add Ada Obi" });
+      expect(ada.disabled).toBe(true);
+      expect(ada.textContent).toBe("In class");
+      fireEvent.click(within(results).getByRole("button", { name: "Add Bayo Ade" }));
+      await waitFor(() =>
+        expect(http.post).toHaveBeenCalledWith("/api/teacher/subjects/m1/students/", { student_ids: ["u-bayo"] }, { auth: true })
+      );
+      expect(await within(extras).findByText("Bayo Ade")).toBeTruthy();
+
+      fireEvent.click(within(extras).getByRole("button", { name: "Remove Chidi Eze" }));
+      await waitFor(() =>
+        expect(http.del).toHaveBeenCalledWith("/api/teacher/subjects/m1/students/", {
+          auth: true,
+          body: { student_ids: ["u-chidi"] },
+        })
+      );
+    });
+  });
+
   it("creates a subject in a class they lead, or with no class", async () => {
     granted = ["create_subjects"];
     render(<ClassManagement />);

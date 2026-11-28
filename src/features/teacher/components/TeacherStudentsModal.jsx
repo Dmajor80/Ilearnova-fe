@@ -7,6 +7,7 @@ const SEARCH_DELAY_MS = 250;
 
 const errorText = (err) => apiErrorDetails(err).messages.map((m) => m.replace(/^student_ids: /, "")).join(" ");
 const nameOf = (student) => student.name || student.full_name || student.email || "Student";
+const plural = (count) => `${count} ${count === 1 ? "student" : "students"}`;
 const listOf = (payload) => {
   const data = payload?.data ?? payload;
   if (Array.isArray(data)) return data;
@@ -15,11 +16,16 @@ const listOf = (payload) => {
 
 /**
  * A teacher adds the school's students to, or removes them from, one of their
- * own classes or classless subjects (with the matching permission from their
- * school admin). ``load()``, ``add(ids)`` and ``remove(ids)`` return the API
- * payload with the new roster; ``onChanged(count)`` fires after each change.
+ * own classes or subjects (with the matching permission from their school
+ * admin). ``load()``, ``add(ids)`` and ``remove(ids)`` return the API payload
+ * with the new roster; ``onChanged(count)`` fires after each change.
+ *
+ * ``fromClass`` (a class name) is for a class subject: its class's students
+ * (roster rows with ``via: "class"``) are only counted, since they are
+ * managed in the class; the teacher adds and removes extra students from
+ * other classes.
  */
-export default function TeacherStudentsModal({ title, load, add, remove, onClose, onChanged }) {
+export default function TeacherStudentsModal({ title, load, add, remove, onClose, onChanged, fromClass = "" }) {
   const [current, setCurrent] = useState([]);
   const [loadingRoster, setLoadingRoster] = useState(true);
   const [search, setSearch] = useState("");
@@ -71,6 +77,11 @@ export default function TeacherStudentsModal({ title, load, add, remove, onClose
   };
 
   const currentIds = new Set(current.map((student) => String(student.id)));
+  const classIds = new Set(
+    current.filter((student) => fromClass && student.via === "class").map((student) => String(student.id))
+  );
+  const listed = current.filter((student) => !classIds.has(String(student.id)));
+  const listLabel = fromClass ? "Extra students" : "Current students";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -84,7 +95,11 @@ export default function TeacherStudentsModal({ title, load, add, remove, onClose
           <div>
             <h3 id="teacher-students-title" className="text-xl font-bold text-gray-800">{title}</h3>
             <p className="text-sm text-gray-600" aria-live="polite">
-              {loadingRoster ? "Loading students..." : `${current.length} ${current.length === 1 ? "student" : "students"}`}
+              {loadingRoster
+                ? "Loading students..."
+                : fromClass
+                  ? `${plural(current.length)}: ${classIds.size} from ${fromClass}, ${listed.length} extra`
+                  : plural(current.length)}
             </p>
           </div>
           <button type="button" onClick={onClose} aria-label="Close dialog" className="text-gray-500 hover:text-gray-800">
@@ -94,9 +109,14 @@ export default function TeacherStudentsModal({ title, load, add, remove, onClose
 
         <div className="grid flex-1 gap-5 overflow-y-auto p-5 md:grid-cols-2">
           <section aria-labelledby="teacher-current-heading">
-            <h4 id="teacher-current-heading" className="mb-2 font-semibold text-gray-800">Current students</h4>
-            <ul aria-label="Current students" className="divide-y rounded-lg border">
-              {current.map((student) => (
+            <h4 id="teacher-current-heading" className="mb-2 font-semibold text-gray-800">{listLabel}</h4>
+            {fromClass && !loadingRoster && (
+              <p className="mb-2 rounded-lg bg-gray-50 p-3 text-sm text-gray-600">
+                From {fromClass}: {plural(classIds.size)} (manage them in the class)
+              </p>
+            )}
+            <ul aria-label={listLabel} className="divide-y rounded-lg border">
+              {listed.map((student) => (
                 <li key={student.id} className="flex items-center justify-between gap-2 p-3">
                   <div className="min-w-0">
                     <p className="truncate font-medium text-gray-800">{nameOf(student)}</p>
@@ -113,12 +133,16 @@ export default function TeacherStudentsModal({ title, load, add, remove, onClose
                   </button>
                 </li>
               ))}
-              {!loadingRoster && current.length === 0 && <li className="p-3 text-sm text-gray-500">No students yet.</li>}
+              {!loadingRoster && listed.length === 0 && (
+                <li className="p-3 text-sm text-gray-500">{fromClass ? "No students from other classes yet." : "No students yet."}</li>
+              )}
             </ul>
           </section>
 
           <section aria-labelledby="teacher-add-heading">
-            <h4 id="teacher-add-heading" className="mb-2 font-semibold text-gray-800">Add students</h4>
+            <h4 id="teacher-add-heading" className="mb-2 font-semibold text-gray-800">
+              {fromClass ? "Add students from other classes" : "Add students"}
+            </h4>
             <label className="mb-2 flex items-center gap-2 rounded-lg border border-gray-300 px-3 focus-within:border-indigo-500">
               <Search className="h-4 w-4 text-gray-500" aria-hidden="true" />
               <input
@@ -132,7 +156,8 @@ export default function TeacherStudentsModal({ title, load, add, remove, onClose
             </label>
             <ul aria-label="School students" aria-busy={searching} className="divide-y rounded-lg border">
               {results.map((student) => {
-                const taken = currentIds.has(String(student.id));
+                const inClass = classIds.has(String(student.id));
+                const taken = inClass || currentIds.has(String(student.id));
                 return (
                   <li key={student.id} className="flex items-center justify-between gap-2 p-3">
                     <div className="min-w-0">
@@ -146,7 +171,7 @@ export default function TeacherStudentsModal({ title, load, add, remove, onClose
                       aria-label={`Add ${nameOf(student)}`}
                       className="rounded-lg bg-indigo-600 px-3 py-1 text-sm text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      {taken ? "Added" : "Add"}
+                      {inClass ? "In class" : taken ? "Added" : "Add"}
                     </button>
                   </li>
                 );

@@ -386,3 +386,17 @@ export const teacherPermissionsApi = {
       )
     ),
 };
+
+/* Weekly timetable slots. A slot is for a class (optionally one of its
+ * subjects) or for a subject without a class, then `class_obj` is null. A
+ * classless subject's slot is refused (field_errors.start_time) when it clashes
+ * with its teacher's or its enrolled students' other slots. */
+const TIMETABLE = "/api/admin/school/timetable/";
+
+export const schoolTimetableApi = {
+  list: async (params = {}) => body(await http.get(TIMETABLE, { auth: true, params })),
+  create: async (slot) => body(await http.post(TIMETABLE, slot, { auth: true })),
+  update: async (id, slot) =>
+    body(await http.patch(`${TIMETABLE}${encodeURIComponent(id)}/`, slot, { auth: true })),
+  remove: (id) => http.del(`${TIMETABLE}${encodeURIComponent(id)}/`, { auth: true }),
+};
