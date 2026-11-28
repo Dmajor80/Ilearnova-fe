@@ -182,7 +182,7 @@ export default function OrganizationMaterials() {
           <p className="text-sm text-gray-600">Documents shared with your school&apos;s subjects and classes. Students see those of the subjects they take.</p>
         </div>
         <div className="flex gap-2">
-          <button type="button" onClick={openForm} className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700">
+          <button type="button" onClick={openForm} className="inline-flex min-h-[44px] items-center gap-2 whitespace-nowrap rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700">
             <Plus className="h-4 w-4" aria-hidden="true" /> Upload document
           </button>
           <button type="button" onClick={load} aria-label="Refresh materials" className="min-h-[44px] rounded-lg border px-3 text-gray-700 hover:bg-gray-50">
