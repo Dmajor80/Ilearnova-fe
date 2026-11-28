@@ -373,7 +373,7 @@ export default function OrganizationDetails() {
               <button
                 type="submit"
                 disabled={loading}
-                className="px-8 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-cyan-700 transition-all shadow-lg disabled:opacity-60"
+                className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-2xl hover:bg-blue-700 transition-all shadow-lg disabled:opacity-60"
               >
                 {loading ? "Saving..." : "Save and Continue"}
               </button>

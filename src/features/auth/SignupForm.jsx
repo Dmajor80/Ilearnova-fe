@@ -176,7 +176,7 @@ export default function SignupForm() {
 
             <Link
               to="/login"
-              className="inline-block w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-green-600 to-blue-600 text-white font-semibold rounded-2xl hover:from-green-700 hover:to-blue-700 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-green-300 shadow-lg"
+              className="inline-block w-full sm:w-auto px-8 py-4 bg-blue-600 text-white font-semibold rounded-2xl hover:bg-blue-700 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-300 shadow-lg"
             >
               Log in
             </Link>
@@ -260,7 +260,7 @@ export default function SignupForm() {
 
                 <button
                   onClick={handleConfirmEmail}
-                  className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-green-600 to-blue-600 text-white font-semibold rounded-2xl hover:from-green-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 shadow-lg"
+                  className="w-full sm:w-auto px-8 py-4 bg-blue-600 text-white font-semibold rounded-2xl hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300 shadow-lg"
                 >
                   I've Confirmed - Go to Login
                 </button>
@@ -590,7 +590,7 @@ export default function SignupForm() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full px-8 py-3.5 sm:py-4 bg-gradient-to-r from-green-600 to-blue-600 text-white font-semibold rounded-xl sm:rounded-2xl hover:from-green-700 hover:to-blue-700 transition-all duration-300 transform sm:hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-4 focus:ring-green-300 shadow-lg"
+                  className="w-full px-8 py-3.5 sm:py-4 bg-blue-600 text-white font-semibold rounded-xl sm:rounded-2xl hover:bg-blue-700 transition-all duration-300 transform sm:hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-4 focus:ring-blue-300 shadow-lg"
                 >
                   {loading ? <LoadingSpinner /> : "Create Account"}
                 </button>

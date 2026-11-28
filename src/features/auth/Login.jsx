@@ -247,7 +247,7 @@ export default function Login() {
                 <button
                   type="submit"
                   disabled={loading || isBlocked}
-                  className="w-full px-8 py-3.5 sm:py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-cyan-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-4 focus:ring-blue-300 shadow-lg"
+                  className="w-full px-8 py-3.5 sm:py-4 bg-blue-600 text-white font-semibold rounded-2xl hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-4 focus:ring-blue-300 shadow-lg"
                 >
                   {loading ? <LoadingSpinner /> : isBlocked ? "Account Locked" : "Sign In"}
                 </button>
@@ -375,7 +375,7 @@ export default function Login() {
                     <button
                       type="button"
                       onClick={handleToSignUp}
-                      className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold shadow-lg hover:from-blue-700 hover:to-cyan-700 transition-all"
+                      className="px-5 py-2.5 rounded-xl bg-blue-600 text-white font-semibold shadow-lg hover:bg-blue-700 transition-all"
                     >
                       Create Account
                     </button>

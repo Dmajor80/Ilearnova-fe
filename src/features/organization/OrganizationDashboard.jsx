@@ -152,8 +152,8 @@ const OrganizationDashboard = () => {
                     }
                     className={`w-full flex items-center px-4 py-3 text-left rounded-xl transition-all duration-200 min-h-[48px] group ${
                       isActive
-                        ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg transform scale-[1.02] border border-blue-500"
-                        : "text-slate-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-700 hover:shadow-md border border-transparent hover:border-blue-200"
+                        ? "bg-blue-600 text-white shadow-lg transform scale-[1.02] border border-blue-500"
+                        : "text-slate-700 hover:bg-blue-50 hover:text-blue-700 hover:shadow-md border border-transparent hover:border-blue-200"
                     }`}
                     title={item.label}
                   >
@@ -206,7 +206,7 @@ const OrganizationDashboard = () => {
               <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                 aria-label="Open menu"
-                className="shrink-0 inline-flex min-h-10 min-w-10 items-center justify-center p-2 md:p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 md:hidden border border-slate-200"
+                className="shrink-0 inline-flex min-h-10 min-w-10 items-center justify-center p-2 md:p-3 bg-slate-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 md:hidden border border-slate-200"
               >
                 <Menu className="w-5 h-5 text-slate-600" />
               </button>
@@ -221,7 +221,7 @@ const OrganizationDashboard = () => {
               <button
                 onClick={() => navigate("/organization-dashboard/alerts")}
                 aria-label={alertsLoading ? "Open alerts" : `Open alerts (${totalNotifications} notifications)`}
-                className="inline-flex min-h-10 min-w-10 items-center justify-center p-2 md:p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 border border-slate-200 group relative"
+                className="inline-flex min-h-10 min-w-10 items-center justify-center p-2 md:p-3 bg-slate-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 border border-slate-200 group relative"
               >
                 <Bell className="w-5 h-5 text-slate-600 group-hover:text-blue-600 transition-colors" />
                 {totalNotifications > 0 && <span className="absolute -top-1 -right-1 min-w-5 rounded-full border border-white bg-red-500 px-1 text-center text-xs text-white">{totalNotifications > 99 ? "99+" : totalNotifications}</span>}
@@ -230,7 +230,7 @@ const OrganizationDashboard = () => {
                 type="button"
                 aria-label="Settings"
                 onClick={() => navigate(PROFILE_PATH)}
-                className="hidden sm:inline-flex min-h-10 min-w-10 items-center justify-center p-2 md:p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 border border-slate-200 group"
+                className="hidden sm:inline-flex min-h-10 min-w-10 items-center justify-center p-2 md:p-3 bg-slate-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 border border-slate-200 group"
               >
                 <Settings className="w-5 h-5 text-slate-600 group-hover:text-blue-600 transition-colors" />
               </button>
@@ -239,7 +239,7 @@ const OrganizationDashboard = () => {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                  className="flex min-h-10 items-center gap-1 md:gap-3 p-1 md:p-2 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 border border-slate-200"
+                  className="flex min-h-10 items-center gap-1 md:gap-3 p-1 md:p-2 rounded-xl hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 border border-slate-200"
                   aria-haspopup="true"
                   aria-expanded={isProfileDropdownOpen}
                 >
@@ -256,7 +256,7 @@ const OrganizationDashboard = () => {
                         navigate(PROFILE_PATH);
                         setIsProfileDropdownOpen(false);
                       }}
-                      className="flex items-center w-full text-left px-4 py-3 text-slate-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-200 rounded-lg mx-2"
+                      className="flex items-center w-full text-left px-4 py-3 text-slate-700 hover:bg-blue-50 transition-all duration-200 rounded-lg mx-2"
                     >
                       <User className="w-5 h-5 mr-3 text-blue-600" />
                       <span className="font-medium">Edit Profile</span>

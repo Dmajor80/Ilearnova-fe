@@ -45,7 +45,7 @@ export default function Forbidden() {
           </button>
           <button
             onClick={() => navigate("/home", { replace: true })}
-            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold shadow hover:from-blue-700 hover:to-cyan-700 transition-all"
+            className="px-5 py-2.5 rounded-xl bg-blue-600 text-white font-semibold shadow hover:bg-blue-700 transition-all"
           >
             Go Home
           </button>
