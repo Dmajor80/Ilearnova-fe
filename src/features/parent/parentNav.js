@@ -1,4 +1,4 @@
-import { Banknote, Calendar, ClipboardList, MessageCircle, Star, Users } from "lucide-react";
+import { Banknote, Calendar, ClipboardList, FileText, MessageCircle, Star, Users } from "lucide-react";
 
 /** Parent sidebar groups; pages in a group are tabs of one another. */
 export const PARENT_GROUPS = [
@@ -13,6 +13,7 @@ export const PARENT_GROUPS = [
       { id: "timetable", label: "Timetable" },
     ],
   },
+  { id: "materials", label: "Course materials", icon: FileText, tabs: [{ id: "materials", label: "Course materials" }] },
   { id: "results", label: "Results", icon: Star, tabs: [{ id: "grades", label: "Results" }] },
   {
     id: "messages",

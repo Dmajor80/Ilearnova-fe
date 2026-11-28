@@ -46,6 +46,7 @@ import OrganizationOverview from "@/features/organization/pages/OrganizationOver
 import OrganizationStudents from "@/features/organization/pages/OrganizationStudents";
 import OrganizationTeachers from "@/features/organization/pages/OrganizationTeachers";
 import OrganizationClasses from "@/features/organization/pages/OrganizationClasses";
+import OrganizationMaterials from "@/features/organization/pages/OrganizationMaterials";
 import OrganizationExams from "@/features/organization/pages/OrganizationExams";
 import OrganizationAnalytics from "@/features/organization/pages/OrganizationAnalytics";
 import OrganizationReports from "@/features/organization/pages/OrganizationReports";
@@ -214,6 +215,7 @@ const AppContent = () => {
         <Route path="pending-teachers" element={<Navigate to="/organization-dashboard/teachers?status=pending" replace />} />
         <Route path="pending-students" element={<Navigate to="/organization-dashboard/students?status=pending" replace />} />
         <Route path="classes" element={<OrganizationClasses />} />
+        <Route path="materials" element={<OrganizationMaterials />} />
         <Route path="exams" element={<OrganizationExams />} />
         <Route path="results" element={<TeacherResults forSchoolAdmin />} />
         <Route path="grading" element={<GradingPolicyPage />} />

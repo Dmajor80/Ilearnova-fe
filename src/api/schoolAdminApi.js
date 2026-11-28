@@ -400,3 +400,17 @@ export const schoolTimetableApi = {
     body(await http.patch(`${TIMETABLE}${encodeURIComponent(id)}/`, slot, { auth: true })),
   remove: (id) => http.del(`${TIMETABLE}${encodeURIComponent(id)}/`, { auth: true }),
 };
+
+/* Course materials of the whole school (documents only, as for teachers).
+ * Upload with FormData: title, description, content_type "file",
+ * is_published, file, and `subject` and/or `class_obj`. The admin may edit
+ * or delete any material, whoever uploaded it. */
+const MATERIALS = "/api/admin/school/materials/";
+
+export const schoolMaterialsApi = {
+  list: async (params = {}) => body(await http.get(MATERIALS, { auth: true, params })),
+  upload: async (formData) => body(await http.post(MATERIALS, formData, { auth: true })),
+  update: async (id, changes) =>
+    body(await http.patch(`${MATERIALS}${encodeURIComponent(id)}/`, changes, { auth: true })),
+  remove: (id) => http.del(`${MATERIALS}${encodeURIComponent(id)}/`, { auth: true }),
+};

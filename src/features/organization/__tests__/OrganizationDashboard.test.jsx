@@ -61,6 +61,7 @@ describe("OrganizationDashboard navigation", () => {
       "Students",
       "Teachers",
       "Classes",
+      "Course materials",
       "Exams & results",
       "Reports",
       "Messages",

@@ -21,13 +21,14 @@ const show = (activeTab, setActiveTab = vi.fn()) =>
   );
 
 describe("ParentSidebar", () => {
-  it("has six links, with timetable beside attendance and announcements beside messages", () => {
+  it("has seven links, with timetable beside attendance and announcements beside messages", () => {
     show("dashboard");
     const nav = screen.getByRole("navigation", { name: "Parent dashboard" });
     expect(within(nav).getAllByRole("button").map((b) => b.title)).toEqual([
       "Dashboard",
       "My Children",
       "Attendance & timetable",
+      "Course materials",
       "Results",
       "Messages",
       "Fees & Payments",

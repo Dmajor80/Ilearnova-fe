@@ -32,3 +32,14 @@ export const getParentChildTimetable = (childId) =>
 
 export const getParentAnnouncements = () =>
   http.get(`${PARENT_API}/announcements/`, { auth: true });
+
+// The child's documents, the same ones the child sees.
+export const getParentChildMaterials = (childId, params = {}) =>
+  http.get(`${PARENT_API}/children/${resourceId(childId)}/materials/`, { auth: true, params });
+
+// One of those documents' files.
+export const downloadParentChildMaterial = (childId, materialId) =>
+  http.get(`${PARENT_API}/children/${resourceId(childId)}/materials/${resourceId(materialId)}/download/`, {
+    auth: true,
+    responseType: "blob",
+  });

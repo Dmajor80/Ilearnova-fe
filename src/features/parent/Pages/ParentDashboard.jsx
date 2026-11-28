@@ -7,6 +7,7 @@ import ParentMessages from "./ParentMessages";
 import MyFees from "@/features/billing/MyFees";
 import ParentResult from "./ParentResult";
 import ParentTimetable from "./ParentTimetable";
+import ParentMaterials from "./ParentMaterials";
 import SectionTabs from "@/components/navigation/SectionTabs";
 import { groupOf } from "@/components/navigation/navGroups";
 import { PARENT_GROUPS } from "../parentNav";
@@ -185,6 +186,7 @@ export default function ParentDashboard() {
           {activeTab === "messages" && <ParentMessages />}
           {activeTab === "fees" && <MyFees />}
           {activeTab === "timetable" && <ParentTimetable />}
+          {activeTab === "materials" && <ParentMaterials />}
         </main>
       </div>
     </div>
