@@ -57,7 +57,7 @@ const VerifyFailure = () => {
               </Link>
               <button
                 onClick={() => navigate("/login")}
-                className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-300 shadow"
+                className="px-8 py-4 bg-blue-600 text-white font-semibold rounded-2xl hover:bg-blue-700 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-300 shadow"
               >
                 Go to Login
               </button>

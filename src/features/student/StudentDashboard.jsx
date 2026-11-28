@@ -162,8 +162,8 @@ export default function StudentDashboard() {
                     aria-current={link.active ? "page" : undefined}
                     className={`w-full flex items-center px-4 py-3 text-left rounded-xl transition-all duration-200 min-h-[48px] group ${
                       link.active
-                        ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg transform scale-[1.02] border border-blue-500"
-                        : "text-slate-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-700 hover:shadow-md border border-transparent hover:border-blue-200"
+                        ? "bg-blue-600 text-white shadow-lg transform scale-[1.02] border border-blue-500"
+                        : "text-slate-700 hover:bg-blue-50 hover:text-blue-700 hover:shadow-md border border-transparent hover:border-blue-200"
                     }`}
                     title={link.label}
                   >
@@ -192,7 +192,7 @@ export default function StudentDashboard() {
               <button
                 onClick={() => setIsMobileMenuOpen(true)}
                 aria-label="Open menu"
-                className="shrink-0 inline-flex min-h-10 min-w-10 items-center justify-center p-2 md:p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 md:hidden border border-slate-200"
+                className="shrink-0 inline-flex min-h-10 min-w-10 items-center justify-center p-2 md:p-3 bg-slate-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 md:hidden border border-slate-200"
               >
                 <Menu className="w-5 h-5 text-slate-600" />
               </button>
@@ -204,10 +204,10 @@ export default function StudentDashboard() {
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-2 md:gap-4">
-              <button type="button" aria-label="Notifications" className="inline-flex min-h-10 min-w-10 items-center justify-center p-2 md:p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 border border-slate-200 group relative">
+              <button type="button" aria-label="Notifications" className="inline-flex min-h-10 min-w-10 items-center justify-center p-2 md:p-3 bg-slate-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 border border-slate-200 group relative">
                 <Bell className="w-5 h-5 text-slate-600 group-hover:text-blue-600 transition-colors" />
               </button>
-              <button type="button" aria-label="Settings" onClick={() => navigate("/profile")} className="hidden sm:inline-flex min-h-10 min-w-10 items-center justify-center p-2 md:p-3 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 border border-slate-200 group">
+              <button type="button" aria-label="Settings" onClick={() => navigate("/profile")} className="hidden sm:inline-flex min-h-10 min-w-10 items-center justify-center p-2 md:p-3 bg-slate-50 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 border border-slate-200 group">
                 <Settings className="w-5 h-5 text-slate-600 group-hover:text-blue-600 transition-colors" />
               </button>
 
@@ -215,7 +215,7 @@ export default function StudentDashboard() {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                  className="flex min-h-10 items-center gap-1 md:gap-3 p-1 md:p-2 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 border border-slate-200"
+                  className="flex min-h-10 items-center gap-1 md:gap-3 p-1 md:p-2 rounded-xl hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 border border-slate-200"
                   aria-haspopup="true"
                   aria-expanded={isProfileDropdownOpen}
                 >
@@ -243,7 +243,7 @@ export default function StudentDashboard() {
                         navigate("/profile");
                         setIsProfileDropdownOpen(false);
                       }}
-                      className="flex items-center w-full text-left px-4 py-3 text-slate-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-200 rounded-lg mx-2"
+                      className="flex items-center w-full text-left px-4 py-3 text-slate-700 hover:bg-blue-50 transition-all duration-200 rounded-lg mx-2"
                     >
                       <User className="w-5 h-5 mr-3 text-blue-600" />
                       <span className="font-medium">Edit Profile</span>

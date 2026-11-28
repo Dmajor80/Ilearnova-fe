@@ -171,7 +171,7 @@ const ProgramsSection = () => {
                 onClick={() => setActiveProgram(index)}
                 className={`px-6 py-3 rounded-full font-medium transition-all duration-300 transform hover:scale-105 ${
                   activeProgram === index
-                    ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg"
+                    ? "bg-blue-600 text-white shadow-lg"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
@@ -441,7 +441,7 @@ const StatsSection = () => {
 //                     </div>
 //                   </div>
 
-//                   <button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center space-x-2">
+//                   <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center space-x-2">
 //                     <span>Register Now</span>
 //                     <ChevronRight className="w-4 h-4" />
 //                   </button>
@@ -563,7 +563,7 @@ const TestimonialsSection = () => {
                     onClick={() => setCurrentTestimonial(index)}
                     className={`w-3 h-3 rounded-full transition-all duration-300 ${
                       index === currentTestimonial
-                        ? "bg-gradient-to-r from-blue-500 to-purple-600 w-8"
+                        ? "bg-blue-600 w-8"
                         : "bg-gray-300 hover:bg-gray-400"
                     }`}
                   />

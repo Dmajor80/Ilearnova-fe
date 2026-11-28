@@ -173,7 +173,7 @@ const Navbar = () => {
                 {!isAuthenticated && (
                   <>
                     <button
-                      className="group relative inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-indigo-600 hover:to-purple-700"
+                      className="group relative inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-blue-700"
                       onClick={handleSignup}
                     >
                       <Sparkles className="h-4 w-4" />
@@ -194,7 +194,7 @@ const Navbar = () => {
 
           <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
             <a
-              className="hidden sm:inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 px-5 py-2 text-sm font-medium text-white shadow-lg transition-all duration-300 hover:scale-105 mr-2"
+              className="hidden sm:inline-flex items-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-700 px-5 py-2 text-sm font-medium text-white shadow-lg transition-all duration-300 hover:scale-105 mr-2"
               href={`${CDN_BASE_URL}/1app/app-release.apk`}
             >
               <span>📱</span> Download App
@@ -341,7 +341,7 @@ const Navbar = () => {
               <div className="flex-1 space-y-3 px-4 py-6">
                 {!isAuthenticated ? (
                   <>
-                    <button className="group flex w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-4 text-base font-semibold text-white" onClick={() => { handleSignup(); setIsMobileMenuOpen(false); }}>
+                    <button className="group flex w-full items-center justify-center gap-3 rounded-xl bg-blue-600 hover:bg-blue-700 px-6 py-4 text-base font-semibold text-white" onClick={() => { handleSignup(); setIsMobileMenuOpen(false); }}>
                       <Sparkles className="h-5 w-5" /> Get Started
                     </button>
                     <button className="group flex w-full items-center justify-center gap-3 rounded-xl border border-white/20 bg-white/5 px-6 py-4 text-base font-medium text-white" onClick={() => { handleLogin(); setIsMobileMenuOpen(false); }}>
@@ -387,7 +387,7 @@ const Navbar = () => {
                 </div>
               )}
               <div className="px-4 py-4 mt-auto border-t border-white/10">
-                <a className="group flex items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 px-6 py-4 text-base font-medium text-white w-full" href={`${CDN_BASE_URL}/1app/app-release.apk`} onClick={() => setIsMobileMenuOpen(false)}>
+                <a className="group flex items-center justify-center gap-3 rounded-xl bg-blue-600 hover:bg-blue-700 px-6 py-4 text-base font-medium text-white w-full" href={`${CDN_BASE_URL}/1app/app-release.apk`} onClick={() => setIsMobileMenuOpen(false)}>
                   <span className="text-lg">📱</span> Download App
                 </a>
               </div>

@@ -79,7 +79,7 @@ function UpcomingBirthdays({ birthdays }) {
 
       {/* Add New Birthday Button */}
       <div className="mt-6 pt-4 border-t border-gray-200">
-        <button className="w-full py-3 px-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-lg hover:from-pink-600 hover:to-purple-700 transition-colors font-medium flex items-center justify-center">
+        <button className="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center">
           <Gift className="w-5 h-5 mr-2" />
           Add New Birthday
         </button>

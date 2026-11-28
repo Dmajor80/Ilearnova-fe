@@ -251,7 +251,7 @@ const IlearnovaHero = () => {
                 style={{ transitionDelay: "0.4s" }}
               >
                 <Link to={slides[currentSlide].goto}>
-                  <button className="group bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold shadow-2xl hover:shadow-yellow-500/50 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1">
+                  <button className="group bg-blue-600 hover:bg-blue-700 to-red-500 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1">
                     <div className="flex items-center justify-center space-x-2">
                       <span>Get Started</span>
                       <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />

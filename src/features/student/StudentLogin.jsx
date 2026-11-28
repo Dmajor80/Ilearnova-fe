@@ -164,7 +164,7 @@ const StudentLogin = () => {
             {/* Login button */}
             <button
               onClick={() => (window.location.href = "/student-dashboard")}
-              className="w-full h-12 bg-gradient-to-r from-blue-600 to-teal-500 text-white rounded-lg font-medium mb-4 transition-all duration-300 hover:from-blue-700 hover:to-teal-600 hover:scale-105 hover:shadow-lg active:scale-95 focus:outline-none focus:ring-4 focus:ring-blue-300"
+              className="w-full h-12 bg-blue-600 text-white rounded-lg font-medium mb-4 transition-all duration-300 hover:bg-blue-700 hover:scale-105 hover:shadow-lg active:scale-95 focus:outline-none focus:ring-4 focus:ring-blue-300"
             >
               Login
             </button>

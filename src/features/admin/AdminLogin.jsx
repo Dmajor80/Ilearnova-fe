@@ -200,7 +200,7 @@ const AdminLogin = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full h-12 sm:h-14 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold text-sm sm:text-base shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-blue-200"
+                className="w-full h-12 sm:h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-sm sm:text-base shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-blue-200"
               >
                 {loading ? "Signing in..." : "Access Admin Portal"}
               </button>
@@ -223,22 +223,22 @@ const AdminLogin = () => {
               </p>
               <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-3 justify-center">
                 <Link to="/login">
-                  <button className="w-full sm:w-20 h-10 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-xs font-semibold text-white rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200">
+                  <button className="w-full sm:w-20 h-10 bg-green-600 hover:bg-green-700 text-xs font-semibold text-white rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200">
                     Teacher
                   </button>
                 </Link>
                 <Link to="/student-login">
-                  <button className="w-full sm:w-20 h-10 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-xs font-semibold text-white rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200">
+                  <button className="w-full sm:w-20 h-10 bg-green-600 hover:bg-green-700 text-xs font-semibold text-white rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200">
                     Student
                   </button>
                 </Link>
                 <Link to="/parent-login">
-                  <button className="w-full sm:w-20 h-10 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-xs font-semibold text-white rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200">
+                  <button className="w-full sm:w-20 h-10 bg-green-600 hover:bg-green-700 text-xs font-semibold text-white rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200">
                     Parent
                   </button>
                 </Link>
                 <Link to="/Admin-login">
-                  <button className="w-full sm:w-20 h-10 bg-gradient-to-r from-blue-600 to-purple-600 text-xs font-semibold text-white rounded-lg shadow-md ring-2 ring-blue-200">
+                  <button className="w-full sm:w-20 h-10 bg-blue-600 hover:bg-blue-700 text-xs font-semibold text-white rounded-lg shadow-md ring-2 ring-blue-200">
                     Admin
                   </button>
                 </Link>

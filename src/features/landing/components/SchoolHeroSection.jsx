@@ -260,7 +260,7 @@ const SchoolHeroSection = () => {
                   </motion.div>
 
                   <motion.button
-                    className="text-lg sm:text-xl bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-8 py-4 rounded-full font-semibold cursor-pointer shadow-lg hover:shadow-xl transform transition-all duration-300"
+                    className="text-lg sm:text-xl bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-full font-semibold cursor-pointer shadow-lg hover:shadow-xl transform transition-all duration-300"
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.7 }}

@@ -149,7 +149,7 @@ const LoginPage = () => {
             {/* Login button */}
             <button
               type="submit"
-              className="w-full h-12 sm:h-14 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white rounded-xl font-semibold text-sm sm:text-base transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg hover:shadow-orange-500/25 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+              className="w-full h-12 sm:h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-sm sm:text-base transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg hover:shadow-blue-500/25 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
               <span className="flex items-center justify-center gap-2">
                 <BookOpen className="w-5 h-5" />
@@ -175,22 +175,22 @@ const LoginPage = () => {
               </p>
               <div className="flex items-center gap-2 sm:gap-3 justify-center flex-wrap">
                 <Link to="/login">
-                  <button className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-xs text-white hover:from-orange-600 hover:to-red-600 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg ring-2 ring-orange-300">
+                  <button className="px-4 py-2 bg-orange-600 text-xs text-white hover:bg-orange-700 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg ring-2 ring-orange-300">
                     Teacher
                   </button>
                 </Link>
                 <Link to="/student-login">
-                  <button className="px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-xs text-white hover:from-blue-600 hover:to-cyan-600 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg">
+                  <button className="px-4 py-2 bg-blue-600 text-xs text-white hover:bg-blue-700 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg">
                     Student
                   </button>
                 </Link>
                 <Link to="/parent-login">
-                  <button className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-xs text-white hover:from-purple-600 hover:to-pink-600 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg">
+                  <button className="px-4 py-2 bg-purple-600 text-xs text-white hover:bg-purple-700 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg">
                     Parent
                   </button>
                 </Link>
                 <Link to="/admin-login">
-                  <button className="px-4 py-2 bg-gradient-to-r from-gray-600 to-gray-700 text-xs text-white hover:from-gray-700 hover:to-gray-800 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg">
+                  <button className="px-4 py-2 bg-gray-600 text-xs text-white hover:bg-gray-700 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg">
                     Admin
                   </button>
                 </Link>

@@ -66,7 +66,7 @@ export default function Error() {
               </button>
               <Link
                 to="/"
-                className="inline-flex items-center px-6 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold shadow-lg hover:from-blue-700 hover:to-cyan-700 transition-all"
+                className="inline-flex items-center px-6 py-3 rounded-2xl bg-blue-600 text-white font-semibold shadow-lg hover:bg-blue-700 transition-all"
               >
                 Go Home
               </Link>

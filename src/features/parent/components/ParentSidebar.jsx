@@ -59,8 +59,8 @@ function ParentSidebar({ activeTab, setActiveTab, isMobileMenuOpen, setIsMobileM
                   aria-current={activeGroup?.id === link.id ? "page" : undefined}
                   className={`w-full flex items-center px-4 py-3 text-left rounded-xl transition-all duration-200 min-h-[48px] group ${
                     activeGroup?.id === link.id
-                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg transform scale-[1.02] border border-blue-500"
-                      : "text-slate-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-700 hover:shadow-md border border-transparent hover:border-blue-200"
+                      ? "bg-blue-600 text-white shadow-lg transform scale-[1.02] border border-blue-500"
+                      : "text-slate-700 hover:bg-blue-50 hover:text-blue-700 hover:shadow-md border border-transparent hover:border-blue-200"
                   }`}
                   title={link.label}
                 >

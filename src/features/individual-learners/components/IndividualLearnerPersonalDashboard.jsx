@@ -112,7 +112,7 @@ export default function IndividualLearnerPersonalDashboard() {
                 <button
                   className={`flex items-center px-4 py-3 w-full text-left transition-all duration-200 rounded-lg ${
                     activeTab === link.id
-                      ? "text-white bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg"
+                      ? "text-white bg-blue-600 shadow-lg"
                       : "text-slate-700 hover:text-blue-600 hover:bg-blue-50"
                   }`}
                   onClick={() => {
