@@ -30,6 +30,7 @@ import assignment from "../../assets/assignment.png";
 import mask from "../../assets/Mask group.png";
 import bell from "../../assets/bell.png";
 import LiveCalendar from "./LiveCalendar";
+import { progressLabel } from "./courseLabel";
 import { useStudentAnnouncements, useStudentAssignments } from "@/hooks/student";
 const Overview = () => {
   const studentAnnouncements = useStudentAnnouncements();
@@ -235,7 +236,7 @@ const Overview = () => {
                     <div className="flex justify-between items-center gap-3 mb-3">
                       <div className="min-w-0">
                         <h4 className="break-words text-lg font-bold text-slate-800 mb-1">
-                          {course.course_name}
+                          {progressLabel(course)}
                         </h4>
                         <p className="text-slate-600 font-medium">
                           {course.completed_lessons} of {course.total_lessons} lessons done

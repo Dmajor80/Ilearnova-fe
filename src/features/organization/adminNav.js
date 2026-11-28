@@ -2,6 +2,7 @@ import {
   Award,
   Banknote,
   BookOpen,
+  FileText,
   GraduationCap,
   Home,
   Megaphone,
@@ -20,6 +21,7 @@ export const ADMIN_GROUPS = [
   { id: "students", label: "Students", icon: GraduationCap, tabs: [{ id: "students", label: "Students" }] },
   { id: "teachers", label: "Teachers", icon: UserCheck, tabs: [{ id: "teachers", label: "Teachers" }] },
   { id: "classes", label: "Classes", icon: BookOpen, tabs: [{ id: "classes", label: "Classes" }] },
+  { id: "materials", label: "Course materials", icon: FileText, tabs: [{ id: "materials", label: "Course materials" }] },
   {
     id: "academics",
     label: "Exams & results",
